@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package browsergame.v1;
+
+option csharp_namespace = "BrowserGame.Contracts.V1";
+
+// Client → Server
+message ClientMessage {
+  oneof payload {
+    Input input = 1;
+  }
+}
+
+// Gewünschte Laufrichtung für genau einen Server-Tick.
+// WASD und Halten-und-Folgen ergeben beide einen Richtungsvektor.
+message Input {
+  // Fortlaufend pro Verbindung, beginnend bei 1.
+  uint32 seq = 1;
+  // Länge > 1 wird vom Server auf 1 gekürzt.
+  float dir_x = 2;
+  float dir_y = 3;
+}
+
+// Server → Client
+message ServerMessage {
+  oneof payload {
+    Welcome welcome = 1;
+    Snapshot snapshot = 2;
+  }
+}
+
+message Welcome {
+  string player_id = 1;
+  string name = 2;
+  // Welteinheiten pro Sekunde.
+  float speed = 3;
+  uint32 tick_rate_hz = 4;
+}
+
+message Snapshot {
+  uint32 tick = 1;
+  // Pro Empfänger: letzte vom Server verarbeitete Eingabe.
+  uint32 last_processed_seq = 2;
+  repeated PlayerState players = 3;
+}
+
+message PlayerState {
+  string id = 1;
+  string name = 2;
+  float x = 3;
+  float y = 4;
+  // 0xRRGGBB
+  uint32 color = 5;
+}

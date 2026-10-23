@@ -6,7 +6,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/CD.
 Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf (vorhanden).
 
 ## Verträge
-- [ ] **T1** (AK-3, AK-5): `contracts/proto/game.proto` wie im Plan, `buf.yaml` + `buf.gen.yaml` im Repo-Root.
+- [x] **T1** (AK-3, AK-5): `contracts/proto/browsergame/v1/game.proto` wie im Plan, `buf.yaml` + `buf.gen.yaml` im Repo-Root.
   CI-Job `contracts` (`bufbuild/buf-action`, SHA-gepinnt) mit `buf lint`, in `ci-ok.needs` eintragen.
 
 ## Server

@@ -15,7 +15,7 @@ Ein ASP.NET-Core-Prozess liefert alles aus. Der Spielzustand liegt nur im Speich
 
 ## Verträge
 
-Neu: `contracts/proto/game.proto`. Kein HTTP-API in 001, `openapi/` bleibt leer.
+Neu: `contracts/proto/browsergame/v1/game.proto` (Verzeichnis = Paketname, Pflicht für `buf lint` STANDARD). Kein HTTP-API in 001, `openapi/` bleibt leer.
 
 ```proto
 syntax = "proto3";
@@ -66,7 +66,7 @@ message PlayerState {
 ```
 
 **Codegen:**
-- C#: `Grpc.Tools` im Server-csproj, `<Protobuf Include="../../contracts/proto/*.proto" GrpcServices="None" />`
+- C#: `Grpc.Tools` im Server-csproj, `<Protobuf Include="../../contracts/proto/**/*.proto" ProtoRoot="../../contracts/proto" GrpcServices="None" />`
   (nur Messages, keine gRPC-Services).
 - TS: `buf generate` mit `@bufbuild/protoc-gen-es` (lokales Plugin aus `client/node_modules`) nach
   `client/src/generated/`. Das Verzeichnis ist durch `.gitignore` bereits ausgeschlossen; `npm run gen` läuft vor

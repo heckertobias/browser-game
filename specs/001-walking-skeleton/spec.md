@@ -1,6 +1,6 @@
 # 001 – Walking Skeleton
 
-**Status:** bereit
+**Status:** in arbeit
 
 ## Ziel
 

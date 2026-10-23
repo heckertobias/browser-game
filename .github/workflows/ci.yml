@@ -31,10 +31,27 @@ jobs:
           tar -xzf "${archive}" actionlint
           ./actionlint -color
 
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: bufbuild/buf-action@85aebf73123b5c15fd5528aaecbf9129cddf7fa7 # v1.6.0
+        with:
+          version: 1.74.0
+          lint: true
+          format: true
+          # breaking: Standard (nur bei PRs gegen main)
+          push: false
+          archive: false
+          pr_comment: false
+
   # Einziger Required Check im Ruleset. Neue Jobs nur in `needs` eintragen.
   ci-ok:
     if: always()
-    needs: [lint]
+    needs: [lint, contracts]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
