@@ -10,9 +10,9 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
   CI-Job `contracts` (`bufbuild/buf-action`, SHA-gepinnt) mit `buf lint`, in `ci-ok.needs` eintragen.
 
 ## Server
-- [ ] **T2**: Projekte `server/BrowserGame.Server` (ASP.NET Core) und `server/BrowserGame.Server.Tests` (xUnit) plus
+- [x] **T2**: Projekte `server/BrowserGame.Server` (ASP.NET Core) und `server/BrowserGame.Server.Tests` (xUnit) plus
   Solution. Codegen über `Grpc.Tools` (`GrpcServices="None"`); `dotnet build` erzeugt die Contract-Typen.
-- [ ] **T3** (AK-2, AK-5, AK-7): `World` mit Input-Warteschlange (max. 10), einer Eingabe pro Tick, Kürzen auf
+- [x] **T3** (AK-2, AK-5, AK-7): `World` mit Input-Warteschlange (max. 10), einer Eingabe pro Tick, Kürzen auf
   Länge ≤ 1, ohne Grenzen. xUnit-Tests laut Abdeckungstabelle.
 - [ ] **T4** (AK-3, AK-4): `/ws`-Endpoint, `GameLoop` (20 Hz) mit `Welcome` und `Snapshot` pro Empfänger. Bei
   Disconnect wird der Spieler entfernt. Frame-Limit 1 KB, zufällige Namen und Farben.

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.36.2" />
+    <PackageReference Include="Grpc.Tools" Version="2.84.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Typen nur aus contracts/ (Constitution §3). -->
+  <ItemGroup>
+    <Protobuf Include="../../contracts/proto/**/*.proto" ProtoRoot="../../contracts/proto" GrpcServices="None" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="BrowserGame.Server.Tests" />
+  </ItemGroup>
+
+</Project>

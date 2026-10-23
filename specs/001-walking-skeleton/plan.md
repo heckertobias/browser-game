@@ -81,7 +81,9 @@ message PlayerState {
   - `AddPlayer()` / `RemovePlayer(id)`, Spawn zufällig in einem kleinen Radius um (0,0).
   - `EnqueueInput(id, Input)`: Die Warteschlange ist pro Spieler auf 10 Einträge begrenzt, ältere fallen weg.
   - `Step()`: Pro Spieler wird **genau eine** Eingabe verbraucht, die Richtung auf Länge ≤ 1 gekürzt und um
-    `speed / tickRate` bewegt. Ist die Warteschlange leer, gilt die letzte Richtung weiter.
+    `speed / tickRate` bewegt. Ist die Warteschlange leer, gilt die letzte Richtung höchstens 2 Ticks weiter
+    (`MaxCoastTicks`, überbrückt Jitter), danach steht der Spieler – sonst liefe eine Figur in einem
+    Hintergrund-Tab endlos weiter. Ungültige Werte (NaN, ∞) bedeuten Stillstand, alte oder doppelte `seq` werden ignoriert.
   - Es gibt keine Weltgrenzen (AK-7).
 - **`GameLoop`** (`BackgroundService`, `PeriodicTimer` 50 ms): `World.Step()`, danach Snapshot an alle Verbindungen,
   jeweils mit dem eigenen `last_processed_seq`. Bei ≤ 50 Spielern gibt es noch kein Interest Management.
