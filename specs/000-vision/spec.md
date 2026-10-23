@@ -23,17 +23,26 @@ Ein 2D-Pixel-Art-MMORPG im Browser mit zwei Seiten:
 ## Entschieden
 
 - Grafik: 2D-Pixel-Art
+- Setting: klassische Fantasy
 - Bewegung: frei, nicht tile-basiert
 - Kampf: Tab-Targeting
+- Steuerung: Tastatur sowie Maus/Touch; jede Taste ist frei belegbar
+- Sichtfeld: Alle Spieler sehen einen gleich großen Ausschnitt der Welt, egal wie groß ihr Bildschirm ist.
+  Ein größerer oder schärferer Bildschirm zeigt dasselbe nur detaillierter, nicht mehr davon.
+  Die Kamera folgt der eigenen Figur.
+- Spielerzahl: bis zu ca. 50 Spieler gleichzeitig in einem Gebiet
+- Offline-Fortschritt ist **nur persönlich**: Die Welt verändert sich durch das, was Spieler online tun –
+  was offline weiterläuft, hat keinen Einfluss auf die Welt oder auf andere Spieler.
+- Offline laufen weiter:
+  - **Gebäude / Produktion** – eigene Gebäude erzeugen über die Zeit Ressourcen
+  - **Begleiter / Expeditionen** – Begleiter werden losgeschickt und kommen mit Beute zurück
+  - **Handwerk** – Herstellungsaufträge laufen in Echtzeit ab
+- UI-Stil: Pixel-Akzente – Menüs und HUD bleiben gut lesbar, mit pixeliger Schrift, Rahmen und Icons
 - Öffentliche Seiten (Landing) serverseitig gerendert
 
 ## Offene Fragen
 
-- [ ] Ist der Offline-Fortschritt **nur persönlich** (z. B. Ressourcen, Produktion) oder **verändert sich die Welt** (Gebiete, Fraktionen)?
-- [ ] Was genau läuft offline weiter? (Beispiele: Gebäude, Begleiter, Handwerk, Expeditionen)
-- [ ] Wie viele Spieler sollen sich realistisch gleichzeitig in einem Gebiet aufhalten?
-- [ ] Setting / Thema der Welt?
-- [ ] UI-Stil: wie stark Pixel-Look in Menüs und HUD?
+_Keine – neue Fragen hier sammeln, sobald sie auftauchen._
 
 ## Nicht-Ziele (vorerst)
 
