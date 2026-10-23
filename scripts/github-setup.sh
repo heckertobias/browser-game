@@ -42,11 +42,12 @@ api -X PATCH "repos/$REPO" --silent --input - <<'JSON'
   }
 }
 JSON
-# CodeQL Default Setup erkennt Sprachen selbst (Actions jetzt, C#/TS sobald Code existiert).
-# Schlägt fehl, solange GitHub keine unterstützte Sprache im Repo findet.
-api -X PATCH "repos/$REPO/code-scanning/default-setup" --silent \
-  -f state=configured -f query_suite=default \
-  || echo "   (CodeQL Default Setup noch nicht möglich – später erneut ausführen)"
+# CodeQL Default Setup. Sprachen explizit, weil die Auto-Erkennung bei leerem Repo nichts findet.
+# Mit 001 (T12) kommen csharp und javascript-typescript dazu.
+CODEQL_LANGUAGES=(actions)
+codeql_args=(-f state=configured -f query_suite=default)
+for lang in "${CODEQL_LANGUAGES[@]}"; do codeql_args+=(-f "languages[]=$lang"); done
+api -X PATCH "repos/$REPO/code-scanning/default-setup" --silent "${codeql_args[@]}"
 
 echo "== Actions"
 api -X PUT "repos/$REPO/actions/permissions" --silent --input - <<'JSON'

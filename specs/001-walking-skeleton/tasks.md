@@ -46,6 +46,7 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
     `packages: write`, `attestations: write`, `id-token: write`.
   - Neue Third-Party-Actions (`docker/*`, Trivy) in die Allowlist in `scripts/github-setup.sh` eintragen,
     das Skript ausführen und SHAs pinnen.
+  - In `scripts/github-setup.sh` `CODEQL_LANGUAGES` um `csharp` und `javascript-typescript` erweitern, Skript ausführen.
   - Lösung für „Auto-Merge löst keine CI auf `main` aus“ (ADR 0002) festlegen und umsetzen.
 - [ ] **T13**: `dependabot.yml` um `nuget` (`/server`), `npm` (`/client`) und `docker` (`/`) erweitern, mit gleichem
   Schema (wöchentlich, Minor/Patch gruppiert, Cooldown).
