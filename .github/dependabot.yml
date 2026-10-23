@@ -1,4 +1,4 @@
-# nuget, npm und docker kommen mit 001 dazu, sobald Manifeste existieren.
+# Version-Updates. nuget, npm und docker kommen mit 001 dazu, sobald Manifeste existieren.
 version: 2
 updates:
   - package-ecosystem: github-actions
