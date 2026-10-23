@@ -1,5 +1,7 @@
 # Browser Game
 
+[![CI](https://github.com/heckertobias/browser-game/actions/workflows/ci.yml/badge.svg)](https://github.com/heckertobias/browser-game/actions/workflows/ci.yml)
+
 2D-Pixel-Art-MMORPG im Browser: frei begehbare Welt mit Echtzeit-Bewegung und Tab-Targeting-Kampf –
 und gleichzeitig ein Browsergame, das weiterläuft, wenn man nicht online ist.
 
@@ -24,6 +26,8 @@ Details: [`specs/README.md`](specs/README.md)
 | `specs/_template/` | Vorlagen für neue Features |
 | `contracts/` | Maschinenlesbare Verträge: OpenAPI (HTTP), Protobuf (WebSocket) |
 | `docs/decisions/` | Architekturentscheidungen (ADRs) |
+| `scripts/` | Hilfsskripte, z. B. `github-setup.sh` (Repo-Härtung) |
+| `.github/` | CI-Workflows, Dependabot |
 | `server/` | C# / ASP.NET Core (Spielserver, Razor-Landing) |
 | `client/` | TypeScript, React, Canvas, daisyUI |
 
@@ -32,3 +36,12 @@ Details: [`specs/README.md`](specs/README.md)
 - **Server:** C# / ASP.NET Core, Razor für öffentliche Seiten
 - **Client:** TypeScript, React (UI), Canvas (Spielwelt), daisyUI
 - **Verträge:** OpenAPI für HTTP, Protobuf für WebSocket – Typen werden nur dort definiert und generiert
+
+## Repo-Regeln
+
+Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md)
+
+- Gearbeitet wird direkt auf `main`; Commits müssen **signiert** sein.
+- Issues und Pull Requests können nur Collaborators eröffnen.
+- Dependabot-Updates laufen als PR durch die CI; Patch- und Minor-Updates werden automatisch gemergt.
+- Sicherheitslücken bitte vertraulich melden: [SECURITY.md](SECURITY.md)
