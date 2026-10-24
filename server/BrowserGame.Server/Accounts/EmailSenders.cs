@@ -1,5 +1,5 @@
 using System.Text.Encodings.Web;
-using BrowserGame.Server.Data;
+using BrowserGame.Data;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity;

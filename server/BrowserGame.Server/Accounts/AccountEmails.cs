@@ -1,4 +1,4 @@
-using BrowserGame.Server.Data;
+using BrowserGame.Data;
 using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGame.Server.Accounts;

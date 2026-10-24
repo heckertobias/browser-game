@@ -5,7 +5,7 @@ Gehört zu: [plan.md](plan.md)
 Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/Betrieb.
 
 ## Datenschicht
-- [ ] **T1**: Bibliothek `BrowserGame.Data` anlegen; `Data/*` aus dem Server dorthin verschieben (Namespace
+- [x] **T1**: Bibliothek `BrowserGame.Data` anlegen; `Data/*` aus dem Server dorthin verschieben (Namespace
   `BrowserGame.Data`), Server und Tests umstellen. Alle bisherigen Tests müssen grün bleiben.
 - [ ] **T2** (AK-7, AK-8, AK-10): `Settings`-Tabelle, `SmtpSettingsStore` mit verschlüsseltem Passwort (Zweck `Settings.Smtp`).
 - [ ] **T3** (AK-1, AK-4e, AK-12): `AdminDbContext` (Identity v3 mit Präfix `Admin`, `AdminInvites`, `AdminAuditEntries`),

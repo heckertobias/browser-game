@@ -1,5 +1,5 @@
 using System.Threading.RateLimiting;
-using BrowserGame.Server.Data;
+using BrowserGame.Data;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 

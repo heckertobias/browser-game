@@ -7,7 +7,7 @@ cd "$(git rev-parse --show-toplevel)/server"
 dotnet tool restore >/dev/null
 for provider in Sqlite Postgres; do
   dotnet ef migrations add "$NAME" \
-    --project BrowserGame.Server \
+    --project BrowserGame.Data --startup-project BrowserGame.Data \
     --context "${provider}GameDbContext" \
-    --output-dir "Data/Migrations/$provider"
+    --output-dir "Migrations/$provider"
 done

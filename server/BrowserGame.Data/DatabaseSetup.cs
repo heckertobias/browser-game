@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace BrowserGame.Server.Data;
+namespace BrowserGame.Data;
 
 internal enum DatabaseProvider
 {

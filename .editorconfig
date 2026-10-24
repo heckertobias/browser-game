@@ -19,5 +19,5 @@ csharp_style_namespace_declarations = file_scoped:warning
 dotnet_diagnostic.CA1707.severity = none
 
 # Von EF Core erzeugte Migrationen nicht analysieren.
-[server/BrowserGame.Server/Data/Migrations/**.cs]
+[server/BrowserGame.Data/Migrations/**.cs]
 generated_code = true

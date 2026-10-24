@@ -1,4 +1,4 @@
-using BrowserGame.Server.Data;
+using BrowserGame.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;

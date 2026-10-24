@@ -22,8 +22,10 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
 WORKDIR /src
 COPY contracts/ contracts/
 COPY server/global.json server/Directory.Build.props server/
+COPY server/BrowserGame.Data/BrowserGame.Data.csproj server/BrowserGame.Data/
 COPY server/BrowserGame.Server/BrowserGame.Server.csproj server/BrowserGame.Server/
 RUN dotnet restore server/BrowserGame.Server/BrowserGame.Server.csproj --arch $TARGETARCH
+COPY server/BrowserGame.Data/ server/BrowserGame.Data/
 COPY server/BrowserGame.Server/ server/BrowserGame.Server/
 COPY --from=client /src/server/BrowserGame.Server/wwwroot/ server/BrowserGame.Server/wwwroot/
 RUN dotnet publish server/BrowserGame.Server/BrowserGame.Server.csproj --configuration Release --arch $TARGETARCH --no-restore --output /app

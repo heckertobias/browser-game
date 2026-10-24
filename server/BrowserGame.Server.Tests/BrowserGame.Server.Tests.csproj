@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BrowserGame.Server\BrowserGame.Server.csproj" />
+    <ProjectReference Include="..\BrowserGame.Data\BrowserGame.Data.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
 using BrowserGame.Server.Accounts;
-using BrowserGame.Server.Data;
+using BrowserGame.Data;
 
 namespace BrowserGame.Server.Tests;
 

@@ -1,5 +1,5 @@
 using BrowserGame.Server.Accounts;
-using BrowserGame.Server.Data;
+using BrowserGame.Data;
 using BrowserGame.Server.Game;
 
 // Docker-HEALTHCHECK: Das chiseled Image hat kein curl, deshalb prüft der Server sich selbst.

@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="BrowserGame.Data/BrowserGame.Data.csproj" />
   <Project Path="BrowserGame.Server.Tests/BrowserGame.Server.Tests.csproj" />
   <Project Path="BrowserGame.Server/BrowserGame.Server.csproj" />
 </Solution>

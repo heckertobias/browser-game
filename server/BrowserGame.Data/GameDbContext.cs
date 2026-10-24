@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace BrowserGame.Server.Data;
+namespace BrowserGame.Data;
 
 /// <summary>Spieler-Account. <see cref="IdentityUser.UserName"/> ist der Spielername (z. B. „Tobias“).</summary>
 public sealed class Account : IdentityUser;

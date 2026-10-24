@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace BrowserGame.Server.Data;
+namespace BrowserGame.Data;
 
 /// <summary>
 /// Schreibt täglich eine konsistente Kopie der SQLite-Datenbank (<c>VACUUM INTO</c>), damit ein dateibasiertes
