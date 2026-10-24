@@ -1,6 +1,6 @@
 # 002 – Tastenbelegung & erstes Menü
 
-**Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [003 – Accounts & gespeicherte Position](../003-accounts/spec.md) (die Belegung gehört zum Account).
 
@@ -24,6 +24,8 @@ Linkshänder oder Gewohnheiten aus anderen Spielen. Dafür gibt es ein erstes Sp
 - **AK-2:** Gegeben ich spiele per Touch, dann gibt es im HUD einen Menü-Button, der dasselbe Menü öffnet.
 - **AK-3:** Gegeben das Menü ist offen, dann enthält es „Weiterspielen“, „Einstellungen → Tastenbelegung“ und „Abmelden“.
 - **AK-4:** Gegeben das Menü ist offen, dann steuern Tasten das Menü und nicht meine Figur; meine Figur bleibt stehen.
+- **AK-4b:** Gegeben das Menü ist offen, dann läuft das Spiel im Hintergrund weiter: Andere Spieler bewegen sich
+  weiter und bleiben sichtbar.
 
 ### Tastenbelegung
 - **AK-5:** Gegeben die Tastenbelegung, wenn ich bei einer Aktion einen der zwei Plätze wähle und eine Taste
@@ -46,14 +48,14 @@ Linkshänder oder Gewohnheiten aus anderen Spielen. Dafür gibt es ein erstes Sp
 
 ## Offene Fragen
 
-- [ ] Sind Bewegungstasten standardmäßig doppelt belegt (z. B. WASD **und** Pfeiltasten), oder bleibt Platz 2 leer?
-- [ ] Läuft das Spiel weiter, während das Menü offen ist (es ist ein MMO – andere bewegen sich weiter)?
-      Vorschlag: ja, nur die eigene Figur steht.
+_Keine._
 
 ## Entschiedene Fragen
 
 - Belegung gilt pro Account (nicht pro Gerät).
 - Bis zu zwei Tasten pro Aktion.
 - Einstellungen sind über ein Spielmenü erreichbar (Esc bzw. Menü-Button).
+- Standard: nur WASD, zweiter Platz leer.
+- Das Spiel läuft bei offenem Menü weiter, nur die eigene Figur steht.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
