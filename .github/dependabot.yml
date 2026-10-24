@@ -36,6 +36,10 @@ updates:
     groups:
       npm-minor-patch:
         update-types: [minor, patch]
+    ignore:
+      # typescript-eslint unterstützt TypeScript 7 noch nicht (Peer-Range <6.1). Wieder freigeben, sobald es das tut.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /
@@ -48,6 +52,10 @@ updates:
     groups:
       docker-minor-patch:
         update-types: [minor, patch]
+    ignore:
+      # Build-Stage bleibt auf Node-LTS (gerade Majors); den Wechsel auf die nächste LTS machen wir bewusst von Hand.
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   # Hält das SDK in global.json aktuell.
   - package-ecosystem: dotnet-sdk
