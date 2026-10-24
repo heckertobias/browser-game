@@ -69,14 +69,7 @@ internal static class AccountSetup
         // Bestätigungs- und Reset-Links (AK-15: befristet; einmalig, weil sich der Security-Stamp danach ändert).
         services.Configure<DataProtectionTokenProviderOptions>(o => o.TokenLifespan = TimeSpan.FromHours(3));
 
-        services.Configure<IdentityPasskeyOptions>(options =>
-        {
-            var domain = builder.Configuration["Passkeys:ServerDomain"];
-            if (!string.IsNullOrWhiteSpace(domain))
-            {
-                options.ServerDomain = domain;
-            }
-        });
+        services.AddPasskeyOptions(builder.Configuration, builder.Environment.IsDevelopment());
 
         services.AddAuthRateLimiting(builder.Configuration);
 

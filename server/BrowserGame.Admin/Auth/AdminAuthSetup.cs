@@ -75,14 +75,7 @@ internal static class AdminAuthSetup
 
         services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = TimeSpan.FromMinutes(1));
 
-        services.Configure<IdentityPasskeyOptions>(options =>
-        {
-            var domain = builder.Configuration["Passkeys:ServerDomain"];
-            if (!string.IsNullOrWhiteSpace(domain))
-            {
-                options.ServerDomain = domain;
-            }
-        });
+        services.AddPasskeyOptions(builder.Configuration, builder.Environment.IsDevelopment());
 
         if (!builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(builder.Configuration["App:PublicUrl"]))
         {
