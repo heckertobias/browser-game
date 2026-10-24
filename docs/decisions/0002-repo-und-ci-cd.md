@@ -40,9 +40,10 @@ der einzige Required Check. Neue Jobs werden nur in seinem `needs` eingetragen; 
 Patch und Minor werden nach grüner CI automatisch gemergt, Major-Updates manuell.
 
 **CD:**
-- CI baut ein Docker-Image für **amd64 und arm64** (Testbetrieb auf einem Raspberry Pi) und pusht es auf `main` nach
-  `ghcr.io/heckertobias/browser-game` (Tags `sha-<commit>` und `main`, mit Build-Provenance-Attestation).
-  arm64 entsteht per Cross-Build ohne Emulation; jede Architektur wird vor dem Push einzeln mit Trivy gescannt.
+- CI baut die Docker-Images für **amd64 und arm64** (Testbetrieb auf einem Raspberry Pi) bei jedem Push, PR und
+  nächtlich und scannt jede Architektur mit Trivy. arm64 entsteht per Cross-Build ohne Emulation.
+- **Veröffentlicht wird nur bei Release-Tags** (geändert 2026-10-24): Ohne Tag landet nichts in GHCR, also auch kein
+  wanderndes `:main`. Mit Tag entstehen `:X.Y.Z` und `:latest`, jeweils mit Build-Provenance-Attestation.
 - **Releases:** Ein signierter Tag `vX.Y.Z` (nur der Admin darf `v*` anlegen; Tags sind unveränderlich, Releases
   per „Immutable Releases“ ebenfalls) veröffentlicht `:X.Y.Z` und `:latest` und legt ein GitHub Release mit Notes an.
   `scripts/release.sh` erzeugt `deploy/compose.yaml` **erst danach** aus `deploy/compose.template.yaml` – sonst würde
@@ -56,7 +57,7 @@ Patch und Minor werden nach grüner CI automatisch gemergt, Major-Updates manuel
 
 - Lokale Commits müssen signiert sein, sonst lehnt GitHub den Push ab.
 - Merges durch Auto-Merge laufen mit `GITHUB_TOKEN` und lösen deshalb **keinen** neuen Workflow auf `main` aus.
-  Lösung: Die CI läuft zusätzlich **nächtlich** (`schedule`) auf `main` und veröffentlicht dann das Image. So sind
-  Dependabot-Merges spätestens nach einem Tag im Image, und Sicherheitsfixes der Basis-Images kommen ebenfalls an.
-  Ein GitHub-App-Token wäre schneller, kostet aber eine zusätzliche App mit Schreibrechten.
+  Die CI läuft deshalb zusätzlich **nächtlich** (`schedule`) auf `main` und prüft den Stand inklusive Trivy-Scan.
+- Updates (auch Dependabot- und Basis-Image-Sicherheitsfixes) erreichen den Betrieb **nur über ein Release**. Meldet der
+  nächtliche Scan eine neue Schwachstelle oder kommt ein wichtiges Update, ist ein Patch-Release (`X.Y.Z+1`) fällig.
 - Neue Third-Party-Actions müssen erst in die Allowlist (`scripts/github-setup.sh`) und per SHA gepinnt werden.

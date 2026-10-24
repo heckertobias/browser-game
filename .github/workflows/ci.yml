@@ -6,8 +6,8 @@ on:
     # Releases: signierter Tag vX.Y.Z (scripts/release.sh)
     tags: ["v*.*.*"]
   pull_request:
-  # Nächtlich main neu bauen: übernimmt Dependabot-Auto-Merges (lösen keinen push-Workflow aus)
-  # und Sicherheitsfixes der Basis-Images ins veröffentlichte Image (ADR 0002).
+  # Nächtlich main bauen und scannen: findet neue Schwachstellen in Basis-Images und prüft Dependabot-Auto-Merges
+  # (die keinen push-Workflow auslösen). Veröffentlicht wird nur bei Release-Tags (ADR 0002).
   schedule:
     - cron: "17 3 * * *"
   workflow_dispatch:
@@ -158,7 +158,8 @@ jobs:
       id-token: write
     env:
       IMAGE: ${{ matrix.image }}
-      PUBLISH: ${{ github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+      # Veröffentlichen nur bei Release-Tags (scripts/release.sh); sonst nur bauen und scannen.
+      PUBLISH: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -168,12 +169,10 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ env.IMAGE }}
-          # main: :main + :sha-…; Release-Tag v0.2.0: :0.2.0 + :latest
+          # Nur Release-Tags: v0.2.0 → :0.2.0 + :latest
           tags: |
-            type=sha,prefix=sha-
-            type=raw,value=main,enable={{is_default_branch}}
             type=semver,pattern={{version}}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            type=raw,value=latest
       # Pro Architektur lokal bauen und scannen (Basis-Image-Pakete unterscheiden sich je Architektur).
       - name: Build amd64 (zum Scannen)
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
