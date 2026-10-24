@@ -16,7 +16,8 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
     public GameServerFactory()
     {
         Directory.CreateDirectory(Path.Combine(_webRoot, "play"));
-        File.WriteAllText(Path.Combine(_webRoot, "play", "index.html"), "<!doctype html><div id=\"root\" data-client></div>");
+        // Fallback, falls kein Client-Build vorliegt; liegt einer in wwwroot/play, wird ggf. der echte ausgeliefert.
+        File.WriteAllText(Path.Combine(_webRoot, "play", "index.html"), "<!doctype html><div id=\"root\"></div>");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder) => builder.UseWebRoot(_webRoot);
@@ -49,7 +50,7 @@ public sealed class GameServerTests(GameServerFactory factory) : IClassFixture<G
     {
         var html = await factory.CreateClient().GetStringAsync(new Uri(path, UriKind.Relative), TestContext.Current.CancellationToken);
 
-        Assert.Contains("data-client", html, StringComparison.Ordinal);
+        Assert.Contains("<div id=\"root\">", html, StringComparison.Ordinal);
     }
 
     [Fact]
