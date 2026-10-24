@@ -54,14 +54,14 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
 - [x] **T14**: README-Abschnitte „Lokal starten“ (Server + Vite-Dev) und „Docker“ (Build, Run, Image aus GHCR).
 
 ## Abschluss
-- [ ] **T15**: Alle Akzeptanzkriterien geprüft, manuelle Prüfungen hier mit Datum dokumentiert:
+- [x] **T15**: Alle Akzeptanzkriterien geprüft, manuelle Prüfungen hier mit Datum dokumentiert:
   - AK-1, AK-2, AK-2b (Maus + Touch), AK-3 (2 Tabs), AK-6 (≥ 3 Fenstergrößen), AK-7.
   - Danach Spec-Status auf `umgesetzt`.
   - Manuelle Prüfungen (v0.1.0 auf dem Pi, `browsergame.endofweb.internal`):
     - [x] AK-1: Startseite → „Spielen“ öffnet das Spiel (2026-10-24, Tobias)
     - [x] AK-3: zwei Browser sehen sich gegenseitig (2026-10-24, Tobias)
-    - [ ] AK-2: WASD, auch diagonal
-    - [ ] AK-2b: Halten-und-Folgen mit Maus und Touch
-    - [ ] AK-4: Tab schließen → Figur verschwindet beim anderen
-    - [ ] AK-6: ≥ 3 Fenstergrößen, gleicher Ausschnitt, Ränder statt mehr Welt
-    - [ ] AK-7: in eine Richtung laufen, keine Grenze, Gitter bewegt sich
+    - [x] AK-2: WASD, auch diagonal (2026-10-24, Tobias)
+    - [x] AK-2b: Halten-und-Folgen mit Maus und Touch (2026-10-24, Tobias)
+    - [x] AK-4: Tab schließen → Figur verschwindet beim anderen (2026-10-24, Tobias)
+    - [x] AK-6: ≥ 3 Fenstergrößen, gleicher Ausschnitt, Ränder statt mehr Welt (2026-10-24, Tobias)
+    - [x] AK-7: in eine Richtung laufen, keine Grenze, Gitter bewegt sich (2026-10-24, Tobias)
