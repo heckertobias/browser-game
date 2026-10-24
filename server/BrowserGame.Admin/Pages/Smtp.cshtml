@@ -1,0 +1,66 @@
+@page
+@using BrowserGame.Data
+@model SmtpModel
+@{
+    ViewData["Title"] = "SMTP-Einstellungen";
+}
+<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+@if (Model.Message is not null)
+{
+    <div class="alert alert-success rounded-none">@Model.Message</div>
+}
+@if (!Model.Configured)
+{
+    <div class="alert alert-warning rounded-none">Noch nicht eingerichtet – das Spiel verschickt derzeit keine Mails.</div>
+}
+
+<form method="post" asp-page-handler="Save" class="grid gap-3 sm:grid-cols-2">
+    <label class="form-control sm:col-span-2">
+        <span class="label-text">Server</span>
+        <input asp-for="Input.Host" class="input input-bordered rounded-none" placeholder="z. B. mx2f12.netcup.net" />
+    </label>
+    <label class="form-control">
+        <span class="label-text">Port</span>
+        <input asp-for="Input.Port" type="number" min="1" max="65535" class="input input-bordered rounded-none" />
+    </label>
+    <label class="form-control">
+        <span class="label-text">Verschlüsselung</span>
+        <select asp-for="Input.Security" class="select select-bordered rounded-none">
+            <option value="@SmtpSecurity.Auto">Automatisch (465 → SSL, sonst STARTTLS)</option>
+            <option value="@SmtpSecurity.SslOnConnect">SSL/TLS</option>
+            <option value="@SmtpSecurity.StartTls">STARTTLS</option>
+            <option value="@SmtpSecurity.None">Keine (nur Testserver)</option>
+        </select>
+    </label>
+    <label class="form-control">
+        <span class="label-text">Benutzername</span>
+        <input asp-for="Input.Username" autocomplete="off" class="input input-bordered rounded-none" />
+    </label>
+    <label class="form-control">
+        <span class="label-text">Passwort @(Model.PasswordSet ? "(gesetzt – leer lassen = unverändert)" : "")</span>
+        <input asp-for="Input.Password" type="password" autocomplete="new-password" value="" class="input input-bordered rounded-none" />
+    </label>
+    <label class="form-control">
+        <span class="label-text">Absender-Adresse</span>
+        <input asp-for="Input.FromAddress" type="email" class="input input-bordered rounded-none" />
+    </label>
+    <label class="form-control">
+        <span class="label-text">Absender-Name</span>
+        <input asp-for="Input.FromName" class="input input-bordered rounded-none" placeholder="Browser Game" />
+    </label>
+    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase sm:col-span-2">Speichern</button>
+</form>
+
+<div class="divider font-mono text-xs">Testmail</div>
+@if (Model.TestError is not null)
+{
+    <div class="alert alert-error rounded-none" data-testid="test-error">@Model.TestError</div>
+}
+<form method="post" asp-page-handler="Test" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+    <label class="form-control grow">
+        <span class="label-text">Empfänger</span>
+        <input asp-for="TestRecipient" type="email" class="input input-bordered rounded-none" />
+    </label>
+    <button type="submit" class="btn rounded-none font-mono uppercase">Testmail senden</button>
+</form>
+<p class="text-sm opacity-70">Die Testmail nutzt die gespeicherten Einstellungen.</p>

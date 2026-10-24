@@ -25,7 +25,7 @@ Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/
   Passkey-Weg (gemeinsames `passkeys.js`).
 - [x] **T8** (AK-4b, AK-4c): `Login` mit Passkey oder Passwort + TOTP/Wiederherstellungscode, `Logout`, `Account`
   (eigene Passkeys/2FA verwalten).
-- [ ] **T9** (AK-7–9): Seite `Smtp` (Formular, „gesetzt“, Testmail).
+- [x] **T9** (AK-7–9): Seite `Smtp` (Formular, „gesetzt“, Testmail).
 - [ ] **T10** (AK-4e, AK-4f, AK-12): Seiten `Admins` (einladen, entfernen, letzter bleibt) und `Audit`; `AuditLog` an
   allen Änderungen.
 
