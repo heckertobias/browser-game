@@ -2,7 +2,7 @@
 # Basis-Images per Digest gepinnt; Dependabot aktualisiert Tag und Digest.
 
 # 1) Client bauen (landet in server/BrowserGame.Server/wwwroot)
-FROM node:24-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS client
+FROM node:25-slim@sha256:81db02c4b671288a03915da9534dbd54f96d0e7c24d80ccc54f5b36b2e684370 AS client
 WORKDIR /src
 COPY buf.yaml buf.gen.yaml ./
 COPY contracts/ contracts/
