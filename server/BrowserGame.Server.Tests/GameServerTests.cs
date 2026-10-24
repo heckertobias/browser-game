@@ -18,6 +18,8 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
         Directory.CreateDirectory(Path.Combine(_webRoot, "play"));
         // Fallback, falls kein Client-Build vorliegt; liegt einer in wwwroot/play, wird ggf. der echte ausgeliefert.
         File.WriteAllText(Path.Combine(_webRoot, "play", "index.html"), "<!doctype html><div id=\"root\"></div>");
+        Directory.CreateDirectory(Path.Combine(_webRoot, "play", "assets"));
+        File.WriteAllText(Path.Combine(_webRoot, "play", "assets", "test-asset.js"), "// test-asset");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder) => builder.UseWebRoot(_webRoot);
@@ -51,6 +53,24 @@ public sealed class GameServerTests(GameServerFactory factory) : IClassFixture<G
         var html = await factory.CreateClient().GetStringAsync(new Uri(path, UriKind.Relative), TestContext.Current.CancellationToken);
 
         Assert.Contains("<div id=\"root\">", html, StringComparison.Ordinal);
+    }
+
+    [Fact] // AK-1: Assets dürfen nicht vom SPA-Fallback (index.html) verdeckt werden
+    public async Task Play_assets_are_served_as_files()
+    {
+        var response = await factory.CreateClient().GetAsync(new Uri("/play/assets/test-asset.js", UriKind.Relative), TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/javascript", response.Content.Headers.ContentType?.MediaType);
+        Assert.Contains("test-asset", await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Missing_play_asset_is_not_found()
+    {
+        var response = await factory.CreateClient().GetAsync(new Uri("/play/assets/fehlt.js", UriKind.Relative), TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
