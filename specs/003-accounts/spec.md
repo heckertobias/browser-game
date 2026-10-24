@@ -1,6 +1,6 @@
 # 003 – Accounts & gespeicherte Position
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Voraussetzung für: [002 – Tastenbelegung & erstes Menü](../002-keybindings/spec.md)
 

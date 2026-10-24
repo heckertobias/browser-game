@@ -5,7 +5,7 @@ Gehört zu: [plan.md](plan.md)
 Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 
 ## Verträge
-- [ ] **T1** (AK-12, AK-20, AK-22): `game.proto` um `PlayerState.away` und `ServerMessage.kicked` (`Kicked.Reason`)
+- [x] **T1** (AK-12, AK-20, AK-22): `game.proto` um `PlayerState.away` und `ServerMessage.kicked` (`Kicked.Reason`)
   erweitern; `buf lint` und `buf breaking` gegen `main` müssen grün sein.
 
 ## Server – Daten

@@ -26,7 +26,20 @@ message ServerMessage {
   oneof payload {
     Welcome welcome = 1;
     Snapshot snapshot = 2;
+    // Verbindung wird vom Server beendet; danach schließt er den WebSocket.
+    Kicked kicked = 3;
   }
+}
+
+message Kicked {
+  enum Reason {
+    REASON_UNSPECIFIED = 0;
+    // Derselbe Account hat sich auf einem anderen Gerät ins Spiel angemeldet.
+    REASON_SIGNED_IN_ELSEWHERE = 1;
+    // Abgemeldet, Passwort zurückgesetzt oder Account gelöscht.
+    REASON_SIGNED_OUT = 2;
+  }
+  Reason reason = 1;
 }
 
 message Welcome {
@@ -51,4 +64,6 @@ message PlayerState {
   float y = 4;
   // 0xRRGGBB
   uint32 color = 5;
+  // Verbindung verloren, Figur wartet noch (Nachlauf) – anders darstellen.
+  bool away = 6;
 }
