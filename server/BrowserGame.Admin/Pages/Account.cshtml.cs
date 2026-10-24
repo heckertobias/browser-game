@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.WebUtilities;
 namespace BrowserGame.Admin.Pages;
 
 /// <summary>Eigene Anmeldearten verwalten: Passkeys, Wiederherstellungscodes (004 AK-4b, AK-4c). Mindestens eine bleibt.</summary>
-public sealed class AccountModel(UserManager<AdminUser> users, SignInManager<AdminUser> signIn, AuditLog audit) : PageModel
+public sealed partial class AccountModel(
+    UserManager<AdminUser> users, SignInManager<AdminUser> signIn, AuditLog audit, ILogger<AccountModel> logger) : PageModel
 {
     public sealed record PasskeyRow(string Id, string Label);
 
@@ -38,7 +39,9 @@ public sealed class AccountModel(UserManager<AdminUser> users, SignInManager<Adm
         var attestation = string.IsNullOrEmpty(Credential) ? null : await signIn.PerformPasskeyAttestationAsync(Credential);
         if (attestation is not { Succeeded: true })
         {
-            ModelState.AddModelError("", "Der Passkey konnte nicht angelegt werden.");
+            var reason = attestation?.Failure?.Message ?? "kein Passkey übermittelt";
+            LogPasskeyFailed(reason);
+            ModelState.AddModelError("", $"Der Passkey konnte nicht angelegt werden ({reason}).");
             return await ShowAsync();
         }
 
@@ -82,6 +85,9 @@ public sealed class AccountModel(UserManager<AdminUser> users, SignInManager<Adm
         await audit.WriteAsync(user.UserName!, "Wiederherstellungscodes erneuert");
         return await ShowAsync();
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Passkey im Account abgelehnt: {Reason}")]
+    private partial void LogPasskeyFailed(string reason);
 
     private async Task<AdminUser> CurrentAsync() =>
         await users.GetUserAsync(User) ?? throw new InvalidOperationException("Angemeldeter Admin nicht gefunden.");

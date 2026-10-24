@@ -13,41 +13,86 @@
 
 type Mode = "create" | "get";
 
-export function toBase64Url(buffer: ArrayBuffer): string {
+type Binary = ArrayBuffer | ArrayBufferView;
+
+/**
+ * Bytes erkennen – auch aus einem anderen JavaScript-Kontext (Passwortmanager-Erweiterungen liefern Credentials oft
+ * aus ihrer eigenen „Welt“, dann schlägt `instanceof ArrayBuffer` fehl).
+ */
+export function isBinary(value: unknown): value is Binary {
+  return value instanceof ArrayBuffer
+    || ArrayBuffer.isView(value)
+    || Object.prototype.toString.call(value) === "[object ArrayBuffer]";
+}
+
+export function toBase64Url(value: Binary): string {
+  const bytes = ArrayBuffer.isView(value)
+    ? new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+    : new Uint8Array(value);
   let binary = "";
-  for (const byte of new Uint8Array(buffer)) binary += String.fromCharCode(byte);
+  for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 interface CredentialLike {
   id: string;
-  rawId: ArrayBuffer;
+  rawId: unknown;
   type: string;
   authenticatorAttachment?: string | null;
   response: Record<string, unknown>;
   getClientExtensionResults?: () => unknown;
+  toJSON?: () => unknown;
 }
 
-/** Wie `PublicKeyCredential.toJSON`, aber ohne sich darauf zu verlassen (manche Passwortmanager liefern es fehlerhaft). */
+/** Eigene Serialisierung im Format von `PublicKeyCredential.toJSON` (WebAuthn Level 3). */
 export function serializeCredential(credential: CredentialLike): string {
   const response: Record<string, unknown> = {};
   const source = credential.response;
   for (const key of ["clientDataJSON", "attestationObject", "authenticatorData", "signature", "userHandle"]) {
     const value = source[key];
-    if (value instanceof ArrayBuffer) response[key] = toBase64Url(value);
+    if (isBinary(value)) response[key] = toBase64Url(value);
   }
-  const getTransports = source.getTransports;
-  if (typeof getTransports === "function") {
-    response.transports = (getTransports as () => string[]).call(source);
+  const call = (name: string): unknown => {
+    const fn = source[name];
+    return typeof fn === "function" ? (fn as () => unknown).call(source) : undefined;
+  };
+  const transports = call("getTransports");
+  if (Array.isArray(transports)) response.transports = transports;
+  if (!("authenticatorData" in response)) {
+    const authenticatorData = call("getAuthenticatorData");
+    if (isBinary(authenticatorData)) response.authenticatorData = toBase64Url(authenticatorData);
   }
+  const publicKeyAlgorithm = call("getPublicKeyAlgorithm");
+  if (typeof publicKeyAlgorithm === "number") response.publicKeyAlgorithm = publicKeyAlgorithm;
+  const publicKey = call("getPublicKey");
+  if (isBinary(publicKey)) response.publicKey = toBase64Url(publicKey);
+
   return JSON.stringify({
     id: credential.id,
-    rawId: toBase64Url(credential.rawId),
+    rawId: isBinary(credential.rawId) ? toBase64Url(credential.rawId) : credential.id,
     type: credential.type,
     authenticatorAttachment: credential.authenticatorAttachment ?? null,
     response,
     clientExtensionResults: credential.getClientExtensionResults?.() ?? {},
   });
+}
+
+/**
+ * Bevorzugt das browsereigene `toJSON()`; nur wenn es fehlt oder offensichtlich unbrauchbar ist (manche
+ * Passwortmanager liefern es fehlerhaft), greift die eigene Serialisierung.
+ */
+export function credentialToJson(credential: CredentialLike): string {
+  if (typeof credential.toJSON === "function") {
+    try {
+      const json = credential.toJSON() as { id?: unknown; response?: { clientDataJSON?: unknown } } | null;
+      if (json && typeof json.id === "string" && typeof json.response?.clientDataJSON === "string") {
+        return JSON.stringify(json);
+      }
+    } catch {
+      // fällt auf die eigene Serialisierung zurück
+    }
+  }
+  return serializeCredential(credential);
 }
 
 function showError(form: HTMLFormElement, message: string): void {
@@ -89,7 +134,7 @@ function attach(form: HTMLFormElement): void {
           showError(form, "Kein Passkey ausgewählt.");
           return;
         }
-        input.value = serializeCredential(credential as unknown as CredentialLike);
+        input.value = credentialToJson(credential as unknown as CredentialLike);
         form.dataset.passkeyReady = "1";
         form.requestSubmit();
       } catch {

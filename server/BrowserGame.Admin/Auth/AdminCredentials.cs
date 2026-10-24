@@ -14,6 +14,15 @@ public sealed class AdminCredentials(AdminDbContext db, UserManager<AdminUser> u
     public async Task<bool> IsActiveAsync(AdminUser user) =>
         IsActive(await users.HasPasswordAsync(user), user.TwoFactorEnabled, (await users.GetPasskeysAsync(user)).Count);
 
+    /// <summary>Entfernt einen halb eingerichteten Admin (ohne Anmeldeart); eingerichtete bleiben unangetastet.</summary>
+    public async Task RemoveIfInactiveAsync(string userId)
+    {
+        if (await users.FindByIdAsync(userId) is { } user && !await IsActiveAsync(user))
+        {
+            await users.DeleteAsync(user);
+        }
+    }
+
     public async Task<bool> AnyActiveAdminAsync(CancellationToken cancellationToken = default) =>
         await ActiveAdminIdsAsync(cancellationToken) is { Count: > 0 };
 

@@ -17,7 +17,7 @@ public sealed class AdminInvite
     public required string CreatedBy { get; init; }
     public string? Email { get; init; }
     public DateTimeOffset CreatedAt { get; init; }
-    public DateTimeOffset ExpiresAt { get; init; }
+    public DateTimeOffset ExpiresAt { get; set; }
     public DateTimeOffset? UsedAt { get; set; }
 
     /// <summary>Während der Einrichtung schon angelegter, aber noch nicht aktiver Admin (Abbruch → mit demselben Link weiter).</summary>

@@ -22,17 +22,19 @@ public enum InviteStep
 /// Berechtigung und wird bei jedem Schritt mitgeschickt.
 /// </summary>
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
-public sealed class InviteModel(
-    AdminInvites invites, AdminDbContext db, UserManager<AdminUser> users, SignInManager<AdminUser> signIn, AuditLog audit) : PageModel
+public sealed partial class InviteModel(
+    AdminInvites invites, AdminDbContext db, UserManager<AdminUser> users, SignInManager<AdminUser> signIn, AuditLog audit,
+    ILogger<InviteModel> logger) : PageModel
 {
     [BindProperty(SupportsGet = true)]
     public string? Token { get; set; }
 
+    // Nullable: Nur der Details-Schritt schickt sie mit; sonst würde jede andere Absendung „required“ melden.
     [BindProperty]
-    public string Name { get; set; } = "";
+    public string? Name { get; set; }
 
     [BindProperty]
-    public string Email { get; set; } = "";
+    public string? Email { get; set; }
 
     [BindProperty]
     public string? Password { get; set; }
@@ -67,7 +69,7 @@ public sealed class InviteModel(
 
         if (invite.PendingUserId is null)
         {
-            var user = new AdminUser { UserName = Name.Trim(), Email = (invite.Email ?? Email).Trim() };
+            var user = new AdminUser { UserName = Name?.Trim(), Email = (invite.Email ?? Email)?.Trim() };
             if (string.IsNullOrWhiteSpace(user.UserName) || string.IsNullOrWhiteSpace(user.Email))
             {
                 ModelState.AddModelError("", "Bitte Name und E-Mail angeben.");
@@ -155,7 +157,9 @@ public sealed class InviteModel(
         var attestation = string.IsNullOrEmpty(Credential) ? null : await signIn.PerformPasskeyAttestationAsync(Credential);
         if (attestation is not { Succeeded: true })
         {
-            ModelState.AddModelError("", "Der Passkey konnte nicht angelegt werden. Bitte versuche es erneut.");
+            var reason = attestation?.Failure?.Message ?? "kein Passkey übermittelt";
+            LogPasskeyFailed(reason);
+            ModelState.AddModelError("", $"Der Passkey konnte nicht angelegt werden ({reason}). Bitte versuche es erneut.");
             return await ShowAsync(InviteStep.ChooseMethod);
         }
 
@@ -164,6 +168,9 @@ public sealed class InviteModel(
         Step = InviteStep.Done;
         return Page();
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Passkey bei der Einrichtung abgelehnt: {Reason}")]
+    private partial void LogPasskeyFailed(string reason);
 
     private async Task CompleteAsync(AdminInvite invite, AdminUser user)
     {

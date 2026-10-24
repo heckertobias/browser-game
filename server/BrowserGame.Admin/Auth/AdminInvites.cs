@@ -65,9 +65,22 @@ public sealed partial class AdminInvites(
         }
 
         var now = time.GetUtcNow();
-        await db.Invites
+        var abandoned = await db.Invites
             .Where(i => i.CreatedBy == AdminInvite.SetupCreator && i.UsedAt == null)
-            .ExecuteUpdateAsync(set => set.SetProperty(i => i.ExpiresAt, now), cancellationToken);
+            .ToListAsync(cancellationToken);
+        foreach (var old in abandoned)
+        {
+            // Halb eingerichteter Account aus einem abgebrochenen Versuch würde sonst Name und E-Mail blockieren.
+            if (old.PendingUserId is { } pending)
+            {
+                await credentials.RemoveIfInactiveAsync(pending);
+                old.PendingUserId = null;
+            }
+
+            old.ExpiresAt = now;
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
 
         var (_, link) = await CreateAsync(AdminInvite.SetupCreator, email: null, cancellationToken);
         LogSetupLink(link, Lifetime.TotalHours);

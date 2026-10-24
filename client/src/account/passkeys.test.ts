@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { serializeCredential, toBase64Url } from "./passkeys";
+import { credentialToJson, isBinary, serializeCredential, toBase64Url } from "./passkeys";
 
 const bytes = (...values: number[]) => new Uint8Array(values).buffer;
 
@@ -45,5 +45,44 @@ describe("serializeCredential", () => {
 
     expect(json.response).toEqual({ clientDataJSON: "AQ", authenticatorData: "Ag", signature: "Aw", userHandle: "BA" });
     expect(json.authenticatorAttachment).toBeNull();
+  });
+});
+
+describe("Bytes aus einem fremden JavaScript-Kontext (Passwortmanager-Erweiterungen)", () => {
+  it("werden erkannt und serialisiert", async () => {
+    // Echter fremder Kontext über Node-vm (Tests laufen in Node); dynamisch, damit der Client keine Node-Typen braucht.
+    const vmModule = "node:vm";
+    const { runInNewContext } = (await import(/* @vite-ignore */ vmModule)) as { runInNewContext: (code: string) => unknown };
+    const foreign = runInNewContext("new Uint8Array([4, 5]).buffer") as ArrayBuffer;
+    expect(foreign instanceof ArrayBuffer).toBe(false); // genau das Problem
+    expect(isBinary(foreign)).toBe(true);
+
+    const json = JSON.parse(
+      serializeCredential({ id: "x", rawId: foreign, type: "public-key", response: { clientDataJSON: foreign, attestationObject: foreign } }),
+    ) as { rawId: string; response: Record<string, string> };
+
+    expect(json.rawId).toBe("BAU");
+    expect(json.response).toEqual({ clientDataJSON: "BAU", attestationObject: "BAU" });
+  });
+
+  it("Typed Arrays (Views) gehen ebenfalls", () => {
+    expect(toBase64Url(new Uint8Array([1, 2, 3]).subarray(1))).toBe("AgM");
+  });
+});
+
+describe("credentialToJson", () => {
+  const base = { id: "abc", rawId: bytes(1), type: "public-key", response: { clientDataJSON: bytes(2), attestationObject: bytes(3) } };
+
+  it("nutzt das browsereigene toJSON, wenn es brauchbar ist", () => {
+    const native = { id: "abc", rawId: "AQ", type: "public-key", response: { clientDataJSON: "NATIV", attestationObject: "Aw" } };
+    expect(JSON.parse(credentialToJson({ ...base, toJSON: () => native }))).toEqual(native);
+  });
+
+  it("fällt bei kaputtem toJSON auf die eigene Serialisierung zurück", () => {
+    const broken = credentialToJson({ ...base, toJSON: () => ({ id: "abc", response: {} }) });
+    expect(JSON.parse(broken)).toMatchObject({ response: { clientDataJSON: "Ag", attestationObject: "Aw" } });
+
+    const throwing = credentialToJson({ ...base, toJSON: () => { throw new Error("kaputt"); } });
+    expect(JSON.parse(throwing)).toMatchObject({ rawId: "AQ" });
   });
 });
