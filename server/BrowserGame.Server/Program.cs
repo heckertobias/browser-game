@@ -1,3 +1,4 @@
+using BrowserGame.Server.Accounts;
 using BrowserGame.Server.Data;
 using BrowserGame.Server.Game;
 
@@ -30,6 +31,7 @@ if (databaseProvider == DatabaseProvider.Sqlite)
     builder.Services.AddHostedService<SqliteBackupService>();
 }
 
+builder.AddGameAccounts();
 builder.Services.AddRazorPages();
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<GameLoop>();
@@ -56,6 +58,9 @@ app.UseWebSockets(new WebSocketOptions
     KeepAliveTimeout = TimeSpan.FromSeconds(10),
 });
 app.UseStaticFiles();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapRazorPages();
 app.Map("/ws", GameEndpoint.HandleAsync);
