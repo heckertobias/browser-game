@@ -1,10 +1,13 @@
-# Deployment hinter nginx-proxy (externes Docker-Netz "proxy"), z. B. per Arcane Git Sync.
-# Hostname kommt aus der .env des Projekts, damit keine internen Namen im Repo stehen:
-#   VIRTUAL_HOST=browsergame.example.internal
-# Die Version setzt scripts/release.sh nach jedem Release; Git Sync deployt die Änderung. Kein Auto-Updater nötig.
+# ERZEUGT von scripts/release.sh aus deploy/compose.template.yaml – Änderungen in der Vorlage machen, nicht hier.
+#
+# Betrieb hinter nginx-proxy (externes Docker-Netz "proxy"), z. B. per Arcane Git Sync.
+# Kein Dienst veröffentlicht einen Port: Erreichbar sind beide nur über den Proxy (Forwarded-Header werden vertraut).
+# In der .env des Projekts (keine internen Namen im Repo):
+#   VIRTUAL_HOST=browsergame.example.internal          # Spiel
+#   ADMIN_VIRTUAL_HOST=admin-browsergame.example.internal  # Admin – nur intern erreichbar machen (004 AK-6)
 services:
   browsergame:
-    image: ghcr.io/heckertobias/browser-game:0.1.0
+    image: ghcr.io/heckertobias/browser-game:0.2.0
     restart: unless-stopped
     read_only: true
     cap_drop: [ALL]
@@ -12,10 +15,41 @@ services:
       - no-new-privileges:true
     networks:
       - proxy
+    volumes:
+      - data:/data
     environment:
       TZ: Europe/Berlin
       VIRTUAL_HOST: ${VIRTUAL_HOST:?VIRTUAL_HOST in der .env setzen}
       VIRTUAL_PORT: 8080
+      App__PublicUrl: https://${VIRTUAL_HOST}
+      Passkeys__ServerDomain: ${VIRTUAL_HOST}
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      Database__Provider: Sqlite
+      Database__BackupPath: /data/backup/game.db
+
+  browsergame-admin:
+    image: ghcr.io/heckertobias/browser-game-admin:0.2.0
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    volumes:
+      - data:/data
+    environment:
+      TZ: Europe/Berlin
+      VIRTUAL_HOST: ${ADMIN_VIRTUAL_HOST:?ADMIN_VIRTUAL_HOST in der .env setzen}
+      VIRTUAL_PORT: 8080
+      App__PublicUrl: https://${ADMIN_VIRTUAL_HOST}
+      Passkeys__ServerDomain: ${ADMIN_VIRTUAL_HOST}
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      Database__Provider: Sqlite
+
+volumes:
+  # Gemeinsame SQLite-Datenbank von Spiel und Admin (ADR 0006). Ins Backup aufnehmen.
+  data:
 
 networks:
   proxy:
