@@ -2,24 +2,9 @@ using BrowserGame.Server.Accounts;
 using BrowserGame.Data;
 using BrowserGame.Server.Game;
 
-// Docker-HEALTHCHECK: Das chiseled Image hat kein curl, deshalb prüft der Server sich selbst.
-if (args is ["--healthcheck", ..])
+if (await WebDefaults.TryRunHealthProbeAsync(args) is { } exitCode)
 {
-    var port = Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS")?.Split(';')[0] ?? "8080";
-    using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
-    try
-    {
-        using var response = await http.GetAsync(new Uri($"http://localhost:{port}/health"));
-        return response.IsSuccessStatusCode ? 0 : 1;
-    }
-    catch (HttpRequestException)
-    {
-        return 1;
-    }
-    catch (TaskCanceledException)
-    {
-        return 1;
-    }
+    return exitCode;
 }
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,15 +26,7 @@ var app = builder.Build();
 
 await app.Services.MigrateAsync<GameDbContext>(databaseProvider);
 
-app.Use(async (context, next) =>
-{
-    var headers = context.Response.Headers;
-    headers.XContentTypeOptions = "nosniff";
-    headers["Referrer-Policy"] = "no-referrer";
-    headers.ContentSecurityPolicy =
-        "default-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'";
-    await next();
-});
+app.UseSecurityHeaders();
 
 // Erkennt Verbindungen, die ohne Close-Frame verschwinden (AK-4).
 app.UseWebSockets(new WebSocketOptions

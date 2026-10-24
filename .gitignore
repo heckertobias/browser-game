@@ -24,3 +24,4 @@ server/BrowserGame.Server/wwwroot/css/site.css
 *.db
 *.db-shm
 *.db-wal
+server/BrowserGame.Admin/wwwroot/css/site.css

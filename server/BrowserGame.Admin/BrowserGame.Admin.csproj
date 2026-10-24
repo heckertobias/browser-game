@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Admin-Interface als eigener Dienst (ADR 0006). -->
+  <ItemGroup>
+    <ProjectReference Include="..\BrowserGame.Data\BrowserGame.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="BrowserGame.Admin.Tests" />
+  </ItemGroup>
+
+</Project>

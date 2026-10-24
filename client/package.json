@@ -9,11 +9,12 @@
   "scripts": {
     "gen": "cd .. && buf generate",
     "dev": "npm run gen && vite",
-    "build": "npm run gen && vite build && npm run build:landing",
+    "build": "npm run gen && vite build && npm run build:landing && npm run build:admin",
     "build:landing": "tailwindcss -i src/landing.css -o ../server/BrowserGame.Server/wwwroot/css/site.css --minify",
     "test": "npm run gen && vitest run",
     "typecheck": "npm run gen && tsc --noEmit",
-    "lint": "npm run gen && eslint ."
+    "lint": "npm run gen && eslint .",
+    "build:admin": "tailwindcss -i src/admin.css -o ../server/BrowserGame.Admin/wwwroot/css/site.css --minify"
   },
   "dependencies": {
     "@bufbuild/protobuf": "2.16.0",

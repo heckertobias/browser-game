@@ -16,7 +16,7 @@ Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/
   und Startabbruch aus 003 T6 entfernen.
 
 ## Admin
-- [ ] **T5**: Projekt `BrowserGame.Admin` (Razor Pages, Layout im Pixel-Akzent-Stil), Testprojekt, Migration beim Start
+- [x] **T5**: Projekt `BrowserGame.Admin` (Razor Pages, Layout im Pixel-Akzent-Stil), Testprojekt, Migration beim Start
   (Game + Admin), Sicherheits-Header, `/health`.
 - [ ] **T6** (AK-2–4, AK-4d): Identity für `AdminUser`, Cookie-Schema `Admin` (8 h, SameSite=Strict), Lockout,
   Rate-Limiter, `RequireAuthorization` für alles außer Login/Invite.

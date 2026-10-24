@@ -21,3 +21,6 @@ dotnet_diagnostic.CA1707.severity = none
 # Von EF Core erzeugte Migrationen nicht analysieren.
 [server/BrowserGame.Data/Migrations/**.cs]
 generated_code = true
+
+[server/BrowserGame.Admin.Tests/**.cs]
+dotnet_diagnostic.CA1707.severity = none

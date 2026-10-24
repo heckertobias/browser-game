@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="BrowserGame.Admin.Tests/BrowserGame.Admin.Tests.csproj" />
+  <Project Path="BrowserGame.Admin/BrowserGame.Admin.csproj" />
   <Project Path="BrowserGame.Data/BrowserGame.Data.csproj" />
   <Project Path="BrowserGame.Server.Tests/BrowserGame.Server.Tests.csproj" />
   <Project Path="BrowserGame.Server/BrowserGame.Server.csproj" />
