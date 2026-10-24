@@ -37,6 +37,10 @@ Ein 2D-Pixel-Art-MMORPG im Browser mit zwei Seiten:
   - **Gebäude / Produktion** – eigene Gebäude erzeugen über die Zeit Ressourcen
   - **Begleiter / Expeditionen** – Begleiter werden losgeschickt und kommen mit Beute zurück
   - **Handwerk** – Herstellungsaufträge laufen in Echtzeit ab
+  - Voraussichtlicher Mittelpunkt des Offline-Teils: **das Haus des Spielers** (Details folgen in einer eigenen Spec)
+- Spielen nur mit Account (kein Gastmodus). Anmeldung per E-Mail + Passwort oder Passkey; der Spielername ist
+  selbst gewählt und eindeutig.
+- Einstellungen (z. B. Tastenbelegung) gehören zum Account und gelten auf jedem Gerät.
 - UI-Stil: Pixel-Akzente – Menüs und HUD bleiben gut lesbar, mit pixeliger Schrift, Rahmen und Icons
 - Öffentliche Seiten (Landing) serverseitig gerendert
 
