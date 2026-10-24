@@ -1,0 +1,25 @@
+# Deployment hinter nginx-proxy (externes Docker-Netz "proxy"), z. B. per Arcane Git Sync.
+# Hostname kommt aus der .env des Projekts, damit keine internen Namen im Repo stehen:
+#   VIRTUAL_HOST=browsergame.example.internal
+# Neue Images (:main) übernimmt Arcanes Auto-Updater über das Label; Git Sync reagiert nur auf Änderungen dieser Datei.
+services:
+  browsergame:
+    image: ghcr.io/heckertobias/browser-game:main
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      com.getarcaneapp.arcane.updater: "true"
+    networks:
+      - proxy
+    environment:
+      TZ: Europe/Berlin
+      VIRTUAL_HOST: ${VIRTUAL_HOST:?VIRTUAL_HOST in der .env setzen}
+      VIRTUAL_PORT: 8080
+
+networks:
+  proxy:
+    name: proxy
+    external: true

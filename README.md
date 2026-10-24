@@ -70,6 +70,9 @@ docker run -d --name browser-game --restart unless-stopped -p 8080:8080 \
   ghcr.io/heckertobias/browser-game:main
 ```
 
+Hinter einem nginx-proxy (Netz `proxy`) liegt die fertige Compose-Datei in [`deploy/compose.yaml`](deploy/compose.yaml);
+den Hostnamen setzt man als `VIRTUAL_HOST` in der `.env`. Damit lässt sich z. B. Arcane Git Sync direkt auf das Repo richten.
+
 Herkunft prüfen:
 
 ```bash
