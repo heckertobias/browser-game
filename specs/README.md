@@ -52,3 +52,16 @@ Nummern fortlaufend, Namen kurz und sprechend.
 - Die erste Spec ist ein **Walking Skeleton**: der dünnste Durchstich durch alle Schichten.
 - Verträge (`contracts/`) sind ausführbare Specs – aus ihnen wird Code generiert, nie umgekehrt.
 - Größere, schwer umkehrbare Entscheidungen → ADR in `docs/decisions/`.
+
+## Roadmap
+
+Die Nummer ist nur eine ID (Reihenfolge des Anlegens). Umgesetzt wird nach Status und Abhängigkeiten:
+nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim Statuswechsel einer Spec hier mitpflegen.
+
+| Reihenfolge | Spec | Status | Setzt voraus |
+|---|---|---|---|
+| – | [000 – Vision](000-vision/spec.md) | entwurf (wächst mit) | – |
+| 1 | [001 – Walking Skeleton](001-walking-skeleton/spec.md) | umgesetzt | – |
+| 2 | [003 – Accounts & gespeicherte Position](003-accounts/spec.md) | bereit | 001 |
+| 3 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | bereit | 003 |
+| später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |
