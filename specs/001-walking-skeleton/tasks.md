@@ -32,23 +32,23 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
   Vitest für die Reconciliation.
 
 ## Tests / Prüfung
-- [ ] **T10** (AK-1, AK-3, AK-4): Integrationstests mit `WebApplicationFactory`, die `/` und `/play` prüfen, sowie
+- [x] **T10** (AK-1, AK-3, AK-4): Integrationstests mit `WebApplicationFactory`, die `/` und `/play` prüfen, sowie
   2 WebSocket-Clients für Sichtbarkeit < 1 s und Verschwinden nach Close.
-  _Stand: Server-Teil fertig (`GameServerTests`, inkl. AK-5 über WebSocket, ungültige/zu große Nachrichten)._
+  Dazu AK-5 über WebSocket sowie ungültige und zu große Nachrichten (`GameServerTests`).
 
 ## CI/CD & Betrieb
 - [x] **T11**: Multi-Stage-`Dockerfile` (node → dotnet/sdk → aspnet chiseled, non-root), Images per Digest gepinnt,
   `HEALTHCHECK` auf `/health`, `.dockerignore`.
-- [ ] **T12**: `ci.yml` erweitern und alle neuen Jobs in `ci-ok.needs` eintragen:
+- [x] **T12**: `ci.yml` erweitern und alle neuen Jobs in `ci-ok.needs` eintragen:
   - [x] `server`: `dotnet build`, `dotnet test`; verwundbare Pakete über NuGet Audit + `TreatWarningsAsErrors`
   - [x] `client`: `npm ci`, `gen`, `typecheck`, `lint`, `test`, `build`, `npm audit --audit-level=high`
-  - `docker`: Build mit Trivy-Scan (Fail ab `HIGH`); auf `main` Push nach `ghcr.io/heckertobias/browser-game`
+  - [x] `docker`: Build mit Trivy-Scan (Fail ab `HIGH`); auf `main` Push nach `ghcr.io/heckertobias/browser-game`
     (`sha-<commit>`, `main`) plus `actions/attest-build-provenance`. Nur dieser Job bekommt
     `packages: write`, `attestations: write`, `id-token: write`.
-  - Neue Third-Party-Actions (`docker/*`, Trivy) in die Allowlist in `scripts/github-setup.sh` eintragen,
-    das Skript ausführen und SHAs pinnen.
-  - In `scripts/github-setup.sh` `CODEQL_LANGUAGES` um `csharp` und `javascript-typescript` erweitern, Skript ausführen.
-  - Lösung für „Auto-Merge löst keine CI auf `main` aus“ (ADR 0002) festlegen und umsetzen.
+  - [x] Neue Third-Party-Actions (`docker/*`, Trivy) in die Allowlist in `scripts/github-setup.sh` eingetragen,
+    Skript ausgeführt, SHAs gepinnt.
+  - [x] `CODEQL_LANGUAGES` um `csharp` und `javascript-typescript` erweitert.
+  - [x] „Auto-Merge löst keine CI auf `main` aus“: nächtlicher CI-Lauf (`schedule`) auf `main` (ADR 0002).
 - [x] **T13**: `dependabot.yml` um `nuget` (`/server`), `npm` (`/client`) und `docker` (`/`) erweitern, mit gleichem
   Schema (wöchentlich, Minor/Patch gruppiert, Cooldown).
 - [x] **T14**: README-Abschnitte „Lokal starten“ (Server + Vite-Dev) und „Docker“ (Build, Run, Image aus GHCR).
