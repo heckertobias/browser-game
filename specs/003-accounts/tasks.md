@@ -37,7 +37,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 - [ ] **T12** (AK-18, AK-19): `PositionStore` – gebündeltes Speichern alle 5 s, beim Entfernen und beim Herunterfahren.
 
 ## Client
-- [ ] **T13** (AK-12, AK-20, AK-22): `kicked`-Overlay, `away`-Figuren entsättigt, HUD mit Link „Mein Account“.
+- [ ] **T13** (AK-12, AK-19b, AK-20, AK-22): `kicked`-Overlay, `away`-Figuren entsättigt, HUD mit Koordinaten und Link „Mein Account“.
 
 ## Tests / Prüfung
 - [ ] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen

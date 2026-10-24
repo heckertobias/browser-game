@@ -74,6 +74,8 @@ kommen dort wieder heraus, wo sie aufgehört haben. Das ist die Grundlage für a
 - **AK-18:** Gegeben ich verlasse das Spiel an einer Stelle, wenn ich mich später erneut anmelde (auch auf einem
   anderen Gerät), dann starte ich an derselben Stelle.
 - **AK-19:** Gegeben der Server wird neu gestartet, dann geht höchstens die Bewegung der letzten paar Sekunden verloren.
+- **AK-19b:** Gegeben ich bin im Spiel, dann sehe ich im HUD die Koordinaten meiner Figur (ganze Zahlen); so lässt sich
+  prüfen, dass ich nach dem Wiederkommen an derselben Stelle stehe.
 
 ### Spiel verlassen
 - **AK-20:** Gegeben ich schließe den Tab oder verliere die Verbindung, dann bleibt meine Figur für andere noch

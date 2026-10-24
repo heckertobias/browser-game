@@ -137,7 +137,8 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
   - Overlay „Auf einem anderen Gerät angemeldet“ mit Button „Hier weiterspielen“ (neu laden) bzw. Weiterleitung zur
     Anmeldung bei `SIGNED_OUT`.
 - `render.ts`: `away`-Figuren entsättigt und halbtransparent (AK-20).
-- HUD: Spielername aus dem Account, Link „Mein Account“ (bis das Menü aus 002 kommt).
+- HUD: Spielername aus dem Account, **eigene Koordinaten** (gerundet, aus der vorhergesagten Position, AK-19b), Link
+  „Mein Account“ (bis das Menü aus 002 kommt).
 - Verbindung bricht ohne `Kicked` ab → wie bisher „getrennt“ mit „Neu verbinden“ (innerhalb von 20 s nahtlos, AK-21).
 
 ## Deployment
@@ -181,6 +182,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 | 16 | Delete mit Bestätigung, Cascade | Integration: Account weg, Name wieder registrierbar |
 | 17, 18 | Position laden/speichern | Integration: erster Beitritt am Startpunkt; Bewegung, gehen, wiederkommen → gleiche Stelle |
 | 19 | gebündeltes Speichern + Flush beim Stop | Integration: neuer Server auf derselben DB-Datei → Position ≤ 5 s alt |
+| 19b | HUD zeigt gerundete eigene Position | Vitest: Formatierung; **manuell**: gehen, wiederkommen, gleiche Koordinaten |
 | 20, 23 | `away` + Entfernen nach Linger | Unit (`World`); Integration mit verkürztem Linger: `away=true`, dann weg |
 | 21 | Übernahme wartender Figur | Integration: innerhalb Linger neu verbinden → gleiche ID/Position, `away=false` |
 | 22 | `ForceLeave` beim Logout | Integration: nach Logout sofort aus Snapshot verschwunden |
