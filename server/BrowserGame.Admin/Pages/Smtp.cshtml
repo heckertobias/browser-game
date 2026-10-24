@@ -4,63 +4,57 @@
 @{
     ViewData["Title"] = "SMTP-Einstellungen";
 }
-<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+<partial name="_Errors" />
 @if (Model.Message is not null)
 {
     <div class="alert alert-success rounded-none">@Model.Message</div>
 }
 @if (!Model.Configured)
 {
-    <div class="alert alert-warning rounded-none">Noch nicht eingerichtet – das Spiel verschickt derzeit keine Mails.</div>
+    <div class="alert alert-warning rounded-none">Noch nicht gespeichert – das Spiel verschickt derzeit keine Mails.</div>
 }
 
-<form method="post" asp-page-handler="Save" class="grid gap-3 sm:grid-cols-2">
-    <label class="form-control sm:col-span-2">
-        <span class="label-text">Server</span>
-        <input asp-for="Input.Host" class="input input-bordered rounded-none" placeholder="z. B. mx2f12.netcup.net" />
+<form method="post" class="grid gap-4 sm:grid-cols-2">
+    <label class="flex flex-col gap-1 sm:col-span-2">
+        <span class="label-text">Server (nur der Name, z. B. mx2ea8.netcup.net)</span>
+        <input asp-for="Input.Host" class="input w-full rounded-none" autocomplete="off" />
     </label>
-    <label class="form-control">
-        <span class="label-text">Port</span>
-        <input asp-for="Input.Port" type="number" min="1" max="65535" class="input input-bordered rounded-none" />
+    <label class="flex flex-col gap-1">
+        <span class="label-text">Port (465 = SSL/TLS, 587 = STARTTLS)</span>
+        <input asp-for="Input.Port" type="number" min="1" max="65535" class="input w-full rounded-none" />
     </label>
-    <label class="form-control">
+    <label class="flex flex-col gap-1">
         <span class="label-text">Verschlüsselung</span>
-        <select asp-for="Input.Security" class="select select-bordered rounded-none">
-            <option value="@SmtpSecurity.Auto">Automatisch (465 → SSL, sonst STARTTLS)</option>
-            <option value="@SmtpSecurity.SslOnConnect">SSL/TLS</option>
-            <option value="@SmtpSecurity.StartTls">STARTTLS</option>
+        <select asp-for="Input.Security" class="select w-full rounded-none">
+            <option value="@SmtpSecurity.SslOnConnect">SSL/TLS (meist Port 465)</option>
+            <option value="@SmtpSecurity.StartTls">STARTTLS (meist Port 587)</option>
+            <option value="@SmtpSecurity.Auto">Automatisch</option>
             <option value="@SmtpSecurity.None">Keine (nur Testserver)</option>
         </select>
     </label>
-    <label class="form-control">
+    <label class="flex flex-col gap-1">
         <span class="label-text">Benutzername</span>
-        <input asp-for="Input.Username" autocomplete="off" class="input input-bordered rounded-none" />
+        <input asp-for="Input.Username" autocomplete="off" class="input w-full rounded-none" />
     </label>
-    <label class="form-control">
+    <label class="flex flex-col gap-1">
         <span class="label-text">Passwort @(Model.PasswordSet ? "(gesetzt – leer lassen = unverändert)" : "")</span>
-        <input asp-for="Input.Password" type="password" autocomplete="new-password" value="" class="input input-bordered rounded-none" />
+        <input asp-for="Input.Password" type="password" autocomplete="new-password" value="" class="input w-full rounded-none" />
     </label>
-    <label class="form-control">
+    <label class="flex flex-col gap-1">
         <span class="label-text">Absender-Adresse</span>
-        <input asp-for="Input.FromAddress" type="email" class="input input-bordered rounded-none" />
+        <input asp-for="Input.FromAddress" type="email" class="input w-full rounded-none" />
     </label>
-    <label class="form-control">
+    <label class="flex flex-col gap-1">
         <span class="label-text">Absender-Name</span>
-        <input asp-for="Input.FromName" class="input input-bordered rounded-none" placeholder="Browser Game" />
+        <input asp-for="Input.FromName" class="input w-full rounded-none" placeholder="Browser Game" />
     </label>
-    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase sm:col-span-2">Speichern</button>
-</form>
 
-<div class="divider font-mono text-xs">Testmail</div>
-@if (Model.TestError is not null)
-{
-    <div class="alert alert-error rounded-none" data-testid="test-error">@Model.TestError</div>
-}
-<form method="post" asp-page-handler="Test" class="flex flex-col gap-3 sm:flex-row sm:items-end">
-    <label class="form-control grow">
-        <span class="label-text">Empfänger</span>
-        <input asp-for="TestRecipient" type="email" class="input input-bordered rounded-none" />
+    <div class="divider font-mono text-xs sm:col-span-2">Testen, bevor du speicherst</div>
+    <label class="flex flex-col gap-1 sm:col-span-2">
+        <span class="label-text">Testmail an</span>
+        <input asp-for="TestRecipient" type="email" class="input w-full rounded-none" />
     </label>
-    <button type="submit" class="btn rounded-none font-mono uppercase">Testmail senden</button>
+    <button type="submit" asp-page-handler="Test" class="btn rounded-none font-mono uppercase">Testmail senden</button>
+    <button type="submit" asp-page-handler="Save" class="btn btn-primary rounded-none font-mono uppercase">Speichern</button>
+    <p class="text-sm opacity-70 sm:col-span-2">Die Testmail nutzt die Werte im Formular (nicht gespeichert). Leeres Passwortfeld = gespeichertes Passwort.</p>
 </form>
-<p class="text-sm opacity-70">Die Testmail nutzt die gespeicherten Einstellungen.</p>

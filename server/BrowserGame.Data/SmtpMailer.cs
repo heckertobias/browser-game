@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -13,8 +14,11 @@ public enum MailStatus
     Failed,
 }
 
-/// <summary>Ergebnis eines Versands; <see cref="Error"/> ist eine verständliche deutsche Meldung (004 AK-9).</summary>
-public sealed record MailResult(MailStatus Status, string? Error = null)
+/// <summary>
+/// Ergebnis eines Versands; <see cref="Error"/> ist eine verständliche deutsche Meldung (004 AK-9),
+/// <see cref="Detail"/> die technische Ursache fürs Log.
+/// </summary>
+public sealed record MailResult(MailStatus Status, string? Error = null, string? Detail = null)
 {
     public static readonly MailResult Sent = new(MailStatus.Sent);
     public static readonly MailResult NotConfigured = new(MailStatus.NotConfigured, "Der Mailversand ist noch nicht eingerichtet.");
@@ -61,9 +65,9 @@ public sealed class SmtpMailer(IServiceScopeFactory scopes)
             await client.DisconnectAsync(quit: true, cancellationToken);
             return MailResult.Sent;
         }
-        catch (Exception ex) when (Describe(ex) is { } error)
+        catch (Exception ex) when (Describe(ex, settings.Host) is { } error)
         {
-            return new MailResult(MailStatus.Failed, error);
+            return new MailResult(MailStatus.Failed, error, ex.InnerException is null ? ex.Message : $"{ex.Message} → {ex.InnerException.Message}");
         }
     }
 
@@ -76,16 +80,46 @@ public sealed class SmtpMailer(IServiceScopeFactory scopes)
     };
 
     /// <summary>Übersetzt die typischen Fehler; <c>null</c> = unerwartet, wird weitergeworfen.</summary>
-    internal static string? Describe(Exception exception) => exception switch
+    internal static string? Describe(Exception exception, string host) => exception switch
     {
         AuthenticationException => "Anmeldung am Mailserver fehlgeschlagen – Benutzername und Passwort prüfen.",
-        SslHandshakeException => "Verschlüsselte Verbindung zum Mailserver fehlgeschlagen – Verschlüsselung und Port prüfen.",
+        SslHandshakeException { ServerCertificate: { } certificate } when CertificateNames(certificate) is { Count: > 0 } names
+            && !names.Any(n => MatchesHost(n, host))
+            => $"Das Zertifikat des Mailservers gilt für „{string.Join("“, „", names.Take(3))}“, nicht für „{host}“ – trage diesen Namen als Server ein.",
+        SslHandshakeException => "Verschlüsselte Verbindung zum Mailserver fehlgeschlagen – Verschlüsselung und Port prüfen (465 = SSL/TLS, 587 = STARTTLS).",
         SocketException => "Mailserver nicht erreichbar – Server und Port prüfen.",
         SmtpCommandException command => $"Der Mailserver hat die Mail abgelehnt: {command.Message}",
         SmtpProtocolException or ServiceNotConnectedException => "Unerwartete Antwort vom Mailserver – Server, Port und Verschlüsselung prüfen.",
         ParseException or FormatException => "Ungültige Absender- oder Empfängeradresse.",
         TimeoutException or OperationCanceledException => "Zeitüberschreitung beim Mailserver.",
         IOException => "Verbindung zum Mailserver abgebrochen – Server, Port und Verschlüsselung prüfen.",
+        ArgumentException => "Ungültige Einstellungen – beim Server nur den Namen eintragen (ohne Port, ohne https://).",
         _ => null,
     };
+
+    /// <summary>DNS-Namen eines Zertifikats (Subject Alternative Names, sonst Common Name).</summary>
+    internal static IReadOnlyList<string> CertificateNames(X509Certificate certificate)
+    {
+        using var cert = new X509Certificate2(certificate);
+        var names = cert.Extensions.OfType<X509SubjectAlternativeNameExtension>().SelectMany(e => e.EnumerateDnsNames()).ToList();
+        if (names.Count == 0 && cert.GetNameInfo(X509NameType.DnsName, forIssuer: false) is { Length: > 0 } commonName)
+        {
+            names.Add(commonName);
+        }
+
+        return names;
+    }
+
+    /// <summary>Hostname passt zum Zertifikatsnamen, auch mit einfachem Platzhalter (*.example.net).</summary>
+    internal static bool MatchesHost(string certificateName, string host)
+    {
+        if (string.Equals(certificateName, host, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return certificateName.StartsWith("*.", StringComparison.Ordinal)
+            && host.IndexOf('.', StringComparison.Ordinal) is var dot and > 0
+            && string.Equals(certificateName[2..], host[(dot + 1)..], StringComparison.OrdinalIgnoreCase);
+    }
 }

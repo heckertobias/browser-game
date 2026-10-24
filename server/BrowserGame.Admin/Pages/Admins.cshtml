@@ -3,16 +3,16 @@
 @{
     ViewData["Title"] = "Admins";
 }
-<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+<partial name="_Errors" />
 @if (Model.Message is not null)
 {
     <div class="alert alert-success rounded-none">@Model.Message</div>
 }
 @if (Model.InviteLink is not null)
 {
-    <label class="form-control">
+    <label class="flex flex-col gap-1">
         <span class="label-text">Einladungslink zum Weitergeben</span>
-        <input readonly value="@Model.InviteLink" class="input input-bordered rounded-none font-mono text-sm" data-testid="invite-link" />
+        <input readonly value="@Model.InviteLink" class="input input-bordered w-full rounded-none font-mono text-sm" data-testid="invite-link" />
     </label>
 }
 
@@ -41,9 +41,9 @@
 
 <div class="divider font-mono text-xs">Neuen Admin einladen</div>
 <form method="post" asp-page-handler="Invite" class="flex flex-col gap-3 sm:flex-row sm:items-end">
-    <label class="form-control grow">
+    <label class="flex flex-col gap-1 grow">
         <span class="label-text">E-Mail (optional – sonst nur Link)</span>
-        <input asp-for="InviteEmail" type="email" class="input input-bordered rounded-none" />
+        <input asp-for="InviteEmail" type="email" class="input input-bordered w-full rounded-none" />
     </label>
     <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Einladen</button>
 </form>

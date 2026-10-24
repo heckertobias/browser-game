@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Mein Account";
 }
-<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+<partial name="_Errors" />
 @if (Model.Message is not null)
 {
     <div class="alert alert-success rounded-none">@Model.Message</div>

@@ -1,0 +1,5 @@
+@* Fehlerkasten nur bei Fehlern – die Validierungszusammenfassung rendert sonst eine leere Liste (sichtbarer roter Balken). *@
+@if (!ViewContext.ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="All" class="alert alert-error rounded-none" role="alert"></div>
+}

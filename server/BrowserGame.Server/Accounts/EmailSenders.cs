@@ -53,19 +53,19 @@ internal sealed partial class PlayerEmailSender(SmtpMailer mailer, IWebHostEnvir
 
         if (environment.IsDevelopment())
         {
-            LogNotSentWithLink(subject, result.Error, link);
+            LogNotSentWithLink(subject, result.Error, result.Detail, link);
         }
         else
         {
-            LogNotSent(subject, result.Error);
+            LogNotSent(subject, result.Error, result.Detail);
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Mail „{Subject}“ nicht verschickt: {Error}")]
-    private partial void LogNotSent(string subject, string? error);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Mail „{Subject}“ nicht verschickt: {Error} ({Detail})")]
+    private partial void LogNotSent(string subject, string? error, string? detail);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Mail „{Subject}“ nicht verschickt: {Error} – Link (nur Entwicklung): {Link}")]
-    private partial void LogNotSentWithLink(string subject, string? error, string link);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Mail „{Subject}“ nicht verschickt: {Error} ({Detail}) – Link (nur Entwicklung): {Link}")]
+    private partial void LogNotSentWithLink(string subject, string? error, string? detail, string link);
 }
 
 internal static class EmailSetup

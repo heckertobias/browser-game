@@ -76,7 +76,9 @@ Formulare.
   - `Index`: Übersicht.
   - `Smtp`: Formular mit Server, Port, Verschlüsselung (Auto/SSL/STARTTLS/keine), Benutzer, Passwort, Absender
     (Adresse + Name). Das Passwortfeld ist leer; daneben steht „gesetzt“, solange eins gespeichert ist (AK-7, AK-8).
-    Dazu „Testmail senden“ (AK-9).
+    Dazu „Testmail senden“ (AK-9) – **mit den Werten im Formular, ohne zu speichern** (leeres Passwort = gespeichertes);
+    Empfänger mit der eigenen Admin-Adresse vorbelegt. Typische Verwechslungen (Port im Servernamen, IMAP/POP3-Ports)
+    werden beim Absenden erklärt; bei TLS-Fehlern nennt die Meldung, für welchen Namen das Zertifikat gilt.
   - `Admins`: Liste, „Einladen“ (Link anzeigen, optional per Mail), „Entfernen“, das den letzten Admin verweigert (AK-4e, AK-4f).
   - `Audit`: Protokoll, neueste zuerst (AK-12).
   - `Account`: eigene Passkeys und 2FA, neue Wiederherstellungscodes.

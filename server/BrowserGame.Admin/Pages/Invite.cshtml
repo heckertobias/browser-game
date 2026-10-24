@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Admin einrichten";
 }
-<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+<partial name="_Errors" />
 
 @switch (Model.Step)
 {
@@ -14,13 +14,13 @@
     case InviteStep.Details:
         <form method="post" asp-page-handler="Details" class="flex flex-col gap-3">
             <input type="hidden" asp-for="Token" />
-            <label class="form-control">
+            <label class="flex flex-col gap-1">
                 <span class="label-text">Name</span>
-                <input asp-for="Name" autocomplete="username" class="input input-bordered rounded-none" required />
+                <input asp-for="Name" autocomplete="username" class="input input-bordered w-full rounded-none" required />
             </label>
-            <label class="form-control">
+            <label class="flex flex-col gap-1">
                 <span class="label-text">E-Mail</span>
-                <input asp-for="Email" type="email" autocomplete="email" class="input input-bordered rounded-none" required />
+                <input asp-for="Email" type="email" autocomplete="email" class="input input-bordered w-full rounded-none" required />
             </label>
             <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Weiter</button>
         </form>
@@ -38,13 +38,13 @@
         <div class="divider font-mono text-xs">oder Passwort + Authenticator-App</div>
         <form method="post" asp-page-handler="Password" class="flex flex-col gap-3">
             <input type="hidden" asp-for="Token" />
-            <label class="form-control">
+            <label class="flex flex-col gap-1">
                 <span class="label-text">Passwort (mindestens 12 Zeichen)</span>
-                <input asp-for="Password" type="password" autocomplete="new-password" class="input input-bordered rounded-none" />
+                <input asp-for="Password" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
             </label>
-            <label class="form-control">
+            <label class="flex flex-col gap-1">
                 <span class="label-text">Passwort wiederholen</span>
-                <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="input input-bordered rounded-none" />
+                <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
             </label>
             <button type="submit" class="btn rounded-none font-mono uppercase">Weiter zur Authenticator-App</button>
         </form>
@@ -56,9 +56,9 @@
         <p class="font-mono text-sm break-all">@Model.TotpKey</p>
         <form method="post" asp-page-handler="Totp" class="flex flex-col gap-3">
             <input type="hidden" asp-for="Token" />
-            <label class="form-control">
+            <label class="flex flex-col gap-1">
                 <span class="label-text">Code aus der App</span>
-                <input asp-for="Code" autocomplete="one-time-code" inputmode="numeric" class="input input-bordered rounded-none font-mono" />
+                <input asp-for="Code" autocomplete="one-time-code" inputmode="numeric" class="input input-bordered w-full rounded-none font-mono" />
             </label>
             <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Bestätigen</button>
         </form>
