@@ -3,6 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
+    # Releases: signierter Tag vX.Y.Z (scripts/release.sh)
+    tags: ["v*.*.*"]
   pull_request:
   # Nächtlich main neu bauen: übernimmt Dependabot-Auto-Merges (lösen keinen push-Workflow aus)
   # und Sicherheitsfixes der Basis-Images ins veröffentlichte Image (ADR 0002).
@@ -105,7 +107,7 @@ jobs:
       id-token: write
     env:
       IMAGE: ghcr.io/heckertobias/browser-game
-      PUBLISH: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+      PUBLISH: ${{ github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -115,9 +117,12 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ env.IMAGE }}
+          # main: :main + :sha-…; Release-Tag v0.2.0: :0.2.0 + :latest
           tags: |
             type=sha,prefix=sha-
             type=raw,value=main,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
       # Pro Architektur lokal bauen und scannen (Basis-Image-Pakete unterscheiden sich je Architektur).
       - name: Build amd64 (zum Scannen)
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -174,6 +179,24 @@ jobs:
           subject-name: ${{ env.IMAGE }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [docker]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: GitHub Release anlegen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          gh release create "$TAG" --verify-tag --generate-notes --title "$TAG" \
+            --notes "Image: \`ghcr.io/heckertobias/browser-game:${version}\` (amd64, arm64)"
 
   # Einziger Required Check im Ruleset. Neue Jobs nur in `needs` eintragen.
   ci-ok:

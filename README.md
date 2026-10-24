@@ -79,6 +79,16 @@ Herkunft prüfen:
 gh attestation verify oci://ghcr.io/heckertobias/browser-game:main --owner heckertobias
 ```
 
+## Release
+
+```bash
+scripts/release.sh 0.2.0
+```
+
+Das Skript prüft den Stand (sauber, `main`, synchron, CI grün), pusht den signierten Tag `v0.2.0`, wartet, bis die CI
+`ghcr.io/heckertobias/browser-game:0.2.0` (+ `:latest`) veröffentlicht und das GitHub Release angelegt hat, und setzt
+erst dann die Version in `deploy/compose.yaml`. Git Sync in Arcane rollt sie anschließend aus.
+
 ## Repo-Regeln
 
 Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md)

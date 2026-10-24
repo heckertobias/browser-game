@@ -48,6 +48,9 @@ codeql_args=(-f state=configured -f query_suite=default)
 for lang in "${CODEQL_LANGUAGES[@]}"; do codeql_args+=(-f "languages[]=$lang"); done
 api -X PATCH "repos/$REPO/code-scanning/default-setup" --silent "${codeql_args[@]}"
 
+# Veröffentlichte Releases (und ihr Tag) lassen sich danach nicht mehr ändern.
+api -X PUT "repos/$REPO/immutable-releases" --silent
+
 echo "== Actions"
 api -X PUT "repos/$REPO/actions/permissions" --silent --input - <<'JSON'
 { "enabled": true, "allowed_actions": "selected", "sha_pinning_required": true }
@@ -122,6 +125,34 @@ upsert_ruleset "main-via-pr-checks" '{
         "do_not_enforce_on_create": false,
         "required_status_checks": [ { "context": "ci-ok", "integration_id": 15368 } ]
     } }
+  ]
+}'
+
+# Release-Tags: gilt für alle – einmal gesetzt, nie verschoben oder gelöscht; nur signierte Commits.
+upsert_ruleset "release-tags-immutable" '{
+  "name": "release-tags-immutable",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/tags/v*"], "exclude": [] } },
+  "bypass_actors": [],
+  "rules": [
+    { "type": "update" },
+    { "type": "deletion" },
+    { "type": "required_signatures" }
+  ]
+}'
+
+# Release-Tags anlegen darf nur der Admin (scripts/release.sh).
+upsert_ruleset "release-tags-admin-only" '{
+  "name": "release-tags-admin-only",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/tags/v*"], "exclude": [] } },
+  "bypass_actors": [
+    { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }
+  ],
+  "rules": [
+    { "type": "creation" }
   ]
 }'
 
