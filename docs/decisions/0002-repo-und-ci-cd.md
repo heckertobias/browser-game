@@ -40,8 +40,9 @@ der einzige Required Check. Neue Jobs werden nur in seinem `needs` eingetragen; 
 Patch und Minor werden nach grüner CI automatisch gemergt, Major-Updates manuell.
 
 **CD:**
-- CI baut ein Docker-Image und pusht es auf `main` nach `ghcr.io/heckertobias/browser-game` (Tags `sha-<commit>` und
-  `main`, mit Build-Provenance-Attestation).
+- CI baut ein Docker-Image für **amd64 und arm64** (Testbetrieb auf einem Raspberry Pi) und pusht es auf `main` nach
+  `ghcr.io/heckertobias/browser-game` (Tags `sha-<commit>` und `main`, mit Build-Provenance-Attestation).
+  arm64 entsteht per Cross-Build ohne Emulation; jede Architektur wird vor dem Push einzeln mit Trivy gescannt.
 - Das Homelab **zieht** das Image (pull-basiert). GitHub braucht damit keinen eingehenden Zugriff und keine
   Zugangsdaten zum Homelab. Wie das Homelab aktualisiert, wird beim ersten Rollout entschieden.
 

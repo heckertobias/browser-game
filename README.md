@@ -61,8 +61,16 @@ docker build -t browser-game .
 docker run --rm -p 8080:8080 --read-only --cap-drop=ALL --security-opt no-new-privileges browser-game
 ```
 
-Die CI veröffentlicht jedes `main` als `ghcr.io/heckertobias/browser-game:main` (und `:sha-<commit>`),
-inklusive Build-Provenance-Attestation:
+Die CI veröffentlicht jedes `main` als `ghcr.io/heckertobias/browser-game:main` (und `:sha-<commit>`)
+für **amd64 und arm64** (z. B. Raspberry Pi 3/4/5 mit 64-Bit-OS), inklusive Build-Provenance-Attestation:
+
+```bash
+docker run -d --name browser-game --restart unless-stopped -p 8080:8080 \
+  --read-only --cap-drop=ALL --security-opt no-new-privileges \
+  ghcr.io/heckertobias/browser-game:main
+```
+
+Herkunft prüfen:
 
 ```bash
 gh attestation verify oci://ghcr.io/heckertobias/browser-game:main --owner heckertobias
