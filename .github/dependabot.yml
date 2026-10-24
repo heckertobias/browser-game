@@ -1,4 +1,4 @@
-# Version-Updates. nuget, npm und docker kommen mit 001 dazu, sobald Manifeste existieren.
+# Version-Updates: wöchentlich, Minor/Patch gruppiert, 3 Tage Cooldown (ADR 0002).
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -12,3 +12,49 @@ updates:
     groups:
       actions-minor-patch:
         update-types: [minor, patch]
+
+  - package-ecosystem: nuget
+    directory: /server
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      nuget-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /client
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      npm-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      docker-minor-patch:
+        update-types: [minor, patch]
+
+  # Hält das SDK in global.json aktuell.
+  - package-ecosystem: dotnet-sdk
+    directory: /server
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: "chore(deps)"

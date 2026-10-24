@@ -1,0 +1,13 @@
+.git
+.github
+**/bin
+**/obj
+**/node_modules
+**/generated
+server/BrowserGame.Server/wwwroot/play
+server/BrowserGame.Server/wwwroot/css/site.css
+server/BrowserGame.Server.Tests
+docs
+specs
+*.md
+.DS_Store

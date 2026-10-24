@@ -37,6 +37,37 @@ Details: [`specs/README.md`](specs/README.md)
 - **Client:** TypeScript, React (UI), Canvas (Spielwelt), daisyUI
 - **Verträge:** OpenAPI für HTTP, Protobuf für WebSocket – Typen werden nur dort definiert und generiert
 
+## Lokal starten
+
+Voraussetzungen: .NET 10 SDK, Node 24.
+
+```bash
+# Terminal 1 – Spielserver (http://localhost:5080)
+dotnet run --project server/BrowserGame.Server
+
+# Terminal 2 – Client mit Hot Reload (http://localhost:5173/play/, /ws wird an den Server weitergeleitet)
+cd client && npm ci && npm run dev
+```
+
+Die Startseite unter `http://localhost:5080/` verlinkt auf `/play`; das funktioniert dort erst nach
+`npm run build` (der Build landet in `server/BrowserGame.Server/wwwroot`).
+
+Tests: `dotnet test` in `server/`, `npm test` in `client/`.
+
+## Docker
+
+```bash
+docker build -t browser-game .
+docker run --rm -p 8080:8080 --read-only --cap-drop=ALL --security-opt no-new-privileges browser-game
+```
+
+Die CI veröffentlicht jedes `main` als `ghcr.io/heckertobias/browser-game:main` (und `:sha-<commit>`),
+inklusive Build-Provenance-Attestation:
+
+```bash
+gh attestation verify oci://ghcr.io/heckertobias/browser-game:main --owner heckertobias
+```
+
 ## Repo-Regeln
 
 Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md)

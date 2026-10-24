@@ -1,5 +1,25 @@
 using BrowserGame.Server.Game;
 
+// Docker-HEALTHCHECK: Das chiseled Image hat kein curl, deshalb prüft der Server sich selbst.
+if (args is ["--healthcheck", ..])
+{
+    var port = Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS")?.Split(';')[0] ?? "8080";
+    using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+    try
+    {
+        using var response = await http.GetAsync(new Uri($"http://localhost:{port}/health"));
+        return response.IsSuccessStatusCode ? 0 : 1;
+    }
+    catch (HttpRequestException)
+    {
+        return 1;
+    }
+    catch (TaskCanceledException)
+    {
+        return 1;
+    }
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
@@ -33,4 +53,5 @@ app.MapHealthChecks("/health");
 // Client (Vite-Build) liegt in wwwroot/play.
 app.MapFallbackToFile("/play/{**path}", "play/index.html");
 
-app.Run();
+await app.RunAsync();
+return 0;

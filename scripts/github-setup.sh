@@ -42,9 +42,8 @@ api -X PATCH "repos/$REPO" --silent --input - <<'JSON'
   }
 }
 JSON
-# CodeQL Default Setup. Sprachen explizit, weil die Auto-Erkennung bei leerem Repo nichts findet.
-# Mit 001 (T12) kommen csharp und javascript-typescript dazu.
-CODEQL_LANGUAGES=(actions)
+# CodeQL Default Setup. Sprachen explizit, weil die Auto-Erkennung bei leerem Repo nichts fand.
+CODEQL_LANGUAGES=(actions csharp javascript-typescript)
 codeql_args=(-f state=configured -f query_suite=default)
 for lang in "${CODEQL_LANGUAGES[@]}"; do codeql_args+=(-f "languages[]=$lang"); done
 api -X PATCH "repos/$REPO/code-scanning/default-setup" --silent "${codeql_args[@]}"
@@ -59,7 +58,13 @@ api -X PUT "repos/$REPO/actions/permissions/selected-actions" --silent --input -
   "verified_allowed": false,
   "patterns_allowed": [
     "dependabot/fetch-metadata@*",
-    "bufbuild/buf-action@*"
+    "bufbuild/buf-action@*",
+    "docker/setup-buildx-action@*",
+    "docker/login-action@*",
+    "docker/metadata-action@*",
+    "docker/build-push-action@*",
+    "aquasecurity/trivy-action@*",
+    "aquasecurity/setup-trivy@*"
   ]
 }
 JSON

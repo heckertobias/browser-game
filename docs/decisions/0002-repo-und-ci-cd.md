@@ -49,6 +49,7 @@ Patch und Minor werden nach grüner CI automatisch gemergt, Major-Updates manuel
 
 - Lokale Commits müssen signiert sein, sonst lehnt GitHub den Push ab.
 - Merges durch Auto-Merge laufen mit `GITHUB_TOKEN` und lösen deshalb **keinen** neuen Workflow auf `main` aus.
-  Sobald CD Images baut, braucht es dafür eine Lösung, z. B. ein GitHub-App-Token für den Merge oder einen
-  `workflow_run`-Trigger.
+  Lösung: Die CI läuft zusätzlich **nächtlich** (`schedule`) auf `main` und veröffentlicht dann das Image. So sind
+  Dependabot-Merges spätestens nach einem Tag im Image, und Sicherheitsfixes der Basis-Images kommen ebenfalls an.
+  Ein GitHub-App-Token wäre schneller, kostet aber eine zusätzliche App mit Schreibrechten.
 - Neue Third-Party-Actions müssen erst in die Allowlist (`scripts/github-setup.sh`) und per SHA gepinnt werden.

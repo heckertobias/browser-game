@@ -37,7 +37,7 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
   _Stand: Server-Teil fertig (`GameServerTests`, inkl. AK-5 über WebSocket, ungültige/zu große Nachrichten)._
 
 ## CI/CD & Betrieb
-- [ ] **T11**: Multi-Stage-`Dockerfile` (node → dotnet/sdk → aspnet chiseled, non-root), Images per Digest gepinnt,
+- [x] **T11**: Multi-Stage-`Dockerfile` (node → dotnet/sdk → aspnet chiseled, non-root), Images per Digest gepinnt,
   `HEALTHCHECK` auf `/health`, `.dockerignore`.
 - [ ] **T12**: `ci.yml` erweitern und alle neuen Jobs in `ci-ok.needs` eintragen:
   - [x] `server`: `dotnet build`, `dotnet test`; verwundbare Pakete über NuGet Audit + `TreatWarningsAsErrors`
@@ -49,9 +49,9 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
     das Skript ausführen und SHAs pinnen.
   - In `scripts/github-setup.sh` `CODEQL_LANGUAGES` um `csharp` und `javascript-typescript` erweitern, Skript ausführen.
   - Lösung für „Auto-Merge löst keine CI auf `main` aus“ (ADR 0002) festlegen und umsetzen.
-- [ ] **T13**: `dependabot.yml` um `nuget` (`/server`), `npm` (`/client`) und `docker` (`/`) erweitern, mit gleichem
+- [x] **T13**: `dependabot.yml` um `nuget` (`/server`), `npm` (`/client`) und `docker` (`/`) erweitern, mit gleichem
   Schema (wöchentlich, Minor/Patch gruppiert, Cooldown).
-- [ ] **T14**: README-Abschnitte „Lokal starten“ (Server + Vite-Dev) und „Docker“ (Build, Run, Image aus GHCR).
+- [x] **T14**: README-Abschnitte „Lokal starten“ (Server + Vite-Dev) und „Docker“ (Build, Run, Image aus GHCR).
 
 ## Abschluss
 - [ ] **T15**: Alle Akzeptanzkriterien geprüft, manuelle Prüfungen hier mit Datum dokumentiert:
