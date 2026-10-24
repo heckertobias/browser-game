@@ -2,7 +2,7 @@
 
 **Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
-Voraussetzung für: [002 – Tastenbelegung & erstes Menü](../002-keybindings/spec.md)
+Setzt voraus: [004 – Admin-Interface & SMTP-Einstellungen](../004-admin/spec.md) (Mailversand) · Voraussetzung für: [002 – Tastenbelegung & erstes Menü](../002-keybindings/spec.md)
 
 ## Ziel
 
