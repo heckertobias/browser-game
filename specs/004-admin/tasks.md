@@ -34,7 +34,7 @@ Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/
   gemeinsame Test-DB für AK-10), gegen SQLite und PostgreSQL.
 
 ## Docker, CI, Betrieb
-- [ ] **T12**: Dockerfile mit Zielen `game` und `admin`; CI-`docker`-Job als Matrix, zweites Image
+- [x] **T12**: Dockerfile mit Zielen `game` und `admin`; CI-`docker`-Job als Matrix, zweites Image
   `browser-game-admin`; `release.sh` und Release-Notes für beide Images.
 - [ ] **T13**: `deploy/compose.yaml` um `browsergame-admin` (gleiches Volume, `ADMIN_VIRTUAL_HOST`), README
   („Admin-Interface“, erster Admin über den Link im Log). Hinweise fürs Homelab: interner Hostname, Volume ins Backup.

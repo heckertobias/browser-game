@@ -32,7 +32,7 @@ classified="$(git log --no-merges --reverse --format=$'%h\t%s' "$range" | while 
   printf '%s\t%s\t%s\n' "$type" "$hash" "$subject"
 done)"
 
-echo "Image: \`ghcr.io/heckertobias/browser-game:${VERSION}\` (amd64, arm64)"
+echo "Images (amd64, arm64): \`ghcr.io/heckertobias/browser-game:${VERSION}\` (Spiel), \`ghcr.io/heckertobias/browser-game-admin:${VERSION}\` (Admin)"
 for type in feat fix perf refactor docs test ci build deps other; do
   lines="$(printf '%s\n' "$classified" | awk -F'\t' -v t="$type" -v url="$REPO_URL" \
     '$1 == t { printf "- %s ([`%s`](%s/commit/%s))\n", $3, $2, url, $2 }')"

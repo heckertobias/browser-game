@@ -8,7 +8,7 @@ set -euo pipefail
 
 VERSION="${1:-}"
 REPO="heckertobias/browser-game"
-IMAGE_REPO="heckertobias/browser-game"
+IMAGE_REPOS=("heckertobias/browser-game" "heckertobias/browser-game-admin")
 COMPOSE="deploy/compose.yaml"
 
 die() { echo "Fehler: $*" >&2; exit 1; }
@@ -41,16 +41,20 @@ done
 [[ -n "$run_id" ]] || die "kein CI-Lauf für $TAG gefunden"
 gh run watch "$run_id" --repo "$REPO" --exit-status --interval 15 >/dev/null || die "CI für $TAG fehlgeschlagen: https://github.com/$REPO/actions/runs/$run_id"
 
-# Image anonym prüfen (öffentliches Paket), unabhängig von Docker.
-token="$(curl -fsSL "https://ghcr.io/token?scope=repository:$IMAGE_REPO:pull" | python3 -I -c 'import json,sys; print(json.load(sys.stdin)["token"])')"
-curl -fsS -o /dev/null -I -H "Authorization: Bearer $token" \
-  -H "Accept: application/vnd.oci.image.index.v1+json" \
-  "https://ghcr.io/v2/$IMAGE_REPO/manifests/$VERSION" || die "Image :$VERSION nicht in GHCR gefunden"
-echo "   Image ghcr.io/$IMAGE_REPO:$VERSION ist veröffentlicht"
+# Images anonym prüfen (öffentliche Pakete), unabhängig von Docker.
+for repo in "${IMAGE_REPOS[@]}"; do
+  token="$(curl -fsSL "https://ghcr.io/token?scope=repository:$repo:pull" | python3 -I -c 'import json,sys; print(json.load(sys.stdin)["token"])')"
+  curl -fsS -o /dev/null -I -H "Authorization: Bearer $token" \
+    -H "Accept: application/vnd.oci.image.index.v1+json" \
+    "https://ghcr.io/v2/$repo/manifests/$VERSION" || die "Image ghcr.io/$repo:$VERSION nicht in GHCR gefunden"
+  echo "   Image ghcr.io/$repo:$VERSION ist veröffentlicht"
+done
 
 echo "== 2/2: $COMPOSE auf $VERSION setzen"
-perl -pi -e "s{(image: ghcr\.io/\Q$IMAGE_REPO\E:)\S+}{\${1}$VERSION}" "$COMPOSE"
-grep -q "image: ghcr.io/$IMAGE_REPO:$VERSION" "$COMPOSE" || die "Image-Zeile in $COMPOSE nicht gefunden"
+for repo in "${IMAGE_REPOS[@]}"; do
+  perl -pi -e "s{(image: ghcr\.io/\Q$repo\E:)\S+}{\${1}$VERSION}" "$COMPOSE"
+  grep -q "image: ghcr.io/$repo:$VERSION" "$COMPOSE" || die "Image-Zeile für $repo in $COMPOSE nicht gefunden"
+done
 git add "$COMPOSE"
 git commit --quiet -m "chore(deploy): browser-game $VERSION ausrollen"
 git push --quiet origin main
