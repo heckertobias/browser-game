@@ -9,7 +9,7 @@ Gehört zu: [spec.md](spec.md) · Entscheidungen: [ADR 0004](../../docs/decision
 Browser ── /Account/*  Razor Pages (Registrieren, Anmelden, Bestätigen, Passwort vergessen, Account verwalten)
         ── /play       nur angemeldet + E-Mail bestätigt, sonst → /Account/Login
         ── /ws         gleiches Cookie + Origin-Prüfung; Spieler = Account
-Server  ── ASP.NET Core Identity (EF Core) ── SQLite | PostgreSQL (per Konfiguration)
+Server  ── ASP.NET Core Identity (EF Core) ── SQLite | PostgreSQL (per Konfiguration, Bibliothek BrowserGame.Data aus 004)
         ── GameLoop: Nachlauf 20 s, Übernahme/Rauswurf, Positionen gebündelt speichern
         ── SMTP (Netcup-Postfach) bzw. Log in der Entwicklung
 ```
@@ -83,11 +83,9 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
   - `Normalize`: trimmen, prüfen auf `^[A-Za-z]{3,16}$`, dann erster Buchstabe groß, Rest klein (AK-5, AK-6).
   - Sperrliste `blocked-names.txt` (eingebettete Ressource, ganze Namen, Vergleich nach Normalisierung, AK-7b).
   - Eindeutigkeit über Identitys `NormalizedUserName`-Index (AK-7).
-- **E-Mail** (`IEmailSender<Account>`):
-  - `SmtpEmailSender` mit MailKit; Konfiguration `Mail:Host`, `Mail:Port`, `Mail:Username`, `Mail:Password`, `Mail:From`.
-  - In Development `LogEmailSender`, der Mails ins Log schreibt.
-  - Links basieren auf `App:PublicUrl`, nie auf dem Host-Header.
-  - Deutsche Texte.
+- **E-Mail:** kommt aus [004](../004-admin/plan.md). Die SMTP-Einstellungen stehen in der DB und werden im
+  Admin-Interface gepflegt; der `SmtpEmailSender` liest sie pro Mail. Fehlen sie, wird die Mail verworfen und eine
+  Warnung geloggt (004 AK-11). Texte und `AccountEmails` (Links aus `App:PublicUrl`) bleiben wie hier beschrieben.
 
 ### Seiten (`Pages/Account/`, daisyUI im Pixel-Akzent-Stil wie die Startseite)
 | Seite | Zweck | AK |
@@ -150,7 +148,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
   - `Database__Provider: Sqlite`, `ConnectionStrings__Game: Data Source=/data/game.db`.
   - `App__PublicUrl: https://${VIRTUAL_HOST}`, `Passkeys__ServerDomain: ${VIRTUAL_HOST}`.
   - `ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"`.
-  - Mail-Werte aus der `.env` (`MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`).
+  - Mail: keine Umgebungsvariablen mehr, Einstellungen im Admin-Interface (004).
 - Homelab, nicht in diesem Repo: Volume `browsergame_browsergame-data` ins restic-Backup aufnehmen, Netcup-Postfach anlegen.
 
 ## CI

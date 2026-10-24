@@ -21,7 +21,8 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   Rate-Limiter, Forwarded-Header, Passkey-Optionen.
 - [x] **T6** (AK-2, AK-3, AK-14): `IEmailSender<Account>` – `SmtpEmailSender` (MailKit) und `LogEmailSender`
   (Development), deutsche Texte, Links aus `App:PublicUrl`.
-- [ ] **T7** (AK-1–3, AK-7, AK-9, AK-13): Razor Pages `Register` (Passwort-Weg), `Login`, `ConfirmEmail`,
+  _Wird durch 004 T4 ersetzt: SMTP-Einstellungen aus der DB (Admin-Interface) statt `Mail:*`._
+- [ ] **T7** _(Teilstand: Hilfsklassen, deutsche Fehlertexte)_ (AK-1–3, AK-7, AK-9, AK-13): Razor Pages `Register` (Passwort-Weg), `Login`, `ConfirmEmail`,
   `ResendConfirmation`, `Logout`; Startseite mit Anmelde-Links; `/play` mit `RequireAuthorization`.
 - [ ] **T8** (AK-14, AK-15): `ForgotPassword`, `ResetPassword`.
 - [ ] **T9** (AK-4, AK-13b, AK-13c, AK-16): Passkeys bei Registrierung, Anmeldung und `Manage`; `CanRemoveCredential`
@@ -45,7 +46,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   beide Kontexte; in `ci-ok.needs`.
 
 ## Betrieb
-- [ ] **T16**: `deploy/compose.yaml` (Volume `/data`, Datenbank, URL, Passkey-Domain, Forwarded-Header, Mail aus `.env`),
+- [ ] **T16**: `deploy/compose.yaml` (Volume `/data`, Datenbank, URL, Passkey-Domain, Forwarded-Header),
   README-Abschnitt „Konfiguration“ mit allen Variablen. Hinweise fürs Homelab: Volume ins Backup aufnehmen,
   Netcup-Postfach + SPF/DKIM.
 - [ ] **T17**: Manuelle Prüfung auf dem Pi:

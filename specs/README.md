@@ -62,7 +62,7 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 |---|---|---|---|
 | – | [000 – Vision](000-vision/spec.md) | entwurf (wächst mit) | – |
 | 1 | [001 – Walking Skeleton](001-walking-skeleton/spec.md) | umgesetzt | – |
-| 2 | [004 – Admin-Interface & SMTP-Einstellungen](004-admin/spec.md) | bereit | 001 |
+| 2 | [004 – Admin-Interface & SMTP-Einstellungen](004-admin/spec.md) | in arbeit | 001 |
 | 3 | [003 – Accounts & gespeicherte Position](003-accounts/spec.md) | in arbeit (pausiert für 004) | 004 |
 | 4 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | bereit | 003 |
 | später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |
