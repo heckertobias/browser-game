@@ -54,6 +54,8 @@ internal sealed class World(double speed, int tickRateHz, Random random)
 
     public bool RemovePlayer(string id) => _players.Remove(id);
 
+    public Player? GetPlayer(string id) => _players.GetValueOrDefault(id);
+
     public void EnqueueInput(string playerId, MoveInput input)
     {
         if (!_players.TryGetValue(playerId, out var player) || input.Seq <= player.LastQueuedSeq)

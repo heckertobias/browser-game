@@ -14,9 +14,9 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
   Solution. Codegen über `Grpc.Tools` (`GrpcServices="None"`); `dotnet build` erzeugt die Contract-Typen.
 - [x] **T3** (AK-2, AK-5, AK-7): `World` mit Input-Warteschlange (max. 10), einer Eingabe pro Tick, Kürzen auf
   Länge ≤ 1, ohne Grenzen. xUnit-Tests laut Abdeckungstabelle.
-- [ ] **T4** (AK-3, AK-4): `/ws`-Endpoint, `GameLoop` (20 Hz) mit `Welcome` und `Snapshot` pro Empfänger. Bei
+- [x] **T4** (AK-3, AK-4): `/ws`-Endpoint, `GameLoop` (20 Hz) mit `Welcome` und `Snapshot` pro Empfänger. Bei
   Disconnect wird der Spieler entfernt. Frame-Limit 1 KB, zufällige Namen und Farben.
-- [ ] **T5** (AK-1): Razor Page `/` mit daisyUI-Button „Spielen“, statische Auslieferung `/play` mit SPA-Fallback,
+- [x] **T5** (AK-1): Razor Page `/` mit daisyUI-Button „Spielen“, statische Auslieferung `/play` mit SPA-Fallback,
   `/health`.
 
 ## Client
@@ -34,12 +34,13 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
 ## Tests / Prüfung
 - [ ] **T10** (AK-1, AK-3, AK-4): Integrationstests mit `WebApplicationFactory`, die `/` und `/play` prüfen, sowie
   2 WebSocket-Clients für Sichtbarkeit < 1 s und Verschwinden nach Close.
+  _Stand: Server-Teil fertig (`GameServerTests`, inkl. AK-5 über WebSocket, ungültige/zu große Nachrichten)._
 
 ## CI/CD & Betrieb
 - [ ] **T11**: Multi-Stage-`Dockerfile` (node → dotnet/sdk → aspnet chiseled, non-root), Images per Digest gepinnt,
   `HEALTHCHECK` auf `/health`, `.dockerignore`.
 - [ ] **T12**: `ci.yml` erweitern und alle neuen Jobs in `ci-ok.needs` eintragen:
-  - `server`: `dotnet build`, `dotnet test`, `dotnet list package --vulnerable` (schlägt bei Treffer fehl)
+  - [x] `server`: `dotnet build`, `dotnet test`; verwundbare Pakete über NuGet Audit + `TreatWarningsAsErrors`
   - `client`: `npm ci`, `gen`, `typecheck`, `lint`, `test`, `build`, `npm audit --audit-level=high`
   - `docker`: Build mit Trivy-Scan (Fail ab `HIGH`); auf `main` Push nach `ghcr.io/heckertobias/browser-game`
     (`sha-<commit>`, `main`) plus `actions/attest-build-provenance`. Nur dieser Job bekommt
