@@ -1,0 +1,49 @@
+@page
+@model AdminsModel
+@{
+    ViewData["Title"] = "Admins";
+}
+<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+@if (Model.Message is not null)
+{
+    <div class="alert alert-success rounded-none">@Model.Message</div>
+}
+@if (Model.InviteLink is not null)
+{
+    <label class="form-control">
+        <span class="label-text">Einladungslink zum Weitergeben</span>
+        <input readonly value="@Model.InviteLink" class="input input-bordered rounded-none font-mono text-sm" data-testid="invite-link" />
+    </label>
+}
+
+<table class="table">
+    <thead><tr><th>Name</th><th>E-Mail</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+        @foreach (var admin in Model.Admins)
+        {
+            <tr>
+                <td>@admin.Name @(admin.IsMe ? "(du)" : "")</td>
+                <td>@admin.Email</td>
+                <td>@(admin.Active ? "eingerichtet" : "Einrichtung offen")</td>
+                <td>
+                    @if (!admin.IsMe)
+                    {
+                        <form method="post" asp-page-handler="Remove">
+                            <input type="hidden" name="RemoveId" value="@admin.Id" />
+                            <button type="submit" class="btn btn-sm btn-ghost rounded-none">Entfernen</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="divider font-mono text-xs">Neuen Admin einladen</div>
+<form method="post" asp-page-handler="Invite" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+    <label class="form-control grow">
+        <span class="label-text">E-Mail (optional – sonst nur Link)</span>
+        <input asp-for="InviteEmail" type="email" class="input input-bordered rounded-none" />
+    </label>
+    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Einladen</button>
+</form>
