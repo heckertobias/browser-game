@@ -18,6 +18,7 @@
   <ItemGroup>
     <!-- Gemeinsame Test-Helfer -->
     <Compile Include="..\BrowserGame.Server.Tests\FakeSmtpServer.cs" Link="FakeSmtpServer.cs" />
+    <Compile Include="..\BrowserGame.Server.Tests\TestDatabase.cs" Link="TestDatabase.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,8 +1,6 @@
 using BrowserGame.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Server.Tests;
 
@@ -24,14 +22,12 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
         File.WriteAllText(Path.Combine(play, "assets", "test-asset.js"), "// test-asset");
     }
 
-    public static string Provider => Environment.GetEnvironmentVariable("TEST_DB_PROVIDER") ?? nameof(DatabaseProvider.Sqlite);
+    public static string Provider => TestDatabase.Provider;
 
     private string WebRoot => Path.Combine(_root, "wwwroot");
 
     /// <summary>Verbindungszeichenfolge dieser Factory; bleibt gleich, damit ein zweiter Server dieselbe DB nutzen kann.</summary>
-    public string ConnectionString { get; } = Provider == nameof(DatabaseProvider.Postgres)
-        ? $"{Environment.GetEnvironmentVariable("TEST_POSTGRES")};Database=bg_test_{Guid.NewGuid():N}"
-        : $"Data Source={Path.Combine(Path.GetTempPath(), $"bg-test-{Guid.NewGuid():N}.db")}";
+    public string ConnectionString { get; } = TestDatabase.NewConnectionString("bg-test");
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -42,22 +38,8 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && Provider == nameof(DatabaseProvider.Postgres))
-        {
-            using var scope = Services.CreateScope();
-            scope.ServiceProvider.GetRequiredService<GameDbContext>().Database.EnsureDeleted();
-        }
-
         base.Dispose(disposing);
-        SqliteConnection.ClearAllPools();
         Directory.Delete(_root, recursive: true);
-        if (Provider == nameof(DatabaseProvider.Sqlite))
-        {
-            var file = new SqliteConnectionStringBuilder(ConnectionString).DataSource;
-            foreach (var suffix in new[] { "", "-wal", "-shm" })
-            {
-                File.Delete(file + suffix);
-            }
-        }
+        TestDatabase.Drop(ConnectionString);
     }
 }

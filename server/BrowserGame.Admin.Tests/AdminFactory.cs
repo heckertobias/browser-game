@@ -1,8 +1,7 @@
 using BrowserGame.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
+using BrowserGame.Server.Tests;
 using Microsoft.Extensions.Logging;
 
 namespace BrowserGame.Admin.Tests;
@@ -19,11 +18,9 @@ public sealed class AdminFactory : WebApplicationFactory<Program>
     /// <summary>Alle Log-Meldungen des Admin-Dienstes (z. B. der Einrichtungslink).</summary>
     public LogCapture Logs { get; } = new();
 
-    public static string Provider => Environment.GetEnvironmentVariable("TEST_DB_PROVIDER") ?? nameof(DatabaseProvider.Sqlite);
+    public static string Provider => TestDatabase.Provider;
 
-    public string ConnectionString { get; } = Provider == nameof(DatabaseProvider.Postgres)
-        ? $"{Environment.GetEnvironmentVariable("TEST_POSTGRES")};Database=bg_admin_test_{Guid.NewGuid():N}"
-        : $"Data Source={Path.Combine(Path.GetTempPath(), $"bg-admin-test-{Guid.NewGuid():N}.db")}";
+    public string ConnectionString { get; } = TestDatabase.NewConnectionString("bg-admin-test");
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -38,21 +35,7 @@ public sealed class AdminFactory : WebApplicationFactory<Program>
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && Provider == nameof(DatabaseProvider.Postgres))
-        {
-            using var scope = Services.CreateScope();
-            scope.ServiceProvider.GetRequiredService<GameDbContext>().Database.EnsureDeleted();
-        }
-
         base.Dispose(disposing);
-        SqliteConnection.ClearAllPools();
-        if (Provider == nameof(DatabaseProvider.Sqlite))
-        {
-            var file = new SqliteConnectionStringBuilder(ConnectionString).DataSource;
-            foreach (var suffix in new[] { "", "-wal", "-shm" })
-            {
-                File.Delete(file + suffix);
-            }
-        }
+        TestDatabase.Drop(ConnectionString);
     }
 }

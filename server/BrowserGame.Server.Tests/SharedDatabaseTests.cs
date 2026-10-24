@@ -8,9 +8,7 @@ namespace BrowserGame.Server.Tests;
 /// <summary>Spiel- und Admin-Kontext teilen sich eine Datenbank (ADR 0006) – beide Migrationen müssen nebeneinander passen.</summary>
 public sealed class SharedDatabaseTests : IAsyncLifetime
 {
-    private readonly string _connectionString = GameServerFactory.Provider == nameof(DatabaseProvider.Postgres)
-        ? $"{Environment.GetEnvironmentVariable("TEST_POSTGRES")};Database=bg_shared_{Guid.NewGuid():N}"
-        : $"Data Source={Path.Combine(Path.GetTempPath(), $"bg-shared-{Guid.NewGuid():N}.db")}";
+    private readonly string _connectionString = TestDatabase.NewConnectionString("bg-shared");
 
     private ServiceProvider _services = null!;
     private DatabaseProvider _provider;
@@ -65,21 +63,7 @@ public sealed class SharedDatabaseTests : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        if (_provider == DatabaseProvider.Postgres)
-        {
-            await using var scope = _services.CreateAsyncScope();
-            await scope.ServiceProvider.GetRequiredService<GameDbContext>().Database.EnsureDeletedAsync();
-        }
-
         await _services.DisposeAsync();
-        SqliteConnection.ClearAllPools();
-        if (_provider == DatabaseProvider.Sqlite)
-        {
-            var file = new SqliteConnectionStringBuilder(_connectionString).DataSource;
-            foreach (var suffix in new[] { "", "-wal", "-shm" })
-            {
-                File.Delete(file + suffix);
-            }
-        }
+        TestDatabase.Drop(_connectionString);
     }
 }
