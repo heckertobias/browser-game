@@ -1,0 +1,9 @@
+# TS-Typen für den Client; Aufruf über `npm run gen` in client/ (nutzt buf und protoc-gen-es aus node_modules).
+version: v2
+inputs:
+  - directory: contracts/proto
+plugins:
+  - local: protoc-gen-es
+    out: client/src/generated
+    opt: target=ts
+clean: true

@@ -1,0 +1,4 @@
+/* Styles der Razor-Startseite (server/…/Pages). Gleiches Tailwind/daisyUI wie der Client, siehe ADR 0001. */
+@import "tailwindcss" source(none);
+@source "../../server/BrowserGame.Server/Pages";
+@plugin "daisyui";

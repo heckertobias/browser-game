@@ -20,14 +20,14 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
   `/health`.
 
 ## Client
-- [ ] **T6**: Gerüst `client/` mit Vite, React, TS, Tailwind und daisyUI, ESLint, Vitest. Skripte `gen`
+- [x] **T6**: Gerüst `client/` mit Vite, React, TS, Tailwind und daisyUI, ESLint, Vitest. Skripte `gen`
   (buf generate) und `dev`/`build`/`test`/`lint`/`typecheck`. Vite-Proxy `/ws` → ASP.NET, Build-Ausgabe nach
   `server/BrowserGame.Server/wwwroot/play`.
-- [ ] **T7** (AK-6, AK-7): Canvas-Rendering mit 640×360, ganzzahliger Skalierung, Letterbox, Kamera auf eigene
+- [x] **T7** (AK-6, AK-7): Canvas-Rendering mit 640×360, ganzzahliger Skalierung, Letterbox, Kamera auf eigene
   Figur, Gitter-Hintergrund, Quadrate mit Namen. Vitest für die Skalierungs- und Letterbox-Berechnung.
-- [ ] **T8** (AK-2, AK-2b): `actions.ts` mit WASD-Standard-Belegung, Pointer Events mit Halten-und-Folgen,
+- [x] **T8** (AK-2, AK-2b): `actions.ts` mit WASD-Standard-Belegung, Pointer Events mit Halten-und-Folgen,
   Totzone, Stopp bei `pointerup`/`pointercancel`/`blur`. Vitest für die Richtungsberechnung.
-- [ ] **T9** (AK-3, AK-4, AK-5): WebSocket-Client, Fixed-Step 50 ms mit `seq`, Prediction und Reconciliation,
+- [x] **T9** (AK-3, AK-4, AK-5): WebSocket-Client, Fixed-Step 50 ms mit `seq`, Prediction und Reconciliation,
   Interpolation der anderen Spieler, Entfernen fehlender Spieler, HUD (Name, Verbindungsstatus).
   Vitest für die Reconciliation.
 
@@ -41,7 +41,7 @@ Voraussetzung lokal: .NET 10 SDK (`brew install dotnet`), Node (vorhanden), buf 
   `HEALTHCHECK` auf `/health`, `.dockerignore`.
 - [ ] **T12**: `ci.yml` erweitern und alle neuen Jobs in `ci-ok.needs` eintragen:
   - [x] `server`: `dotnet build`, `dotnet test`; verwundbare Pakete über NuGet Audit + `TreatWarningsAsErrors`
-  - `client`: `npm ci`, `gen`, `typecheck`, `lint`, `test`, `build`, `npm audit --audit-level=high`
+  - [x] `client`: `npm ci`, `gen`, `typecheck`, `lint`, `test`, `build`, `npm audit --audit-level=high`
   - `docker`: Build mit Trivy-Scan (Fail ab `HIGH`); auf `main` Push nach `ghcr.io/heckertobias/browser-game`
     (`sha-<commit>`, `main`) plus `actions/attest-build-provenance`. Nur dieser Job bekommt
     `packages: write`, `attestations: write`, `id-token: write`.
