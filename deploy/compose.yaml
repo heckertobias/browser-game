@@ -4,7 +4,7 @@
 # Die Version setzt scripts/release.sh nach jedem Release; Git Sync deployt die Änderung. Kein Auto-Updater nötig.
 services:
   browsergame:
-    image: ghcr.io/heckertobias/browser-game:main
+    image: ghcr.io/heckertobias/browser-game:0.1.0
     restart: unless-stopped
     read_only: true
     cap_drop: [ALL]
