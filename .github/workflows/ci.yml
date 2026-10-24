@@ -74,6 +74,48 @@ jobs:
       - run: dotnet build --configuration Release
       - run: dotnet test --configuration Release --no-build
 
+  # Dieselben Tests gegen PostgreSQL (ADR 0004).
+  server-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17@sha256:b8faeff7712663c2773a190181e1246e37e364b887611c04658c28b44e2408fe
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: server
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+      TEST_DB_PROVIDER: Postgres
+      TEST_POSTGRES: Host=localhost;Port=5432;Username=test;Password=test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: server/global.json
+      - run: dotnet build --configuration Release
+      - run: dotnet test --configuration Release --no-build
+      - name: Migrationen passen zum Modell (beide Provider, beide Kontexte)
+        run: |
+          dotnet tool restore
+          for context in SqliteGameDbContext PostgresGameDbContext SqliteAdminDbContext PostgresAdminDbContext; do
+            dotnet ef migrations has-pending-model-changes --no-build --configuration Release \
+              --project BrowserGame.Data --startup-project BrowserGame.Data --context "$context"
+          done
+
   client:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -203,7 +245,7 @@ jobs:
   # Einziger Required Check im Ruleset. Neue Jobs nur in `needs` eintragen.
   ci-ok:
     if: always()
-    needs: [lint, contracts, server, client, docker]
+    needs: [lint, contracts, server, server-postgres, client, docker]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

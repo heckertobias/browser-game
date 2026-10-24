@@ -30,7 +30,7 @@ Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/
   allen Änderungen.
 
 ## Tests
-- [ ] **T11**: Integrationstests laut Abdeckungstabelle (inkl. TOTP-Berechnung im Test, SMTP-Testserver,
+- [x] **T11**: Integrationstests laut Abdeckungstabelle (inkl. TOTP-Berechnung im Test, SMTP-Testserver,
   gemeinsame Test-DB für AK-10), gegen SQLite und PostgreSQL.
 
 ## Docker, CI, Betrieb
