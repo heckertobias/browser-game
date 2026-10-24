@@ -36,7 +36,7 @@ Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/
 ## Docker, CI, Betrieb
 - [x] **T12**: Dockerfile mit Zielen `game` und `admin`; CI-`docker`-Job als Matrix, zweites Image
   `browser-game-admin`; `release.sh` und Release-Notes für beide Images.
-- [ ] **T13**: `deploy/compose.yaml` um `browsergame-admin` (gleiches Volume, `ADMIN_VIRTUAL_HOST`), README
+- [x] **T13**: `deploy/compose.template.yaml` (erzeugt beim Release `deploy/compose.yaml`) mit `browsergame-admin` (gleiches Volume, `ADMIN_VIRTUAL_HOST`), README
   („Admin-Interface“, erster Admin über den Link im Log). Hinweise fürs Homelab: interner Hostname, Volume ins Backup.
 - [ ] **T14**: Manuelle Prüfung auf dem Pi:
   - Erster Admin über den Log-Link

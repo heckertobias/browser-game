@@ -98,7 +98,11 @@ Formulare.
   - Push nach `ghcr.io/heckertobias/browser-game` bzw. `…/browser-game-admin`, mit denselben Tags (`main`, `sha-…`,
     `X.Y.Z`, `latest`).
   - Die Release-Notes nennen beide Images. `release.sh` prüft beide Images und setzt beide Versionen in der Compose.
-- **`deploy/compose.yaml`:**
+- **`deploy/compose.template.yaml`** (neu): Struktur der Compose mit `__VERSION__`; `release.sh` erzeugt daraus
+  `deploy/compose.yaml` erst nach dem Veröffentlichen der Images (sonst zöge Git Sync ein noch fehlendes Admin-Image).
+- **Images bringen `/data` mit Besitzer 1654 mit**, damit ein neues Volume vom non-root-User beschreibbar ist;
+  `ConnectionStrings__Game` zeigt standardmäßig auf `/data/game.db`.
+- **Inhalt der Compose (Vorlage):**
   - Neuer Dienst `browsergame-admin`: gleiches Volume `/data`, `VIRTUAL_HOST: ${ADMIN_VIRTUAL_HOST}`,
     `App__PublicUrl`, `Passkeys__ServerDomain`, read-only, `cap_drop`.
   - Kein veröffentlichter Port; nur intern über den Proxy. Ob der Hostname nur intern auflöst, ist Sache des

@@ -32,6 +32,9 @@ COPY server/BrowserGame.Admin/BrowserGame.Admin.csproj server/BrowserGame.Admin/
 RUN dotnet restore server/BrowserGame.Server/BrowserGame.Server.csproj --arch $TARGETARCH \
  && dotnet restore server/BrowserGame.Admin/BrowserGame.Admin.csproj --arch $TARGETARCH
 COPY server/BrowserGame.Data/ server/BrowserGame.Data/
+# Leeres Datenverzeichnis: Ein neues Docker-Volume übernimmt beim ersten Einhängen Inhalt und Besitzer aus dem Image
+# (sonst gehört es root und der non-root-User könnte die SQLite-Datei nicht anlegen).
+RUN mkdir -p /data-template
 
 # 3a) Spiel publishen
 FROM --platform=$BUILDPLATFORM restore AS publish-game
@@ -51,6 +54,8 @@ RUN dotnet publish server/BrowserGame.Admin/BrowserGame.Admin.csproj --configura
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:5165aeeb688df15e869a56a7584bb94bf16a14e0b3ba77b49fcdbe350f6b8020 AS admin
 WORKDIR /app
 COPY --from=publish-admin /app ./
+COPY --from=restore --chown=1654:1654 /data-template /data
+ENV ConnectionStrings__Game="Data Source=/data/game.db"
 USER $APP_UID
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
@@ -61,6 +66,8 @@ ENTRYPOINT ["dotnet", "BrowserGame.Admin.dll"]
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:5165aeeb688df15e869a56a7584bb94bf16a14e0b3ba77b49fcdbe350f6b8020 AS game
 WORKDIR /app
 COPY --from=publish-game /app ./
+COPY --from=restore --chown=1654:1654 /data-template /data
+ENV ConnectionStrings__Game="Data Source=/data/game.db"
 USER $APP_UID
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

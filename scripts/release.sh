@@ -3,6 +3,8 @@
 #   1. Signierten Tag vX.Y.Z pushen → CI baut, scannt und veröffentlicht ghcr.io/…:X.Y.Z + :latest, legt GitHub Release an
 #   2. Erst wenn das Image existiert: Version in deploy/compose.yaml setzen, committen, pushen → Arcane Git Sync deployt
 #
+# Die Struktur der Compose steht in deploy/compose.template.yaml; compose.yaml wird hier erzeugt.
+#
 # Aufruf: scripts/release.sh 0.2.0
 set -euo pipefail
 
@@ -10,6 +12,7 @@ VERSION="${1:-}"
 REPO="heckertobias/browser-game"
 IMAGE_REPOS=("heckertobias/browser-game" "heckertobias/browser-game-admin")
 COMPOSE="deploy/compose.yaml"
+TEMPLATE="deploy/compose.template.yaml"
 
 die() { echo "Fehler: $*" >&2; exit 1; }
 
@@ -50,11 +53,15 @@ for repo in "${IMAGE_REPOS[@]}"; do
   echo "   Image ghcr.io/$repo:$VERSION ist veröffentlicht"
 done
 
-echo "== 2/2: $COMPOSE auf $VERSION setzen"
+echo "== 2/2: $COMPOSE aus $TEMPLATE für $VERSION erzeugen"
+{
+  echo "# ERZEUGT von scripts/release.sh aus $TEMPLATE – Änderungen in der Vorlage machen, nicht hier."
+  sed -e '/^# Vorlage für deploy\/compose.yaml/,/^# (__VERSION__ wird ersetzt)/d' -e "s/__VERSION__/$VERSION/g" "$TEMPLATE"
+} > "$COMPOSE"
 for repo in "${IMAGE_REPOS[@]}"; do
-  perl -pi -e "s{(image: ghcr\.io/\Q$repo\E:)\S+}{\${1}$VERSION}" "$COMPOSE"
-  grep -q "image: ghcr.io/$repo:$VERSION" "$COMPOSE" || die "Image-Zeile für $repo in $COMPOSE nicht gefunden"
+  grep -q "image: ghcr.io/$repo:$VERSION" "$COMPOSE" || die "Image-Zeile für $repo in $COMPOSE fehlt"
 done
+! grep -q "__VERSION__" "$COMPOSE" || die "Platzhalter in $COMPOSE übrig"
 git add "$COMPOSE"
 git commit --quiet -m "chore(deploy): browser-game $VERSION ausrollen"
 git push --quiet origin main

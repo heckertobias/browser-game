@@ -45,8 +45,10 @@ Patch und Minor werden nach grüner CI automatisch gemergt, Major-Updates manuel
   arm64 entsteht per Cross-Build ohne Emulation; jede Architektur wird vor dem Push einzeln mit Trivy gescannt.
 - **Releases:** Ein signierter Tag `vX.Y.Z` (nur der Admin darf `v*` anlegen; Tags sind unveränderlich, Releases
   per „Immutable Releases“ ebenfalls) veröffentlicht `:X.Y.Z` und `:latest` und legt ein GitHub Release mit Notes an.
-  `scripts/release.sh` setzt die Version **erst danach** in `deploy/compose.yaml` – sonst würde Git Sync ein noch
-  nicht existierendes Image ziehen. Deployt wird also immer eine fest gepinnte Version, kein wanderndes Tag.
+  `scripts/release.sh` erzeugt `deploy/compose.yaml` **erst danach** aus `deploy/compose.template.yaml` – sonst würde
+  Git Sync ein noch nicht existierendes Image ziehen. Auch Strukturänderungen (z. B. der Admin-Dienst aus 004) stehen
+  zuerst nur in der Vorlage. Deployt wird also immer eine fest gepinnte Version, kein wanderndes Tag.
+- Zwei Images aus einem Dockerfile: `browser-game` (Spiel) und `browser-game-admin` (ADR 0006), gleiche Tags.
 - Das Homelab **zieht** das Image (pull-basiert). GitHub braucht damit keinen eingehenden Zugriff und keine
   Zugangsdaten zum Homelab. Wie das Homelab aktualisiert, wird beim ersten Rollout entschieden.
 

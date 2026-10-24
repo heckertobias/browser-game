@@ -47,7 +47,9 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 
 ## Betrieb
 - [ ] **T16**: `deploy/compose.yaml` (Volume `/data`, Datenbank, URL, Passkey-Domain, Forwarded-Header),
-  README-Abschnitt „Konfiguration“ mit allen Variablen. Hinweise fürs Homelab: Volume ins Backup aufnehmen,
+  README-Abschnitt „Konfiguration“ mit allen Variablen.
+  _Großteils mit 004 T13 erledigt (Vorlage `deploy/compose.template.yaml` mit Volume, URL, Passkey-Domain,
+  Forwarded-Header; README „Betrieb“). Offen: Feinschliff, sobald 003 fertig ist._ Hinweise fürs Homelab: Volume ins Backup aufnehmen,
   Netcup-Postfach + SPF/DKIM.
 - [ ] **T17**: Manuelle Prüfung auf dem Pi:
   - AK-4, AK-13b und AK-13c mit echten Passkeys (Handy + Laptop)

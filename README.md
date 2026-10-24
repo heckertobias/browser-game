@@ -28,7 +28,8 @@ Details: [`specs/README.md`](specs/README.md)
 | `docs/decisions/` | Architekturentscheidungen (ADRs) |
 | `scripts/` | Hilfsskripte, z. B. `github-setup.sh` (Repo-Härtung) |
 | `.github/` | CI-Workflows, Dependabot |
-| `server/` | C# / ASP.NET Core (Spielserver, Razor-Landing) |
+| `deploy/` | Compose für den Betrieb (Vorlage + erzeugte Datei) |
+| `server/` | C# / ASP.NET Core: Spielserver, Admin-Interface, gemeinsame Datenschicht |
 | `client/` | TypeScript, React, Canvas, daisyUI |
 
 ## Tech-Stack
@@ -47,37 +48,55 @@ dotnet run --project server/BrowserGame.Server
 
 # Terminal 2 – Client mit Hot Reload (http://localhost:5173/play/, /ws wird an den Server weitergeleitet)
 cd client && npm ci && npm run dev
+
+# Optional, Terminal 3 – Admin-Interface (http://localhost:5090), nutzt dieselbe SQLite-Datei
+dotnet run --project server/BrowserGame.Admin
 ```
 
 Die Startseite unter `http://localhost:5080/` verlinkt auf `/play`; das funktioniert dort erst nach
-`npm run build` (der Build landet in `server/BrowserGame.Server/wwwroot`).
+`npm run build` (der Build landet in den `wwwroot`-Ordnern von Spiel und Admin).
+Ohne SMTP-Einstellungen landen Mail-Links in der Entwicklung im Log des Spiels.
 
-Tests: `dotnet test` in `server/`, `npm test` in `client/`.
+Tests: `dotnet test` in `server/` (SQLite; mit `TEST_DB_PROVIDER=Postgres` und `TEST_POSTGRES=Host=…;Username=…;Password=…`
+gegen PostgreSQL), `npm test` in `client/`.
 
 ## Docker
 
-```bash
-docker build -t browser-game .
-docker run --rm -p 8080:8080 --read-only --cap-drop=ALL --security-opt no-new-privileges browser-game
-```
-
-Die CI veröffentlicht jedes `main` als `ghcr.io/heckertobias/browser-game:main` (und `:sha-<commit>`)
-für **amd64 und arm64** (z. B. Raspberry Pi 3/4/5 mit 64-Bit-OS), inklusive Build-Provenance-Attestation:
+Ein Dockerfile, zwei Images (ADR 0006), beide für **amd64 und arm64** (z. B. Raspberry Pi 3/4/5 mit 64-Bit-OS):
 
 ```bash
-docker run -d --name browser-game --restart unless-stopped -p 8080:8080 \
-  --read-only --cap-drop=ALL --security-opt no-new-privileges \
-  ghcr.io/heckertobias/browser-game:main
+docker build --target game  -t browser-game .        # Spiel (Standardziel)
+docker build --target admin -t browser-game-admin .  # Admin-Interface
 ```
 
-Hinter einem nginx-proxy (Netz `proxy`) liegt die fertige Compose-Datei in [`deploy/compose.yaml`](deploy/compose.yaml);
-den Hostnamen setzt man als `VIRTUAL_HOST` in der `.env`. Damit lässt sich z. B. Arcane Git Sync direkt auf das Repo richten.
-
-Herkunft prüfen:
+Beide laufen read-only und ohne Capabilities; Daten liegen im Volume `/data` (SQLite), `App__PublicUrl` ist Pflicht:
 
 ```bash
-gh attestation verify oci://ghcr.io/heckertobias/browser-game:main --owner heckertobias
+docker run -d -p 8080:8080 --read-only --cap-drop=ALL --security-opt no-new-privileges \
+  -v browsergame-data:/data -e App__PublicUrl=http://localhost:8080 browser-game
 ```
+
+Veröffentlichte Images: `ghcr.io/heckertobias/browser-game:<version>` und `ghcr.io/heckertobias/browser-game-admin:<version>`,
+jeweils mit Build-Provenance-Attestation:
+
+```bash
+gh attestation verify oci://ghcr.io/heckertobias/browser-game:<version> --owner heckertobias
+```
+
+## Betrieb (Compose / Arcane)
+
+[`deploy/compose.yaml`](deploy/compose.yaml) ist das, was läuft – sie wird von `scripts/release.sh` aus
+[`deploy/compose.template.yaml`](deploy/compose.template.yaml) erzeugt. Strukturänderungen (neue Dienste, Variablen,
+Volumes) gehören in die **Vorlage**; live gehen sie mit dem nächsten Release, wenn die passenden Images existieren.
+
+- Betrieb hinter nginx-proxy (Netz `proxy`); kein Dienst veröffentlicht einen Port.
+- `.env` des Projekts: `VIRTUAL_HOST` (Spiel) und `ADMIN_VIRTUAL_HOST` (Admin, nur intern auflösen lassen).
+- Spiel und Admin teilen sich das Volume `data` (SQLite). Es gehört ins Backup; das Spiel schreibt dafür nachts um
+  03:50 eine konsistente Kopie nach `/data/backup/game.db`.
+- **Erster Admin:** Beim ersten Start schreibt das Admin-Interface einen einmaligen Einrichtungslink (48 h gültig)
+  in sein Log. Wer das Container-Log lesen kann, kann also den ersten Admin anlegen – das ist so gewollt (Betreiber).
+  Startet das Admin ohne eingerichteten Admin neu, gibt es einen neuen Link; der alte wird ungültig.
+- Mailversand (Bestätigungen, Passwort-Reset, Einladungen) richtet man danach im Admin unter „SMTP“ ein.
 
 ## Release
 
@@ -85,9 +104,9 @@ gh attestation verify oci://ghcr.io/heckertobias/browser-game:main --owner hecke
 scripts/release.sh 0.2.0
 ```
 
-Das Skript prüft den Stand (sauber, `main`, synchron, CI grün), pusht den signierten Tag `v0.2.0`, wartet, bis die CI
-`ghcr.io/heckertobias/browser-game:0.2.0` (+ `:latest`) veröffentlicht und das GitHub Release angelegt hat, und setzt
-erst dann die Version in `deploy/compose.yaml`. Git Sync in Arcane rollt sie anschließend aus.
+Das Skript prüft den Stand (sauber, `main`, synchron, CI grün) und pusht den signierten Tag `v0.2.0`. Es wartet,
+bis die CI beide Images (`:0.2.0` + `:latest`) veröffentlicht und das GitHub Release angelegt hat, und erzeugt erst
+dann `deploy/compose.yaml` aus der Vorlage. Git Sync in Arcane rollt sie anschließend aus.
 
 Die Release-Notes entstehen aus den Commits seit dem letzten Tag, gruppiert nach Typ (`feat`, `fix`, `docs`, …);
 Vorschau lokal: `scripts/release-notes.sh v0.2.0` (der Tag muss lokal existieren).
