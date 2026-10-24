@@ -1,3 +1,4 @@
+using BrowserGame.Server.Data;
 using BrowserGame.Server.Game;
 
 // Docker-HEALTHCHECK: Das chiseled Image hat kein curl, deshalb prüft der Server sich selbst.
@@ -22,12 +23,21 @@ if (args is ["--healthcheck", ..])
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton(TimeProvider.System);
+var databaseProvider = builder.Services.AddGameDatabase(builder.Configuration);
+if (databaseProvider == DatabaseProvider.Sqlite)
+{
+    builder.Services.AddHostedService<SqliteBackupService>();
+}
+
 builder.Services.AddRazorPages();
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<GameLoop>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<GameLoop>());
 
 var app = builder.Build();
+
+await app.Services.MigrateGameDatabaseAsync(databaseProvider);
 
 app.Use(async (context, next) =>
 {

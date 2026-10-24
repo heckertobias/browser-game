@@ -9,10 +9,10 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   erweitern; `buf lint` und `buf breaking` gegen `main` müssen grün sein.
 
 ## Server – Daten
-- [ ] **T2**: Pakete (Identity.EntityFrameworkCore, EF Core Sqlite/Npgsql/Design, DataProtection.EntityFrameworkCore),
+- [x] **T2**: Pakete (Identity.EntityFrameworkCore, EF Core Sqlite/Npgsql/Design, DataProtection.EntityFrameworkCore),
   `dotnet-ef` als lokales Tool. `GameDbContext` mit `Account`, `PlayerPosition`, Data-Protection-Keys;
   `SqliteGameDbContext` und `PostgresGameDbContext`, Provider-Auswahl per Konfiguration.
-- [ ] **T3**: Erste Migration für beide Provider (`scripts/add-migration.sh Initial`). Migration beim Start,
+- [x] **T3**: Erste Migration für beide Provider (`scripts/add-migration.sh Initial`). Migration beim Start,
   WAL bei SQLite, `SqliteBackupService` (`VACUUM INTO`).
 
 ## Server – Anmeldung

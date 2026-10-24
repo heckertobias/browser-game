@@ -3,33 +3,8 @@ using System.Net.WebSockets;
 using BrowserGame.Contracts.V1;
 using BrowserGame.Server.Game;
 using Google.Protobuf;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace BrowserGame.Server.Tests;
-
-/// <summary>Startet den echten Server im Speicher; der Client-Build wird durch ein Platzhalter-wwwroot ersetzt.</summary>
-public sealed class GameServerFactory : WebApplicationFactory<Program>
-{
-    private readonly string _webRoot = Directory.CreateTempSubdirectory("browsergame-wwwroot").FullName;
-
-    public GameServerFactory()
-    {
-        Directory.CreateDirectory(Path.Combine(_webRoot, "play"));
-        // Fallback, falls kein Client-Build vorliegt; liegt einer in wwwroot/play, wird ggf. der echte ausgeliefert.
-        File.WriteAllText(Path.Combine(_webRoot, "play", "index.html"), "<!doctype html><div id=\"root\"></div>");
-        Directory.CreateDirectory(Path.Combine(_webRoot, "play", "assets"));
-        File.WriteAllText(Path.Combine(_webRoot, "play", "assets", "test-asset.js"), "// test-asset");
-    }
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder) => builder.UseWebRoot(_webRoot);
-
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-        Directory.Delete(_webRoot, recursive: true);
-    }
-}
 
 public sealed class GameServerTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {

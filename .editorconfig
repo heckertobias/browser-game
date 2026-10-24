@@ -17,3 +17,7 @@ csharp_style_namespace_declarations = file_scoped:warning
 # Testnamen dürfen Unterstriche enthalten (lesbare Szenarien).
 [server/BrowserGame.Server.Tests/**.cs]
 dotnet_diagnostic.CA1707.severity = none
+
+# Von EF Core erzeugte Migrationen nicht analysieren.
+[server/BrowserGame.Server/Data/Migrations/**.cs]
+generated_code = true

@@ -19,3 +19,8 @@ dist/
 # Build-Ausgaben des Clients im Server
 server/BrowserGame.Server/wwwroot/play/
 server/BrowserGame.Server/wwwroot/css/site.css
+
+# Lokale SQLite-Datenbanken
+*.db
+*.db-shm
+*.db-wal

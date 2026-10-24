@@ -61,7 +61,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 - Start: `Database.MigrateAsync()`. Bei SQLite einmalig `PRAGMA journal_mode=WAL`.
 - `SqliteBackupService` (nur bei SQLite): täglich um 03:50 `VACUUM INTO '/data/backup/game.db'`, damit das
   Homelab-Backup (04:00) eine konsistente Kopie bekommt.
-- `dotnet-ef` als lokales Tool (`.config/dotnet-tools.json`), Migrationen per Skript `scripts/add-migration.sh <Name>`
+- `dotnet-ef` als lokales Tool (`server/dotnet-tools.json`), Migrationen per Skript `scripts/add-migration.sh <Name>`
   für beide Provider.
 
 ### Identity & Anmeldung (`Accounts/`)
