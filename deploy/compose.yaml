@@ -7,7 +7,7 @@
 #   ADMIN_VIRTUAL_HOST=admin-browsergame.example.internal  # Admin – nur intern erreichbar machen (004 AK-6)
 services:
   browsergame:
-    image: ghcr.io/heckertobias/browser-game:0.2.2
+    image: ghcr.io/heckertobias/browser-game:0.2.3
     restart: unless-stopped
     read_only: true
     cap_drop: [ALL]
@@ -28,7 +28,7 @@ services:
       Database__BackupPath: /data/backup/game.db
 
   browsergame-admin:
-    image: ghcr.io/heckertobias/browser-game-admin:0.2.2
+    image: ghcr.io/heckertobias/browser-game-admin:0.2.3
     restart: unless-stopped
     read_only: true
     cap_drop: [ALL]
