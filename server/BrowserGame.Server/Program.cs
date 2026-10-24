@@ -24,7 +24,6 @@ if (args is ["--healthcheck", ..])
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton(TimeProvider.System);
 var databaseProvider = builder.Services.AddGameDatabase(builder.Configuration);
 if (databaseProvider == DatabaseProvider.Sqlite)
 {
@@ -40,7 +39,7 @@ builder.Services.AddHostedService(sp => sp.GetRequiredService<GameLoop>());
 
 var app = builder.Build();
 
-await app.Services.MigrateGameDatabaseAsync(databaseProvider);
+await app.Services.MigrateAsync<GameDbContext>(databaseProvider);
 
 app.Use(async (context, next) =>
 {

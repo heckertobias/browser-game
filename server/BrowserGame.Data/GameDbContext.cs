@@ -27,6 +27,8 @@ public abstract class GameDbContext(DbContextOptions options) : IdentityDbContex
 
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
+    public DbSet<Setting> Settings => Set<Setting>();
+
     /// <summary>
     /// Identity-Schema mit Passkey-Tabelle. Identity liest die Version aus <c>IdentityOptions.Stores</c>;
     /// <see cref="DatabaseSetup"/> setzt sie zur Laufzeit und beim Erzeugen der Migrationen.
@@ -42,6 +44,8 @@ public abstract class GameDbContext(DbContextOptions options) : IdentityDbContex
             position.HasKey(p => p.AccountId);
             position.HasOne<Account>().WithOne().HasForeignKey<PlayerPosition>(p => p.AccountId).OnDelete(DeleteBehavior.Cascade);
         });
+
+        builder.Entity<Setting>().HasKey(s => s.Key);
     }
 }
 

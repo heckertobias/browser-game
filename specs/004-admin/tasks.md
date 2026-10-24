@@ -7,9 +7,9 @@ Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/
 ## Datenschicht
 - [x] **T1**: Bibliothek `BrowserGame.Data` anlegen; `Data/*` aus dem Server dorthin verschieben (Namespace
   `BrowserGame.Data`), Server und Tests umstellen. Alle bisherigen Tests müssen grün bleiben.
-- [ ] **T2** (AK-7, AK-8, AK-10): `Settings`-Tabelle, `SmtpSettingsStore` mit verschlüsseltem Passwort (Zweck `Settings.Smtp`).
-- [ ] **T3** (AK-1, AK-4e, AK-12): `AdminDbContext` (Identity v3 mit Präfix `Admin`, `AdminInvites`, `AdminAuditEntries`),
-  eigene Migrations-Historie; SQLite-/Postgres-Kontexte. `busy_timeout` für SQLite.
+- [x] **T2** (AK-7, AK-8, AK-10): `Settings`-Tabelle, `SmtpSettingsStore` mit verschlüsseltem Passwort (Zweck `Settings.Smtp`).
+- [x] **T3** (AK-1, AK-4e, AK-12): `AdminDbContext` (Identity v3 mit Präfix `Admin`, `AdminInvites`, `AdminAuditEntries`),
+  eigene Migrations-Historie; SQLite-/Postgres-Kontexte. (Sperrkonflikte: Microsoft.Data.Sqlite wiederholt bei `SQLITE_BUSY` bis zum Command-Timeout, kein eigenes `busy_timeout` nötig.) Admin-Indizes umbenannt (datenbankweit eindeutig).
   `scripts/add-migration.sh` für beide Kontexte; Migrationen neu erzeugen (game + admin, je SQLite + Postgres).
 - [ ] **T4** (AK-9, AK-10, AK-11): Mailversand nach `BrowserGame.Data`: `SmtpEmailSender` liest pro Mail aus dem Store,
   fehlende Einstellungen → Warnung + verwerfen; `TestMailAsync` mit deutschen Fehlermeldungen. `Mail:*`-Konfiguration

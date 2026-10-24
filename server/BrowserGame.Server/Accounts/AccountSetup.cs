@@ -1,6 +1,5 @@
 using System.Threading.RateLimiting;
 using BrowserGame.Data;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGame.Server.Accounts;
@@ -75,9 +74,6 @@ internal static class AccountSetup
 
         // Bestätigungs- und Reset-Links (AK-15: befristet; einmalig, weil sich der Security-Stamp danach ändert).
         services.Configure<DataProtectionTokenProviderOptions>(o => o.TokenLifespan = TimeSpan.FromHours(3));
-
-        // Schlüssel in der DB: Cookies und Links überstehen Neustarts trotz read-only-Container.
-        services.AddDataProtection().SetApplicationName("browsergame").PersistKeysToDbContext<GameDbContext>();
 
         services.Configure<IdentityPasskeyOptions>(options =>
         {
