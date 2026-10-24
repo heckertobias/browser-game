@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Accounts/blocked-names.txt" LogicalName="BrowserGame.Server.Accounts.blocked-names.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="BrowserGame.Server.Tests" />
   </ItemGroup>
 

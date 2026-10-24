@@ -16,7 +16,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   WAL bei SQLite, `SqliteBackupService` (`VACUUM INTO`).
 
 ## Server – Anmeldung
-- [ ] **T4** (AK-5, AK-6, AK-7b): `PlayerNames` (Normalisieren, Regeln, Sperrliste) + Unit-Tests.
+- [x] **T4** (AK-5, AK-6, AK-7b): `PlayerNames` (Normalisieren, Regeln, Sperrliste) + Unit-Tests.
 - [ ] **T5** (AK-3, AK-9–11, AK-15): Identity- und Cookie-Konfiguration, Lockout, Token-Lebensdauer, Security-Stamp,
   Rate-Limiter, Forwarded-Header, Passkey-Optionen.
 - [ ] **T6** (AK-2, AK-3, AK-14): `IEmailSender<Account>` – `SmtpEmailSender` (MailKit) und `LogEmailSender`

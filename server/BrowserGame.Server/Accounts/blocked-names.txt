@@ -1,0 +1,39 @@
+# Gesperrte Spielernamen (003 AK-7b): ganze Namen, Groß-/Kleinschreibung egal.
+# Erkennung von Wortteilen kommt später in einer eigenen Spec.
+
+# Reserviert
+Admin
+Administrator
+Mod
+Moderator
+Support
+System
+Server
+Staff
+Team
+Gamemaster
+Gm
+Dev
+Developer
+Owner
+Root
+Official
+
+# Klare Beleidigungen
+Arschloch
+Wichser
+Hurensohn
+Fotze
+Missgeburt
+Spast
+Nazi
+Hitler
+Asshole
+Bastard
+Bitch
+Cunt
+Dick
+Fuck
+Nigger
+Retard
+Whore
