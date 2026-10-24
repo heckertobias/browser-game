@@ -75,6 +75,17 @@ kommen dort wieder heraus, wo sie aufgehört haben. Das ist die Grundlage für a
   anderen Gerät), dann starte ich an derselben Stelle.
 - **AK-19:** Gegeben der Server wird neu gestartet, dann geht höchstens die Bewegung der letzten paar Sekunden verloren.
 
+### Spiel verlassen
+- **AK-20:** Gegeben ich schließe den Tab oder verliere die Verbindung, dann bleibt meine Figur für andere noch
+  20 Sekunden an ihrer Stelle in der Welt, steht still und ist sichtbar anders eingefärbt (z. B. ausgegraut);
+  danach verschwindet sie. (Ersetzt 001 AK-4.)
+- **AK-21:** Gegeben meine Figur wartet nach einem Verbindungsverlust noch, wenn ich innerhalb der 20 Sekunden
+  wieder ins Spiel komme (z. B. Tab neu geladen), dann übernehme ich nahtlos dieselbe Figur an derselben Stelle,
+  und sie sieht für andere wieder normal aus.
+- **AK-22:** Gegeben ich melde mich bewusst ab, dann verschwindet meine Figur sofort.
+- **AK-23:** Gegeben ich komme nach mehr als 20 Sekunden zurück, dann starte ich an der Stelle, an der meine Figur
+  zuletzt stand.
+
 ## Out of Scope
 
 - Login über Google, Discord, GitHub o. Ä.
@@ -84,6 +95,8 @@ kommen dort wieder heraus, wo sie aufgehört haben. Das ist die Grundlage für a
 - E-Mail-Adresse ändern
 - Mehrere Figuren pro Account
 - Rollen/Rechte (Admin, Moderation)
+- Zonen, in denen man sich sofort abmelden kann, und Gefahr während der 20 Sekunden (z. B. sterben) – später
+- Eigene Darstellung für wartende Figuren (z. B. hinsetzen) – kommt mit Sprites
 - Tastenbelegung (→ 002), Haus und Offline-Fortschritt (eigene Specs)
 
 ## Offene Fragen
@@ -96,6 +109,7 @@ _Keine._
 - Name: 3–16 Buchstaben A–Z, Schreibweise wird vereinheitlicht (erster groß, Rest klein), eindeutig, nicht änderbar.
 - E-Mail-Bestätigung, Passwort vergessen und Account löschen gehören zu dieser Spec.
 - Eine neue Anmeldung im Spiel wirft die alte hinaus.
+- Nach Tab schließen/Verbindungsabbruch bleibt die Figur 20 s (anders eingefärbt); bewusstes Abmelden: sofort weg.
 - Angemeldet bleiben: 30 Tage.
 - Sperrliste: kleine Liste ganzer Namen (reserviert + klare Beleidigungen); Wortteil-Erkennung später.
 - Passwort und beliebig viele Passkeys pro Account, mindestens eine Anmeldeart bleibt.

@@ -41,6 +41,9 @@ Ein 2D-Pixel-Art-MMORPG im Browser mit zwei Seiten:
 - Spielen nur mit Account (kein Gastmodus). Anmeldung per E-Mail + Passwort oder Passkey; der Spielername ist
   selbst gewählt und eindeutig.
 - Einstellungen (z. B. Tastenbelegung) gehören zum Account und gelten auf jedem Gerät.
+- Spiel verlassen: In der offenen Welt bleibt die Figur nach dem Gehen noch 20 Sekunden in der Welt (und kann dort
+  später auch sterben); in sicheren Zonen kann man sich sofort abmelden. Wartende Figuren sind erkennbar
+  (zunächst andere Farbe, später z. B. hinsetzen).
 - UI-Stil: Pixel-Akzente – Menüs und HUD bleiben gut lesbar, mit pixeliger Schrift, Rahmen und Icons
 - Öffentliche Seiten (Landing) serverseitig gerendert
 

@@ -23,6 +23,7 @@ kein Offline-Teil – nur der Beweis, dass Client, Server und Echtzeit-Verbindun
   Figur in Richtung des Zeigers und folgt ihm, solange ich gedrückt halte; lasse ich los, bleibt sie stehen.
 - **AK-3:** Gegeben zwei Spieler sind im Spiel, wenn einer sich bewegt, dann sieht der andere die Bewegung innerhalb von ca. einer Sekunde.
 - **AK-4:** Gegeben ein Spieler schließt den Tab, dann verschwindet seine Figur bei den anderen.
+  _Abgelöst durch [003 AK-20](../003-accounts/spec.md): Die Figur bleibt noch 20 Sekunden sichtbar._
 - **AK-5:** Gegeben ein Spieler versucht, sich schneller als erlaubt zu bewegen, dann wird er vom Server auf eine gültige Position zurückgesetzt.
 - **AK-6:** Gegeben ich bewege mich, dann folgt die Kamera meiner Figur. Gegeben zwei Spieler mit unterschiedlich großen
   Bildschirmen, dann sehen beide einen gleich großen Ausschnitt der Welt; passt das Seitenverhältnis des Bildschirms nicht,
