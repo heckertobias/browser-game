@@ -188,15 +188,17 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # volle Historie + Tags für die Notes seit dem letzten Release
+          persist-credentials: false
       - name: GitHub Release anlegen
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
-          version="${TAG#v}"
-          gh release create "$TAG" --verify-tag --generate-notes --title "$TAG" \
-            --notes "Image: \`ghcr.io/heckertobias/browser-game:${version}\` (amd64, arm64)"
+          scripts/release-notes.sh "$TAG" > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" --verify-tag --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
 
   # Einziger Required Check im Ruleset. Neue Jobs nur in `needs` eintragen.
   ci-ok:

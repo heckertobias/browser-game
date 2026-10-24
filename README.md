@@ -89,6 +89,9 @@ Das Skript prüft den Stand (sauber, `main`, synchron, CI grün), pusht den sign
 `ghcr.io/heckertobias/browser-game:0.2.0` (+ `:latest`) veröffentlicht und das GitHub Release angelegt hat, und setzt
 erst dann die Version in `deploy/compose.yaml`. Git Sync in Arcane rollt sie anschließend aus.
 
+Die Release-Notes entstehen aus den Commits seit dem letzten Tag, gruppiert nach Typ (`feat`, `fix`, `docs`, …);
+Vorschau lokal: `scripts/release-notes.sh v0.2.0` (der Tag muss lokal existieren).
+
 ## Repo-Regeln
 
 Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md)
