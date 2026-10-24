@@ -35,6 +35,7 @@ internal static class DatabaseSetup
         services.AddDataProtection().SetApplicationName(DataProtectionApplicationName).PersistKeysToDbContext<GameDbContext>();
         services.TryAddSingletonTimeProvider();
         services.AddScoped<SmtpSettingsStore>();
+        services.AddSingleton<SmtpMailer>();
         return provider;
     }
 

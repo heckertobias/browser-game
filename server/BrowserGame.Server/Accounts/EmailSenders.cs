@@ -1,21 +1,7 @@
-using System.Text.Encodings.Web;
 using BrowserGame.Data;
-using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
-using MimeKit;
 
 namespace BrowserGame.Server.Accounts;
-
-/// <summary>SMTP-Zugang aus der Konfiguration (<c>Mail:*</c>, im Deployment aus der .env).</summary>
-internal sealed class MailOptions
-{
-    public string? Host { get; set; }
-    public int Port { get; set; } = 465;
-    public string? Username { get; set; }
-    public string? Password { get; set; }
-    public string From { get; set; } = "";
-}
 
 /// <summary>Deutsche Mailtexte für Identity (Bestätigen, Passwort zurücksetzen); der Versandweg ist austauschbar.</summary>
 internal abstract class GameEmailSender : IEmailSender<Account>
@@ -47,74 +33,46 @@ internal abstract class GameEmailSender : IEmailSender<Account>
     /// <summary>Text-Mail plus schlichtes HTML mit klickbarem Link.</summary>
     protected abstract Task SendAsync(string to, string subject, string text, string link);
 
-    protected static string ToHtml(string text, string link)
-    {
-        var encoded = HtmlEncoder.Default.Encode(text).Replace("&#xA;", "<br>", StringComparison.Ordinal);
-        var encodedLink = HtmlEncoder.Default.Encode(link);
-        return encoded.Replace(encodedLink, $"<a href=\"{encodedLink}\">{encodedLink}</a>", StringComparison.Ordinal);
-    }
+    protected static string ToHtml(string text, string link) => MailHtml.FromText(text, link);
 }
 
-internal sealed class SmtpEmailSender(MailOptions options) : GameEmailSender
+/// <summary>
+/// Versand über den gemeinsamen <see cref="SmtpMailer"/> (Einstellungen aus dem Admin-Interface, 004).
+/// Fehlen die Einstellungen oder scheitert der Versand, läuft die Registrierung weiter (004 AK-11); Spieler können die
+/// Mail erneut anfordern. Links landen nur in der Entwicklung im Log – sie sind Geheimnisse.
+/// </summary>
+internal sealed partial class PlayerEmailSender(SmtpMailer mailer, IWebHostEnvironment environment, ILogger<PlayerEmailSender> logger) : GameEmailSender
 {
     protected override async Task SendAsync(string to, string subject, string text, string link)
     {
-        var message = new MimeMessage();
-        message.From.Add(MailboxAddress.Parse(options.From));
-        message.To.Add(MailboxAddress.Parse(to));
-        message.Subject = subject;
-        message.Body = new BodyBuilder { TextBody = text, HtmlBody = ToHtml(text, link) }.ToMessageBody();
-
-        using var client = new SmtpClient();
-        await client.ConnectAsync(options.Host ?? throw new InvalidOperationException("Mail:Host fehlt."), options.Port, SecureSocketOptions.Auto);
-        if (!string.IsNullOrEmpty(options.Username))
+        var result = await mailer.SendAsync(to, subject, text, ToHtml(text, link));
+        if (result.Status == MailStatus.Sent)
         {
-            await client.AuthenticateAsync(options.Username, options.Password ?? "");
+            return;
         }
 
-        await client.SendAsync(message);
-        await client.DisconnectAsync(quit: true);
-    }
-}
-
-/// <summary>Entwicklung: Mails ins Log schreiben statt verschicken.</summary>
-internal sealed partial class LogEmailSender(ILogger<LogEmailSender> logger) : GameEmailSender
-{
-    protected override Task SendAsync(string to, string subject, string text, string link)
-    {
-        LogMail(to, subject, link);
-        return Task.CompletedTask;
+        if (environment.IsDevelopment())
+        {
+            LogNotSentWithLink(subject, result.Error, link);
+        }
+        else
+        {
+            LogNotSent(subject, result.Error);
+        }
     }
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Mail (nicht verschickt) an {To}: {Subject} – Link: {Link}")]
-    private partial void LogMail(string to, string subject, string link);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Mail „{Subject}“ nicht verschickt: {Error}")]
+    private partial void LogNotSent(string subject, string? error);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Mail „{Subject}“ nicht verschickt: {Error} – Link (nur Entwicklung): {Link}")]
+    private partial void LogNotSentWithLink(string subject, string? error, string link);
 }
 
 internal static class EmailSetup
 {
     public static void AddGameEmail(this WebApplicationBuilder builder)
     {
-        var options = builder.Configuration.GetSection("Mail").Get<MailOptions>() ?? new MailOptions();
-        if (!string.IsNullOrWhiteSpace(options.Host))
-        {
-            if (string.IsNullOrWhiteSpace(options.From))
-            {
-                throw new InvalidOperationException("Mail:From fehlt.");
-            }
-
-            builder.Services.AddSingleton(options);
-            builder.Services.AddSingleton<GameEmailSender, SmtpEmailSender>();
-        }
-        else if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.AddSingleton<GameEmailSender, LogEmailSender>();
-        }
-        else
-        {
-            // Ohne Mailversand könnte sich niemand registrieren – lieber gar nicht starten als still scheitern.
-            throw new InvalidOperationException("Mail:Host fehlt (SMTP für Bestätigungs- und Reset-Mails).");
-        }
-
+        builder.Services.AddSingleton<GameEmailSender, PlayerEmailSender>();
         builder.Services.AddSingleton<IEmailSender<Account>>(sp => sp.GetRequiredService<GameEmailSender>());
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<AccountLinks>();
