@@ -1,0 +1,61 @@
+@page
+@model AccountModel
+@{
+    ViewData["Title"] = "Mein Account";
+}
+<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+@if (Model.Message is not null)
+{
+    <div class="alert alert-success rounded-none">@Model.Message</div>
+}
+
+<h2 class="font-mono uppercase">Passkeys</h2>
+@if (Model.Passkeys.Count == 0)
+{
+    <p>Noch kein Passkey.</p>
+}
+<ul class="flex flex-col gap-2">
+    @foreach (var passkey in Model.Passkeys)
+    {
+        <li class="flex items-center justify-between gap-2 border-2 border-base-content/20 p-2">
+            <span>@passkey.Label</span>
+            <form method="post" asp-page-handler="RemovePasskey">
+                <input type="hidden" name="PasskeyId" value="@passkey.Id" />
+                <button type="submit" class="btn btn-sm btn-ghost rounded-none">Entfernen</button>
+            </form>
+        </li>
+    }
+</ul>
+<form method="post" asp-page-handler="AddPasskey" data-passkey="create" class="flex flex-col gap-2">
+    <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
+    <input type="hidden" name="Credential" />
+    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase w-fit">Passkey hinzufügen</button>
+    <p class="text-error text-sm" data-passkey-error hidden></p>
+</form>
+
+<h2 class="font-mono uppercase">Passwort &amp; Authenticator</h2>
+@if (Model.HasPassword && Model.TwoFactorEnabled)
+{
+    <p>Passwort mit Authenticator-App ist eingerichtet.</p>
+    <form method="post" asp-page-handler="RecoveryCodes">
+        <button type="submit" class="btn rounded-none font-mono uppercase">Neue Wiederherstellungscodes</button>
+    </form>
+    @if (Model.NewRecoveryCodes.Count > 0)
+    {
+        <p>Deine neuen Codes – die alten gelten ab sofort nicht mehr. Sie werden nicht noch einmal angezeigt.</p>
+        <ul class="grid grid-cols-2 gap-1 font-mono" data-testid="recovery-codes">
+            @foreach (var code in Model.NewRecoveryCodes)
+            {
+                <li>@code</li>
+            }
+        </ul>
+    }
+}
+else
+{
+    <p>Kein Passwort eingerichtet – du meldest dich nur mit Passkey an.</p>
+}
+
+@section Scripts {
+    <script type="module" src="~/js/passkeys.js" asp-append-version="true"></script>
+}

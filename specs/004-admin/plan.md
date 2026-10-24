@@ -55,7 +55,8 @@ Formulare.
 ## Admin (`BrowserGame.Admin`)
 
 - **Identity** für `AdminUser`:
-  - Eigenes Cookie-Schema `Admin` (Cookie `bg.admin`, HttpOnly, Secure, SameSite=Strict), 8 Stunden fest (AK-4d).
+  - Identitys Standard-Cookies, aber mit eigenem Data-Protection-Zweck `BrowserGame.Admin.Cookies` (ein Spieler-Cookie
+    ist im Admin nicht entschlüsselbar) und eigenen Namen `bg.admin.*`; HttpOnly, Secure, SameSite=Strict, 8 Stunden fest (AK-4d).
   - Lockout und Rate-Limiting wie im Spiel (AK-4).
   - `RequireConfirmedEmail` entfällt, Admins kommen über Einladungen.
   - Passkey-`ServerDomain` aus `Passkeys:ServerDomain` (Admin-Host).

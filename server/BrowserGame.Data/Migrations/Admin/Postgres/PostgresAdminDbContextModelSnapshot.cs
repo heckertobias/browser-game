@@ -69,6 +69,9 @@ namespace BrowserGame.Data.Migrations.Admin.Postgres
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("PendingUserId")
+                        .HasColumnType("text");
+
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasColumnType("text");

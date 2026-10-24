@@ -18,12 +18,12 @@ Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/
 ## Admin
 - [x] **T5**: Projekt `BrowserGame.Admin` (Razor Pages, Layout im Pixel-Akzent-Stil), Testprojekt, Migration beim Start
   (Game + Admin), Sicherheits-Header, `/health`.
-- [ ] **T6** (AK-2–4, AK-4d): Identity für `AdminUser`, Cookie-Schema `Admin` (8 h, SameSite=Strict), Lockout,
+- [x] **T6** (AK-2–4, AK-4d): Identity für `AdminUser`, Admin-Cookies mit eigenem Schutzzweck (8 h, SameSite=Strict), Lockout,
   Rate-Limiter, `RequireAuthorization` für alles außer Login/Invite.
-- [ ] **T7** (AK-1, AK-4b, AK-4c, AK-4e): Einladungen (`AdminInvites`, Hash, 48 h, einmalig), Setup-Einladung beim
+- [x] **T7** (AK-1, AK-4b, AK-4c, AK-4e): Einladungen (`AdminInvites`, Hash, 48 h, einmalig), Setup-Einladung beim
   ersten Start (Link ins Log), Seite `Invite`: Passwort + Authenticator (QRCoder) + Wiederherstellungscodes;
   Passkey-Weg (gemeinsames `passkeys.js`).
-- [ ] **T8** (AK-4b, AK-4c): `Login` mit Passkey oder Passwort + TOTP/Wiederherstellungscode, `Logout`, `Account`
+- [x] **T8** (AK-4b, AK-4c): `Login` mit Passkey oder Passwort + TOTP/Wiederherstellungscode, `Logout`, `Account`
   (eigene Passkeys/2FA verwalten).
 - [ ] **T9** (AK-7–9): Seite `Smtp` (Formular, „gesetzt“, Testmail).
 - [ ] **T10** (AK-4e, AK-4f, AK-12): Seiten `Admins` (einladen, entfernen, letzter bleibt) und `Audit`; `AuditLog` an

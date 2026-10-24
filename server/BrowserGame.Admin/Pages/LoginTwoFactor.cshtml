@@ -1,0 +1,18 @@
+@page
+@model LoginTwoFactorModel
+@{
+    ViewData["Title"] = "Zweiter Faktor";
+}
+<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+<p>Gib den Code aus deiner Authenticator-App ein – oder einen deiner Wiederherstellungscodes.</p>
+<form method="post" class="flex flex-col gap-3">
+    <label class="form-control">
+        <span class="label-text">Code</span>
+        <input asp-for="Code" autocomplete="one-time-code" inputmode="text" class="input input-bordered rounded-none font-mono" />
+    </label>
+    <label class="label cursor-pointer justify-start gap-2">
+        <input asp-for="IsRecoveryCode" type="checkbox" class="checkbox rounded-none" />
+        <span class="label-text">Das ist ein Wiederherstellungscode</span>
+    </label>
+    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Anmelden</button>
+</form>

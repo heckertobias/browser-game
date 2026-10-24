@@ -62,6 +62,9 @@ namespace BrowserGame.Data.Migrations.Admin.Sqlite
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PendingUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasColumnType("TEXT");

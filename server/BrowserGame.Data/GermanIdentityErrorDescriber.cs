@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace BrowserGame.Server.Accounts;
+namespace BrowserGame.Data;
 
 /// <summary>Deutsche Texte für die Identity-Fehler, die Spieler zu sehen bekommen.</summary>
-internal sealed class GermanIdentityErrorDescriber : IdentityErrorDescriber
+public sealed class GermanIdentityErrorDescriber : IdentityErrorDescriber
 {
     public override IdentityError DuplicateUserName(string userName) =>
         new() { Code = nameof(DuplicateUserName), Description = $"Der Name „{userName}“ ist schon vergeben." };
 
     public override IdentityError InvalidUserName(string? userName) =>
-        new() { Code = nameof(InvalidUserName), Description = PlayerNames.Describe(PlayerNameError.Characters) };
+        new() { Code = nameof(InvalidUserName), Description = "Der Name enthält nicht erlaubte Zeichen." };
 
     // Bewusst neutral: Registrierung verrät nicht, ob es eine Adresse schon gibt.
     public override IdentityError DuplicateEmail(string email) =>

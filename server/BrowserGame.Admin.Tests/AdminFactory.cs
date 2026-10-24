@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BrowserGame.Admin.Tests;
 
@@ -12,6 +13,12 @@ namespace BrowserGame.Admin.Tests;
 /// </summary>
 public sealed class AdminFactory : WebApplicationFactory<Program>
 {
+    /// <summary>Im Testserver kommen alle Anfragen von derselben „IP“ – Standard hoch, damit nur der Rate-Limit-Test limitiert.</summary>
+    public int AuthRequestsPerMinute { get; init; } = 1000;
+
+    /// <summary>Alle Log-Meldungen des Admin-Dienstes (z. B. der Einrichtungslink).</summary>
+    public LogCapture Logs { get; } = new();
+
     public static string Provider => Environment.GetEnvironmentVariable("TEST_DB_PROVIDER") ?? nameof(DatabaseProvider.Sqlite);
 
     public string ConnectionString { get; } = Provider == nameof(DatabaseProvider.Postgres)
@@ -22,7 +29,12 @@ public sealed class AdminFactory : WebApplicationFactory<Program>
     {
         builder.UseSetting("Database:Provider", Provider);
         builder.UseSetting("ConnectionStrings:Game", ConnectionString);
+        builder.UseSetting("RateLimiting:AuthRequestsPerMinute", AuthRequestsPerMinute.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        builder.ConfigureLogging(logging => logging.AddProvider(Logs));
     }
+
+    /// <summary>Formular-Client mit eigenem Cookie-Speicher, ohne automatische Weiterleitungen.</summary>
+    public FormClient CreateFormClient() => new(CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false }));
 
     protected override void Dispose(bool disposing)
     {

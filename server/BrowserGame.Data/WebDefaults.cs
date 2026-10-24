@@ -1,4 +1,6 @@
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 namespace BrowserGame.Data;
 
@@ -27,6 +29,36 @@ public static class WebDefaults
         {
             return 1;
         }
+    }
+
+    /// <summary>
+    /// JSON sicher in einen <c>&lt;script type="application/json"&gt;</c>-Block einbetten: <c>&lt;</c> wird zu <c>\u003c</c>
+    /// (gleiches JSON, kann den Block aber nicht mit <c>&lt;/script&gt;</c> verlassen).
+    /// </summary>
+    public static string JsonForHtmlScript(string json) => json.Replace("<", "\\u003c", StringComparison.Ordinal);
+
+    public const string AuthRateLimitPolicy = "auth";
+
+    /// <summary>
+    /// Standard: höchstens so viele Formular-Absendungen pro Minute und IP auf Anmelde-Seiten (003 AK-10, 004 AK-4).
+    /// Überschreibbar mit <c>RateLimiting:AuthRequestsPerMinute</c> (z. B. in Tests).
+    /// </summary>
+    public const int AuthRequestsPerMinute = 10;
+
+    /// <summary>Rate-Limit nur für POSTs (Anmelden, Registrieren, …) pro Client-IP; GETs bleiben frei.</summary>
+    public static IServiceCollection AddAuthRateLimiting(this IServiceCollection services, IConfiguration configuration)
+    {
+        var permitLimit = configuration.GetValue("RateLimiting:AuthRequestsPerMinute", AuthRequestsPerMinute);
+        return services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.AddPolicy(AuthRateLimitPolicy, context =>
+                HttpMethods.IsPost(context.Request.Method)
+                    ? RateLimitPartition.GetFixedWindowLimiter(
+                        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        _ => new FixedWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 })
+                    : RateLimitPartition.GetNoLimiter("get"));
+        });
     }
 
     public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder app) =>

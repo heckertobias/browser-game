@@ -1,0 +1,31 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Anmelden";
+}
+<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+
+<form method="post" asp-page-handler="Passkey" data-passkey="get" class="flex flex-col gap-2">
+    <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
+    <input type="hidden" name="Credential" />
+    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Mit Passkey anmelden</button>
+    <p class="text-error text-sm" data-passkey-error hidden></p>
+</form>
+
+<div class="divider font-mono text-xs">oder</div>
+
+<form method="post" asp-page-handler="Password" class="flex flex-col gap-3">
+    <label class="form-control">
+        <span class="label-text">E-Mail</span>
+        <input asp-for="Email" type="email" autocomplete="username" class="input input-bordered rounded-none" />
+    </label>
+    <label class="form-control">
+        <span class="label-text">Passwort</span>
+        <input asp-for="Password" type="password" autocomplete="current-password" class="input input-bordered rounded-none" />
+    </label>
+    <button type="submit" class="btn rounded-none font-mono uppercase">Weiter</button>
+</form>
+
+@section Scripts {
+    <script type="module" src="~/js/passkeys.js" asp-append-version="true"></script>
+}

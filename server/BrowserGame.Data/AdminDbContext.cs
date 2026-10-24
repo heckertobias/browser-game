@@ -19,6 +19,9 @@ public sealed class AdminInvite
     public DateTimeOffset CreatedAt { get; init; }
     public DateTimeOffset ExpiresAt { get; init; }
     public DateTimeOffset? UsedAt { get; set; }
+
+    /// <summary>Während der Einrichtung schon angelegter, aber noch nicht aktiver Admin (Abbruch → mit demselben Link weiter).</summary>
+    public string? PendingUserId { get; set; }
 }
 
 /// <summary>Protokoll: wer hat wann was getan – ohne Geheimnisse (004 AK-12).</summary>

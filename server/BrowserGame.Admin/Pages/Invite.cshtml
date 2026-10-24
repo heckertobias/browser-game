@@ -1,0 +1,86 @@
+@page
+@model InviteModel
+@{
+    ViewData["Title"] = "Admin einrichten";
+}
+<div asp-validation-summary="All" class="alert alert-error rounded-none empty:hidden"></div>
+
+@switch (Model.Step)
+{
+    case InviteStep.Invalid:
+        <p>Dieser Link ist ungültig, abgelaufen oder wurde schon benutzt.</p>
+        break;
+
+    case InviteStep.Details:
+        <form method="post" asp-page-handler="Details" class="flex flex-col gap-3">
+            <input type="hidden" asp-for="Token" />
+            <label class="form-control">
+                <span class="label-text">Name</span>
+                <input asp-for="Name" autocomplete="username" class="input input-bordered rounded-none" required />
+            </label>
+            <label class="form-control">
+                <span class="label-text">E-Mail</span>
+                <input asp-for="Email" type="email" autocomplete="email" class="input input-bordered rounded-none" required />
+            </label>
+            <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Weiter</button>
+        </form>
+        break;
+
+    case InviteStep.ChooseMethod:
+        <p>Wie möchtest du dich künftig anmelden?</p>
+        <form method="post" asp-page-handler="Passkey" data-passkey="create" class="flex flex-col gap-2">
+            <input type="hidden" asp-for="Token" />
+            <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
+            <input type="hidden" name="Credential" />
+            <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Passkey anlegen (empfohlen)</button>
+            <p class="text-error text-sm" data-passkey-error hidden></p>
+        </form>
+        <div class="divider font-mono text-xs">oder Passwort + Authenticator-App</div>
+        <form method="post" asp-page-handler="Password" class="flex flex-col gap-3">
+            <input type="hidden" asp-for="Token" />
+            <label class="form-control">
+                <span class="label-text">Passwort (mindestens 12 Zeichen)</span>
+                <input asp-for="Password" type="password" autocomplete="new-password" class="input input-bordered rounded-none" />
+            </label>
+            <label class="form-control">
+                <span class="label-text">Passwort wiederholen</span>
+                <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="input input-bordered rounded-none" />
+            </label>
+            <button type="submit" class="btn rounded-none font-mono uppercase">Weiter zur Authenticator-App</button>
+        </form>
+        break;
+
+    case InviteStep.Totp:
+        <p>Scanne den QR-Code mit deiner Authenticator-App (oder gib den Schlüssel ein) und bestätige mit dem angezeigten Code.</p>
+        <div class="bg-white p-2 w-fit">@Html.Raw(Model.TotpQrSvg)</div>
+        <p class="font-mono text-sm break-all">@Model.TotpKey</p>
+        <form method="post" asp-page-handler="Totp" class="flex flex-col gap-3">
+            <input type="hidden" asp-for="Token" />
+            <label class="form-control">
+                <span class="label-text">Code aus der App</span>
+                <input asp-for="Code" autocomplete="one-time-code" inputmode="numeric" class="input input-bordered rounded-none font-mono" />
+            </label>
+            <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Bestätigen</button>
+        </form>
+        break;
+
+    case InviteStep.Done:
+        <div class="alert alert-success rounded-none">Fertig – du bist als Admin angemeldet.</div>
+        @if (Model.RecoveryCodes.Count > 0)
+        {
+            <p><strong>Wiederherstellungscodes:</strong> Bewahre sie sicher auf (z. B. im Passwortmanager). Jeder Code
+                funktioniert nur einmal, falls du keinen Zugriff auf die Authenticator-App hast. Sie werden nicht noch einmal angezeigt.</p>
+            <ul class="grid grid-cols-2 gap-1 font-mono" data-testid="recovery-codes">
+                @foreach (var code in Model.RecoveryCodes)
+                {
+                    <li>@code</li>
+                }
+            </ul>
+        }
+        <a href="/" class="btn btn-primary rounded-none font-mono uppercase">Zur Übersicht</a>
+        break;
+}
+
+@section Scripts {
+    <script type="module" src="~/js/passkeys.js" asp-append-version="true"></script>
+}

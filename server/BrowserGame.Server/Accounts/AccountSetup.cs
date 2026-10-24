@@ -1,4 +1,3 @@
-using System.Threading.RateLimiting;
 using BrowserGame.Data;
 using Microsoft.AspNetCore.Identity;
 
@@ -7,11 +6,6 @@ namespace BrowserGame.Server.Accounts;
 /// <summary>Anmeldung mit ASP.NET Core Identity: Passwort + Passkeys, Cookie, Lockout, Rate-Limiting (ADR 0005).</summary>
 internal static class AccountSetup
 {
-    public const string AuthRateLimitPolicy = "auth";
-
-    /// <summary>Höchstens so viele Formular-Absendungen pro Minute und IP auf den Anmelde-Seiten (AK-10).</summary>
-    public const int AuthRequestsPerMinute = 10;
-
     public static readonly TimeSpan SessionLifetime = TimeSpan.FromDays(30);
 
     public static void AddGameAccounts(this WebApplicationBuilder builder)
@@ -84,16 +78,7 @@ internal static class AccountSetup
             }
         });
 
-        services.AddRateLimiter(options =>
-        {
-            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-            options.AddPolicy(AuthRateLimitPolicy, context =>
-                HttpMethods.IsPost(context.Request.Method)
-                    ? RateLimitPartition.GetFixedWindowLimiter(
-                        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                        _ => new FixedWindowRateLimiterOptions { PermitLimit = AuthRequestsPerMinute, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 })
-                    : RateLimitPartition.GetNoLimiter("get"));
-        });
+        services.AddAuthRateLimiting(builder.Configuration);
 
         services.AddAuthorization();
     }
