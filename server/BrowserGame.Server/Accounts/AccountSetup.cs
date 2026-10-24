@@ -49,7 +49,13 @@ internal static class AccountSetup
             })
             .AddEntityFrameworkStores<GameDbContext>()
             .AddSignInManager()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddErrorDescriber<GermanIdentityErrorDescriber>();
+
+        if (!builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(builder.Configuration["App:PublicUrl"]))
+        {
+            throw new InvalidOperationException("App:PublicUrl fehlt (Basis für Links in Mails und Origin-Prüfung).");
+        }
 
         services.ConfigureApplicationCookie(cookie =>
         {

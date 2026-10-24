@@ -32,6 +32,14 @@ internal abstract class GameEmailSender : IEmailSender<Account>
             + "Der Link ist 3 Stunden gültig und funktioniert nur einmal. Wenn du das nicht angefordert hast, ignoriere diese Mail.",
             resetLink);
 
+    /// <summary>Registrierung mit einer schon vorhandenen Adresse: Hinweis an den Inhaber statt Fehlermeldung auf der Seite.</summary>
+    public Task SendAlreadyRegisteredAsync(Account user, string email, string loginLink, string forgotPasswordLink) =>
+        SendAsync(email, "Du hast schon einen Account",
+            $"Hallo {user.UserName},\n\njemand hat versucht, mit deiner E-Mail-Adresse einen neuen Account anzulegen. "
+            + $"Du hast bereits einen. Hier kannst du dich anmelden:\n{loginLink}\n\n"
+            + $"Passwort vergessen? {forgotPasswordLink}\n\nWenn du das nicht warst, musst du nichts tun.",
+            loginLink);
+
     /// <summary>Codes statt Links nutzen wir nicht (nur für das Identity-Interface).</summary>
     public Task SendPasswordResetCodeAsync(Account user, string email, string resetCode) =>
         throw new NotSupportedException("Passwort-Reset läuft über Links.");
@@ -95,16 +103,21 @@ internal static class EmailSetup
             }
 
             builder.Services.AddSingleton(options);
-            builder.Services.AddSingleton<IEmailSender<Account>, SmtpEmailSender>();
+            builder.Services.AddSingleton<GameEmailSender, SmtpEmailSender>();
         }
         else if (builder.Environment.IsDevelopment())
         {
-            builder.Services.AddSingleton<IEmailSender<Account>, LogEmailSender>();
+            builder.Services.AddSingleton<GameEmailSender, LogEmailSender>();
         }
         else
         {
             // Ohne Mailversand könnte sich niemand registrieren – lieber gar nicht starten als still scheitern.
             throw new InvalidOperationException("Mail:Host fehlt (SMTP für Bestätigungs- und Reset-Mails).");
         }
+
+        builder.Services.AddSingleton<IEmailSender<Account>>(sp => sp.GetRequiredService<GameEmailSender>());
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<AccountLinks>();
+        builder.Services.AddScoped<AccountEmails>();
     }
 }
