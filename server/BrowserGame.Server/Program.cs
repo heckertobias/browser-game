@@ -32,6 +32,7 @@ if (databaseProvider == DatabaseProvider.Sqlite)
 }
 
 builder.AddGameAccounts();
+builder.AddGameEmail();
 builder.Services.AddRazorPages();
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<GameLoop>();
