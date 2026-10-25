@@ -1,34 +1,34 @@
 @page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Registrieren";
+    ViewData["Title"] = T["Common.Register"].Value;
 }
 @if (Model.Sent)
 {
-    <p>Fast geschafft! Wir haben dir eine Mail geschickt. Klicke auf den Link darin, um deine E-Mail-Adresse zu bestätigen.</p>
-    <a class="link text-sm" href="/Account/ResendConfirmation">Keine Mail bekommen? Erneut senden</a>
+    <p>@T["Register.Sent"]</p>
+    <a class="link text-sm" href="/Account/ResendConfirmation">@T["Register.NoMail"]</a>
 }
 else
 {
     <partial name="_Errors" />
     <form method="post" class="flex flex-col gap-3">
         <label class="flex flex-col gap-1">
-            <span class="label-text">E-Mail</span>
+            <span class="label-text">@T["Common.Email"]</span>
             <input asp-for="Email" type="email" autocomplete="username" class="input input-bordered w-full rounded-none" />
         </label>
         <label class="flex flex-col gap-1">
-            <span class="label-text">Spielername (3 bis 16 Buchstaben A–Z)</span>
+            <span class="label-text">@T["Register.NameLabel"]</span>
             <input asp-for="Name" type="text" autocomplete="nickname" class="input input-bordered w-full rounded-none" />
         </label>
         <label class="flex flex-col gap-1">
-            <span class="label-text">Passwort (mindestens 10 Zeichen)</span>
+            <span class="label-text">@T["Register.PasswordLabel"]</span>
             <input asp-for="Password" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
         </label>
         <label class="flex flex-col gap-1">
-            <span class="label-text">Passwort wiederholen</span>
+            <span class="label-text">@T["Register.ConfirmPasswordLabel"]</span>
             <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
         </label>
-        <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Registrieren</button>
+        <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">@T["Common.Register"]</button>
     </form>
-    <a class="link text-sm" href="/Account/Login">Schon einen Account? Anmelden</a>
+    <a class="link text-sm" href="/Account/Login">@T["Register.HaveAccount"]</a>
 }

@@ -15,7 +15,7 @@ Reihenfolge: Daten → Server → Client → Prüfung. Jeder Task bringt seine T
 - [x] **T3** (AK-10, AK-11): `LocalizedIdentityErrorDescriber` mit `IdentityErrors(.de).resx` in `BrowserGame.Data`
   (ersetzt `GermanIdentityErrorDescriber`, Server und Admin); `PlayerNames.Describe` aus `Texts`; Admin fest `de`
   per `UseRequestLocalization`. Texte je Sprache in neuen Tests.
-- [ ] **T4** (AK-10): Alle Spieler-Seiten aus 003 T7 (`_Layout`, `Index`, `Register`, `Login`, `ConfirmEmail`,
+- [x] **T4** (AK-10): Alle Spieler-Seiten aus 003 T7 (`_Layout`, `Index`, `Register`, `Login`, `ConfirmEmail`,
   `ResendConfirmation`, `Logout`) auf `IStringLocalizer<Texts>`; Integrationstests auf Englisch.
 - [ ] **T5** (AK-3, AK-5): `Pages/Language` (POST) und `_LanguageSwitch` im Layout; Account-Sprache beim Umschalten.
 - [ ] **T6** (AK-6, AK-7): Registrierung speichert die aktuelle Sprache, Anmeldung setzt das Culture-Cookie aus dem

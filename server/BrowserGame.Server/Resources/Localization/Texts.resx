@@ -11,4 +11,31 @@
   <data name="PlayerName.Length" xml:space="preserve"><value>The name must be {0} to {1} characters long.</value></data>
   <data name="PlayerName.Characters" xml:space="preserve"><value>The name may only contain the letters A–Z (no accented letters, digits, spaces or special characters).</value></data>
   <data name="PlayerName.Blocked" xml:space="preserve"><value>This name is not allowed.</value></data>
+  <data name="Common.GameName" xml:space="preserve"><value>Browser Game</value></data>
+  <data name="Common.SignIn" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Common.Register" xml:space="preserve"><value>Sign up</value></data>
+  <data name="Common.Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Common.ResendConfirmation" xml:space="preserve"><value>Resend confirmation email</value></data>
+  <data name="Index.Tagline" xml:space="preserve"><value>A fantasy world in your browser. No download – just start walking.</value></data>
+  <data name="Index.Play" xml:space="preserve"><value>Play</value></data>
+  <data name="Index.SignedInAs" xml:space="preserve"><value>Signed in as {0}</value></data>
+  <data name="Index.SignOut" xml:space="preserve"><value>Sign out</value></data>
+  <data name="Login.ReturnHint" xml:space="preserve"><value>Sign in to play.</value></data>
+  <data name="Login.Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Login.NoAccount" xml:space="preserve"><value>No account yet? Sign up</value></data>
+  <data name="Login.GenericError" xml:space="preserve"><value>Sign-in failed. Check your email and password. After several failed attempts, sign-in is locked for a short time.</value></data>
+  <data name="Register.NameLabel" xml:space="preserve"><value>Player name (3 to 16 letters A–Z)</value></data>
+  <data name="Register.PasswordLabel" xml:space="preserve"><value>Password (at least 10 characters)</value></data>
+  <data name="Register.ConfirmPasswordLabel" xml:space="preserve"><value>Repeat password</value></data>
+  <data name="Register.HaveAccount" xml:space="preserve"><value>Already have an account? Sign in</value></data>
+  <data name="Register.PasswordMismatch" xml:space="preserve"><value>The passwords do not match.</value></data>
+  <data name="Register.Sent" xml:space="preserve"><value>Almost done! We've sent you an email. Click the link in it to confirm your email address.</value></data>
+  <data name="Register.NoMail" xml:space="preserve"><value>Didn't get an email? Send it again</value></data>
+  <data name="ConfirmEmail.Title" xml:space="preserve"><value>Confirm email</value></data>
+  <data name="ConfirmEmail.Confirmed" xml:space="preserve"><value>Your email address is confirmed.</value></data>
+  <data name="ConfirmEmail.PlayNow" xml:space="preserve"><value>Play now</value></data>
+  <data name="ConfirmEmail.Invalid" xml:space="preserve"><value>The link is invalid or has expired.</value></data>
+  <data name="ResendConfirmation.Title" xml:space="preserve"><value>Confirmation email</value></data>
+  <data name="ResendConfirmation.Sent" xml:space="preserve"><value>If there is an unconfirmed account for this address, we've sent you a new email.</value></data>
+  <data name="ResendConfirmation.Submit" xml:space="preserve"><value>Send email</value></data>
 </root>

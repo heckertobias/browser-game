@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using BrowserGame.Data;
 using BrowserGame.Server.Accounts;
+using BrowserGame.Server.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Localization;
 using PlayerAccount = BrowserGame.Data.Account;
 
 namespace BrowserGame.Server.Pages.Account;
@@ -14,7 +16,7 @@ namespace BrowserGame.Server.Pages.Account;
 /// verrät die Seite nicht: Sie zeigt dieselbe Erfolgsansicht, der Inhaber bekommt eine Mail.
 /// </summary>
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
-public sealed class RegisterModel(UserManager<PlayerAccount> users, AccountEmails emails) : PageModel
+public sealed class RegisterModel(UserManager<PlayerAccount> users, AccountEmails emails, IStringLocalizer<Texts> t) : PageModel
 {
     [BindProperty]
     [Required(ErrorMessage = "Validation.EmailRequired")]
@@ -48,7 +50,7 @@ public sealed class RegisterModel(UserManager<PlayerAccount> users, AccountEmail
 
         if (!string.IsNullOrEmpty(ConfirmPassword) && Password != ConfirmPassword)
         {
-            ModelState.AddModelError(nameof(ConfirmPassword), "Die Passwörter stimmen nicht überein.");
+            ModelState.AddModelError(nameof(ConfirmPassword), t["Register.PasswordMismatch"]);
         }
 
         return ModelState.IsValid ? await CreateAsync(name) : Page();

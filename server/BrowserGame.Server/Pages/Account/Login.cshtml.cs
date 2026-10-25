@@ -1,20 +1,20 @@
 using System.ComponentModel.DataAnnotations;
 using BrowserGame.Data;
 using BrowserGame.Server.Accounts;
+using BrowserGame.Server.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Localization;
 using PlayerAccount = BrowserGame.Data.Account;
 
 namespace BrowserGame.Server.Pages.Account;
 
 /// <summary>Anmeldung mit E-Mail und Passwort (003 AK-1, AK-9). Alle Fehlerfälle zeigen dieselbe Meldung.</summary>
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
-public sealed class LoginModel(SignInManager<PlayerAccount> signIn, UserManager<PlayerAccount> users) : PageModel
+public sealed class LoginModel(SignInManager<PlayerAccount> signIn, UserManager<PlayerAccount> users, IStringLocalizer<Texts> t) : PageModel
 {
-    internal const string GenericError = "Anmeldung fehlgeschlagen. Prüfe E-Mail und Passwort. Nach mehreren Fehlversuchen ist die Anmeldung kurz gesperrt.";
-
     [BindProperty]
     [Required(ErrorMessage = "Validation.EmailRequired")]
     public string Email { get; set; } = "";
@@ -38,7 +38,7 @@ public sealed class LoginModel(SignInManager<PlayerAccount> signIn, UserManager<
         }
 
         ModelState.Clear();
-        ModelState.AddModelError("", GenericError);
+        ModelState.AddModelError("", t["Login.GenericError"]);
         return Page();
     }
 }
