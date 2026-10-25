@@ -27,3 +27,6 @@ server/BrowserGame.Server/wwwroot/css/site.css
 server/BrowserGame.Admin/wwwroot/css/site.css
 server/BrowserGame.Server/wwwroot/js/passkeys.js
 server/BrowserGame.Admin/wwwroot/js/passkeys.js
+
+# Persönliche Agent-Hinweise
+CLAUDE.local.md
