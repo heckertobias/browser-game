@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using BrowserGame.Data;
 using BrowserGame.Server.Accounts;
 using BrowserGame.Server.Localization;
@@ -12,7 +13,7 @@ using PlayerAccount = BrowserGame.Data.Account;
 namespace BrowserGame.Server.Pages.Account;
 
 /// <summary>
-/// Registrierung mit E-Mail, Name und Passwort (003 AK-2, AK-5 bis AK-7b). Eine schon vergebene E-Mail-Adresse
+/// Registrierung mit E-Mail, Name und Passwort (003 AK-2, AK-5 bis AK-7b, 006 AK-7). Eine schon vergebene E-Mail-Adresse
 /// verrät die Seite nicht: Sie zeigt dieselbe Erfolgsansicht, der Inhaber bekommt eine Mail.
 /// </summary>
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
@@ -59,7 +60,7 @@ public sealed class RegisterModel(UserManager<PlayerAccount> users, AccountEmail
     private async Task<IActionResult> CreateAsync(string name)
     {
         var email = Email.Trim();
-        var account = new PlayerAccount { UserName = name, Email = email };
+        var account = new PlayerAccount { UserName = name, Email = email, Language = GameLanguages.Normalize(CultureInfo.CurrentUICulture.Name) };
         var result = await users.CreateAsync(account, Password);
         if (result.Succeeded)
         {

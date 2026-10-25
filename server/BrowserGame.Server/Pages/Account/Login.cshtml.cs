@@ -33,6 +33,9 @@ public sealed class LoginModel(SignInManager<PlayerAccount> signIn, UserManager<
             var result = await signIn.PasswordSignInAsync(user, Password, isPersistent: true, lockoutOnFailure: true);
             if (result.Succeeded)
             {
+                // 006 AK-6: Ab der Anmeldung gilt die Sprache des Accounts, auch gegen ein vorhandenes Cookie.
+                // Die Passkey-Anmeldung (003 T9) muss dasselbe tun.
+                LanguageCookie.Append(Response, user.Language);
                 return LocalRedirect(AccountLinks.SafeReturnUrl(ReturnUrl, Url.IsLocalUrl));
             }
         }
