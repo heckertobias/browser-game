@@ -15,7 +15,7 @@ public sealed class CapturingEmailSender : GameEmailSender
         }
     }
 
-    protected override Task SendAsync(string recipient, string subject, string text, string link)
+    protected override Task SendAsync(string recipient, string subject, string text, string link, string language)
     {
         lock (_mails)
         {

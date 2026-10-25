@@ -41,4 +41,10 @@
   <data name="Language.Label" xml:space="preserve"><value>Language</value></data>
   <data name="Language.de" xml:space="preserve"><value>Deutsch</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
   <data name="Language.en" xml:space="preserve"><value>English</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
+  <data name="Mail.Confirmation.Subject" xml:space="preserve"><value>Please confirm your email address</value></data>
+  <data name="Mail.Confirmation.Body" xml:space="preserve"><value>Hello {0},&#10;&#10;Please confirm your email address so you can play:&#10;{1}&#10;&#10;The link is valid for 3 hours. If you didn't sign up, you can ignore this email.</value></data>
+  <data name="Mail.PasswordReset.Subject" xml:space="preserve"><value>Reset your password</value></data>
+  <data name="Mail.PasswordReset.Body" xml:space="preserve"><value>Hello {0},&#10;&#10;Use this link to set a new password:&#10;{1}&#10;&#10;The link is valid for 3 hours and works only once. If you didn't request this, ignore this email.</value></data>
+  <data name="Mail.AlreadyRegistered.Subject" xml:space="preserve"><value>You already have an account</value></data>
+  <data name="Mail.AlreadyRegistered.Body" xml:space="preserve"><value>Hello {0},&#10;&#10;Someone tried to create a new account with your email address. You already have one. You can sign in here:&#10;{1}&#10;&#10;Forgot your password? {2}&#10;&#10;If this wasn't you, you don't need to do anything.</value></data>
 </root>

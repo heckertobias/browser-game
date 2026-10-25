@@ -20,7 +20,7 @@ Reihenfolge: Daten → Server → Client → Prüfung. Jeder Task bringt seine T
 - [x] **T5** (AK-3, AK-5): `Pages/Language` (POST) und `_LanguageSwitch` im Layout; Account-Sprache beim Umschalten.
 - [x] **T6** (AK-6, AK-7): Registrierung speichert die aktuelle Sprache, Anmeldung setzt das Culture-Cookie aus dem
   Account.
-- [ ] **T7** (AK-9): `GameEmailSender` mit Texten aus `Texts` in der Sprache des Accounts; Unit- und Integrationstests
+- [x] **T7** (AK-9): `GameEmailSender` mit Texten aus `Texts` in der Sprache des Accounts; Unit- und Integrationstests
   je Sprache.
 
 ## Client
