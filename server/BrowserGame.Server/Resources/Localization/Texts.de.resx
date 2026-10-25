@@ -38,4 +38,7 @@
   <data name="ResendConfirmation.Title" xml:space="preserve"><value>Bestätigungsmail</value></data>
   <data name="ResendConfirmation.Sent" xml:space="preserve"><value>Falls es zu dieser Adresse einen noch nicht bestätigten Account gibt, haben wir dir eine neue Mail geschickt.</value></data>
   <data name="ResendConfirmation.Submit" xml:space="preserve"><value>Mail senden</value></data>
+  <data name="Language.Label" xml:space="preserve"><value>Sprache</value></data>
+  <data name="Language.de" xml:space="preserve"><value>Deutsch</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
+  <data name="Language.en" xml:space="preserve"><value>English</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
 </root>

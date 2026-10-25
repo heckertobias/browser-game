@@ -38,4 +38,7 @@
   <data name="ResendConfirmation.Title" xml:space="preserve"><value>Confirmation email</value></data>
   <data name="ResendConfirmation.Sent" xml:space="preserve"><value>If there is an unconfirmed account for this address, we've sent you a new email.</value></data>
   <data name="ResendConfirmation.Submit" xml:space="preserve"><value>Send email</value></data>
+  <data name="Language.Label" xml:space="preserve"><value>Language</value></data>
+  <data name="Language.de" xml:space="preserve"><value>Deutsch</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
+  <data name="Language.en" xml:space="preserve"><value>English</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
 </root>

@@ -1,0 +1,16 @@
+@using Microsoft.AspNetCore.Http.Extensions
+@{
+    var current = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+<form method="post" asp-page="/Language" class="ml-auto" data-language-switch>
+    <input type="hidden" name="ReturnUrl" value="@Context.Request.GetEncodedPathAndQuery()" />
+    <div class="join" role="group" aria-label="@T["Language.Label"]">
+        @foreach (var code in GameLanguages.Supported.Order(StringComparer.Ordinal))
+        {
+            var active = code == current;
+            <button type="submit" name="Language" value="@code" lang="@code"
+                    disabled="@active" aria-current="@(active ? "true" : null)"
+                    class="btn btn-xs join-item rounded-none font-mono uppercase @(active ? "btn-primary disabled:bg-primary disabled:text-primary-content" : "")">@T[$"Language.{code}"]</button>
+        }
+    </div>
+</form>

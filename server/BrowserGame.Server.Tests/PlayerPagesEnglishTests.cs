@@ -42,7 +42,7 @@ public sealed partial class PlayerPagesEnglishTests(GameServerFactory factory) :
 
         var (_, html) = await client.GetAsync("/");
 
-        AssertAll(html, "lang=\"en\"", "<title>Browser Game</title>",
+        AssertAll(html, "<html lang=\"en\"", "<title>Browser Game</title>",
             "A fantasy world in your browser. No download – just start walking.", ">Play</a>", ">Sign in</a>", ">Sign up</a>");
         AssertAll(html, "href=\"/play\"", "href=\"/Account/Login\"", "href=\"/Account/Register\"");
     }
@@ -257,7 +257,7 @@ public sealed partial class PlayerPagesEnglishTests(GameServerFactory factory) :
         Assert.DoesNotContain(en.Concat(de), t => MissingKey().IsMatch(t));
     }
 
-    private static readonly string[] SameInBothLanguages = ["Browser Game"];
+    private static readonly string[] SameInBothLanguages = ["Browser Game", "Deutsch", "English"];
 
     private static int Occurrences(string text, string part) =>
         text.Split(part, StringSplitOptions.None).Length - 1;
