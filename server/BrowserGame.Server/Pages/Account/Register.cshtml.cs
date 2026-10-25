@@ -17,19 +17,19 @@ namespace BrowserGame.Server.Pages.Account;
 public sealed class RegisterModel(UserManager<PlayerAccount> users, AccountEmails emails) : PageModel
 {
     [BindProperty]
-    [Required(ErrorMessage = "Bitte E-Mail angeben.")]
+    [Required(ErrorMessage = "Validation.EmailRequired")]
     public string Email { get; set; } = "";
 
     [BindProperty]
-    [Required(ErrorMessage = "Bitte einen Spielernamen angeben.")]
+    [Required(ErrorMessage = "Validation.NameRequired")]
     public string Name { get; set; } = "";
 
     [BindProperty]
-    [Required(ErrorMessage = "Bitte Passwort angeben.")]
+    [Required(ErrorMessage = "Validation.PasswordRequired")]
     public string Password { get; set; } = "";
 
     [BindProperty]
-    [Required(ErrorMessage = "Bitte das Passwort wiederholen.")]
+    [Required(ErrorMessage = "Validation.ConfirmPasswordRequired")]
     public string ConfirmPassword { get; set; } = "";
 
     public bool Sent { get; private set; }

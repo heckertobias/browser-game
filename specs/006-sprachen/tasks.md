@@ -9,7 +9,7 @@ Reihenfolge: Daten → Server → Client → Prüfung. Jeder Task bringt seine T
   Bestand `"de"`. `GameLanguages` (`Supported`, `Default`, `Normalize`) + Unit-Test.
 
 ## Server – Lokalisierung
-- [ ] **T2** (AK-1, AK-2, AK-4, AK-10): `AddLocalization`, DataAnnotations-Lokalisierung, `UseRequestLocalization`
+- [x] **T2** (AK-1, AK-2, AK-4, AK-10): `AddLocalization`, DataAnnotations-Lokalisierung, `UseRequestLocalization`
   (Cookie → `Accept-Language` mit einem Wert → `en`), `Texts` + `Texts.resx`/`Texts.de.resx`, `LanguageCookie`,
   `<html lang>` im Layout. `GameServerFactory` setzt `Accept-Language: de`. Unit-Test Schlüssel-Abgleich der `.resx`.
 - [ ] **T3** (AK-10, AK-11): `LocalizedIdentityErrorDescriber` mit `IdentityErrors(.de).resx` in `BrowserGame.Data`

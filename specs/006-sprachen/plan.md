@@ -47,7 +47,9 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
   - Provider genau in dieser Reihenfolge: `CookieRequestCultureProvider`, dann `AcceptLanguageHeaderRequestCultureProvider`
     mit `MaximumAcceptLanguageHeaderValuesToTry = 1` (nur die bevorzugte Sprache zählt, AK-1, AK-2). Kein
     Query-String-Provider.
-  - `de-AT`, `de-CH` usw. landen über die Eltern-Kultur bei `de`.
+  - `de-AT`, `de-CH` usw. landen bei `de`: Im Invariant-Modus gibt es keine Eltern-Kulturen, deshalb kürzt ein
+    Wrapper `LanguageOnlyCultureProvider` um beide Provider die Namen auf die Sprache; `FallBackToParent(UI)Cultures`
+    ist aus.
 - Leere, öffentliche Marker-Klasse `Texts` (`Localization/Texts.cs`) mit `Resources/Localization/Texts.resx`
   (Englisch) und `Resources/Localization/Texts.de.resx` – der Localizer sucht
   `BrowserGame.Server.Resources.Localization.Texts`. Schlüssel sind sprechende englische Bezeichner (`Login.Title`, `Register.NameRequired` …),
