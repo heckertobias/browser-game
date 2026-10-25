@@ -12,7 +12,7 @@ und Client nicht doppelt gepflegt werden.
 - **Server:** C# / ASP.NET Core
 - **Öffentliche Seiten:** Razor (schneller erster Seitenaufbau, kein React-SSR)
 - **Client:** TypeScript, React für UI, Canvas für die Spielwelt
-- **UI-Framework:** daisyUI, gemeinsam für Spiel-UI und Landing
+- **UI-Framework:** daisyUI, gemeinsam für Spiel-UI und Landing (Admin-Interface: Bootstrap, siehe [ADR 0007](0007-bootstrap-fuers-admin.md))
 - **Verträge:** OpenAPI (HTTP) und Protobuf (WebSocket) als einzige Typquelle, Code wird generiert
 
 ## Konsequenzen

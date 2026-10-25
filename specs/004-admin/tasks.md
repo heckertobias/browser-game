@@ -38,7 +38,7 @@ Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/
   `browser-game-admin`; `release.sh` und Release-Notes für beide Images.
 - [x] **T13**: `deploy/compose.template.yaml` (erzeugt beim Release `deploy/compose.yaml`) mit `browsergame-admin` (gleiches Volume, `ADMIN_VIRTUAL_HOST`), README
   („Admin-Interface“, erster Admin über den Link im Log). Hinweise fürs Homelab: interner Hostname, Volume ins Backup.
-- [ ] **T14**: Manuelle Prüfung auf dem Pi:
+- [x] **T14**: Manuelle Prüfung auf dem Pi:
   - Erster Admin über den Log-Link
   - Passkey-Anmeldung
   - SMTP mit dem Netcup-Postfach eintragen, Testmail

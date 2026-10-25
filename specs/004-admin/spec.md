@@ -1,6 +1,6 @@
 # 004 – Admin-Interface & SMTP-Einstellungen
 
-**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Voraussetzung für: [003 – Accounts](../003-accounts/spec.md) (Bestätigungs- und Reset-Mails nutzen diese Einstellungen)
 
