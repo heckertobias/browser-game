@@ -6,7 +6,7 @@
 # Multi-Arch (amd64, arm64) als Cross-Build: Build-Stages laufen auf der Build-Plattform,
 # nur die Laufzeit-Images sind zielspezifisch und enthalten kein RUN – keine Emulation nötig.
 
-# 1) Client bauen: Spiel-Client, CSS für Startseite und Admin, passkeys.js (landen in den wwwroot-Ordnern)
+# 1) Client bauen: Spiel-Client, CSS für Startseite und Admin, passkeys.js und language.js (landen in den wwwroot-Ordnern)
 FROM --platform=$BUILDPLATFORM node:24-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS client
 WORKDIR /src
 COPY buf.yaml buf.gen.yaml ./
@@ -20,7 +20,7 @@ COPY server/BrowserGame.Admin/Pages/ server/BrowserGame.Admin/Pages/
 RUN cd client && npm run build
 
 # 2) Gemeinsamer Restore für Spiel und Admin
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0@sha256:747cbade5bfd918a175ac32f8f1d931edec2c7d0d5397a3de72eaef1ac1f66d2 AS restore
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0@sha256:afd0ccff9d306812a69ef0f47458376b6acb544ae866cfc4b8d28ff0eef35ea7 AS restore
 ARG TARGETARCH
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
 WORKDIR /src
@@ -51,7 +51,7 @@ COPY --from=client /src/server/BrowserGame.Admin/wwwroot/ server/BrowserGame.Adm
 RUN dotnet publish server/BrowserGame.Admin/BrowserGame.Admin.csproj --configuration Release --arch $TARGETARCH --no-restore --output /app
 
 # 4a) Laufzeit Admin: chiseled (keine Shell, kein Paketmanager), non-root-User "app"
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:5165aeeb688df15e869a56a7584bb94bf16a14e0b3ba77b49fcdbe350f6b8020 AS admin
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:c89a6a61f494f20a5ae302990e814627a8d91b332fd4a8e7c1707c2d4da9555d AS admin
 WORKDIR /app
 COPY --from=publish-admin /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data
@@ -63,7 +63,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 ENTRYPOINT ["dotnet", "BrowserGame.Admin.dll"]
 
 # 4b) Laufzeit Spiel (Standardziel)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:5165aeeb688df15e869a56a7584bb94bf16a14e0b3ba77b49fcdbe350f6b8020 AS game
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:c89a6a61f494f20a5ae302990e814627a8d91b332fd4a8e7c1707c2d4da9555d AS game
 WORKDIR /app
 COPY --from=publish-game /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data

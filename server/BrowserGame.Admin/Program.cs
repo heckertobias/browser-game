@@ -33,6 +33,12 @@ await using (var scope = app.Services.CreateAsyncScope())
 }
 
 app.UseSecurityHeaders();
+// Bis 005 fest Deutsch (006): eine Sprache, kein Provider – Browser und Cookie ändern nichts.
+app.UseRequestLocalization(o =>
+{
+    o.SetDefaultCulture("de").AddSupportedCultures("de").AddSupportedUICultures("de");
+    o.RequestCultureProviders.Clear();
+});
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();

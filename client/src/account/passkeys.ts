@@ -9,9 +9,25 @@
  *
  * Beim Absenden fragt der Browser den Passkey ab; das Ergebnis landet als JSON im versteckten Feld und das Formular
  * wird normal abgeschickt. Keine JSON-API nötig.
+ *
+ * Fehlertexte nach `<html lang>`. Bewusst ohne Imports: sonst entsteht ein gemeinsamer Chunk, der im Admin fehlt.
  */
 
 type Mode = "create" | "get";
+
+const en = {
+  unsupported: "This browser does not support passkeys. Please use a current browser.",
+  noneSelected: "No passkey selected.",
+  createFailed: "The passkey could not be created (cancelled or not allowed).",
+  getFailed: "Signing in with a passkey was cancelled or failed.",
+} as const;
+
+const de: Record<keyof typeof en, string> = {
+  unsupported: "Dieser Browser unterstützt keine Passkeys. Bitte nutze einen aktuellen Browser.",
+  noneSelected: "Kein Passkey ausgewählt.",
+  createFailed: "Der Passkey konnte nicht angelegt werden (abgebrochen oder nicht erlaubt).",
+  getFailed: "Die Anmeldung mit Passkey wurde abgebrochen oder ist fehlgeschlagen.",
+};
 
 type Binary = ArrayBuffer | ArrayBufferView;
 
@@ -114,12 +130,13 @@ async function requestCredential(mode: Mode, optionsJson: unknown): Promise<Cred
 
 function attach(form: HTMLFormElement): void {
   const mode = form.dataset.passkey as Mode;
+  const texts = document.documentElement.lang.toLowerCase().startsWith("de") ? de : en;
   form.addEventListener("submit", (event) => {
     if (form.dataset.passkeyReady === "1") return; // zweiter Durchlauf: wirklich absenden
     event.preventDefault();
 
     if (!("PublicKeyCredential" in window) || typeof PublicKeyCredential.parseCreationOptionsFromJSON !== "function") {
-      showError(form, "Dieser Browser unterstützt keine Passkeys. Bitte nutze einen aktuellen Browser.");
+      showError(form, texts.unsupported);
       return;
     }
 
@@ -131,16 +148,14 @@ function attach(form: HTMLFormElement): void {
       try {
         const credential = await requestCredential(mode, JSON.parse(optionsElement.textContent));
         if (!credential) {
-          showError(form, "Kein Passkey ausgewählt.");
+          showError(form, texts.noneSelected);
           return;
         }
         input.value = credentialToJson(credential as unknown as CredentialLike);
         form.dataset.passkeyReady = "1";
         form.requestSubmit();
       } catch {
-        showError(form, mode === "create"
-          ? "Der Passkey konnte nicht angelegt werden (abgebrochen oder nicht erlaubt)."
-          : "Die Anmeldung mit Passkey wurde abgebrochen oder ist fehlgeschlagen.");
+        showError(form, mode === "create" ? texts.createFailed : texts.getFailed);
       }
     })();
   });

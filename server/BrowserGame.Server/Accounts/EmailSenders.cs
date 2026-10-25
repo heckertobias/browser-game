@@ -1,39 +1,50 @@
+using System.Globalization;
+using System.Text.Encodings.Web;
 using BrowserGame.Data;
+using BrowserGame.Server.Localization;
 using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGame.Server.Accounts;
 
-/// <summary>Deutsche Mailtexte für Identity (Bestätigen, Passwort zurücksetzen); der Versandweg ist austauschbar.</summary>
+/// <summary>
+/// Mailtexte in der Sprache des Accounts (006 AK-9), nicht der aktuellen Anfrage; der Versandweg ist austauschbar.
+/// </summary>
 public abstract class GameEmailSender : IEmailSender<Account>
 {
     public Task SendConfirmationLinkAsync(Account user, string email, string confirmationLink) =>
-        SendAsync(email, "Bitte bestätige deine E-Mail-Adresse",
-            $"Hallo {user.UserName},\n\nbitte bestätige deine E-Mail-Adresse, damit du spielen kannst:\n{confirmationLink}\n\n"
-            + "Der Link ist 3 Stunden gültig. Wenn du dich nicht registriert hast, kannst du diese Mail ignorieren.",
-            confirmationLink);
+        Compose(user, email, "Mail.Confirmation", confirmationLink, confirmationLink);
 
     public Task SendPasswordResetLinkAsync(Account user, string email, string resetLink) =>
-        SendAsync(email, "Passwort zurücksetzen",
-            $"Hallo {user.UserName},\n\nüber diesen Link kannst du ein neues Passwort setzen:\n{resetLink}\n\n"
-            + "Der Link ist 3 Stunden gültig und funktioniert nur einmal. Wenn du das nicht angefordert hast, ignoriere diese Mail.",
-            resetLink);
+        Compose(user, email, "Mail.PasswordReset", resetLink, resetLink);
 
     /// <summary>Registrierung mit einer schon vorhandenen Adresse: Hinweis an den Inhaber statt Fehlermeldung auf der Seite.</summary>
     public Task SendAlreadyRegisteredAsync(Account user, string email, string loginLink, string forgotPasswordLink) =>
-        SendAsync(email, "Du hast schon einen Account",
-            $"Hallo {user.UserName},\n\njemand hat versucht, mit deiner E-Mail-Adresse einen neuen Account anzulegen. "
-            + $"Du hast bereits einen. Hier kannst du dich anmelden:\n{loginLink}\n\n"
-            + $"Passwort vergessen? {forgotPasswordLink}\n\nWenn du das nicht warst, musst du nichts tun.",
-            loginLink);
+        Compose(user, email, "Mail.AlreadyRegistered", loginLink, loginLink, forgotPasswordLink);
 
     /// <summary>Codes statt Links nutzen wir nicht (nur für das Identity-Interface).</summary>
     public Task SendPasswordResetCodeAsync(Account user, string email, string resetCode) =>
         throw new NotSupportedException("Passwort-Reset läuft über Links.");
 
-    /// <summary>Text-Mail plus schlichtes HTML mit klickbarem Link.</summary>
-    protected abstract Task SendAsync(string recipient, string subject, string text, string link);
+    /// <summary>Text-Mail plus schlichtes HTML mit klickbarem Link; <paramref name="language"/> ist die Sprache des Accounts.</summary>
+    protected abstract Task SendAsync(string recipient, string subject, string text, string link, string language);
 
-    protected static string ToHtml(string text, string link) => MailHtml.FromText(text, link);
+    protected static string ToHtml(string text, string link, string language) =>
+        $"<div lang=\"{HtmlEncoder.Default.Encode(language)}\">{MailHtml.FromText(text, link)}</div>";
+
+    private Task Compose(Account user, string email, string key, string htmlLink, params string[] links)
+    {
+        var language = GameLanguages.Normalize(user.Language);
+        var culture = CultureInfo.GetCultureInfo(language);
+        var subject = Text(key + ".Subject", culture);
+        var text = Format(culture, Text(key + ".Body", culture), [user.UserName, .. links]);
+        return SendAsync(email, subject, text, htmlLink, language);
+    }
+
+    private static string Text(string key, CultureInfo culture) => Texts.ResourceManager.GetString(key, culture) ?? key;
+
+#pragma warning disable CA1863 // Vorlage kommt je Sprache aus der Ressource; Zwischenspeichern lohnt nicht.
+    private static string Format(CultureInfo culture, string format, params object?[] args) => string.Format(culture, format, args);
+#pragma warning restore CA1863
 }
 
 /// <summary>
@@ -43,9 +54,9 @@ public abstract class GameEmailSender : IEmailSender<Account>
 /// </summary>
 internal sealed partial class PlayerEmailSender(SmtpMailer mailer, IWebHostEnvironment environment, ILogger<PlayerEmailSender> logger) : GameEmailSender
 {
-    protected override async Task SendAsync(string recipient, string subject, string text, string link)
+    protected override async Task SendAsync(string recipient, string subject, string text, string link, string language)
     {
-        var result = await mailer.SendAsync(recipient, subject, text, ToHtml(text, link));
+        var result = await mailer.SendAsync(recipient, subject, text, ToHtml(text, link, language));
         if (result.Status == MailStatus.Sent)
         {
             return;

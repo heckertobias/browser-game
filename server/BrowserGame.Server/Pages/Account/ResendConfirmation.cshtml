@@ -1,20 +1,20 @@
 @page
 @model ResendConfirmationModel
 @{
-    ViewData["Title"] = "Bestätigungsmail";
+    ViewData["Title"] = T["ResendConfirmation.Title"].Value;
 }
 @if (Model.Sent)
 {
-    <p>Falls es zu dieser Adresse einen noch nicht bestätigten Account gibt, haben wir dir eine neue Mail geschickt.</p>
+    <p>@T["ResendConfirmation.Sent"]</p>
 }
 else
 {
     <partial name="_Errors" />
     <form method="post" class="flex flex-col gap-3">
         <label class="flex flex-col gap-1">
-            <span class="label-text">E-Mail</span>
+            <span class="label-text">@T["Common.Email"]</span>
             <input asp-for="Email" type="email" autocomplete="username" class="input input-bordered w-full rounded-none" />
         </label>
-        <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Mail senden</button>
+        <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">@T["ResendConfirmation.Submit"]</button>
     </form>
 }

@@ -45,7 +45,7 @@ internal static class AdminAuthSetup
             .AddEntityFrameworkStores<AdminDbContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders()
-            .AddErrorDescriber<GermanIdentityErrorDescriber>();
+            .AddErrorDescriber<LocalizedIdentityErrorDescriber>();
 
         var secure = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
         foreach (var scheme in new[]

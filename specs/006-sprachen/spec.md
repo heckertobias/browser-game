@@ -1,6 +1,6 @@
 # 006 – Deutsch und Englisch
 
-**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) (HUD) ·
 [004 – Admin-Interface & SMTP-Einstellungen](../004-admin/spec.md) (Mailversand) ·

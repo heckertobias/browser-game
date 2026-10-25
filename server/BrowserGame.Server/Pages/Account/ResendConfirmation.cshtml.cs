@@ -14,7 +14,7 @@ namespace BrowserGame.Server.Pages.Account;
 public sealed class ResendConfirmationModel(UserManager<PlayerAccount> users, AccountEmails emails) : PageModel
 {
     [BindProperty]
-    [Required(ErrorMessage = "Bitte E-Mail angeben.")]
+    [Required(ErrorMessage = "Validation.EmailRequired")]
     public string Email { get; set; } = "";
 
     public bool Sent { get; private set; }

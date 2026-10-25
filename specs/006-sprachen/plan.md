@@ -47,7 +47,9 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
   - Provider genau in dieser Reihenfolge: `CookieRequestCultureProvider`, dann `AcceptLanguageHeaderRequestCultureProvider`
     mit `MaximumAcceptLanguageHeaderValuesToTry = 1` (nur die bevorzugte Sprache zählt, AK-1, AK-2). Kein
     Query-String-Provider.
-  - `de-AT`, `de-CH` usw. landen über die Eltern-Kultur bei `de`.
+  - `de-AT`, `de-CH` usw. landen bei `de`: Im Invariant-Modus gibt es keine Eltern-Kulturen, deshalb kürzt ein
+    Wrapper `LanguageOnlyCultureProvider` um beide Provider die Namen auf die Sprache; `FallBackToParent(UI)Cultures`
+    ist aus.
 - Leere, öffentliche Marker-Klasse `Texts` (`Localization/Texts.cs`) mit `Resources/Localization/Texts.resx`
   (Englisch) und `Resources/Localization/Texts.de.resx` – der Localizer sucht
   `BrowserGame.Server.Resources.Localization.Texts`. Schlüssel sind sprechende englische Bezeichner (`Login.Title`, `Register.NameRequired` …),
@@ -93,7 +95,8 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
 - Server und Admin registrieren den neuen Describer.
 
 ### Admin bis 005
-- `AddLocalization` + `UseRequestLocalization` mit genau einer unterstützten Sprache `de` und ohne Provider. So bleibt
+- `UseRequestLocalization` mit genau einer unterstützten Sprache `de` und ohne Provider (kein `AddLocalization`: das
+  Admin hat noch keine eigenen Ressourcen; kommt mit 005). So bleibt
   das Admin vollständig deutsch, auch bei englischem Browser. 005 stellt auf `en` um und übersetzt (005 AK-14).
 
 ### Account-Sprache
@@ -131,8 +134,8 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
 - **Test-Clients:** `GameServerFactory` setzt für alle Clients `Accept-Language: de` (`ConfigureClient`), damit die
   bestehenden Integrationstests mit deutschen Texten unverändert bleiben. Tests für Englisch setzen den Header selbst.
 - **Bestehende Unit-Tests mit deutschen Texten** (`PlayerNamesTests`, `EmailTests`): Sie hängen danach von der Kultur
-  ab. `PlayerNamesTests` setzt die UI-Kultur auf `de` (Verhalten unverändert); `EmailTests` bleibt unverändert, weil
-  `Account.Language` standardmäßig `"de"` ist.
+  ab. `PlayerNamesTests` prüft nur, dass es Texte gibt, und bleibt unverändert; die Texte je Sprache prüfen neue Tests.
+  `EmailTests` bleibt unverändert, weil `Account.Language` standardmäßig `"de"` ist.
 
 ## Abdeckung der Akzeptanzkriterien
 
