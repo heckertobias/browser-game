@@ -38,7 +38,11 @@ _(Seit ADR 0009: Merge-Commit und Squash erlaubt, keine lineare Historie, Admin-
 der einzige Required Check. Neue Jobs werden nur in seinem `needs` eingetragen; das Ruleset bleibt unverändert.
 `dependency-review.yml` blockiert PRs, die Abhängigkeiten mit Schwachstellen ab `high` einführen.
 
-**Dependabot:** wöchentlich, Minor- und Patch-Updates gruppiert, mit 3 Tagen Cooldown gegen frisch kompromittierte Releases.
+**Dependabot:** wöchentlich, Minor- und Patch-Updates gruppiert, mit 7 Tagen Cooldown gegen frisch kompromittierte
+Releases (geändert 2026-10-25, vorher 3 Tage). Sicherheitsupdates sind davon ausgenommen und kommen sofort. Auch das
+.NET SDK kommt nur so: `global.json` nutzt `rollForward: "patch"`, damit die CI genau die angegebene Version
+installiert und nicht an Dependabot vorbei den neuesten Patch zieht. Für npm gilt dasselbe auch bei Installationen von Hand:
+`client/.npmrc` setzt `min-release-age=7` (wirksam ab npm 11.10).
 Patch und Minor werden nach grüner CI automatisch gemergt, Major-Updates manuell.
 
 **CD:**
