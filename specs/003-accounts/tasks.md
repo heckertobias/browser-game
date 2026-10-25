@@ -22,7 +22,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 - [x] **T6** (AK-2, AK-3, AK-14): `IEmailSender<Account>` – `SmtpEmailSender` (MailKit) und `LogEmailSender`
   (Development), deutsche Texte, Links aus `App:PublicUrl`.
   _Wird durch 004 T4 ersetzt: SMTP-Einstellungen aus der DB (Admin-Interface) statt `Mail:*`._
-- [ ] **T7** _(Teilstand: Hilfsklassen, deutsche Fehlertexte)_ (AK-1–3, AK-7, AK-9, AK-13): Razor Pages `Register` (Passwort-Weg), `Login`, `ConfirmEmail`,
+- [x] **T7** (AK-1–3, AK-7, AK-9, AK-13): Razor Pages `Register` (Passwort-Weg), `Login`, `ConfirmEmail`,
   `ResendConfirmation`, `Logout`; Startseite mit Anmelde-Links; `/play` mit `RequireAuthorization`.
 - [ ] **T8** (AK-14, AK-15): `ForgotPassword`, `ResetPassword`.
 - [ ] **T9** (AK-4, AK-13b, AK-13c, AK-16): Passkeys bei Registrierung, Anmeldung und `Manage`; `CanRemoveCredential`
@@ -42,6 +42,8 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 ## Tests / Prüfung
 - [ ] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen
   SQLite und PostgreSQL (Provider per Umgebungsvariable).
+  _AK-1, AK-2, AK-3, AK-7, AK-9 und AK-13 samt Test-Infrastruktur (`CapturingEmailSender`, `FormClient`,
+  `AccountTestFlows`) schon mit T7 erledigt._
 - [ ] **T15**: CI-Job `server-postgres` (Service-Container, Digest gepinnt) und Prüfung auf pending model changes für
   beide Kontexte; in `ci-ok.needs`.
 

@@ -9,9 +9,9 @@ public class EmailTests
     {
         public List<(string To, string Subject, string Text, string Html)> Mails { get; } = [];
 
-        protected override Task SendAsync(string to, string subject, string text, string link)
+        protected override Task SendAsync(string recipient, string subject, string text, string link)
         {
-            Mails.Add((to, subject, text, ToHtml(text, link)));
+            Mails.Add((recipient, subject, text, ToHtml(text, link)));
             return Task.CompletedTask;
         }
     }

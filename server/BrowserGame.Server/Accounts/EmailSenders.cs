@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 namespace BrowserGame.Server.Accounts;
 
 /// <summary>Deutsche Mailtexte für Identity (Bestätigen, Passwort zurücksetzen); der Versandweg ist austauschbar.</summary>
-internal abstract class GameEmailSender : IEmailSender<Account>
+public abstract class GameEmailSender : IEmailSender<Account>
 {
     public Task SendConfirmationLinkAsync(Account user, string email, string confirmationLink) =>
         SendAsync(email, "Bitte bestätige deine E-Mail-Adresse",
@@ -31,7 +31,7 @@ internal abstract class GameEmailSender : IEmailSender<Account>
         throw new NotSupportedException("Passwort-Reset läuft über Links.");
 
     /// <summary>Text-Mail plus schlichtes HTML mit klickbarem Link.</summary>
-    protected abstract Task SendAsync(string to, string subject, string text, string link);
+    protected abstract Task SendAsync(string recipient, string subject, string text, string link);
 
     protected static string ToHtml(string text, string link) => MailHtml.FromText(text, link);
 }
@@ -43,9 +43,9 @@ internal abstract class GameEmailSender : IEmailSender<Account>
 /// </summary>
 internal sealed partial class PlayerEmailSender(SmtpMailer mailer, IWebHostEnvironment environment, ILogger<PlayerEmailSender> logger) : GameEmailSender
 {
-    protected override async Task SendAsync(string to, string subject, string text, string link)
+    protected override async Task SendAsync(string recipient, string subject, string text, string link)
     {
-        var result = await mailer.SendAsync(to, subject, text, ToHtml(text, link));
+        var result = await mailer.SendAsync(recipient, subject, text, ToHtml(text, link));
         if (result.Status == MailStatus.Sent)
         {
             return;

@@ -44,8 +44,8 @@ app.Map("/ws", GameEndpoint.HandleAsync);
 app.MapHealthChecks("/health");
 // Client (Vite-Build) liegt in wwwroot/play. `nonfile`: Pfade mit Dateiendung (Assets) fallen nicht auf
 // index.html zurück – sonst verdeckt die Route die Static-Files-Middleware und Assets kämen als HTML.
-app.MapFallbackToFile("/play", "play/index.html");
-app.MapFallbackToFile("/play/{*path:nonfile}", "play/index.html");
+app.MapFallbackToFile("/play", "play/index.html").RequireAuthorization();
+app.MapFallbackToFile("/play/{*path:nonfile}", "play/index.html").RequireAuthorization();
 
 await app.RunAsync();
 return 0;

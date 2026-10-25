@@ -1,0 +1,15 @@
+@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "E-Mail bestätigen";
+}
+@if (Model.Confirmed)
+{
+    <p>Deine E-Mail-Adresse ist bestätigt.</p>
+    <a href="/play" class="btn btn-primary rounded-none font-mono uppercase" data-testid="play">Jetzt spielen</a>
+}
+else
+{
+    <div class="alert alert-error rounded-none" role="alert">Der Link ist ungültig oder abgelaufen.</div>
+    <a class="link text-sm" href="/Account/ResendConfirmation">Bestätigungsmail erneut senden</a>
+}

@@ -23,10 +23,30 @@ public sealed class GameServerTests(GameServerFactory factory) : IClassFixture<G
     [InlineData("/play")]
     [InlineData("/play/")]
     [InlineData("/play/irgendwas")]
-    public async Task Play_serves_client(string path)
+    public async Task Play_redirects_anonymous_to_login(string path)
     {
-        var html = await factory.CreateClient().GetStringAsync(new Uri(path, UriKind.Relative), TestContext.Current.CancellationToken);
+        using var client = factory.CreateFormClient();
 
+        var (response, _) = await client.GetAsync(path);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/Login", response.Headers.Location?.AbsolutePath);
+        Assert.Contains("ReturnUrl=", response.Headers.Location?.Query, StringComparison.Ordinal);
+    }
+
+    [Theory] // AK-1
+    [InlineData("/play")]
+    [InlineData("/play/")]
+    [InlineData("/play/irgendwas")]
+    public async Task Play_serves_client_when_signed_in(string path)
+    {
+        using var client = factory.CreateFormClient();
+        var account = await AccountTestFlows.CreateConfirmedAccountAsync(factory);
+        await AccountTestFlows.LoginAsync(client, account.Email);
+
+        var (response, html) = await client.GetAsync(path);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("<div id=\"root\">", html, StringComparison.Ordinal);
     }
 

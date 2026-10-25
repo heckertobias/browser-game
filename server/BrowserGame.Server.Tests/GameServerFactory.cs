@@ -1,6 +1,8 @@
 using BrowserGame.Data;
+using BrowserGame.Server.Accounts;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 
 namespace BrowserGame.Server.Tests;
 
@@ -29,12 +31,21 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
     /// <summary>Verbindungszeichenfolge dieser Factory; bleibt gleich, damit ein zweiter Server dieselbe DB nutzen kann.</summary>
     public string ConnectionString { get; } = TestDatabase.NewConnectionString("bg-test");
 
+    /// <summary>Statt echter Mails: alle Mails, die der Server verschicken würde.</summary>
+    public CapturingEmailSender Mails { get; } = new();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseWebRoot(WebRoot);
         builder.UseSetting("Database:Provider", Provider);
         builder.UseSetting("ConnectionStrings:Game", ConnectionString);
+        // Im Testserver kommen alle Anfragen von derselben „IP“ – Limit hoch, damit Tests sich nicht gegenseitig bremsen.
+        builder.UseSetting("RateLimiting:AuthRequestsPerMinute", "1000");
+        builder.ConfigureTestServices(services => services.AddSingleton<GameEmailSender>(Mails));
     }
+
+    /// <summary>Formular-Client mit eigenem Cookie-Speicher, ohne automatische Weiterleitungen.</summary>
+    public FormClient CreateFormClient() => new(CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false }));
 
     protected override void Dispose(bool disposing)
     {

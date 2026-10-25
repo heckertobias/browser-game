@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 namespace BrowserGame.Server.Accounts;
 
 /// <summary>Erzeugt Token und Link und verschickt die passende Mail (AK-2, AK-3, AK-14).</summary>
-internal sealed class AccountEmails(UserManager<Account> users, GameEmailSender mail, AccountLinks links)
+public sealed class AccountEmails(UserManager<Account> users, GameEmailSender mail, AccountLinks links)
 {
     public async Task SendConfirmationAsync(Account account)
     {

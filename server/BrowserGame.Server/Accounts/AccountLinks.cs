@@ -7,7 +7,7 @@ namespace BrowserGame.Server.Accounts;
 /// Absolute Links für Mails. Basis ist <c>App:PublicUrl</c>, nie der Host-Header (sonst ließen sich Links per
 /// manipuliertem Host auf fremde Domains umbiegen). Nur in der Entwicklung fällt sie auf die aktuelle Anfrage zurück.
 /// </summary>
-internal sealed class AccountLinks(IConfiguration configuration, IHttpContextAccessor http, IWebHostEnvironment environment)
+public sealed class AccountLinks(IConfiguration configuration, IHttpContextAccessor http, IWebHostEnvironment environment)
 {
     public string Absolute(string pathAndQuery)
     {

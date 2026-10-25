@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace BrowserGame.Admin.Tests;
+namespace BrowserGame.Server.Tests;
 
 /// <summary>Bedient Razor-Formulare wie ein Browser: Seite laden, Antiforgery-Token übernehmen, absenden.</summary>
 public sealed partial class FormClient(HttpClient http) : IDisposable

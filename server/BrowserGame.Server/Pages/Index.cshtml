@@ -1,19 +1,21 @@
 @page
-<!DOCTYPE html>
-<html lang="de" data-theme="dark">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Browser Game</title>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body class="min-h-screen bg-base-200 flex items-center justify-center">
-    <main class="card bg-base-100 shadow-xl max-w-md border-4 border-base-content/20 rounded-none">
-        <div class="card-body items-center text-center gap-4">
-            <h1 class="card-title text-3xl font-mono uppercase tracking-widest">Browser Game</h1>
-            <p>Eine Fantasy-Welt im Browser. Kein Download – einfach loslaufen.</p>
-            <a href="/play" class="btn btn-primary btn-lg rounded-none font-mono uppercase" data-testid="play">Spielen</a>
-        </div>
-    </main>
-</body>
-</html>
+@{
+    ViewData["Title"] = "Browser Game";
+    ViewData["Home"] = true;
+}
+<p>Eine Fantasy-Welt im Browser. Kein Download – einfach loslaufen.</p>
+<a href="/play" class="btn btn-primary btn-lg rounded-none font-mono uppercase" data-testid="play">Spielen</a>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <p class="text-sm">Angemeldet als @User.Identity.Name</p>
+    <form method="post" asp-page="/Account/Logout">
+        <button type="submit" class="btn btn-ghost btn-sm rounded-none font-mono uppercase">Abmelden</button>
+    </form>
+}
+else
+{
+    <div class="flex gap-2">
+        <a href="/Account/Login" class="btn btn-sm rounded-none font-mono uppercase">Anmelden</a>
+        <a href="/Account/Register" class="btn btn-sm rounded-none font-mono uppercase">Registrieren</a>
+    </div>
+}

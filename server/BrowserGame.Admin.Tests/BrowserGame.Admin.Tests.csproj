@@ -13,11 +13,13 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="BrowserGame.Server.Tests" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Gemeinsame Test-Helfer -->
     <Compile Include="..\BrowserGame.Server.Tests\FakeSmtpServer.cs" Link="FakeSmtpServer.cs" />
+    <Compile Include="..\BrowserGame.Server.Tests\FormClient.cs" Link="FormClient.cs" />
     <Compile Include="..\BrowserGame.Server.Tests\TestDatabase.cs" Link="TestDatabase.cs" />
   </ItemGroup>
 

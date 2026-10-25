@@ -1,0 +1,34 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Registrieren";
+}
+@if (Model.Sent)
+{
+    <p>Fast geschafft! Wir haben dir eine Mail geschickt. Klicke auf den Link darin, um deine E-Mail-Adresse zu bestätigen.</p>
+    <a class="link text-sm" href="/Account/ResendConfirmation">Keine Mail bekommen? Erneut senden</a>
+}
+else
+{
+    <partial name="_Errors" />
+    <form method="post" class="flex flex-col gap-3">
+        <label class="flex flex-col gap-1">
+            <span class="label-text">E-Mail</span>
+            <input asp-for="Email" type="email" autocomplete="username" class="input input-bordered w-full rounded-none" />
+        </label>
+        <label class="flex flex-col gap-1">
+            <span class="label-text">Spielername (3 bis 16 Buchstaben A–Z)</span>
+            <input asp-for="Name" type="text" autocomplete="nickname" class="input input-bordered w-full rounded-none" />
+        </label>
+        <label class="flex flex-col gap-1">
+            <span class="label-text">Passwort (mindestens 10 Zeichen)</span>
+            <input asp-for="Password" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
+        </label>
+        <label class="flex flex-col gap-1">
+            <span class="label-text">Passwort wiederholen</span>
+            <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
+        </label>
+        <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Registrieren</button>
+    </form>
+    <a class="link text-sm" href="/Account/Login">Schon einen Account? Anmelden</a>
+}
