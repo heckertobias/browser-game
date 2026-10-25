@@ -41,6 +41,7 @@
   <data name="Language.Label" xml:space="preserve"><value>Sprache</value></data>
   <data name="Language.de" xml:space="preserve"><value>Deutsch</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
   <data name="Language.en" xml:space="preserve"><value>English</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
+  <data name="Language.Confirm" xml:space="preserve"><value>Beim Umschalten wird die Seite neu geladen und deine Eingaben gehen verloren. Trotzdem umschalten?</value></data>
   <data name="Mail.Confirmation.Subject" xml:space="preserve"><value>Bitte bestätige deine E-Mail-Adresse</value></data>
   <data name="Mail.Confirmation.Body" xml:space="preserve"><value>Hallo {0},&#10;&#10;bitte bestätige deine E-Mail-Adresse, damit du spielen kannst:&#10;{1}&#10;&#10;Der Link ist 3 Stunden gültig. Wenn du dich nicht registriert hast, kannst du diese Mail ignorieren.</value></data>
   <data name="Mail.PasswordReset.Subject" xml:space="preserve"><value>Passwort zurücksetzen</value></data>

@@ -247,8 +247,56 @@ public sealed partial class LanguageSwitchTests(GameServerFactory factory) : ICl
         }
     }
 
+    [Theory] // AK-3
+    [InlineData("de")]
+    [InlineData("en")]
+    public async Task Switch_asks_before_losing_entries_in_the_current_language(string language)
+    {
+        using var client = ClientWith(language);
+
+        var (_, html) = await client.GetAsync("/");
+
+        var attribute = ConfirmPattern().Match(Form(html));
+        Assert.True(attribute.Success);
+        var message = WebUtility.HtmlDecode(attribute.Groups[1].Value);
+        var expected = Texts.ResourceManager.GetString("Language.Confirm", CultureInfo.GetCultureInfo(language));
+        Assert.False(string.IsNullOrWhiteSpace(expected));
+        Assert.NotEqual("Language.Confirm", expected);
+        Assert.Equal(expected, message);
+        if (language == "en")
+        {
+            Assert.DoesNotMatch("[äöüÄÖÜß]", message);
+        }
+        else
+        {
+            Assert.NotEqual(Texts.ResourceManager.GetString("Language.Confirm", CultureInfo.GetCultureInfo("en")), message);
+        }
+    }
+
+    [Theory] // AK-3
+    [InlineData("/")]
+    [InlineData("/Account/Login")]
+    [InlineData("/Account/Login?ReturnUrl=%2Fplay")]
+    [InlineData("/Account/Register")]
+    [InlineData("/Account/ResendConfirmation")]
+    [InlineData("/Account/ConfirmEmail")]
+    public async Task Layout_loads_language_js(string url)
+    {
+        using var client = ClientWith("de");
+
+        var (_, html) = await client.GetAsync(url);
+
+        Assert.Single(ScriptPattern().Matches(html));
+    }
+
     [GeneratedRegex("<form[^>]*data-language-switch.*?</form>", RegexOptions.Singleline)]
     private static partial Regex FormPattern();
+
+    [GeneratedRegex("data-confirm=\"([^\"]*)\"")]
+    private static partial Regex ConfirmPattern();
+
+    [GeneratedRegex("<script type=\"module\" src=\"/js/language\\.js(\\?v=[^\"]+)?\"></script>")]
+    private static partial Regex ScriptPattern();
 
     [GeneratedRegex("name=\"ReturnUrl\" value=\"([^\"]*)\"")]
     private static partial Regex ReturnUrlPattern();

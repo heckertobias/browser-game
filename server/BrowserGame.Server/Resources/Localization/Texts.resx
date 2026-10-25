@@ -41,6 +41,7 @@
   <data name="Language.Label" xml:space="preserve"><value>Language</value></data>
   <data name="Language.de" xml:space="preserve"><value>Deutsch</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
   <data name="Language.en" xml:space="preserve"><value>English</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
+  <data name="Language.Confirm" xml:space="preserve"><value>Switching the language reloads the page and your entries will be lost. Switch anyway?</value></data>
   <data name="Mail.Confirmation.Subject" xml:space="preserve"><value>Please confirm your email address</value></data>
   <data name="Mail.Confirmation.Body" xml:space="preserve"><value>Hello {0},&#10;&#10;Please confirm your email address so you can play:&#10;{1}&#10;&#10;The link is valid for 3 hours. If you didn't sign up, you can ignore this email.</value></data>
   <data name="Mail.PasswordReset.Subject" xml:space="preserve"><value>Reset your password</value></data>
