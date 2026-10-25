@@ -1,7 +1,8 @@
+using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
 using BrowserGame.Data;
-using BrowserGame.Server.Pages.Account;
+using BrowserGame.Server.Localization;
 using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGame.Server.Tests;
@@ -246,7 +247,7 @@ public sealed partial class AccountPagesTests(GameServerFactory factory) : IClas
         text.Split(part, StringSplitOptions.None).Length - 1;
 
     private static void AssertGenericError(string html) =>
-        Assert.Contains(LoginModel.GenericError, WebUtility.HtmlDecode(html), StringComparison.Ordinal);
+        Assert.Contains(Texts.ResourceManager.GetString("Login.GenericError", CultureInfo.GetCultureInfo("de"))!, WebUtility.HtmlDecode(html), StringComparison.Ordinal);
 
     private static bool HasSessionCookie(HttpResponseMessage response) =>
         response.Headers.TryGetValues("Set-Cookie", out var cookies)

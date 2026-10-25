@@ -1,4 +1,5 @@
 import type { Snapshot, Welcome } from "../generated/browsergame/v1/game_pb";
+import { t } from "../i18n";
 import { INTERPOLATION_DELAY_MS, LOGICAL_HEIGHT, LOGICAL_WIDTH } from "./constants";
 import { InputTracker } from "./input";
 import { SnapshotBuffer } from "./interpolation";
@@ -35,7 +36,7 @@ export class Game {
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly events: GameEvents) {
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Canvas 2D wird nicht unterstützt");
+    if (!ctx) throw new Error(t.canvasUnsupported);
     this.ctx = ctx;
     this.input = new InputTracker(canvas);
   }

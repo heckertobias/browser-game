@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Validation.EmailRequired" xml:space="preserve"><value>Bitte E-Mail angeben.</value></data>
+  <data name="Validation.NameRequired" xml:space="preserve"><value>Bitte einen Spielernamen angeben.</value></data>
+  <data name="Validation.PasswordRequired" xml:space="preserve"><value>Bitte Passwort angeben.</value></data>
+  <data name="Validation.ConfirmPasswordRequired" xml:space="preserve"><value>Bitte das Passwort wiederholen.</value></data>
+  <data name="PlayerName.Length" xml:space="preserve"><value>Der Name muss {0} bis {1} Zeichen lang sein.</value></data>
+  <data name="PlayerName.Characters" xml:space="preserve"><value>Der Name darf nur aus den Buchstaben A–Z bestehen (keine Umlaute, Ziffern, Leer- oder Sonderzeichen).</value></data>
+  <data name="PlayerName.Blocked" xml:space="preserve"><value>Dieser Name ist nicht erlaubt.</value></data>
+  <data name="Common.GameName" xml:space="preserve"><value>Browser Game</value></data>
+  <data name="Common.SignIn" xml:space="preserve"><value>Anmelden</value></data>
+  <data name="Common.Register" xml:space="preserve"><value>Registrieren</value></data>
+  <data name="Common.Email" xml:space="preserve"><value>E-Mail</value></data>
+  <data name="Common.ResendConfirmation" xml:space="preserve"><value>Bestätigungsmail erneut senden</value></data>
+  <data name="Index.Tagline" xml:space="preserve"><value>Eine Fantasy-Welt im Browser. Kein Download – einfach loslaufen.</value></data>
+  <data name="Index.Play" xml:space="preserve"><value>Spielen</value></data>
+  <data name="Index.SignedInAs" xml:space="preserve"><value>Angemeldet als {0}</value></data>
+  <data name="Index.SignOut" xml:space="preserve"><value>Abmelden</value></data>
+  <data name="Login.ReturnHint" xml:space="preserve"><value>Melde dich an, um zu spielen.</value></data>
+  <data name="Login.Password" xml:space="preserve"><value>Passwort</value></data>
+  <data name="Login.NoAccount" xml:space="preserve"><value>Noch keinen Account? Registrieren</value></data>
+  <data name="Login.GenericError" xml:space="preserve"><value>Anmeldung fehlgeschlagen. Prüfe E-Mail und Passwort. Nach mehreren Fehlversuchen ist die Anmeldung kurz gesperrt.</value></data>
+  <data name="Register.NameLabel" xml:space="preserve"><value>Spielername (3 bis 16 Buchstaben A–Z)</value></data>
+  <data name="Register.PasswordLabel" xml:space="preserve"><value>Passwort (mindestens 10 Zeichen)</value></data>
+  <data name="Register.ConfirmPasswordLabel" xml:space="preserve"><value>Passwort wiederholen</value></data>
+  <data name="Register.HaveAccount" xml:space="preserve"><value>Schon einen Account? Anmelden</value></data>
+  <data name="Register.PasswordMismatch" xml:space="preserve"><value>Die Passwörter stimmen nicht überein.</value></data>
+  <data name="Register.Sent" xml:space="preserve"><value>Fast geschafft! Wir haben dir eine Mail geschickt. Klicke auf den Link darin, um deine E-Mail-Adresse zu bestätigen.</value></data>
+  <data name="Register.NoMail" xml:space="preserve"><value>Keine Mail bekommen? Erneut senden</value></data>
+  <data name="ConfirmEmail.Title" xml:space="preserve"><value>E-Mail bestätigen</value></data>
+  <data name="ConfirmEmail.Confirmed" xml:space="preserve"><value>Deine E-Mail-Adresse ist bestätigt.</value></data>
+  <data name="ConfirmEmail.PlayNow" xml:space="preserve"><value>Jetzt spielen</value></data>
+  <data name="ConfirmEmail.Invalid" xml:space="preserve"><value>Der Link ist ungültig oder abgelaufen.</value></data>
+  <data name="ResendConfirmation.Title" xml:space="preserve"><value>Bestätigungsmail</value></data>
+  <data name="ResendConfirmation.Sent" xml:space="preserve"><value>Falls es zu dieser Adresse einen noch nicht bestätigten Account gibt, haben wir dir eine neue Mail geschickt.</value></data>
+  <data name="ResendConfirmation.Submit" xml:space="preserve"><value>Mail senden</value></data>
+  <data name="Language.Label" xml:space="preserve"><value>Sprache</value></data>
+  <data name="Language.de" xml:space="preserve"><value>Deutsch</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
+  <data name="Language.en" xml:space="preserve"><value>English</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
+  <data name="Language.Confirm" xml:space="preserve"><value>Beim Umschalten wird die Seite neu geladen und deine Eingaben gehen verloren. Trotzdem umschalten?</value></data>
+  <data name="Mail.Confirmation.Subject" xml:space="preserve"><value>Bitte bestätige deine E-Mail-Adresse</value></data>
+  <data name="Mail.Confirmation.Body" xml:space="preserve"><value>Hallo {0},&#10;&#10;bitte bestätige deine E-Mail-Adresse, damit du spielen kannst:&#10;{1}&#10;&#10;Der Link ist 3 Stunden gültig. Wenn du dich nicht registriert hast, kannst du diese Mail ignorieren.</value></data>
+  <data name="Mail.PasswordReset.Subject" xml:space="preserve"><value>Passwort zurücksetzen</value></data>
+  <data name="Mail.PasswordReset.Body" xml:space="preserve"><value>Hallo {0},&#10;&#10;über diesen Link kannst du ein neues Passwort setzen:&#10;{1}&#10;&#10;Der Link ist 3 Stunden gültig und funktioniert nur einmal. Wenn du das nicht angefordert hast, ignoriere diese Mail.</value></data>
+  <data name="Mail.AlreadyRegistered.Subject" xml:space="preserve"><value>Du hast schon einen Account</value></data>
+  <data name="Mail.AlreadyRegistered.Body" xml:space="preserve"><value>Hallo {0},&#10;&#10;jemand hat versucht, mit deiner E-Mail-Adresse einen neuen Account anzulegen. Du hast bereits einen. Hier kannst du dich anmelden:&#10;{1}&#10;&#10;Passwort vergessen? {2}&#10;&#10;Wenn du das nicht warst, musst du nichts tun.</value></data>
+</root>

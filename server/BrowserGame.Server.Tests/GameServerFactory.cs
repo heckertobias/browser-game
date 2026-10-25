@@ -47,6 +47,12 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
     /// <summary>Formular-Client mit eigenem Cookie-Speicher, ohne automatische Weiterleitungen.</summary>
     public FormClient CreateFormClient() => new(CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false }));
 
+    protected override void ConfigureClient(HttpClient client)
+    {
+        base.ConfigureClient(client);
+        client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("de");
+    }
+
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

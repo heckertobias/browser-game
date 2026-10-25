@@ -6,7 +6,7 @@
 # Multi-Arch (amd64, arm64) als Cross-Build: Build-Stages laufen auf der Build-Plattform,
 # nur die Laufzeit-Images sind zielspezifisch und enthalten kein RUN – keine Emulation nötig.
 
-# 1) Client bauen: Spiel-Client, CSS für Startseite und Admin, passkeys.js (landen in den wwwroot-Ordnern)
+# 1) Client bauen: Spiel-Client, CSS für Startseite und Admin, passkeys.js und language.js (landen in den wwwroot-Ordnern)
 FROM --platform=$BUILDPLATFORM node:24-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS client
 WORKDIR /src
 COPY buf.yaml buf.gen.yaml ./
