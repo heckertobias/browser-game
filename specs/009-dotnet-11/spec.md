@@ -33,12 +33,13 @@ alt sind“ direkt im Werkzeug – so wie bei npm schon heute –, statt nur üb
 
 ## Offene Fragen
 
-- [ ] **LTS oder STS?** .NET 10 ist eine Version mit Langzeit-Support (3 Jahre), .NET 11 eine mit Standard-Support
-      (kürzer). Wechseln wir trotzdem sofort, oder bleiben wir bis .NET 12 (LTS) auf .NET 10 und nutzen bis dahin nur
-      Dependabot plus die Regel für Agenten? Empfehlung: wechseln – das Spiel ist früh in der Entwicklung, der kürzere
-      Support ist bis .NET 12 kein Problem, und die 7-Tage-Regel wirkt dann auch bei NuGet direkt.
 - [ ] Wie genau greift das Mindestalter in NuGet (laut Release Notes `minPublishAgeHours` ab .NET 11 RC2, vor allem
       für gleitende Versionen)? Reicht es für AK-2 bei fest gepinnten Versionen, oder braucht es zusätzlich eine
       Prüfung in der CI? Vor dem Plan mit der finalen .NET-11-Doku klären.
+
+## Entschiedene Fragen
+
+- LTS oder STS: Wir wechseln trotz kürzerem Support auf .NET 11 und danach rechtzeitig auf .NET 12 (LTS,
+  [010](../010-dotnet-12/spec.md)).
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
