@@ -50,9 +50,15 @@ tragen, wenn viele weitere Bereiche dazukommen (Spieler, Server-Status, Spielwer
   und die Wahl bleibt in diesem Browser auch nach dem Neuladen und nach dem Abmelden erhalten.
 - **AK-12:** Gegeben ich habe „Dunkel“ gewählt und lade eine Seite, dann blitzt sie beim Laden nicht kurz hell auf.
 
+### Sprache
+- **AK-14:** Gegeben ich öffne eine beliebige Admin-Seite, dann sind alle Texte auf Englisch, auch Fehlermeldungen
+  und Hinweise, unabhängig von der Sprache des Browsers. Das gilt auch für Mails aus dem Admin (Einladung, Testmail).
+  Eine deutsche Fassung soll später ohne Umbau ergänzt werden können (siehe [006](../006-sprachen/spec.md)).
+
 ### Nichts geht verloren
 - **AK-13:** Gegeben die bisherigen Abläufe aus 004 (erster Admin, Einladen, Passkey, Passwort + Authenticator-App,
-  Wiederherstellungscodes, SMTP speichern und testen, Admins entfernen, Protokoll), dann funktionieren sie unverändert.
+  Wiederherstellungscodes, SMTP speichern und testen, Admins entfernen, Protokoll), dann funktionieren sie unverändert
+  (nur die Texte sind jetzt englisch, AK-14).
 
 ## Out of Scope
 
@@ -70,5 +76,6 @@ _Keine._
 - Navigation als Seitenleiste links, auf dem Handy einklappbar.
 - Farbschema folgt dem System, mit Umschalter Hell/Dunkel/System; die Wahl wird im Browser gemerkt.
 - Umsetzung nach 003.
+- Admin-Interface auf Englisch (aus 006 hierher verschoben, weil 005 ohnehin jede Admin-Seite anfasst).
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
