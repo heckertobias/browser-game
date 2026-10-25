@@ -27,8 +27,9 @@ eine App auf den Homescreen legen und im Vollbild starten.
 - **AK-1:** Gegeben ich spiele in einem beliebigen Fenster oder auf einem beliebigen Bildschirm, dann füllt das
   Spielbild das ganze Fenster; es gibt keine Ränder. (Ausnahme: AK-4.)
 - **AK-2:** Gegeben zwei Spieler mit unterschiedlichen Bildschirmen, dann zeigt die **kürzere** Seite ihres
-  Spielbilds ungefähr gleich viel Welt (Abweichung höchstens etwa ein Zehntel). Die längere Seite zeigt so viel mehr
-  Welt, wie das Format hergibt: im Querformat mehr nach links und rechts, hochkant mehr nach oben und unten.
+  Spielbilds ungefähr gleich viel Welt: höchstens etwa ein Zehntel mehr als üblich; weniger nur bei Bildschirmen oder
+  Fenstern mit niedriger Auflösung (dafür mit größeren Pixeln). Die längere Seite zeigt so viel mehr Welt, wie das
+  Format hergibt: im Querformat mehr nach links und rechts, hochkant mehr nach oben und unten.
 - **AK-3:** Gegeben ein beliebiger Bildschirm, dann sind alle Pixel der Pixel-Art gleich groß und scharf; nichts wirkt
   verwaschen oder ungleichmäßig.
 - **AK-4:** Gegeben ein extrem breites oder extrem hohes Fenster (länger als etwa 21:9), dann zeigt das Spielbild
@@ -77,7 +78,10 @@ _Keine._
 ## Entschiedene Fragen
 
 - Sichtfeld: Die kürzere Seite zeigt überall etwa gleich viel Welt, die längere füllt das Format. Keine Ränder.
-  Pixel bleiben scharf; dafür darf der Ausschnitt leicht schwanken (AK-2).
+  Pixel bleiben scharf; dafür darf der Ausschnitt schwanken: nach oben höchstens ein Zehntel, nach unten bei niedriger
+  Auflösung auch mehr (AK-2).
+- Im Spiel ist Zoomen gesperrt (versehentliche Gesten), auf den Spieler-Seiten bleibt es erlaubt.
+- Die Seite „Keine Verbindung“ erscheint auch, wenn der Server während eines Deploys kurz nicht erreichbar ist.
 - Extreme Formate werden bei etwa 21:9 begrenzt, damit niemand extrem viel mehr sieht (AK-4).
 - Touch-Steuerung: Tippen und Halten aufs Spielbild, kein virtueller Joystick.
 - Web-App: installierbar, Offline-Hinweis, Bildschirm bleibt an. Push als eigene, spätere Spec.
