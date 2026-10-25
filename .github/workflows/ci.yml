@@ -70,8 +70,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
-          # Fest statt global.json (latestPatch): ein frisch angekündigter Patch ist teils noch nicht ladbar (HTTP 409).
-          dotnet-version: "10.0.402"
+          global-json-file: server/global.json
       - run: dotnet build --configuration Release
       - run: dotnet test --configuration Release --no-build
 
@@ -106,8 +105,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
-          # Fest statt global.json (latestPatch): ein frisch angekündigter Patch ist teils noch nicht ladbar (HTTP 409).
-          dotnet-version: "10.0.402"
+          global-json-file: server/global.json
       - run: dotnet build --configuration Release
       - run: dotnet test --configuration Release --no-build
       - name: Migrationen passen zum Modell (beide Provider, beide Kontexte)

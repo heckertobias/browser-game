@@ -1,4 +1,4 @@
-# Version-Updates: wöchentlich, Minor/Patch gruppiert, 3 Tage Cooldown (ADR 0002).
+# Version-Updates: wöchentlich, Minor/Patch gruppiert, 7 Tage Cooldown (ADR 0002). Sicherheitsupdates kommen sofort.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: weekly
     cooldown:
-      default-days: 3
+      default-days: 7
     commit-message:
       prefix: "chore(deps)"
     groups:
@@ -18,7 +18,7 @@ updates:
     schedule:
       interval: weekly
     cooldown:
-      default-days: 3
+      default-days: 7
     commit-message:
       prefix: "chore(deps)"
     groups:
@@ -30,7 +30,7 @@ updates:
     schedule:
       interval: weekly
     cooldown:
-      default-days: 3
+      default-days: 7
     commit-message:
       prefix: "chore(deps)"
     groups:
@@ -46,7 +46,7 @@ updates:
     schedule:
       interval: weekly
     cooldown:
-      default-days: 3
+      default-days: 7
     commit-message:
       prefix: "chore(deps)"
     groups:
@@ -57,12 +57,12 @@ updates:
       - dependency-name: node
         update-types: [version-update:semver-major]
 
-  # Hält das SDK in global.json aktuell.
+  # Hält das SDK in global.json aktuell – der einzige Weg zu einem neuen SDK (global.json: rollForward "patch").
   - package-ecosystem: dotnet-sdk
     directory: /server
     schedule:
       interval: weekly
     cooldown:
-      default-days: 3
+      default-days: 7
     commit-message:
       prefix: "chore(deps)"
