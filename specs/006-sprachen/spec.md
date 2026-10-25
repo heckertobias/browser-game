@@ -1,6 +1,6 @@
 # 006 – Deutsch und Englisch
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) (HUD) ·
 [004 – Admin-Interface & SMTP-Einstellungen](../004-admin/spec.md) (Mailversand) ·
@@ -30,8 +30,9 @@ deutschsprachige Spieler beschränkt.
 
 ### Umschalten und merken
 - **AK-3:** Gegeben ich bin auf einer Spieler-Seite (Startseite, Anmeldung, Registrierung, Account), dann kann ich
-  dort zwischen „Deutsch“ und „English“ umschalten; die Seite erscheint sofort in der gewählten Sprache, und
-  Eingaben in einem Formular gehen dabei nicht verloren.
+  dort zwischen „Deutsch“ und „English“ umschalten; die Seite erscheint sofort neu in der gewählten Sprache.
+  Was ich in ein Formular schon eingegeben habe, geht dabei verloren; deshalb werde ich in dem Fall vorher gefragt
+  und kann abbrechen.
 - **AK-4:** Gegeben ich habe auf einem Gerät umgeschaltet, ohne angemeldet zu sein, dann bleibt diese Sprache auf
   diesem Gerät, auch nach einem Neustart des Browsers.
 - **AK-5:** Gegeben ich bin angemeldet und schalte um, dann wird die Sprache in meinem Account gespeichert.
@@ -80,5 +81,6 @@ _Keine._
 - Umschalten nur auf Startseite, Anmeldung, Registrierung und Account; im Spiel ist immer genau eine Sprache aktiv.
   Ein Umschalter im Spiel gehört in ein Menü, nie direkt ins HUD.
 - Reihenfolge: direkt nach 003 T7; 003 pausiert so lange.
+- Umschalten lädt die Seite neu; Formulareingaben werden nicht gemerkt (KISS), aber es gibt vorher eine Nachfrage.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
