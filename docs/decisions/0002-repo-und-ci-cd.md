@@ -1,6 +1,6 @@
 # ADR 0002 – Repo-Regeln und CI/CD
 
-**Status:** akzeptiert
+**Status:** akzeptiert – Branching, Merge-Regeln und Deploy ersetzt durch [ADR 0009](0009-spec-branches-rc-und-deploy-per-api.md) (2026-10-25)
 
 ## Kontext
 
@@ -11,6 +11,7 @@ Ausgerollt wird zunächst als Docker-Container im Homelab.
 ## Entscheidung
 
 **Branching:** Trunk-Based, alles direkt auf `main`. Es gibt keine Feature-Branches als Pflicht.
+_(Ersetzt durch ADR 0009: Spec-Branches mit Draft-PR.)_
 
 **Rulesets auf `main`** (Einrichtung: `scripts/github-setup.sh`, idempotent):
 
@@ -21,6 +22,7 @@ Ausgerollt wird zunächst als Docker-Container im Homelab.
 
 Der Admin pusht direkt und signiert per SSH-Key. Alle anderen, praktisch nur Dependabot, gehen über einen PR mit grüner CI.
 Squash-Merges über GitHub signiert GitHub selbst.
+_(Seit ADR 0009: Merge-Commit und Squash erlaubt, keine lineare Historie, Admin-Bypass nur per PR.)_
 
 **Beteiligung:** PRs nur von Collaborators (`pull_request_creation_policy`), Issues nur von Collaborators
 (nur über die Web-UI einstellbar). Wiki, Projects und Discussions sind aus.
@@ -46,9 +48,8 @@ Patch und Minor werden nach grüner CI automatisch gemergt, Major-Updates manuel
   wanderndes `:main`. Mit Tag entstehen `:X.Y.Z` und `:latest`, jeweils mit Build-Provenance-Attestation.
 - **Releases:** Ein signierter Tag `vX.Y.Z` (nur der Admin darf `v*` anlegen; Tags sind unveränderlich, Releases
   per „Immutable Releases“ ebenfalls) veröffentlicht `:X.Y.Z` und `:latest` und legt ein GitHub Release mit Notes an.
-  `scripts/release.sh` erzeugt `deploy/compose.yaml` **erst danach** aus `deploy/compose.template.yaml` – sonst würde
-  Git Sync ein noch nicht existierendes Image ziehen. Auch Strukturänderungen (z. B. der Admin-Dienst aus 004) stehen
-  zuerst nur in der Vorlage. Deployt wird also immer eine fest gepinnte Version, kein wanderndes Tag.
+  Deployt wird immer eine fest gepinnte Version, kein wanderndes Tag.
+  _(Ersetzt durch ADR 0009: `scripts/deploy.sh` rollt per Arcane-API aus; Vorlage und Git Sync entfallen. Dort auch RC-Tags `vX.Y.Z-rc.N`, die kein `:latest` bekommen.)_
 - Zwei Images aus einem Dockerfile: `browser-game` (Spiel) und `browser-game-admin` (ADR 0006), gleiche Tags.
 - Das Homelab **zieht** das Image (pull-basiert). GitHub braucht damit keinen eingehenden Zugriff und keine
   Zugangsdaten zum Homelab. Wie das Homelab aktualisiert, wird beim ersten Rollout entschieden.

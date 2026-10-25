@@ -31,3 +31,7 @@ server/BrowserGame.Admin/wwwroot/js/passkeys.js
 
 # Persönliche Agent-Hinweise
 CLAUDE.local.md
+
+# Lokale Deploy-Zugangsdaten (scripts/deploy.sh)
+arcane.env
+*.local.env
