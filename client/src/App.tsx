@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Game, type ConnectionStatus } from "./game/game";
+import { t } from "./i18n";
 
 const STATUS_LABEL: Record<ConnectionStatus, string> = {
-  connecting: "verbinde …",
-  connected: "verbunden",
-  disconnected: "getrennt",
+  connecting: t.statusConnecting,
+  connected: t.statusConnected,
+  disconnected: t.statusDisconnected,
 };
 
 export function App() {
@@ -34,7 +35,7 @@ export function App() {
       {status === "disconnected" && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/60">
           <button type="button" className="btn btn-primary rounded-none font-mono uppercase" onClick={() => { window.location.reload(); }}>
-            Neu verbinden
+            {t.reconnect}
           </button>
         </div>
       )}

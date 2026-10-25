@@ -26,7 +26,7 @@ Reihenfolge: Daten → Server → Client → Prüfung. Jeder Task bringt seine T
 ## Client
 - [x] **T8** (AK-3): `language.ts` als fester Build `wwwroot/js/language.js` (gemeinsame Lib-Konfiguration mit
   `passkeys.js`), im Layout eingebunden; Vitest für die Nachfrage.
-- [ ] **T9** (AK-8, AK-8b, AK-10): `i18n.ts` mit `detectLanguage` (+ Vitest), HUD-Texte und Fehlertexte im Client,
+- [x] **T9** (AK-8, AK-8b, AK-10): `i18n.ts` mit `detectLanguage` (+ Vitest), HUD-Texte und Fehlertexte im Client,
   `passkeys.ts` nach `<html lang>`; Schlüssel für das `kicked`-Overlay aus 003 T13.
 
 ## Prüfung
