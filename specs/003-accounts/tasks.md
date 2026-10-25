@@ -25,9 +25,14 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 - [x] **T7** (AK-1–3, AK-7, AK-9, AK-13): Razor Pages `Register` (Passwort-Weg), `Login`, `ConfirmEmail`,
   `ResendConfirmation`, `Logout`; Startseite mit Anmelde-Links; `/play` mit `RequireAuthorization`.
 - [ ] **T8** (AK-14, AK-15): `ForgotPassword`, `ResetPassword`.
+  _Seit 006: Texte in `Texts.resx`/`Texts.de.resx`; die Reset-Mail kommt schon aus `GameEmailSender` in der
+  Sprache des Accounts – Integrationstest je Sprache ergänzen._
 - [ ] **T9** (AK-4, AK-13b, AK-13c, AK-16): Passkeys bei Registrierung, Anmeldung und `Manage`; `CanRemoveCredential`
   + Unit-Test; Passwort setzen; `Delete` mit Bestätigung. Dazu `client/src/account/passkeys.ts` als fester
   Build `wwwroot/js/passkeys.js`.
+  _Seit 006: Texte zweisprachig; die Passkey-Anmeldung setzt wie die Passwort-Anmeldung
+  `LanguageCookie.Append(Response, user.Language)` (006 AK-6), die Passkey-Registrierung setzt `Account.Language`
+  (006 AK-7); `passkeys.ts` hat ein eigenes kleines Wörterbuch und darf nichts mit `language.ts` teilen._
 
 ## Server – Spiel
 - [ ] **T10** (AK-8, AK-17, AK-18): `/ws` nur angemeldet + bestätigt, Origin-Prüfung; Spieler-ID = Account-ID,
@@ -38,6 +43,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 
 ## Client
 - [ ] **T13** (AK-12, AK-19b, AK-20, AK-22): `kicked`-Overlay, `away`-Figuren entsättigt, HUD mit Koordinaten und Link „Mein Account“.
+  _Seit 006: Texte aus `client/src/i18n.ts` (Schlüssel fürs Overlay sind angelegt); kein Sprachumschalter im Spiel._
 
 ## Tests / Prüfung
 - [ ] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen

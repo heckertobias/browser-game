@@ -30,6 +30,6 @@ Reihenfolge: Daten → Server → Client → Prüfung. Jeder Task bringt seine T
   `passkeys.ts` nach `<html lang>`; Schlüssel für das `kicked`-Overlay aus 003 T13.
 
 ## Prüfung
-- [ ] **T10**: Manuelle Prüfung (lokal und auf dem Pi): Browser auf Deutsch und Englisch, Umschalten mit und ohne
+- [x] **T10**: Manuelle Prüfung (lokal und auf dem Pi): Browser auf Deutsch und Englisch, Umschalten mit und ohne
   Eingaben (Nachfrage, Abbrechen), Anmelden auf zweitem Gerät, Mails in beiden Sprachen, HUD in beiden Sprachen.
   In 003 vermerken, dass T8, T9 und T13 ihre Texte zweisprachig anlegen. Danach alle AKs abhaken, Status `umgesetzt`.
