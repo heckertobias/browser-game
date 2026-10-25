@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Repo-Härtung für GitHub – idempotent, kann jederzeit erneut ausgeführt werden.
-# Begründung der Einstellungen: docs/decisions/0002-repo-und-ci-cd.md
+# Begründung der Einstellungen: docs/decisions/0002-repo-und-ci-cd.md und 0009-spec-branches-rc-und-deploy-per-api.md
 #
 # Voraussetzung: gh ist eingeloggt (Scope `repo`), ausführende Person ist Repo-Admin.
 # Nicht per API setzbar (manuell): Settings → General → Features → Issues →
@@ -20,13 +20,15 @@ api -X PATCH "repos/$REPO" --silent --input - <<'JSON'
   "has_pull_requests": true,
   "pull_request_creation_policy": "collaborators_only",
   "allow_squash_merge": true,
-  "allow_merge_commit": false,
+  "allow_merge_commit": true,
   "allow_rebase_merge": false,
   "allow_auto_merge": true,
   "allow_update_branch": true,
   "delete_branch_on_merge": true,
   "squash_merge_commit_title": "PR_TITLE",
-  "squash_merge_commit_message": "PR_BODY"
+  "squash_merge_commit_message": "PR_BODY",
+  "merge_commit_title": "PR_TITLE",
+  "merge_commit_message": "PR_BODY"
 }
 JSON
 
@@ -87,7 +89,7 @@ upsert_ruleset() {
   echo "   $name ok"
 }
 
-# Gilt für alle, auch Admins: main bleibt erhalten, linear und signiert.
+# Gilt für alle, auch Admins: main bleibt erhalten und signiert.
 upsert_ruleset "main-integrity" '{
   "name": "main-integrity",
   "target": "branch",
@@ -97,19 +99,18 @@ upsert_ruleset "main-integrity" '{
   "rules": [
     { "type": "deletion" },
     { "type": "non_fast_forward" },
-    { "type": "required_linear_history" },
     { "type": "required_signatures" }
   ]
 }'
 
-# Alle außer Admin (= Single-Dev, pusht direkt) müssen per PR mit grüner CI.
+# Alle müssen per PR mit grüner CI; der Admin darf den PR-Zwang nur über einen PR umgehen (Bypass „pull_request“).
 upsert_ruleset "main-via-pr-checks" '{
   "name": "main-via-pr-checks",
   "target": "branch",
   "enforcement": "active",
   "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
   "bypass_actors": [
-    { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }
+    { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "pull_request" }
   ],
   "rules": [
     { "type": "pull_request", "parameters": {
@@ -118,7 +119,7 @@ upsert_ruleset "main-via-pr-checks" '{
         "require_code_owner_review": false,
         "require_last_push_approval": false,
         "required_review_thread_resolution": false,
-        "allowed_merge_methods": ["squash"]
+        "allowed_merge_methods": ["merge", "squash"]
     } },
     { "type": "required_status_checks", "parameters": {
         "strict_required_status_checks_policy": false,
@@ -128,7 +129,7 @@ upsert_ruleset "main-via-pr-checks" '{
   ]
 }'
 
-# Release-Tags: gilt für alle – einmal gesetzt, nie verschoben oder gelöscht; nur signierte Commits.
+# Release- und RC-Tags: gilt für alle – einmal gesetzt, nie verschoben oder gelöscht; nur signierte Commits.
 upsert_ruleset "release-tags-immutable" '{
   "name": "release-tags-immutable",
   "target": "tag",
@@ -142,7 +143,7 @@ upsert_ruleset "release-tags-immutable" '{
   ]
 }'
 
-# Release-Tags anlegen darf nur der Admin (scripts/release.sh).
+# Release- und RC-Tags anlegen darf nur der Admin (scripts/release.sh).
 upsert_ruleset "release-tags-admin-only" '{
   "name": "release-tags-admin-only",
   "target": "tag",

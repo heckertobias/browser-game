@@ -11,3 +11,4 @@ Regeln:
 - Arbeite `tasks.md` der Reihe nach ab und hake erledigte Tasks ab.
 - Wenn die Spec nicht passt oder unklar ist: anhalten und nachfragen, nicht raten.
 - Typen nur aus `contracts/` generieren, nie duplizieren.
+- Arbeite auf dem Spec-Branch `spec/NNN-name` (Draft-PR), nie direkt auf `main`. Tooling und Doku gehören auf einen eigenen kurzlebigen Branch mit PR.

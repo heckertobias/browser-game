@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Release-Notes aus den Commits seit dem vorherigen v*-Tag, gruppiert nach Conventional-Commit-Typ.
+# Release-Notes aus den Commits seit dem vorherigen Release-Tag (RC-Tags zählen nicht), gruppiert nach Conventional-Commit-Typ.
 # Aufruf: scripts/release-notes.sh v0.2.0   (gibt Markdown auf stdout aus; braucht die volle Git-Historie)
 # Läuft auch mit dem Bash 3.2 von macOS (keine assoziativen Arrays).
 set -euo pipefail
@@ -8,7 +8,7 @@ TAG="${1:?Tag angeben, z. B. v0.2.0}"
 VERSION="${TAG#v}"
 REPO_URL="https://github.com/heckertobias/browser-game"
 
-previous="$(git describe --tags --abbrev=0 --match 'v*' "$TAG^" 2>/dev/null || true)"
+previous="$(git describe --tags --abbrev=0 --match 'v*' --exclude 'v*-*' "$TAG^" 2>/dev/null || true)"
 range="${previous:+$previous..}$TAG"
 
 title() {
@@ -21,7 +21,7 @@ title() {
 
 # Jede Zeile: <typ>\t<hash>\t<betreff>
 classified="$(git log --no-merges --reverse --format=$'%h\t%s' "$range" | while IFS=$'\t' read -r hash subject; do
-  # chore(deploy): Versions-Bumps aus release.sh gehören nicht in die Notes
+  # chore(deploy): Versions-Bumps aus release.sh (bis 0.2.x) gehören nicht in die Notes
   [[ "$subject" =~ ^chore\(deploy\): ]] && continue
   type="other"
   if [[ "$subject" =~ ^chore\(deps\) ]]; then

@@ -26,9 +26,9 @@ Details: [`specs/README.md`](specs/README.md)
 | `specs/_template/` | Vorlagen für neue Features |
 | `contracts/` | Maschinenlesbare Verträge: OpenAPI (HTTP), Protobuf (WebSocket) |
 | `docs/decisions/` | Architekturentscheidungen (ADRs) |
-| `scripts/` | Hilfsskripte, z. B. `github-setup.sh` (Repo-Härtung) |
+| `scripts/` | Hilfsskripte: `github-setup.sh` (Repo-Härtung), `release.sh`, `deploy.sh` |
 | `.github/` | CI-Workflows, Dependabot |
-| `deploy/` | Compose für den Betrieb (Vorlage + erzeugte Datei) |
+| `deploy/` | Compose für den Betrieb (Version über `GAME_VERSION`) |
 | `server/` | C# / ASP.NET Core: Spielserver, Admin-Interface, gemeinsame Datenschicht |
 | `client/` | TypeScript, React, Canvas, daisyUI |
 
@@ -85,12 +85,13 @@ gh attestation verify oci://ghcr.io/heckertobias/browser-game:<version> --owner 
 
 ## Betrieb (Compose / Arcane)
 
-[`deploy/compose.yaml`](deploy/compose.yaml) ist das, was läuft – sie wird von `scripts/release.sh` aus
-[`deploy/compose.template.yaml`](deploy/compose.template.yaml) erzeugt. Strukturänderungen (neue Dienste, Variablen,
-Volumes) gehören in die **Vorlage**; live gehen sie mit dem nächsten Release, wenn die passenden Images existieren.
+[`deploy/compose.yaml`](deploy/compose.yaml) ist das, was läuft. `scripts/deploy.sh` lädt sie zusammen mit der `.env`
+über die Arcane-API ins Projekt und startet neu ([ADR 0009](docs/decisions/0009-spec-branches-rc-und-deploy-per-api.md));
+Git Sync ist im Projekt abgeschaltet. Änderungen an der Compose in der Arcane-Oberfläche überschreibt das nächste Deploy.
 
 - Betrieb hinter nginx-proxy (Netz `proxy`); kein Dienst veröffentlicht einen Port.
-- `.env` des Projekts: `VIRTUAL_HOST` (Spiel) und `ADMIN_VIRTUAL_HOST` (Admin, nur intern auflösen lassen).
+- `.env` des Projekts: `VIRTUAL_HOST` (Spiel), `ADMIN_VIRTUAL_HOST` (Admin, nur intern auflösen lassen) und
+  `GAME_VERSION` (setzt `scripts/deploy.sh`; die übrigen Zeilen bleiben unverändert).
 - Spiel und Admin teilen sich das Volume `data` (SQLite). Es gehört ins Backup; das Spiel schreibt dafür nachts um
   03:50 eine konsistente Kopie nach `/data/backup/game.db`.
 - **Erster Admin:** Beim ersten Start schreibt das Admin-Interface einen einmaligen Einrichtungslink (48 h gültig)
@@ -98,24 +99,52 @@ Volumes) gehören in die **Vorlage**; live gehen sie mit dem nächsten Release, 
   Startet das Admin ohne eingerichteten Admin neu, gibt es einen neuen Link; der alte wird ungültig.
 - Mailversand (Bestätigungen, Passwort-Reset, Einladungen) richtet man danach im Admin unter „SMTP“ ein.
 
-## Release
+**Deploy-Zugang:** Die Datei `~/.config/browser-game/arcane.env` (Rechte `600`, außerhalb des Repos) oder gleichnamige
+Umgebungsvariablen. Die Datei wird nur zeilenweise als `NAME=WERT` gelesen:
 
-```bash
-scripts/release.sh 0.2.0
+```
+ARCANE_URL=https://arcane.example.internal
+ARCANE_API_KEY=…
+ARCANE_PROJECT_ID=…
+ARCANE_ENV_ID=0
 ```
 
-Das Skript prüft den Stand (sauber, `main`, synchron, CI grün) und pusht den signierten Tag `v0.2.0`. Es wartet,
-bis die CI beide Images (`:0.2.0` + `:latest`) veröffentlicht und das GitHub Release angelegt hat, und erzeugt erst
-dann `deploy/compose.yaml` aus der Vorlage. Git Sync in Arcane rollt sie anschließend aus.
+`ARCANE_ENV_ID` ist optional (Standard `0`), ebenso `ARCANE_CA_CERT` für eine interne CA. Der Key braucht nur
+`projects:read`, `projects:update` und `projects:deploy`. `scripts/deploy.sh --check` prüft Key und Verbindung nur
+lesend (ohne `ARCANE_PROJECT_ID` listet es die Projekte und endet mit Fehler), `--dry-run` prüft Image und Compose ohne Key.
 
-Die Release-Notes entstehen aus den Commits seit dem letzten Tag, gruppiert nach Typ (`feat`, `fix`, `docs`, …);
-Vorschau lokal: `scripts/release-notes.sh v0.2.0` (der Tag muss lokal existieren).
+```bash
+scripts/deploy.sh 0.3.0     # eine Version ausrollen
+scripts/deploy.sh 0.2.3     # Rollback (die Datenbank wird nicht zurückgesetzt)
+```
+
+## Release
+
+Pro Spec gibt es einen Branch `spec/NNN-name` mit Draft-PR. Auf dem Branch entstehen Release Candidates, auf `main`
+das Release:
+
+```bash
+scripts/release.sh 0.3.0-rc.1   # vom Spec-Branch: Release Candidate zum Testen auf dem Pi
+scripts/release.sh 0.3.0        # von main, nach dem Merge
+scripts/release.sh --dry-run 0.3.0-rc.1   # nur prüfen, nichts tun
+```
+
+Das Skript prüft den Stand (sauber, synchron mit `origin`, CI grün) und pusht den signierten Tag. Es wartet, bis die
+CI beide Images veröffentlicht und das GitHub Release angelegt hat, und ruft dann `scripts/deploy.sh` auf.
+
+- `v0.3.0` veröffentlicht `:0.3.0` und `:latest`; das Release wird nur von `main` aus gebaut.
+- `v0.3.0-rc.1` veröffentlicht nur `:0.3.0-rc.1` und ein GitHub Release als Vorabversion. Bei einem Fehler folgt
+  `-rc.2`.
+
+Die Release-Notes entstehen aus den Commits seit dem letzten echten Release (RCs zählen nicht), gruppiert nach Typ
+(`feat`, `fix`, `docs`, …); Vorschau lokal: `scripts/release-notes.sh v0.3.0` (der Tag muss lokal existieren).
 
 ## Repo-Regeln
 
-Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md)
+Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md), [ADR 0009](docs/decisions/0009-spec-branches-rc-und-deploy-per-api.md)
 
-- Gearbeitet wird direkt auf `main`; Commits müssen **signiert** sein.
+- Gearbeitet wird auf Branches mit PR (Spec: `spec/NNN-name` mit Draft-PR, Merge-Commit; Tooling/Doku: kurzlebiger Branch, Squash);
+  `main` nimmt nur PRs mit grüner CI. Commits müssen **signiert** sein.
 - Issues und Pull Requests können nur Collaborators eröffnen.
 - Dependabot-Updates laufen als PR durch die CI; Patch- und Minor-Updates werden automatisch gemergt.
 - Sicherheitslücken bitte vertraulich melden: [SECURITY.md](SECURITY.md)
