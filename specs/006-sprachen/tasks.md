@@ -12,9 +12,9 @@ Reihenfolge: Daten → Server → Client → Prüfung. Jeder Task bringt seine T
 - [x] **T2** (AK-1, AK-2, AK-4, AK-10): `AddLocalization`, DataAnnotations-Lokalisierung, `UseRequestLocalization`
   (Cookie → `Accept-Language` mit einem Wert → `en`), `Texts` + `Texts.resx`/`Texts.de.resx`, `LanguageCookie`,
   `<html lang>` im Layout. `GameServerFactory` setzt `Accept-Language: de`. Unit-Test Schlüssel-Abgleich der `.resx`.
-- [ ] **T3** (AK-10, AK-11): `LocalizedIdentityErrorDescriber` mit `IdentityErrors(.de).resx` in `BrowserGame.Data`
+- [x] **T3** (AK-10, AK-11): `LocalizedIdentityErrorDescriber` mit `IdentityErrors(.de).resx` in `BrowserGame.Data`
   (ersetzt `GermanIdentityErrorDescriber`, Server und Admin); `PlayerNames.Describe` aus `Texts`; Admin fest `de`
-  per `UseRequestLocalization`. `PlayerNamesTests` mit UI-Kultur `de`.
+  per `UseRequestLocalization`. Texte je Sprache in neuen Tests.
 - [ ] **T4** (AK-10): Alle Spieler-Seiten aus 003 T7 (`_Layout`, `Index`, `Register`, `Login`, `ConfirmEmail`,
   `ResendConfirmation`, `Logout`) auf `IStringLocalizer<Texts>`; Integrationstests auf Englisch.
 - [ ] **T5** (AK-3, AK-5): `Pages/Language` (POST) und `_LanguageSwitch` im Layout; Account-Sprache beim Umschalten.

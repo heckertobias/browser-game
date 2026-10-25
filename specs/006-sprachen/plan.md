@@ -95,7 +95,8 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
 - Server und Admin registrieren den neuen Describer.
 
 ### Admin bis 005
-- `AddLocalization` + `UseRequestLocalization` mit genau einer unterstützten Sprache `de` und ohne Provider. So bleibt
+- `UseRequestLocalization` mit genau einer unterstützten Sprache `de` und ohne Provider (kein `AddLocalization`: das
+  Admin hat noch keine eigenen Ressourcen; kommt mit 005). So bleibt
   das Admin vollständig deutsch, auch bei englischem Browser. 005 stellt auf `en` um und übersetzt (005 AK-14).
 
 ### Account-Sprache
@@ -133,8 +134,8 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
 - **Test-Clients:** `GameServerFactory` setzt für alle Clients `Accept-Language: de` (`ConfigureClient`), damit die
   bestehenden Integrationstests mit deutschen Texten unverändert bleiben. Tests für Englisch setzen den Header selbst.
 - **Bestehende Unit-Tests mit deutschen Texten** (`PlayerNamesTests`, `EmailTests`): Sie hängen danach von der Kultur
-  ab. `PlayerNamesTests` setzt die UI-Kultur auf `de` (Verhalten unverändert); `EmailTests` bleibt unverändert, weil
-  `Account.Language` standardmäßig `"de"` ist.
+  ab. `PlayerNamesTests` prüft nur, dass es Texte gibt, und bleibt unverändert; die Texte je Sprache prüfen neue Tests.
+  `EmailTests` bleibt unverändert, weil `Account.Language` standardmäßig `"de"` ist.
 
 ## Abdeckung der Akzeptanzkriterien
 

@@ -8,4 +8,7 @@
   <data name="Validation.NameRequired" xml:space="preserve"><value>Bitte einen Spielernamen angeben.</value></data>
   <data name="Validation.PasswordRequired" xml:space="preserve"><value>Bitte Passwort angeben.</value></data>
   <data name="Validation.ConfirmPasswordRequired" xml:space="preserve"><value>Bitte das Passwort wiederholen.</value></data>
+  <data name="PlayerName.Length" xml:space="preserve"><value>Der Name muss {0} bis {1} Zeichen lang sein.</value></data>
+  <data name="PlayerName.Characters" xml:space="preserve"><value>Der Name darf nur aus den Buchstaben A–Z bestehen (keine Umlaute, Ziffern, Leer- oder Sonderzeichen).</value></data>
+  <data name="PlayerName.Blocked" xml:space="preserve"><value>Dieser Name ist nicht erlaubt.</value></data>
 </root>

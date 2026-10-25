@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using BrowserGame.Server.Localization;
 
 namespace BrowserGame.Server.Accounts;
 
@@ -49,11 +51,15 @@ internal static partial class PlayerNames
 
     public static string Describe(PlayerNameError error) => error switch
     {
-        PlayerNameError.Length => $"Der Name muss {MinLength} bis {MaxLength} Zeichen lang sein.",
-        PlayerNameError.Characters => "Der Name darf nur aus den Buchstaben A–Z bestehen (keine Umlaute, Ziffern, Leer- oder Sonderzeichen).",
-        PlayerNameError.Blocked => "Dieser Name ist nicht erlaubt.",
+#pragma warning disable CA1863 // Vorlage kommt je Sprache aus der Ressource; Zwischenspeichern lohnt nicht.
+        PlayerNameError.Length => string.Format(CultureInfo.CurrentCulture, Text("PlayerName.Length"), MinLength, MaxLength),
+#pragma warning restore CA1863
+        PlayerNameError.Characters => Text("PlayerName.Characters"),
+        PlayerNameError.Blocked => Text("PlayerName.Blocked"),
         _ => "",
     };
+
+    private static string Text(string key) => Texts.ResourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
 
     [GeneratedRegex("^[A-Za-z]+$")]
     private static partial Regex LettersOnly();

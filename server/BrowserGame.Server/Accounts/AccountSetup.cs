@@ -43,7 +43,7 @@ internal static class AccountSetup
             .AddEntityFrameworkStores<GameDbContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders()
-            .AddErrorDescriber<GermanIdentityErrorDescriber>();
+            .AddErrorDescriber<LocalizedIdentityErrorDescriber>();
 
         if (!builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(builder.Configuration["App:PublicUrl"]))
         {
