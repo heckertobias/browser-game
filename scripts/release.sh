@@ -22,6 +22,9 @@ IS_RC=0
 [[ "$VERSION" == *-rc.* ]] && IS_RC=1
 
 # Immer im Repo dieses Skripts arbeiten, nicht im aktuellen Verzeichnis
+# Relative Pfade aus der Umgebung beziehen sich auf das Aufrufverzeichnis, daher vor dem cd auflösen (deploy.sh erbt sie)
+[[ -z "${ARCANE_CONFIG:-}" || "$ARCANE_CONFIG" == /* ]] || ARCANE_CONFIG="$PWD/$ARCANE_CONFIG"
+[[ -z "${ARCANE_CA_CERT:-}" || "$ARCANE_CA_CERT" == /* ]] || ARCANE_CA_CERT="$PWD/$ARCANE_CA_CERT"
 root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)" || die "Repo des Skripts nicht gefunden (Aufruf über Symlink?)"
 cd "$root"
 BRANCH="$(git branch --show-current)"
