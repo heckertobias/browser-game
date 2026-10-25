@@ -41,7 +41,8 @@ else
 fi
 TAG="v$VERSION"
 
-cd "$(git rev-parse --show-toplevel)"
+# Immer im Repo dieses Skripts arbeiten, nicht im aktuellen Verzeichnis
+cd "$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 
 # --- Konfiguration -----------------------------------------------------------
 CONFIG_FILE="${ARCANE_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/browser-game/arcane.env}"
@@ -109,8 +110,9 @@ if [[ "$MODE" == "check" ]]; then
     die "ARCANE_PROJECT_ID setzen (siehe Liste oben)"
   fi
   status="$(api GET "/$ARCANE_PROJECT_ID")"; need_2xx "$status" "Projekt lesen"
-  jq -r '(.data // .) | "Projekt: \(.name // "?")  Status: \(.status // "?")",
-    "Dienste: \([.services // [] | .[] | (.name // .)] | join(", "))"' "$WORK/body"
+  jq -r '(.data // .) | "Projekt: \(.name // "?")  Status: \(.status // "?")"' "$WORK/body"
+  status="$(api GET "/$ARCANE_PROJECT_ID/runtime")"; need_2xx "$status" "Laufzeit lesen"
+  jq -r '(.data // .) | "Dienste: \([.runtimeServices // [] | .[] | "\(.name // "?") (\(.status // "?")/\(.health // "?"))"] | join(", "))"' "$WORK/body"
   status="$(api GET "/$ARCANE_PROJECT_ID/compose")"; need_2xx "$status" "Compose lesen"
   jq -e '(.data // .) | has("envContent")' "$WORK/body" >/dev/null || die "Antwort ohne envContent: $(head -c 300 "$WORK/body")"
   jq -j '(.data // .) | .envContent // ""' "$WORK/body" > "$WORK/env.current"
