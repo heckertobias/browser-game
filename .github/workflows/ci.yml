@@ -3,11 +3,11 @@ name: CI
 on:
   push:
     branches: [main]
-    # Releases: signierter Tag vX.Y.Z (scripts/release.sh)
+    # Releases vX.Y.Z und Release Candidates vX.Y.Z-rc.N: signierter Tag (scripts/release.sh)
     tags: ["v*.*.*"]
   pull_request:
   # Nächtlich main bauen und scannen: findet neue Schwachstellen in Basis-Images und prüft Dependabot-Auto-Merges
-  # (die keinen push-Workflow auslösen). Veröffentlicht wird nur bei Release-Tags (ADR 0002).
+  # (die keinen push-Workflow auslösen). Veröffentlicht wird nur bei Release- und RC-Tags (ADR 0002, 0009).
   schedule:
     - cron: "17 3 * * *"
   workflow_dispatch:
@@ -158,7 +158,7 @@ jobs:
       id-token: write
     env:
       IMAGE: ${{ matrix.image }}
-      # Veröffentlichen nur bei Release-Tags (scripts/release.sh); sonst nur bauen und scannen.
+      # Veröffentlichen nur bei Release- und RC-Tags (scripts/release.sh); sonst nur bauen und scannen.
       PUBLISH: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -169,10 +169,11 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ env.IMAGE }}
-          # Nur Release-Tags: v0.2.0 → :0.2.0 + :latest
+          # v0.3.0 → :0.3.0 + :latest; v0.3.0-rc.1 → nur :0.3.0-rc.1 (kein :latest)
+          flavor: latest=false
           tags: |
             type=semver,pattern={{version}}
-            type=raw,value=latest
+            type=raw,value=latest,enable=${{ !contains(github.ref_name, '-') }}
       # Pro Architektur lokal bauen und scannen (Basis-Image-Pakete unterscheiden sich je Architektur).
       - name: Build amd64 (zum Scannen)
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -251,7 +252,10 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           scripts/release-notes.sh "$TAG" > "$RUNNER_TEMP/notes.md"
-          gh release create "$TAG" --verify-tag --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+          flags=()
+          # RC (Tag mit „-“) → Vorabversion
+          [[ "$TAG" == *-* ]] && flags+=(--prerelease)
+          gh release create "$TAG" --verify-tag --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" "${flags[@]}"
 
   # Einziger Required Check im Ruleset. Neue Jobs nur in `needs` eintragen.
   ci-ok:
