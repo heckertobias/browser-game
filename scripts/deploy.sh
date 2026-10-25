@@ -16,7 +16,8 @@
 #   ARCANE_PROJECT_ID  ID des Projekts (--check ohne ID listet die Projekte)
 #   ARCANE_CA_CERT     optional: CA-Zertifikat für eine interne CA
 # Die Datei wird zeilenweise als NAME=WERT gelesen (optional mit export davor, Wert optional in "…" oder '…'),
-# nicht ausgeführt. Ein Key mit " oder \ wird abgelehnt.
+# nicht ausgeführt. ARCANE_CA_CERT aus der Datei muss ein absoluter Pfad sein (aus der Umgebung auch relativ zum
+# Aufrufverzeichnis, ebenso ARCANE_CONFIG). Ein Key mit " oder \ wird abgelehnt.
 set -euo pipefail
 
 IMAGE_REPOS=("heckertobias/browser-game" "heckertobias/browser-game-admin")
@@ -42,7 +43,11 @@ fi
 TAG="v$VERSION"
 
 # Immer im Repo dieses Skripts arbeiten, nicht im aktuellen Verzeichnis
-cd "$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
+# Relative Pfade aus der Umgebung beziehen sich auf das Aufrufverzeichnis, daher vor dem cd auflösen
+[[ -z "${ARCANE_CONFIG:-}" || "$ARCANE_CONFIG" == /* ]] || ARCANE_CONFIG="$PWD/$ARCANE_CONFIG"
+[[ -z "${ARCANE_CA_CERT:-}" || "$ARCANE_CA_CERT" == /* ]] || ARCANE_CA_CERT="$PWD/$ARCANE_CA_CERT"
+root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)" || die "Repo des Skripts nicht gefunden (Aufruf über Symlink?)"
+cd "$root"
 
 # --- Konfiguration -----------------------------------------------------------
 CONFIG_FILE="${ARCANE_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/browser-game/arcane.env}"
@@ -66,6 +71,7 @@ ARCANE_API_KEY="${ARCANE_API_KEY:-}"
 ARCANE_ENV_ID="${ARCANE_ENV_ID:-0}"
 ARCANE_PROJECT_ID="${ARCANE_PROJECT_ID:-}"
 ARCANE_CA_CERT="${ARCANE_CA_CERT:-}"
+[[ -z "$ARCANE_CA_CERT" || "$ARCANE_CA_CERT" == /* ]] || die "ARCANE_CA_CERT in der Datei muss ein absoluter Pfad sein"
 case "$ARCANE_URL" in ""|http://*|https://*) ;; *) ARCANE_URL="https://$ARCANE_URL" ;; esac
 ARCANE_URL="${ARCANE_URL%/}"
 case "$ARCANE_API_KEY" in
@@ -111,8 +117,12 @@ if [[ "$MODE" == "check" ]]; then
   fi
   status="$(api GET "/$ARCANE_PROJECT_ID")"; need_2xx "$status" "Projekt lesen"
   jq -r '(.data // .) | "Projekt: \(.name // "?")  Status: \(.status // "?")"' "$WORK/body"
-  status="$(api GET "/$ARCANE_PROJECT_ID/runtime")"; need_2xx "$status" "Laufzeit lesen"
-  jq -r '(.data // .) | "Dienste: \([.runtimeServices // [] | .[] | "\(.name // "?") (\(.status // "?")/\(.health // "?"))"] | join(", "))"' "$WORK/body"
+  status="$(api GET "/$ARCANE_PROJECT_ID/runtime" || true)"
+  if [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+    jq -r '(.data // .) | "Dienste: \([.runtimeServices // [] | .[] | "\(.name // "?") (\(.status // "?")/\(.health // "?"))"] | join(", "))"' "$WORK/body" || echo "Dienste: (nicht lesbar)"
+  else
+    echo "Dienste: (Laufzeit nicht lesbar, HTTP ${status:-keine Antwort})"
+  fi
   status="$(api GET "/$ARCANE_PROJECT_ID/compose")"; need_2xx "$status" "Compose lesen"
   jq -e '(.data // .) | has("envContent")' "$WORK/body" >/dev/null || die "Antwort ohne envContent: $(head -c 300 "$WORK/body")"
   jq -j '(.data // .) | .envContent // ""' "$WORK/body" > "$WORK/env.current"

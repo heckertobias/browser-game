@@ -22,7 +22,8 @@ IS_RC=0
 [[ "$VERSION" == *-rc.* ]] && IS_RC=1
 
 # Immer im Repo dieses Skripts arbeiten, nicht im aktuellen Verzeichnis
-cd "$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
+root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)" || die "Repo des Skripts nicht gefunden (Aufruf über Symlink?)"
+cd "$root"
 BRANCH="$(git branch --show-current)"
 [[ -n "$BRANCH" ]] || die "kein Branch ausgecheckt (detached HEAD)"
 if [[ "$IS_RC" == 1 ]]; then
