@@ -20,7 +20,7 @@ COPY server/BrowserGame.Admin/Pages/ server/BrowserGame.Admin/Pages/
 RUN cd client && npm run build
 
 # 2) Gemeinsamer Restore für Spiel und Admin
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0@sha256:747cbade5bfd918a175ac32f8f1d931edec2c7d0d5397a3de72eaef1ac1f66d2 AS restore
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0@sha256:afd0ccff9d306812a69ef0f47458376b6acb544ae866cfc4b8d28ff0eef35ea7 AS restore
 ARG TARGETARCH
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
 WORKDIR /src
