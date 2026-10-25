@@ -34,7 +34,12 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
   Deutsch registriert.
 
 ### Lokalisierung (`Program.cs`, `Localization/`)
+- **Invariant-Modus:** Das Laufzeit-Image (chiseled) hat keine Kulturdaten (ICU). In `server/Directory.Build.props`
+  `<InvariantGlobalization>true</InvariantGlobalization>` und `<PredefinedCulturesOnly>false</PredefinedCulturesOnly>`:
+  Kulturen wie `de` lassen sich anlegen, Formate bleiben neutral. Lokal, CI und Produktion verhalten sich gleich.
+  Der Server formatiert keine Datums- oder Zeitangaben für die Anzeige (ADR 0008).
 - `AddLocalization(o => o.ResourcesPath = "Resources")`.
+- `<NeutralLanguage>en</NeutralLanguage>` im Server-csproj (CA1824).
 - `AddRazorPages().AddDataAnnotationsLocalization(o => o.DataAnnotationLocalizerProvider = (_, f) => f.Create(typeof(Texts)))`:
   `ErrorMessage` in `[Required(...)]` ist dann ein Schlüssel in `Texts.resx`.
 - `UseRequestLocalization` direkt nach `UseSecurityHeaders`:
@@ -43,8 +48,9 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
     mit `MaximumAcceptLanguageHeaderValuesToTry = 1` (nur die bevorzugte Sprache zählt, AK-1, AK-2). Kein
     Query-String-Provider.
   - `de-AT`, `de-CH` usw. landen über die Eltern-Kultur bei `de`.
-- Leere Marker-Klasse `Texts` (`Localization/Texts.cs`) mit `Resources/Texts.resx` (Englisch) und
-  `Resources/Texts.de.resx`. Schlüssel sind sprechende englische Bezeichner (`Login.Title`, `Register.NameRequired` …),
+- Leere, öffentliche Marker-Klasse `Texts` (`Localization/Texts.cs`) mit `Resources/Localization/Texts.resx`
+  (Englisch) und `Resources/Localization/Texts.de.resx` – der Localizer sucht
+  `BrowserGame.Server.Resources.Localization.Texts`. Schlüssel sind sprechende englische Bezeichner (`Login.Title`, `Register.NameRequired` …),
   nicht der englische Text selbst.
 - Culture-Cookie schreiben: Hilfsfunktion `LanguageCookie.Append(HttpResponse, string language)` –
   `CookieRequestCultureProvider.MakeCookieValue`, 1 Jahr, `SameSite=Lax`, `Secure` außer in Development, **nicht**
@@ -60,7 +66,8 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
   3. Angemeldet → `Account.Language` setzen, `UpdateAsync` (AK-5).
   4. `LocalRedirect` auf `ReturnUrl`, wenn `Url.IsLocalUrl`, sonst `/` (AK-3).
 - Kein Rate-Limit (keine Anmeldedaten), Antiforgery wie jede Razor-Seite.
-- Das Layout setzt `<html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">`.
+- Das Layout setzt `<html lang="@CultureInfo.CurrentUICulture.Name">` (im Invariant-Modus liefert
+  `TwoLetterISOLanguageName` „iv“; die UI-Kultur ist immer genau `en` oder `de`).
 
 ### Nachfrage vor dem Umschalten (`client/src/account/language.ts` → `wwwroot/js/language.js`)
 - Fester Build wie `passkeys.js`: `vite.passkeys.config.ts` wird zu einer Lib mit zwei Einträgen
@@ -90,7 +97,7 @@ Admin   ── bis 005 fest Deutsch (gleicher Mechanismus, eine Sprache)
   das Admin vollständig deutsch, auch bei englischem Browser. 005 stellt auf `en` um und übersetzt (005 AK-14).
 
 ### Account-Sprache
-- **Registrierung** (AK-7): `Account.Language = GameLanguages.Normalize(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)`.
+- **Registrierung** (AK-7): `Account.Language = GameLanguages.Normalize(CultureInfo.CurrentUICulture.Name)`.
 - **Anmeldung** (AK-6): Nach erfolgreichem `PasswordSignInAsync` Culture-Cookie aus `Account.Language` setzen, vor dem
   Redirect. (Passkey-Anmeldung in 003 T9 macht dasselbe.)
 - Abmelden lässt das Culture-Cookie stehen: Das Gerät behält die zuletzt genutzte Sprache.

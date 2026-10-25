@@ -20,6 +20,9 @@ Spiel-Client (HUD, Hinweise). Weitere Sprachen und ein lokalisiertes Admin-Inter
 - **Client:** eigene, typisierte Wörterbücher in TypeScript (`en` gibt die Schlüssel vor, `de` muss alle haben). Die
   Sprache kommt aus dem Culture-Cookie, sonst aus dem Browser. Im Spiel ist genau eine Sprache aktiv; Wechsel nur
   außerhalb des Spiels.
+- **Datum und Uhrzeit** werden immer in UTC übertragen; Format und Zeitzone der Anzeige bestimmt der Client. Der
+  Server braucht deshalb keine Kulturdaten und läuft im Invariant-Modus (`InvariantGlobalization`,
+  `PredefinedCulturesOnly=false`) – passend zum chiseled-Image ohne ICU, gleich in Entwicklung, CI und Produktion.
 - **Keine neue Abhängigkeit:** weder auf dem Server noch im Client.
 
 ## Alternativen
@@ -28,6 +31,8 @@ Spiel-Client (HUD, Hinweise). Weitere Sprachen und ein lokalisiertes Admin-Inter
   Abhängigkeit für zwei Sprachen.
 - **i18next / FormatJS im Client:** Pluralregeln, Interpolation, Nachladen – brauchen wir bei einer Handvoll HUD-Texte
   nicht.
+- **Image mit ICU (`chiseled-extra`):** echte Kulturdaten für serverseitige Formate, aber einige zehn MB größer und
+  Tests liefen anders als Produktion. Unnötig, weil der Client formatiert.
 - **Sprache in der URL (`/en/…`):** teilbare Links mit fester Sprache, aber jede Route und jeder Mail-Link müsste sie
   tragen. Die Spec verlangt das nicht.
 - **Sprache als Claim im Auth-Cookie:** spart nichts gegenüber dem Culture-Cookie und müsste bei jedem Wechsel neu
