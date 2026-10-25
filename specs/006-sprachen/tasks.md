@@ -5,7 +5,7 @@ Gehört zu: [plan.md](plan.md)
 Reihenfolge: Daten → Server → Client → Prüfung. Jeder Task bringt seine Tests mit.
 
 ## Server – Daten
-- [ ] **T1** (AK-5–7): `Account.Language` (Standard `"de"`), Migration `AddAccountLanguage` für SQLite und PostgreSQL,
+- [x] **T1** (AK-5–7): `Account.Language` (Standard `"de"`), Migration `AddAccountLanguage` für SQLite und PostgreSQL,
   Bestand `"de"`. `GameLanguages` (`Supported`, `Default`, `Normalize`) + Unit-Test.
 
 ## Server – Lokalisierung

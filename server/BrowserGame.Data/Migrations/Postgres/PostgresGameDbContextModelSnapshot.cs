@@ -41,6 +41,11 @@ namespace BrowserGame.Data.Migrations.Postgres
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 

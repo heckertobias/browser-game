@@ -6,7 +6,14 @@ using Microsoft.EntityFrameworkCore;
 namespace BrowserGame.Data;
 
 /// <summary>Spieler-Account. <see cref="IdentityUser.UserName"/> ist der Spielername (z. B. „Tobias“).</summary>
-public sealed class Account : IdentityUser;
+public sealed class Account : IdentityUser
+{
+    /// <summary>
+    /// Sprache des Spielers (006), z. B. „de“ oder „en“; gültige Werte prüft der Server.
+    /// Standard „de“: Bestehende Accounts haben sich auf Deutsch registriert.
+    /// </summary>
+    public string Language { get; set; } = "de";
+}
 
 /// <summary>Zuletzt gespeicherte Position eines Accounts in der Welt.</summary>
 public sealed class PlayerPosition
@@ -38,6 +45,8 @@ public abstract class GameDbContext(DbContextOptions options) : IdentityDbContex
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<Account>().Property(a => a.Language).HasMaxLength(8);
 
         builder.Entity<PlayerPosition>(position =>
         {
