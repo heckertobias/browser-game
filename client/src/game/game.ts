@@ -1,6 +1,6 @@
 import type { Snapshot, Welcome } from "../generated/browsergame/v1/game_pb";
 import { t } from "../i18n";
-import { INTERPOLATION_DELAY_MS, LOGICAL_HEIGHT, LOGICAL_WIDTH } from "./constants";
+import { INTERPOLATION_DELAY_MS } from "./constants";
 import { InputTracker } from "./input";
 import { SnapshotBuffer } from "./interpolation";
 import { connect, gameSocketUrl, type GameConnection } from "./net";
@@ -32,6 +32,7 @@ export class Game {
   private lastFrame = 0;
   private frameHandle = 0;
   private viewport: Viewport | null = null;
+  private dpr = 0;
   private self: DrawablePlayer | null = null;
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly events: GameEvents) {
@@ -98,10 +99,11 @@ export class Game {
 
   /** Bildschirm- → Weltkoordinaten; die Kamera ist auf die eigene Figur zentriert. */
   private toWorld(clientX: number, clientY: number, rect: DOMRect, camera: Vec): Vec {
-    const origin = cameraOrigin(camera, this.viewport?.scale ?? 1);
+    if (!this.viewport) return camera;
+    const origin = cameraOrigin(camera, this.viewport);
     return {
-      x: origin.x + ((clientX - rect.left) / rect.width) * LOGICAL_WIDTH,
-      y: origin.y + ((clientY - rect.top) / rect.height) * LOGICAL_HEIGHT,
+      x: origin.x + ((clientX - rect.left) / rect.width) * this.viewport.viewWidth,
+      y: origin.y + ((clientY - rect.top) / rect.height) * this.viewport.viewHeight,
     };
   }
 
@@ -122,11 +124,20 @@ export class Game {
   private resizeIfNeeded(): void {
     const dpr = window.devicePixelRatio || 1;
     const next = computeViewport(window.innerWidth, window.innerHeight, dpr);
-    if (this.viewport?.width === next.width && this.viewport.height === next.height && this.viewport.scale === next.scale) return;
+    if (
+      this.dpr === dpr &&
+      this.viewport?.canvasWidth === next.canvasWidth &&
+      this.viewport.canvasHeight === next.canvasHeight &&
+      this.viewport.scale === next.scale
+    ) return;
     this.viewport = next;
-    this.canvas.width = next.width;
-    this.canvas.height = next.height;
-    this.canvas.style.width = `${String(next.width / dpr)}px`;
-    this.canvas.style.height = `${String(next.height / dpr)}px`;
+    this.dpr = dpr;
+    // Bis T6: Canvas nur so groß wie das Spielbild (≤ 21:9), mittig im schwarzen Container.
+    const width = Math.round(next.viewWidth * next.scale);
+    const height = Math.round(next.viewHeight * next.scale);
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.canvas.style.width = `${String(width / dpr)}px`;
+    this.canvas.style.height = `${String(height / dpr)}px`;
   }
 }

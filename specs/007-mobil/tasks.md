@@ -20,7 +20,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
   DevTools bei 320/360/390 px.
 
 ## Client
-- [ ] **T5** (AK-1–4): `viewport.ts` neu (`chooseScale`, `fitViewport`, `computeViewport`), Konstanten in
+- [x] **T5** (AK-1–4): `viewport.ts` neu (`chooseScale`, `fitViewport`, `computeViewport`), Konstanten in
   `constants.ts` (ADR 0010), `LOGICAL_*` entfernen. Vitest: Tabelle aus ADR 0010 und Sweep-Invarianten.
 - [ ] **T6** (AK-1, AK-3–5): `render.ts`/`game.ts` mit variablem Ausschnitt: `cameraOrigin`, Balken und Clip über
   21:9, Culling (`isVisible`), `screenToWorld`; Canvas füllt das Fenster, Größe per ResizeObserver
