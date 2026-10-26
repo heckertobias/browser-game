@@ -1,10 +1,11 @@
 using System.Buffers.Binary;
 using System.Net;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace BrowserGame.Server.Tests;
 
-public sealed class PwaTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
+public sealed partial class PwaTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static ReadOnlySpan<byte> PngSignature => [137, 80, 78, 71, 13, 10, 26, 10];
 
@@ -106,5 +107,95 @@ public sealed class PwaTests(GameServerFactory factory) : IClassFixture<GameServ
         ];
         foreach (var tag in tags)
             Assert.Contains(tag, html, StringComparison.Ordinal);
+    }
+
+    [GeneratedRegex("/play/assets/[A-Za-z0-9._-]+")]
+    private static partial Regex AssetPath();
+
+    [Fact] // AK-12, AK-13
+    public async Task Service_worker_is_served_anonymously_without_caching()
+    {
+        using var client = factory.CreateFormClient();
+        var (offline, offlineHtml) = await client.GetAsync("/play/offline.html");
+        var assets = AssetPath().Matches(offlineHtml).Select(m => m.Value).Distinct().ToList();
+        Assert.NotEmpty(assets);
+
+        var (response, script) = await client.GetAsync("/sw.js");
+
+        Assert.Equal(HttpStatusCode.OK, offline.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/javascript", response.Content.Headers.ContentType?.MediaType);
+        Assert.Equal("utf-8", response.Content.Headers.ContentType?.CharSet);
+        Assert.True(response.Headers.CacheControl?.NoCache);
+        Assert.Contains("\"/play/offline.html\"", script, StringComparison.Ordinal);
+        foreach (var asset in assets)
+            Assert.Contains($"\"{asset}\"", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("__PRECACHE__", script, StringComparison.Ordinal);
+    }
+
+    [Fact] // AK-12, AK-13
+    public async Task Offline_page_is_served_anonymously_without_caching()
+    {
+        using var client = factory.CreateFormClient();
+
+        var (response, _) = await client.GetAsync("/play/offline.html");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
+        Assert.True(response.Headers.CacheControl?.NoCache);
+    }
+
+    [Theory] // AK-13
+    [InlineData("/play")]
+    [InlineData("/play/")]
+    [InlineData("/play/irgendwas")]
+    public async Task Game_page_is_not_cached(string path)
+    {
+        using var client = factory.CreateFormClient();
+        var account = await AccountTestFlows.CreateConfirmedAccountAsync(factory);
+        await AccountTestFlows.LoginAsync(client, account.Email);
+
+        var (response, html) = await client.GetAsync(path);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("<div id=\"root\">", html, StringComparison.Ordinal);
+        Assert.True(response.Headers.CacheControl?.NoCache);
+    }
+
+    [Fact] // AK-13
+    public async Task Play_assets_are_immutable()
+    {
+        using var client = factory.CreateFormClient();
+
+        var (response, _) = await client.GetAsync("/play/assets/test-asset.js");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var cache = response.Headers.CacheControl!;
+        Assert.True(cache.Public);
+        Assert.Equal(TimeSpan.FromDays(365), cache.MaxAge);
+        Assert.Contains(cache.Extensions, e => e.Name == "immutable");
+        Assert.False(cache.NoCache);
+    }
+
+    [Fact] // AK-13
+    public async Task Manifest_is_not_cached()
+    {
+        using var client = factory.CreateFormClient();
+
+        var (response, _) = await client.GetAsync("/manifest.webmanifest");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(response.Headers.CacheControl?.NoCache);
+    }
+
+    [Fact]
+    public async Task Other_static_files_keep_default_caching()
+    {
+        using var client = factory.CreateFormClient();
+
+        var (response, _) = await client.GetAsync("/icons/icon-192.png");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Null(response.Headers.CacheControl);
     }
 }

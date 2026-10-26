@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Accounts/blocked-names.txt" LogicalName="BrowserGame.Server.Accounts.blocked-names.txt" />
+    <EmbeddedResource Include="Pwa/service-worker.js" LogicalName="BrowserGame.Server.Pwa.service-worker.js" />
   </ItemGroup>
 
   <ItemGroup>

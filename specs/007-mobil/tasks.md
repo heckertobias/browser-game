@@ -12,7 +12,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
 - [x] **T2** (AK-10, AK-11): `client/scripts/icons.mjs` (PNG per `node:zlib`) und erzeugte Icons in `wwwroot/icons/`,
   `wwwroot/manifest.webmanifest`, Kopf-Tags im `_Layout`. `GameServerFactory` kopiert Manifest und Icons;
   Integrationstests: Manifest-Felder und Content-Type, Icons 200/`image/png`/Größe, Tags auf der Startseite.
-- [ ] **T3** (AK-12, AK-13): `Pwa/service-worker.js` (Embedded Resource), `ServiceWorkerScript.Render` + Unit-Tests,
+- [x] **T3** (AK-12, AK-13): `Pwa/service-worker.js` (Embedded Resource), `ServiceWorkerScript.Render` + Unit-Tests,
   `GET /sw.js` (`text/javascript`, `no-cache`, anonym), `PwaCaching.Apply` für Static Files und `/play`-Fallbacks
   (`no-cache` bzw. `immutable`). Factory schreibt Platzhalter `play/offline.html`; Integrationstests für Header.
 - [ ] **T4** (AK-9): Spieler-Seiten handytauglich: `_Layout` (`min-h-dvh`, Abstände, `h1` responsiv mit

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.TestHost;
 namespace BrowserGame.Server.Tests;
 
 /// <summary>
-/// Startet den echten Server im Speicher, mit eigener Datenbank pro Factory und Platzhalter-wwwroot
+/// Startet den echten Server im Speicher, mit eigener Datenbank pro Factory und Platzhalter-wwwroot (index.html, offline.html, test-asset.js)
 /// (dazu das echte Manifest und die echten Icons aus dem Server-Projekt).
 /// Datenbank: SQLite-Temp-Datei (Standard) oder PostgreSQL, wenn <c>TEST_DB_PROVIDER=Postgres</c> und
 /// <c>TEST_POSTGRES</c> (Verbindung ohne Datenbanknamen) gesetzt sind – so laufen dieselben Tests gegen beide (ADR 0004).
@@ -23,6 +23,8 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
         // Fallback, falls kein Client-Build vorliegt; liegt einer in wwwroot/play, wird ggf. der echte ausgeliefert.
         File.WriteAllText(Path.Combine(play, "index.html"), "<!doctype html><div id=\"root\"></div>");
         File.WriteAllText(Path.Combine(play, "assets", "test-asset.js"), "// test-asset");
+        File.WriteAllText(Path.Combine(play, "offline.html"),
+            "<!doctype html><title>offline</title><script type=\"module\" src=\"/play/assets/test-asset.js\"></script>");
         // 007: Manifest und Icons sind eingecheckt – echte Dateien aus dem Server-Projekt verwenden.
         var source = ServerWebRoot();
         File.Copy(Path.Combine(source, "manifest.webmanifest"), Path.Combine(WebRoot, "manifest.webmanifest"));
