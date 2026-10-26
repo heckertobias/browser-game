@@ -120,11 +120,11 @@ scripts/deploy.sh 0.2.3     # Rollback (die Datenbank wird nicht zurückgesetzt)
 
 ## Release
 
-Pro Spec gibt es einen Branch `spec/NNN-name` mit Draft-PR. Auf dem Branch entstehen Release Candidates, auf `main`
-das Release:
+Jede Umsetzung läuft auf einem Branch `impl/NNN-name` mit Draft-PR. Auf dem Branch entstehen Release Candidates, auf
+`main` das Release:
 
 ```bash
-scripts/release.sh 0.3.0-rc.1   # vom Spec-Branch: Release Candidate zum Testen auf dem Pi
+scripts/release.sh 0.3.0-rc.1   # vom impl-Branch: Release Candidate zum Testen auf dem Pi
 scripts/release.sh 0.3.0        # von main, nach dem Merge
 scripts/release.sh --dry-run 0.3.0-rc.1   # nur prüfen, nichts tun
 ```
@@ -141,9 +141,10 @@ Die Release-Notes entstehen aus den Commits seit dem letzten echten Release (RCs
 
 ## Repo-Regeln
 
-Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md), [ADR 0009](docs/decisions/0009-spec-branches-rc-und-deploy-per-api.md)
+Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md), [ADR 0009](docs/decisions/0009-spec-branches-rc-und-deploy-per-api.md), [ADR 0011](docs/decisions/0011-branch-namen.md)
 
-- Gearbeitet wird auf Branches mit PR (Spec: `spec/NNN-name` mit Draft-PR, Merge-Commit; Tooling/Doku: kurzlebiger Branch, Squash);
+- Gearbeitet wird auf Branches mit PR: `spec/NNN-name` (Spec schreiben, Squash), `impl/NNN-name` (Umsetzung,
+  Draft-PR, Merge-Commit), `chore/kurzer-name` (Tooling/Doku, Squash);
   `main` nimmt nur PRs mit grüner CI. Commits müssen **signiert** sein.
 - Issues und Pull Requests können nur Collaborators eröffnen.
 - Dependabot-Updates laufen als PR durch die CI; Patch- und Minor-Updates werden automatisch gemergt, Updates ohne wirksamen Cooldown (z. B. Digests) erst nach 7 Tagen (Label `wartet-7-tage`), Sicherheitsupdates (außer Major) sofort.

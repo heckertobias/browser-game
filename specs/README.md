@@ -29,14 +29,26 @@ Das zahlt sich besonders aus, wenn KI-Agenten mitprogrammieren: Eine gute Spec i
 - Reihenfolge: Verträge → Server → Client → Tests.
 - Jeder Task verweist auf das Akzeptanzkriterium, das er erfüllt (z. B. `AK-2`).
 
+Spec, Plan und Tasks entstehen auf dem Branch `spec/NNN-name` und werden per PR (Squash) nach `main` gemergt –
+meist lange bevor die Umsetzung beginnt.
+
 ### 4. Umsetzung
-- Auf dem Branch `spec/NNN-name` arbeiten und einen Draft-PR gegen `main` öffnen (nie direkt auf `main`).
+- Von `main` den Branch `impl/NNN-name` anlegen und einen Draft-PR gegen `main` öffnen (nie direkt auf `main`).
+- Status in der Spec auf `in arbeit` setzen, Roadmap mitpflegen.
 - Task für Task abarbeiten, abhaken, committen und pushen.
 - Zum Testen auf dem Pi: `scripts/release.sh X.Y.Z-rc.1` vom Branch. Gibt es Fehler: beheben, `-rc.2` usw.
 - Stellt sich beim Bauen heraus, dass die Spec falsch war: **erst Spec ändern, dann Code.**
 - Am Ende: alle Akzeptanzkriterien durchgehen, Status in der Spec auf `umgesetzt` setzen, Roadmap aktualisieren,
   PR auf „Ready“ stellen und mit **Merge-Commit** mergen. Danach `scripts/release.sh X.Y.Z` auf `main`.
-- Tooling und Doku (Skripte, ADRs, READMEs) laufen auf einem kurzlebigen Branch mit PR (Squash).
+- Tooling und Doku (Skripte, ADRs, READMEs) laufen auf einem kurzlebigen Branch `chore/kurzer-name` mit PR (Squash).
+
+### Branch-Namen ([ADR 0011](../docs/decisions/0011-branch-namen.md))
+
+| Präfix | Wofür | Merge |
+|---|---|---|
+| `spec/NNN-name` | Spec schreiben oder ändern (nur `specs/`) | Squash |
+| `impl/NNN-name` | Spec umsetzen (Draft-PR, Release Candidates) | Merge-Commit |
+| `chore/kurzer-name` | Tooling, CI, Skripte, ADRs, READMEs | Squash |
 
 ## Neues Feature anlegen
 
