@@ -55,6 +55,15 @@ tragen, wenn viele weitere Bereiche dazukommen (Spieler, Server-Status, Spielwer
   und Hinweise, unabhängig von der Sprache des Browsers. Das gilt auch für Mails aus dem Admin (Einladung, Testmail).
   Eine deutsche Fassung soll später ohne Umbau ergänzt werden können (siehe [006](../006-sprachen/spec.md)).
 
+### SMTP-Einstellungen
+- **AK-15:** Gegeben ich habe eine Testmail erfolgreich verschickt, wenn ich danach speichere, dann wird genau das
+  getestete Passwort gespeichert; es kann nicht passieren, dass still ein altes oder gar kein Passwort gespeichert
+  bleibt.
+- **AK-16:** Gegeben ich speichere ohne Passwort, dann sehe ich deutlich, ob ein Passwort gespeichert ist; ist keins
+  gespeichert, werde ich darauf hingewiesen.
+- **AK-17:** Gegeben die Einstellungen sind gespeichert, dann kann ich eine Testmail genau mit dem gespeicherten Stand
+  schicken – so wie ihn das Spiel für Bestätigungs- und Reset-Mails benutzt.
+
 ### Nichts geht verloren
 - **AK-13:** Gegeben die bisherigen Abläufe aus 004 (erster Admin, Einladen, Passkey, Passwort + Authenticator-App,
   Wiederherstellungscodes, SMTP speichern und testen, Admins entfernen, Protokoll), dann funktionieren sie unverändert
@@ -77,5 +86,7 @@ _Keine._
 - Farbschema folgt dem System, mit Umschalter Hell/Dunkel/System; die Wahl wird im Browser gemerkt.
 - Umsetzung nach 003.
 - Admin-Interface auf Englisch (aus 006 hierher verschoben, weil 005 ohnehin jede Admin-Seite anfasst).
+- SMTP-Seite: Nach einer Testmail wurde das Passwortfeld geleert; wer danach speicherte, behielt still das alte
+  Passwort (beim RC 0.3.0-rc.1 auf dem Pi aufgefallen). AK-15 bis AK-17 beheben das.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->

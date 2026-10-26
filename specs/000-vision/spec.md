@@ -27,9 +27,12 @@ Ein 2D-Pixel-Art-MMORPG im Browser mit zwei Seiten:
 - Bewegung: frei, nicht tile-basiert
 - Kampf: Tab-Targeting
 - Steuerung: Tastatur sowie Maus/Touch; jede Taste ist frei belegbar
-- Sichtfeld: Alle Spieler sehen einen gleich großen Ausschnitt der Welt, egal wie groß ihr Bildschirm ist.
-  Ein größerer oder schärferer Bildschirm zeigt dasselbe nur detaillierter, nicht mehr davon.
-  Die Kamera folgt der eigenen Figur.
+- Sichtfeld: Das Spielbild füllt immer das ganze Fenster, ohne Ränder. Die kürzere Seite zeigt auf jedem Bildschirm
+  etwa gleich viel Welt; die längere Seite zeigt so viel mehr, wie das Format hergibt (quer mehr zur Seite, hochkant
+  mehr nach oben und unten, begrenzt bei etwa 21:9). Ein größerer oder schärferer Bildschirm zeigt das nur
+  detaillierter. Die Kamera folgt der eigenen Figur. (Geändert mit [007](../007-mobil/spec.md).)
+- Geräte: Monitor, Laptop und Handy – quer wie hochkant. Das Spiel lässt sich als Web-App auf dem Homescreen
+  installieren.
 - Spielerzahl: bis zu ca. 50 Spieler gleichzeitig in einem Gebiet
 - Offline-Fortschritt ist **nur persönlich**: Die Welt verändert sich durch das, was Spieler online tun –
   was offline weiterläuft, hat keinen Einfluss auf die Welt oder auf andere Spieler.
@@ -53,6 +56,6 @@ _Keine – neue Fragen hier sammeln, sobald sie auftauchen._
 
 ## Nicht-Ziele (vorerst)
 
-- Mobile-App
+- Native Apps und App-Stores (eine installierbare Web-App ist gewollt, siehe 007)
 - Mehrere Server/Shards
 - Monetarisierung
