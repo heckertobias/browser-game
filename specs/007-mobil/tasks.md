@@ -15,7 +15,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
 - [x] **T3** (AK-12, AK-13): `Pwa/service-worker.js` (Embedded Resource), `ServiceWorkerScript.Render` + Unit-Tests,
   `GET /sw.js` (`text/javascript`, `no-cache`, anonym), `PwaCaching.Apply` für Static Files und `/play`-Fallbacks
   (`no-cache` bzw. `immutable`). Factory schreibt Platzhalter `play/offline.html`; Integrationstests für Header.
-- [ ] **T4** (AK-9): Spieler-Seiten handytauglich: `_Layout` (`min-h-dvh`, Abstände, `h1` responsiv mit
+- [x] **T4** (AK-9): Spieler-Seiten handytauglich: `_Layout` (`min-h-dvh`, Abstände, `h1` responsiv mit
   Silbentrennung), Umschalter `btn-sm`, Buttons und Linkabstände. Bestehende Seiten-Tests grün; Kurzprüfung in
   DevTools bei 320/360/390 px.
 
