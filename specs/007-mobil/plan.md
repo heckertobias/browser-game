@@ -309,7 +309,7 @@ Heute schon richtig: ein Zeiger zur Zeit, `setPointerCapture`, Folgen bei `point
 ### Bildschirm an (AK-14, `game/wakeLock.ts`)
 - `ScreenWakeLock` mit injizierbarer API (`navigator.wakeLock`) und `document`:
   - `start()`: anfordern, wenn `visibilityState === "visible"`; bei `visibilitychange` → sichtbar erneut anfordern
-    (der Browser gibt die Sperre beim Verstecken selbst frei); zusätzlich beim ersten `pointerdown`/`keydown`, falls noch
+    (der Browser gibt die Sperre beim Verstecken selbst frei); zusätzlich beim ersten `pointerup`/`keydown` (bei Touch ist erst `pointerup` eine Nutzergeste), falls noch
     keine Sperre besteht (Browser, die eine Nutzergeste verlangen).
   - `stop()`: Listener weg, Sperre freigeben.
   - Nicht unterstützt oder abgelehnt (`NotAllowedError`, Akku-Sparmodus): still nichts tun – dann gilt die normale
