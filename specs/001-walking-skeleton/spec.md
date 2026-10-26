@@ -28,6 +28,8 @@ kein Offline-Teil – nur der Beweis, dass Client, Server und Echtzeit-Verbindun
 - **AK-6:** Gegeben ich bewege mich, dann folgt die Kamera meiner Figur. Gegeben zwei Spieler mit unterschiedlich großen
   Bildschirmen, dann sehen beide einen gleich großen Ausschnitt der Welt; passt das Seitenverhältnis des Bildschirms nicht,
   bleiben Ränder frei, statt mehr Welt zu zeigen.
+  _Abgelöst durch [007 AK-1–4](../007-mobil/spec.md): Das Spielbild füllt das Fenster ohne Ränder; die kürzere Seite
+  zeigt überall etwa gleich viel Welt. Die Kamera folgt weiter der eigenen Figur._
 - **AK-7:** Gegeben ich laufe in eine beliebige Richtung, dann stoße ich auf keine Grenze, und ein Hintergrundmuster
   lässt mich erkennen, dass ich mich bewege.
 

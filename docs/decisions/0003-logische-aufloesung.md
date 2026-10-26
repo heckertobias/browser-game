@@ -1,12 +1,14 @@
 # ADR 0003 – Logische Auflösung 640×360
 
-**Status:** akzeptiert
+**Status:** ersetzt durch [ADR 0010](0010-sichtfeld-kurze-seite.md) (2026-10-26)
 
 ## Kontext
 
 Laut Vision sehen alle Spieler einen gleich großen Weltausschnitt, und ein größerer Bildschirm zeigt dasselbe nur
 schärfer. Gerendert wird also in einer festen logischen Auflösung und dann hochskaliert. Pixel-Art sieht nur bei
 **ganzzahliger** Skalierung sauber aus; sonst werden Pixel unterschiedlich breit.
+_(Die [Vision](../../specs/000-vision/spec.md) wurde mit [007](../../specs/007-mobil/spec.md) geändert: Das Spielbild
+füllt das Fenster ohne Ränder, nur die kürzere Seite zeigt überall etwa gleich viel Welt. Siehe ADR 0010.)_
 
 Ursprünglich war 800×600 (4:3) als Beispiel genannt. Fast alle heutigen Bildschirme sind 16:9, und 800×600 skaliert
 auf keine gängige Auflösung ganzzahlig.

@@ -5,7 +5,7 @@ Gehört zu: [plan.md](plan.md)
 Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task bringt seine Tests mit.
 
 ## Doku
-- [ ] **T1** (AK-1–4): ADR 0003 auf „ersetzt durch ADR 0010“; 001 AK-6 mit Vermerk „Abgelöst durch 007 AK-1–4“;
+- [x] **T1** (AK-1–4): ADR 0003 auf „ersetzt durch ADR 0010“; 001 AK-6 mit Vermerk „Abgelöst durch 007 AK-1–4“;
   Hinweis in ADR 0003 auf die geänderte Vision.
 
 ## Server
