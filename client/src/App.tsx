@@ -22,8 +22,8 @@ export function App() {
   }, []);
 
   return (
-    <div className="relative flex h-full w-full select-none items-center justify-center bg-black">
-      <canvas ref={canvasRef} className="touch-none [image-rendering:pixelated]" data-testid="game" />
+    <div className="relative h-full w-full select-none bg-black">
+      <canvas ref={canvasRef} className="block h-full w-full touch-none [image-rendering:pixelated]" data-testid="game" />
       <div className="absolute left-2 top-2 flex gap-2 font-mono text-xs uppercase">
         {name && <span className="badge badge-neutral rounded-none border-2 border-base-content/30">{name}</span>}
         <span

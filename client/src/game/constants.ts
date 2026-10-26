@@ -5,6 +5,8 @@ export const MAX_ASPECT_LONG = 21;
 export const MAX_ASPECT_SHORT = 9;
 
 export const PLAYER_SIZE = 16;
+/** Culling (ADR 0010): Figur samt Namen (≤ 16 Zeichen) muss das Sichtfeld um diesen Rand in Weltpixeln schneiden. */
+export const CULL_MARGIN = 64;
 export const GRID_MINOR = 32;
 export const GRID_MAJOR = 256;
 

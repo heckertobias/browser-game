@@ -22,7 +22,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
 ## Client
 - [x] **T5** (AK-1–4): `viewport.ts` neu (`chooseScale`, `fitViewport`, `computeViewport`), Konstanten in
   `constants.ts` (ADR 0010), `LOGICAL_*` entfernen. Vitest: Tabelle aus ADR 0010 und Sweep-Invarianten.
-- [ ] **T6** (AK-1, AK-3–5): `render.ts`/`game.ts` mit variablem Ausschnitt: `cameraOrigin`, Balken und Clip über
+- [x] **T6** (AK-1, AK-3–5): `render.ts`/`game.ts` mit variablem Ausschnitt: `cameraOrigin`, Balken und Clip über
   21:9, Culling (`isVisible`), `screenToWorld`; Canvas füllt das Fenster, Größe per ResizeObserver
   (`device-pixel-content-box`, Fallback gerundet) und DPR-Vergleich. Vitest für die reinen Funktionen.
 - [ ] **T7** (AK-6–8): `styles.css` (touch-action, overscroll-behavior, user-select, touch-callout, tap-highlight,
