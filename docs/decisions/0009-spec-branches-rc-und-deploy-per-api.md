@@ -1,6 +1,6 @@
 # ADR 0009 – Spec-Branches, Release Candidates und Deploy per Arcane-API
 
-**Status:** akzeptiert
+**Status:** akzeptiert – Punkt 1 (Branch-Namen) ersetzt durch [ADR 0011](0011-branch-namen.md) (2026-10-26)
 
 ## Kontext
 
@@ -11,7 +11,7 @@ Das hat zwei Schwächen. Ein Feature lässt sich erst nach dem Merge auf dem Pi 
 
 ## Entscheidung
 
-1. **Pro Spec ein Branch** `spec/NNN-name` mit Draft-PR gegen `main`. Gemergt wird mit **Merge-Commit**, damit die
+1. _(Ersetzt durch ADR 0011: `spec/` zum Schreiben, `impl/` zum Umsetzen.)_ **Pro Spec ein Branch** `spec/NNN-name` mit Draft-PR gegen `main`. Gemergt wird mit **Merge-Commit**, damit die
    Task-Commits der Spec erhalten bleiben. Tooling- und Doku-PRs sowie Dependabot werden weiter **gesquasht**.
 2. **Rulesets:** `main` nimmt Änderungen nur noch per PR mit grünem `ci-ok`. Die Pflicht zur linearen Historie entfällt
    (Merge-Commits), signierte Commits bleiben Pflicht. Der Admin-Bypass gilt nur noch für PRs

@@ -11,4 +11,7 @@ Regeln:
 - Arbeite `tasks.md` der Reihe nach ab und hake erledigte Tasks ab.
 - Wenn die Spec nicht passt oder unklar ist: anhalten und nachfragen, nicht raten.
 - Typen nur aus `contracts/` generieren, nie duplizieren.
-- Arbeite auf dem Spec-Branch `spec/NNN-name` (Draft-PR), nie direkt auf `main`. Tooling und Doku gehören auf einen eigenen kurzlebigen Branch mit PR.
+- Nie direkt auf `main`. Branch-Namen ([ADR 0011](docs/decisions/0011-branch-namen.md)):
+  - `spec/NNN-name` – Spec schreiben oder ändern (nur `specs/`), PR mit Squash.
+  - `impl/NNN-name` – Spec umsetzen, Draft-PR, Merge-Commit. Erst starten, wenn die Spec auf `main` `bereit` ist.
+  - `chore/kurzer-name` – Tooling, CI, Skripte, ADRs, READMEs, PR mit Squash.

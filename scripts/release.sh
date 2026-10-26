@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Release oder Release Candidate in zwei Schritten (ADR 0002, 0009):
+# Release oder Release Candidate in zwei Schritten (ADR 0002, 0009, 0011):
 #   1. Signierten Tag pushen → CI baut, scannt und veröffentlicht die Images und legt ein GitHub Release an
 #        vX.Y.Z      nur von main:  :X.Y.Z + :latest
-#        vX.Y.Z-rc.N von jedem Branch außer main (Spec-Branch):  nur :X.Y.Z-rc.N, GitHub Release als Vorabversion
+#        vX.Y.Z-rc.N von jedem Branch außer main (impl-Branch):  nur :X.Y.Z-rc.N, GitHub Release als Vorabversion
 #   2. Erst wenn die Images existieren: scripts/deploy.sh rollt die Version über die Arcane-API aus
 #
 # Aufruf: scripts/release.sh [--dry-run] 0.3.0 | 0.3.0-rc.1
@@ -32,7 +32,7 @@ BRANCH="$(git branch --show-current)"
 if [[ "$IS_RC" == 1 ]]; then
   [[ "$BRANCH" != "main" ]] || die "Release Candidates nur von einem Branch außer main (Release: ohne -rc.N)"
 else
-  [[ "$BRANCH" == "main" ]] || die "Release nur von main aus (Spec-Branch: Release Candidate X.Y.Z-rc.N)"
+  [[ "$BRANCH" == "main" ]] || die "Release nur von main aus (impl-Branch: Release Candidate X.Y.Z-rc.N)"
 fi
 [[ -z "$(git status --porcelain)" ]] || die "Arbeitskopie nicht sauber"
 git fetch --quiet origin "$BRANCH" --tags || die "Branch $BRANCH nicht auf origin (gepusht?)"
