@@ -1,6 +1,6 @@
 # 011 – Chat
 
-**Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [003 – Accounts & gespeicherte Position](../003-accounts/spec.md) (Spielername) ·
 [002 – Tastenbelegung & erstes Menü](../002-keybindings/spec.md) (Tasten steuern mal die Figur, mal etwas anderes) ·
@@ -24,13 +24,17 @@ gemeinsam anfühlt. Bewusst ganz einfach: ein Kanal für alle.
 ### Chatfenster
 - **AK-1:** Gegeben ich bin im Spiel, dann sehe ich unten links ein Chatfenster über dem Spielbild. Es verdeckt nur
   einen kleinen Teil der Welt und lässt die Welt dahinter durchscheinen.
-- **AK-2:** Gegeben im Chat steht eine Nachricht, dann sehe ich den Spielernamen des Absenders und den Text;
-  die neueste Nachricht steht unten.
+- **AK-2:** Gegeben im Chat steht eine Nachricht, dann sehe ich die Uhrzeit (Stunden:Minuten, in meiner Ortszeit),
+  den Spielernamen des Absenders und den Text; die neueste Nachricht steht unten.
 - **AK-3:** Gegeben es kommen mehr Nachrichten, als ins Fenster passen, dann rücken ältere nach oben heraus; ich kann
   im Fenster nach oben scrollen, um sie zu lesen. Scrolle ich nach oben, springt das Fenster bei neuen Nachrichten
   nicht von selbst nach unten.
 - **AK-4:** Gegeben das Chatfenster ist offen, wenn ich es einklappe, dann bleibt nur ein kleiner Chat-Button übrig;
   kommt dann eine neue Nachricht, zeigt der Button das an. Mit dem Button klappe ich das Fenster wieder auf.
+- **AK-4b:** Gegeben ich habe den Chat ein- oder aufgeklappt, wenn ich das Spiel auf demselben Gerät erneut öffne, dann
+  ist er wieder so wie zuletzt. Auf einem anderen Gerät gilt dessen eigener Stand.
+- **AK-4c:** Gegeben ich öffne das Spiel auf einem Gerät zum ersten Mal, dann ist der Chat hochkant am Handy
+  eingeklappt, sonst aufgeklappt.
 
 ### Schreiben
 - **AK-5:** Gegeben ich bin im Spiel, wenn ich Enter drücke, dann kann ich eine Nachricht tippen; Enter schickt sie ab,
@@ -55,6 +59,14 @@ gemeinsam anfühlt. Bewusst ganz einfach: ein Kanal für alle.
   werden weitere eine Weile nicht angenommen, und er sieht einen Hinweis, dass er zu schnell schreibt.
 - **AK-14:** Gegeben ich bin nicht angemeldet, dann kann ich den Chat weder lesen noch hineinschreiben.
 
+### Verlauf
+- **AK-15:** Gegeben ich komme ins Spiel, dann sehe ich die letzten bis zu 50 Nachrichten der letzten 24 Stunden,
+  auch wenn ich beim Schreiben nicht im Spiel war.
+- **AK-16:** Gegeben eine Nachricht ist älter als 24 Stunden, dann wird sie gelöscht und niemand bekommt sie mehr
+  zu sehen. Das gilt auch nach einem Neustart des Servers.
+- **AK-17:** Gegeben ich lösche meinen Account (003 AK-16), dann werden auch alle meine Nachrichten gelöscht; wer
+  danach ins Spiel kommt, sieht sie nicht mehr im Verlauf.
+
 ## Out of Scope
 
 - Private Nachrichten (Flüstern), Gruppen-, Gilden- oder Handelskanäle
@@ -69,15 +81,16 @@ gemeinsam anfühlt. Bewusst ganz einfach: ein Kanal für alle.
 
 ## Offene Fragen
 
-- [ ] **Verlauf:** Sehe ich beim Betreten des Spiels ältere Nachrichten (z. B. die letzten 50 oder die der letzten
-  Stunde), oder nur, was ab jetzt geschrieben wird? Und wenn ja: Wie lange werden Nachrichten aufbewahrt?
-- [ ] **Account löschen:** Falls Nachrichten aufbewahrt werden – werden meine Nachrichten beim Löschen des Accounts
-  mitgelöscht (003 AK-16: „alle zugehörigen Daten“)?
-- [ ] **Uhrzeit:** Soll bei jeder Nachricht die Uhrzeit stehen?
-- [ ] **Moderation:** Reicht es zum Start ohne Melden/Stummschalten/Filter (kleiner Kreis von Spielern), oder braucht
-  es mindestens, dass ein Admin Nachrichten löschen oder Spieler stummschalten kann?
-- [ ] **Handy hochkant:** Ist der Chat dort standardmäßig eingeklappt, damit er nicht zu viel Spielbild verdeckt?
-- [ ] **Merken:** Bleibt „eingeklappt/aufgeklappt“ gespeichert (pro Gerät oder pro Account wie die Tastenbelegung)?
-- [ ] **Grenzen:** Passen 200 Zeichen pro Nachricht und „mehr als 5 in 10 Sekunden“ als Bremse?
+_Keine._
+
+## Entschiedene Fragen
+
+- Ein Kanal für alle, die gerade im Spiel sind.
+- Verlauf: die letzten bis zu 50 Nachrichten der letzten 24 Stunden; ältere werden gelöscht.
+- Account löschen löscht auch die eigenen Nachrichten.
+- Uhrzeit (Stunden:Minuten) an jeder Nachricht.
+- Zum Start keine Moderation (kein Melden, Stummschalten, Filter) – eigene Spec, wenn nötig.
+- Hochkant am Handy beim ersten Mal eingeklappt; ein-/aufgeklappt wird pro Gerät gemerkt.
+- Höchstens 200 Zeichen pro Nachricht; Bremse bei mehr als 5 Nachrichten in 10 Sekunden.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
