@@ -30,7 +30,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
   `PointerHold` (primärer Zeiger, `lostpointercapture`) + Vitest.
 - [x] **T8** (AK-14): `ScreenWakeLock` (Neuanforderung bei Sichtbarkeit und erster Eingabe, still ohne Unterstützung)
   + Vitest mit Fakes; in `Game.start/stop`.
-- [ ] **T9** (AK-10–13): `index.html` Kopf-Tags; Offline-Seite (`offline.html`, `src/offline.ts`, Schlüssel
+- [x] **T9** (AK-10–13): `index.html` Kopf-Tags; Offline-Seite (`offline.html`, `src/offline.ts`, Schlüssel
   `offline*` in `i18n.ts`) als zweite Vite-Eingabe; `pwa.ts` registriert `/sw.js` nur im Produktions-Build. Build
   prüfen: absolute Kopf-Links unverändert, `wwwroot/play/offline.html` mit gehashten Assets, `/sw.js` listet sie.
 

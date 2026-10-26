@@ -9,6 +9,8 @@ export default defineConfig({
   build: {
     outDir: "../server/BrowserGame.Server/wwwroot/play",
     emptyOutDir: true,
+    // Mehrseiten-Build (007 AK-12): Spiel und Offline-Seite; Pfade relativ zum Client-Ordner, in dem jeder Build läuft.
+    rolldownOptions: { input: ["index.html", "offline.html"] },
   },
   server: {
     // Dev: Vite liefert den Client, der ASP.NET-Server (dotnet run) das Spiel.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectLanguage } from "./i18n";
+import { detectLanguage, dictionaries } from "./i18n";
 
 const COOKIE = ".AspNetCore.Culture";
 
@@ -52,5 +52,15 @@ describe("detectLanguage", () => {
 
   it("nimmt Englisch, wenn alles fehlt", () => {
     expect(detectLanguage("", "")).toBe("en");
+  });
+});
+
+describe("Wörterbücher", () => {
+  it("enthalten die Texte der Offline-Seite in beiden Sprachen (007 AK-12)", () => {
+    for (const texts of Object.values(dictionaries)) {
+      for (const key of ["offlineTitle", "offlineMessage", "offlineRetry"] as const) {
+        expect(texts[key].trim()).not.toBe("");
+      }
+    }
   });
 });
