@@ -106,7 +106,7 @@ ein Schritt genügt. Beispiele und Abweichungen: Tabelle in ADR 0010.
 - **Browser-Zoom** ändert CSS-Pixel und DPR, nicht die Gerätepixel des Fensters → gleicher Ausschnitt. Herauszoomen
   zeigt also nicht mehr Welt; das HUD (CSS) wächst mit dem Zoom.
 - **Sehr kleine Fenster:** nie fraktional verkleinern (anders als ADR 0003). Kurze Seite ≤ 400 Gerätepixel → `k = 1`,
-  man sieht weniger (z. B. 480×270 → 480×270 Welt). 401–508 → `k = 2` (200–254). Mehr als 400 sieht man nie.
+  man sieht weniger (z. B. 480×270 → 480×270 Welt). 401–800 → `k = 2` (200–400). Mehr als 400 sieht man nie.
 - Fenstergröße 0 (minimiert): Größe nicht übernehmen, nicht zeichnen.
 
 ### Rendering (`render.ts`, `game.ts`)
@@ -327,7 +327,7 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
     iPhone hochkant/quer, Android gerundet und exakt 1080×2400, Ultrawide, 32:9, kleine Fenster). Invarianten über alle
     Größen 200…4000 × 200…4000 (Schritt z. B. 37) und mehrere DPR: `scale` ganzzahlig ≥ 1; Canvas = Gerätegröße;
     `view × scale + 2·offset` = Canvas (±1); kurze Sicht ≤ 400; lange/kurze ≤ 21/9 (+1 Gerätepixel); bei kurzer Seite
-    ≥ 1601 Gerätepixeln kurze Sicht ≥ 324; Offsets nur über 21:9.
+    ≥ 1601 Gerätepixeln kurze Sicht ≥ 320 (−11 %, ADR 0010); Offsets nur über 21:9.
   - `render.test.ts`: `cameraOrigin` (gerundet auf Gerätepixel, Kamera mittig), `screenToWorld` (Mitte → Kamera, mit
     Offset), `isVisible` (Rand, Name).
   - `input.test.ts`: `PointerHold` – zweiter Finger ignoriert, nicht primärer/rechte Taste ignoriert, `release` mit
