@@ -26,7 +26,7 @@ Details: [`specs/README.md`](specs/README.md)
 | `specs/_template/` | Vorlagen für neue Features |
 | `contracts/` | Maschinenlesbare Verträge: OpenAPI (HTTP), Protobuf (WebSocket) |
 | `docs/decisions/` | Architekturentscheidungen (ADRs) |
-| `scripts/` | Hilfsskripte: `github-setup.sh` (Repo-Härtung), `release.sh`, `deploy.sh` |
+| `scripts/` | Hilfsskripte: `github-setup.sh` (Repo-Härtung), `release.sh`, `release-notes.sh` |
 | `.github/` | CI-Workflows, Dependabot |
 | `deploy/` | Compose für den Betrieb (Version über `GAME_VERSION`) |
 | `server/` | C# / ASP.NET Core: Spielserver, Admin-Interface, gemeinsame Datenschicht |
@@ -83,40 +83,22 @@ jeweils mit Build-Provenance-Attestation:
 gh attestation verify oci://ghcr.io/heckertobias/browser-game:<version> --owner heckertobias
 ```
 
-## Betrieb (Compose / Arcane)
+## Betrieb (Compose)
 
-[`deploy/compose.yaml`](deploy/compose.yaml) ist das, was läuft. `scripts/deploy.sh` lädt sie zusammen mit der `.env`
-über die Arcane-API ins Projekt und startet neu ([ADR 0009](docs/decisions/0009-spec-branches-rc-und-deploy-per-api.md));
-Git Sync ist im Projekt abgeschaltet. Änderungen an der Compose in der Arcane-Oberfläche überschreibt das nächste Deploy.
+[`deploy/compose.yaml`](deploy/compose.yaml) ist ein Beispiel für den Betrieb hinter
+[nginx-proxy](https://github.com/nginx-proxy/nginx-proxy) (Netz `proxy`); kein Dienst veröffentlicht einen Port.
+Wie ausgerollt wird, liegt außerhalb des Repos ([ADR 0012](docs/decisions/0012-deploy-ausserhalb-des-repos.md)).
 
-- Betrieb hinter nginx-proxy (Netz `proxy`); kein Dienst veröffentlicht einen Port.
-- `.env` des Projekts: `VIRTUAL_HOST` (Spiel), `ADMIN_VIRTUAL_HOST` (Admin, nur intern auflösen lassen) und
-  `GAME_VERSION` (setzt `scripts/deploy.sh`; die übrigen Zeilen bleiben unverändert).
+- `.env` neben der Compose: `GAME_VERSION`, `VIRTUAL_HOST` (Spiel) und `ADMIN_VIRTUAL_HOST` (Admin, nur intern
+  auflösen lassen).
 - Spiel und Admin teilen sich das Volume `data` (SQLite). Es gehört ins Backup; das Spiel schreibt dafür nachts um
   03:50 eine konsistente Kopie nach `/data/backup/game.db`.
 - **Erster Admin:** Beim ersten Start schreibt das Admin-Interface einen einmaligen Einrichtungslink (48 h gültig)
   in sein Log. Wer das Container-Log lesen kann, kann also den ersten Admin anlegen – das ist so gewollt (Betreiber).
   Startet das Admin ohne eingerichteten Admin neu, gibt es einen neuen Link; der alte wird ungültig.
 - Mailversand (Bestätigungen, Passwort-Reset, Einladungen) richtet man danach im Admin unter „SMTP“ ein.
-
-**Deploy-Zugang:** Die Datei `~/.config/browser-game/arcane.env` (Rechte `600`, außerhalb des Repos) oder gleichnamige
-Umgebungsvariablen. Die Datei wird nur zeilenweise als `NAME=WERT` gelesen:
-
-```
-ARCANE_URL=https://arcane.example.internal
-ARCANE_API_KEY=…
-ARCANE_PROJECT_ID=…
-ARCANE_ENV_ID=0
-```
-
-`ARCANE_ENV_ID` ist optional (Standard `0`), ebenso `ARCANE_CA_CERT` für eine interne CA. Der Key braucht nur
-`projects:read`, `projects:update` und `projects:deploy`. `scripts/deploy.sh --check` prüft Key und Verbindung nur
-lesend (ohne `ARCANE_PROJECT_ID` listet es die Projekte und endet mit Fehler), `--dry-run` prüft Image und Compose ohne Key.
-
-```bash
-scripts/deploy.sh 0.3.0     # eine Version ausrollen
-scripts/deploy.sh 0.2.3     # Rollback (die Datenbank wird nicht zurückgesetzt)
-```
+- Rollback: eine ältere `GAME_VERSION` ausrollen. Die Datenbank wird nicht zurückgesetzt (kein Downgrade der
+  Migrationen).
 
 ## Release
 
@@ -124,13 +106,25 @@ Jede Umsetzung läuft auf einem Branch `impl/NNN-name` mit Draft-PR. Auf dem Bra
 `main` das Release:
 
 ```bash
-scripts/release.sh 0.3.0-rc.1   # vom impl-Branch: Release Candidate zum Testen auf dem Pi
+scripts/release.sh 0.3.0-rc.1   # vom impl-Branch: Release Candidate für die Testumgebung
 scripts/release.sh 0.3.0        # von main, nach dem Merge
 scripts/release.sh --dry-run 0.3.0-rc.1   # nur prüfen, nichts tun
 ```
 
 Das Skript prüft den Stand (sauber, synchron mit `origin`, CI grün) und pusht den signierten Tag. Es wartet, bis die
-CI beide Images veröffentlicht und das GitHub Release angelegt hat, und ruft dann `scripts/deploy.sh` auf.
+CI beide Images veröffentlicht und das GitHub Release angelegt hat. Netzwerkfehler beim Abfragen der CI hält es aus.
+
+**Deploy-Hook:** Gibt es eine ausführbare Datei `~/.config/browser-game/deploy` (oder `$BROWSER_GAME_DEPLOY`), rollt
+`release.sh` die Version damit aus. Der Hook liegt außerhalb des Repos und wird im Repo-Verzeichnis aufgerufen
+(`BROWSER_GAME_REPO` ist gesetzt):
+
+| Aufruf | Wann | Fehler |
+|---|---|---|
+| `deploy --check` | vor dem Tag | bricht ab, bevor etwas passiert |
+| `deploy --dry-run --unreleased X.Y.Z` | `release.sh --dry-run` | – |
+| `deploy X.Y.Z` | nach CI und GitHub Release | Release bleibt; Hook erneut aufrufen |
+
+Ohne Hook endet `release.sh` nach dem Veröffentlichen.
 
 - `v0.3.0` veröffentlicht `:0.3.0` und `:latest`; das Release wird nur von `main` aus gebaut.
 - `v0.3.0-rc.1` veröffentlicht nur `:0.3.0-rc.1` und ein GitHub Release als Vorabversion. Bei einem Fehler folgt
@@ -141,7 +135,7 @@ Die Release-Notes entstehen aus den Commits seit dem letzten echten Release (RCs
 
 ## Repo-Regeln
 
-Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md), [ADR 0009](docs/decisions/0009-spec-branches-rc-und-deploy-per-api.md), [ADR 0011](docs/decisions/0011-branch-namen.md)
+Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md), [ADR 0009](docs/decisions/0009-spec-branches-rc-und-deploy-per-api.md), [ADR 0011](docs/decisions/0011-branch-namen.md), [ADR 0012](docs/decisions/0012-deploy-ausserhalb-des-repos.md)
 
 - Gearbeitet wird auf Branches mit PR: `spec/NNN-name` (Spec schreiben, Squash), `impl/NNN-name` (Umsetzung,
   Draft-PR, Merge-Commit), `chore/kurzer-name` (Tooling/Doku, Squash);

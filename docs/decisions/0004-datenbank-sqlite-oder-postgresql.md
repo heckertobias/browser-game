@@ -4,9 +4,9 @@
 
 ## Kontext
 
-Mit 003 (Accounts) braucht das Spiel zum ersten Mal Persistenz. Betrieben wird es vorerst auf einem Raspberry Pi
+Mit 003 (Accounts) braucht das Spiel zum ersten Mal Persistenz. Betrieben wird es vorerst auf kleiner Hardware
 (ein Server, ≤ 50 Spieler). Später sollen mehr Spieler, mehrere Instanzen oder Auswertungen möglich sein, ohne
-das Spiel umzubauen. Auf dem Pi ist SD-Karten-Verschleiß ein reales Risiko (siehe Homelab, th-rpi-02).
+das Spiel umzubauen. Auf Geräten mit SD-Karte ist Verschleiß ein reales Risiko.
 
 ## Entscheidung
 
@@ -15,8 +15,8 @@ das Spiel umzubauen. Auf dem Pi ist SD-Karten-Verschleiß ein reales Risiko (sie
 - Beide Provider werden **gleichwertig** gepflegt: je ein eigener Migrationssatz
   (`Data/Migrations/Sqlite`, `Data/Migrations/Postgres`), erzeugt über je einen abgeleiteten DbContext.
 - Die CI führt die Integrationstests gegen **beide** Datenbanken aus (PostgreSQL als Service-Container).
-- Deployment auf dem Pi: **SQLite** im Volume (`/data/game.db`, WAL-Modus). Für ein konsistentes Backup schreibt der
-  Server nachts eine Kopie per `VACUUM INTO` (vor dem restic-Lauf des Homelabs).
+- Deployment im Kleinbetrieb: **SQLite** im Volume (`/data/game.db`, WAL-Modus). Für ein konsistentes Backup schreibt der
+  Server nachts eine Kopie per `VACUUM INTO` (vor einem nächtlichen Backup um 04:00).
 - Migrationen laufen beim Start automatisch (nur eine Instanz).
 
 ## Alternativen

@@ -87,6 +87,6 @@ _Keine._
 - Umsetzung nach 003.
 - Admin-Interface auf Englisch (aus 006 hierher verschoben, weil 005 ohnehin jede Admin-Seite anfasst).
 - SMTP-Seite: Nach einer Testmail wurde das Passwortfeld geleert; wer danach speicherte, behielt still das alte
-  Passwort (beim RC 0.3.0-rc.1 auf dem Pi aufgefallen). AK-15 bis AK-17 beheben das.
+  Passwort (beim RC 0.3.0-rc.1 in der Testumgebung aufgefallen). AK-15 bis AK-17 beheben das.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->

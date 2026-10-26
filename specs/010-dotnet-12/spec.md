@@ -19,7 +19,7 @@ Spiel und Admin laufen auf .NET 12, der nächsten Version mit Langzeit-Support. 
 ## Akzeptanzkriterien
 
 - **AK-1:** Gegeben der Wechsel ist ausgerollt, dann funktionieren alle bisherigen Abläufe von Spiel und Admin
-  unverändert (alle bestehenden automatischen Tests grün, Sichtprüfung im Release Candidate auf dem Pi).
+  unverändert (alle bestehenden automatischen Tests grün, Sichtprüfung im Release Candidate in der Testumgebung).
 - **AK-2:** Gegeben die Regeln aus 009 (Mindestalter von Paketen, gehärtete Images), dann gelten sie unverändert weiter.
 - **AK-3:** Gegeben .NET 11 ist nicht mehr unterstützt, dann läuft zu diesem Zeitpunkt nichts mehr darauf.
 

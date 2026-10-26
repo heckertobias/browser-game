@@ -37,11 +37,11 @@ Reihenfolge: Datenschicht → Admin → Spiel-Anbindung → Tests → Docker/CI/
 - [x] **T12**: Dockerfile mit Zielen `game` und `admin`; CI-`docker`-Job als Matrix, zweites Image
   `browser-game-admin`; `release.sh` und Release-Notes für beide Images.
 - [x] **T13**: `deploy/compose.template.yaml` (erzeugt beim Release `deploy/compose.yaml`) mit `browsergame-admin` (gleiches Volume, `ADMIN_VIRTUAL_HOST`), README
-  („Admin-Interface“, erster Admin über den Link im Log). Hinweise fürs Homelab: interner Hostname, Volume ins Backup.
-- [x] **T14**: Manuelle Prüfung auf dem Pi:
+  („Admin-Interface“, erster Admin über den Link im Log). Hinweise für den Betrieb: interner Hostname, Volume ins Backup.
+- [x] **T14**: Manuelle Prüfung in der Testumgebung:
   - Erster Admin über den Log-Link
   - Passkey-Anmeldung
-  - SMTP mit dem Netcup-Postfach eintragen, Testmail
+  - SMTP mit dem Postfach des Spiels eintragen, Testmail
   - Spiel-Container stoppen → Admin geht weiter (AK-5)
   - Admin von außen nicht erreichbar (AK-6)
 

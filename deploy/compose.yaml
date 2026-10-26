@@ -1,13 +1,12 @@
-# Betrieb hinter nginx-proxy (externes Docker-Netz "proxy"). Ausgerollt wird per scripts/deploy.sh über die
-# Arcane-API (ADR 0009), nicht per Git Sync: Das Skript lädt die Compose des Release-Tags hoch und setzt GAME_VERSION.
+# Beispiel: Betrieb hinter nginx-proxy (externes Docker-Netz "proxy"). Ausrollen liegt außerhalb des Repos (ADR 0012).
 # Kein Dienst veröffentlicht einen Port: Erreichbar sind beide nur über den Proxy (Forwarded-Header werden vertraut).
 # In der .env des Projekts (keine internen Namen im Repo):
-#   GAME_VERSION=0.3.0                                  # setzt scripts/deploy.sh
+#   GAME_VERSION=0.3.0                                  # auszurollende Version
 #   VIRTUAL_HOST=browsergame.example.internal           # Spiel
 #   ADMIN_VIRTUAL_HOST=admin-browsergame.example.internal  # Admin – nur intern erreichbar machen (004 AK-6)
 services:
   browsergame:
-    image: ghcr.io/heckertobias/browser-game:${GAME_VERSION:?GAME_VERSION in der .env setzen (scripts/deploy.sh)}
+    image: ghcr.io/heckertobias/browser-game:${GAME_VERSION:?GAME_VERSION in der .env setzen}
     restart: unless-stopped
     read_only: true
     cap_drop: [ALL]
@@ -28,7 +27,7 @@ services:
       Database__BackupPath: /data/backup/game.db
 
   browsergame-admin:
-    image: ghcr.io/heckertobias/browser-game-admin:${GAME_VERSION:?GAME_VERSION in der .env setzen (scripts/deploy.sh)}
+    image: ghcr.io/heckertobias/browser-game-admin:${GAME_VERSION:?GAME_VERSION in der .env setzen}
     restart: unless-stopped
     read_only: true
     cap_drop: [ALL]

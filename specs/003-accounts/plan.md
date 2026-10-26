@@ -11,7 +11,7 @@ Browser ── /Account/*  Razor Pages (Registrieren, Anmelden, Bestätigen, Pas
         ── /ws         gleiches Cookie + Origin-Prüfung; Spieler = Account
 Server  ── ASP.NET Core Identity (EF Core) ── SQLite | PostgreSQL (per Konfiguration, Bibliothek BrowserGame.Data aus 004)
         ── GameLoop: Nachlauf 20 s, Übernahme/Rauswurf, Positionen gebündelt speichern
-        ── SMTP (Netcup-Postfach) bzw. Log in der Entwicklung
+        ── SMTP (eigenes Postfach) bzw. Log in der Entwicklung
 ```
 
 ## Verträge
@@ -60,7 +60,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
   `AddDbContext<GameDbContext, SqliteGameDbContext>()` bzw. Postgres-Variante.
 - Start: `Database.MigrateAsync()`. Bei SQLite einmalig `PRAGMA journal_mode=WAL`.
 - `SqliteBackupService` (nur bei SQLite): täglich um 03:50 `VACUUM INTO '/data/backup/game.db'`, damit das
-  Homelab-Backup (04:00) eine konsistente Kopie bekommt.
+  nächtliche Backup (04:00) eine konsistente Kopie bekommt.
 - `dotnet-ef` als lokales Tool (`server/dotnet-tools.json`), Migrationen per Skript `scripts/add-migration.sh <Name>`
   für beide Provider.
 
@@ -150,7 +150,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
   - `App__PublicUrl: https://${VIRTUAL_HOST}`, `Passkeys__ServerDomain: ${VIRTUAL_HOST}`.
   - `ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"`.
   - Mail: keine Umgebungsvariablen mehr, Einstellungen im Admin-Interface (004).
-- Homelab, nicht in diesem Repo: Volume `browsergame_browsergame-data` ins restic-Backup aufnehmen, Netcup-Postfach anlegen.
+- Betrieb, nicht in diesem Repo: Volume ins Backup aufnehmen, Mail-Postfach anlegen.
 
 ## CI
 
@@ -203,10 +203,10 @@ Alle Integrationstests laufen gegen SQLite **und** PostgreSQL (CI).
 
 ## Risiken / Abweichungen
 
-- **Passkeys** brauchen HTTPS und die richtige Domain. Getestet wird manuell auf dem Pi
-  (`browsergame.endofweb.internal`) und lokal über `localhost`.
+- **Passkeys** brauchen HTTPS und die richtige Domain. Getestet wird manuell in der Testumgebung
+  und lokal über `localhost`.
 - **Zwei Migrationssätze** können auseinanderlaufen. Die CI prüft deshalb pending model changes für beide und testet beide.
 - **Forwarded-Header** werden ohne Proxy-Allowlist vertraut. Das ist sicher nur, solange der Container keinen Port
   veröffentlicht (nur Proxy-Netz). Deshalb steht das im README und als Kommentar in der Compose.
-- **Mails** können im Spam landen. SPF/DKIM für die Netcup-Domain gehören zur Einrichtung des Postfachs (Homelab).
+- **Mails** können im Spam landen. SPF/DKIM für die Mail-Domain gehören zur Einrichtung des Postfachs (Betrieb).
 - **Datenbank-Datei** auf der SD-Karte: WAL mit gebündelten Schreibzugriffen alle 5 s hält die Schreiblast gering.

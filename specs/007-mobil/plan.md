@@ -391,7 +391,7 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
 - **Zoom-Sperre auf `/play`**  geht zulasten der Barrierefreiheit im Spiel.
 - **Fehler im Service Worker treffen alle Seiten des Hosts.** Deshalb minimal; `/sw.js` ist `no-cache` und wird bei
   jedem Seitenaufruf geprüft, ein Fix wirkt beim nächsten Aufruf.
-- **HTTPS ist Pflicht** für Service Worker und Installation; der Pi liefert es schon (Passkeys brauchen es auch). Am
+- **HTTPS ist Pflicht** für Service Worker und Installation; die Testumgebung liefert es schon (Passkeys brauchen es auch). Am
   Handy daher im RC testen, nicht gegen den Dev-Rechner im LAN.
 - **Fairness gegen manipulierte Clients:** Der Server schickt weiterhin alle Spieler; ein veränderter Client kann mehr
   zeigen. Unverändert gegenüber heute, Begrenzung erst mit Interest-Management (ADR 0010).

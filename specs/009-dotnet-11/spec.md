@@ -18,7 +18,7 @@ alt sind“ direkt im Werkzeug – so wie bei npm schon heute –, statt nur üb
 ## Akzeptanzkriterien
 
 - **AK-1:** Gegeben der Wechsel ist ausgerollt, dann funktionieren alle bisherigen Abläufe von Spiel und Admin
-  unverändert (alle bestehenden automatischen Tests grün, Sichtprüfung im Release Candidate auf dem Pi).
+  unverändert (alle bestehenden automatischen Tests grün, Sichtprüfung im Release Candidate in der Testumgebung).
 - **AK-2:** Gegeben jemand fügt ein NuGet-Paket hinzu oder aktualisiert es, dann wird keine Version genommen, die
   jünger als 7 Tage ist.
 - **AK-3:** Gegeben eine dringende Sicherheitskorrektur, dann lässt sich die 7-Tage-Regel für genau dieses Paket

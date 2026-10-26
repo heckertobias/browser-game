@@ -20,10 +20,10 @@ public sealed class PasskeyOriginWiringTests
     public async Task Configured_public_url_is_the_only_valid_origin()
     {
         await using var factory = new AdminFactory();
-        await using var configured = factory.WithWebHostBuilder(b => b.UseSetting("App:PublicUrl", "https://browsergame-admin.endofweb.internal"));
+        await using var configured = factory.WithWebHostBuilder(b => b.UseSetting("App:PublicUrl", "https://browsergame-admin.example.internal"));
 
-        Assert.True(await Validate(configured, "https://browsergame-admin.endofweb.internal"));
-        Assert.False(await Validate(configured, "https://browsergame-admin.endofweb.internal", crossOrigin: true));
+        Assert.True(await Validate(configured, "https://browsergame-admin.example.internal"));
+        Assert.False(await Validate(configured, "https://browsergame-admin.example.internal", crossOrigin: true));
         Assert.False(await Validate(configured, "https://evil.example"));
     }
 }

@@ -108,7 +108,7 @@ Formulare.
   - Neuer Dienst `browsergame-admin`: gleiches Volume `/data`, `VIRTUAL_HOST: ${ADMIN_VIRTUAL_HOST}`,
     `App__PublicUrl`, `Passkeys__ServerDomain`, read-only, `cap_drop`.
   - Kein veröffentlichter Port; nur intern über den Proxy. Ob der Hostname nur intern auflöst, ist Sache des
-    Homelabs (AK-6).
+    Betriebs (AK-6).
 - **Dependabot:** Das Admin-Projekt liegt unter `/server` und ist dort schon abgedeckt.
 
 ## Abdeckung der Akzeptanzkriterien
@@ -125,7 +125,7 @@ Formulare.
 | 4e | Einladungen (Hash, 48 h, einmalig) | Unit: Ablauf/Einmaligkeit; Integration: Einladung → neuer Admin |
 | 4f | letzter Admin bleibt | Integration: Entfernen des einzigen Admins → abgelehnt; mit zweitem → klappt |
 | 5 | getrennte Dienste, eigene Migration | Integration: Admin-Factory ohne laufendes Spiel funktioniert; **manuell**: Spiel-Container stoppen → Admin geht |
-| 6 | nur interner Hostname | **manuell** (Homelab) |
+| 6 | nur interner Hostname | **manuell** (Betrieb) |
 | 7, 8 | `SmtpSettingsStore`, Passwort verschlüsselt, leer = unverändert | Unit/Integration: speichern, Passwort nicht im HTML, nicht im Klartext in der DB, leeres Feld behält es |
 | 9 | `TestMailAsync` mit übersetzten Fehlern | Integration gegen einen lokalen SMTP-Testserver (MailKit-eigener Testserver bzw. kleiner Fake), falsche Zugangsdaten → deutsche Meldung |
 | 10 | Lesen pro Versand | Integration: Einstellungen im Admin ändern → nächste Spiel-Mail nutzt sie (gemeinsame Test-DB) |

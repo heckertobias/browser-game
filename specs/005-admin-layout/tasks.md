@@ -23,5 +23,5 @@ Reihenfolge: Build → Layout → Seiten → Tests → Betrieb.
 - [ ] **T8**: Integrationstests laut Abdeckungstabelle; bestehende Admin-Tests grün (gegen SQLite und PostgreSQL).
 
 ## Betrieb
-- [ ] **T9**: Release; manuelle Prüfung auf dem Pi (AK-3, AK-6, AK-9–12,
+- [ ] **T9**: Release; manuelle Prüfung in der Testumgebung (AK-3, AK-6, AK-9–12,
   Handy). Danach alle AKs abhaken und Spec-Status auf `umgesetzt`.

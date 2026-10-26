@@ -105,10 +105,10 @@ public sealed class SmtpPageTests
     }
 
     [Theory] // Typische Verwechslungen werden verständlich abgefangen
-    [InlineData("mx2ea8.netcup.net:993", 465, "ohne Port")]
-    [InlineData("https://mx2ea8.netcup.net", 465, "ohne Port, ohne https://")]
-    [InlineData("mx2ea8.netcup.net", 993, "Port 993 ist IMAP")]
-    [InlineData("mx2ea8.netcup.net", 995, "Port 995 ist POP3")]
+    [InlineData("mx.mailhost.example:993", 465, "ohne Port")]
+    [InlineData("https://mx.mailhost.example", 465, "ohne Port, ohne https://")]
+    [InlineData("mx.mailhost.example", 993, "Port 993 ist IMAP")]
+    [InlineData("mx.mailhost.example", 995, "Port 995 ist POP3")]
     public async Task Common_mistakes_are_explained(string host, int port, string expected)
     {
         await using var factory = new AdminFactory();

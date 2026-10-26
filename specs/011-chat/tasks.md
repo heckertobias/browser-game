@@ -39,7 +39,7 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
 - [ ] **T12**: Integrationstests (WS) laut Abdeckungstabelle mit Fake-Uhr, gegen SQLite und PostgreSQL.
 - [ ] **T13**: Hinweis im Plan von 002 (sobald es ihn gibt): Esc öffnet das Menü nicht, solange ein Eingabefeld den
   Fokus hat.
-- [ ] **T14**: Manuelle Prüfung auf dem Pi:
+- [ ] **T14**: Manuelle Prüfung in der Testumgebung:
   - zwei Geräte (Laptop + Handy) chatten
   - AK-1, AK-3, AK-4, AK-5 am Monitor
   - AK-4c und AK-7 am Handy hochkant und quer (Android/Chrome und iPhone/Safari)

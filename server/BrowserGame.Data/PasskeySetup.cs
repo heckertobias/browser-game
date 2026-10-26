@@ -6,7 +6,7 @@ namespace BrowserGame.Data;
 /// <summary>
 /// Passkey-Einstellungen für Spiel und Admin. Die Herkunftsprüfung vergleicht mit <c>App:PublicUrl</c> statt mit dem
 /// <c>Origin</c>-Header der Anfrage: Wegen <c>Referrer-Policy: no-referrer</c> schicken Browser bei Formular-POSTs
-/// <c>Origin: null</c>, die Standardprüfung von Identity schlüge dann immer fehl (gefunden in 0.2.1 auf dem Pi).
+/// <c>Origin: null</c>, die Standardprüfung von Identity schlüge dann immer fehl (gefunden in 0.2.1 in der Testumgebung).
 /// </summary>
 public static class PasskeySetup
 {
