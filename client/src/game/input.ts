@@ -45,11 +45,48 @@ export function combinedDirection(actions: ReadonlySet<Action>, pointer: Vec | n
   return pointer ? pointerDirection(pointer, player) : ZERO;
 }
 
+/** Felder eines Pointer-Events, die PointerHold braucht (ohne DOM testbar). */
+export type PointerSample = Pick<PointerEvent, "pointerId" | "isPrimary" | "button" | "clientX" | "clientY">;
+
+/** Diese Events beenden das Halten wie pointerup (Capture kann ohne pointerup verloren gehen). */
+export const POINTER_RELEASE_EVENTS = ["pointerup", "pointercancel", "lostpointercapture"] as const;
+
+/** Tippen und Halten (AK-7): nur der primäre Zeiger mit Haupttaste; weitere Finger werden ignoriert. */
+export class PointerHold {
+  private pointerId: number | null = null;
+  private client: { x: number; y: number } | null = null;
+
+  /** true, wenn dieser Zeiger das Halten startet – dann Capture setzen und preventDefault. */
+  down(e: PointerSample): boolean {
+    if (this.pointerId !== null || !e.isPrimary || e.button !== 0) return false;
+    this.pointerId = e.pointerId;
+    this.client = { x: e.clientX, y: e.clientY };
+    return true;
+  }
+
+  move(e: Pick<PointerSample, "pointerId" | "clientX" | "clientY">): void {
+    if (e.pointerId === this.pointerId) this.client = { x: e.clientX, y: e.clientY };
+  }
+
+  release(pointerId: number): void {
+    if (pointerId === this.pointerId) this.reset();
+  }
+
+  reset(): void {
+    this.pointerId = null;
+    this.client = null;
+  }
+
+  /** Gehaltene Position in Client-Koordinaten oder null. */
+  position(): { x: number; y: number } | null {
+    return this.client;
+  }
+}
+
 /** Hält gedrückte Tasten und den gedrückten Zeiger (Maus und Touch einheitlich über Pointer Events). */
 export class InputTracker {
   private readonly pressedKeys = new Set<string>();
-  private pointerClient: { x: number; y: number } | null = null;
-  private activePointerId: number | null = null;
+  private readonly hold = new PointerHold();
   private readonly abort = new AbortController();
 
   constructor(
@@ -63,23 +100,19 @@ export class InputTracker {
     document.addEventListener("visibilitychange", () => { if (document.hidden) this.reset(); }, { signal });
 
     canvas.addEventListener("pointerdown", (e) => {
-      if (this.activePointerId !== null) return;
-      this.activePointerId = e.pointerId;
+      if (!this.hold.down(e)) return;
       canvas.setPointerCapture(e.pointerId);
-      this.pointerClient = { x: e.clientX, y: e.clientY };
       e.preventDefault();
     }, { signal });
-    canvas.addEventListener("pointermove", (e) => {
-      if (e.pointerId === this.activePointerId) this.pointerClient = { x: e.clientX, y: e.clientY };
-    }, { signal });
-    const release = (e: PointerEvent) => {
-      if (e.pointerId !== this.activePointerId) return;
-      this.activePointerId = null;
-      this.pointerClient = null;
-    };
-    canvas.addEventListener("pointerup", release, { signal });
-    canvas.addEventListener("pointercancel", release, { signal });
+    canvas.addEventListener("pointermove", (e) => { this.hold.move(e); }, { signal });
+    const release = (e: PointerEvent) => { this.hold.release(e.pointerId); };
+    for (const type of POINTER_RELEASE_EVENTS) canvas.addEventListener(type, release, { signal });
     canvas.addEventListener("contextmenu", (e) => { e.preventDefault(); }, { signal });
+
+    // iOS ignoriert user-scalable=no beim Pinch (AK-8); GestureEvent fehlt in lib.dom.
+    const preventGesture = (e: Event) => { e.preventDefault(); };
+    document.addEventListener("gesturestart", preventGesture, { signal, passive: false });
+    document.addEventListener("gesturechange", preventGesture, { signal, passive: false });
   }
 
   /**
@@ -87,9 +120,8 @@ export class InputTracker {
    * `player` ist die eigene (vorhergesagte) Position.
    */
   direction(player: Vec, toWorld: (clientX: number, clientY: number, canvasRect: DOMRect) => Vec): Vec {
-    const pointer = this.pointerClient
-      ? toWorld(this.pointerClient.x, this.pointerClient.y, this.canvas.getBoundingClientRect())
-      : null;
+    const client = this.hold.position();
+    const pointer = client ? toWorld(client.x, client.y, this.canvas.getBoundingClientRect()) : null;
     return combinedDirection(activeActions(this.pressedKeys, this.bindings), pointer, player);
   }
 
@@ -99,7 +131,6 @@ export class InputTracker {
 
   private reset(): void {
     this.pressedKeys.clear();
-    this.activePointerId = null;
-    this.pointerClient = null;
+    this.hold.reset();
   }
 }

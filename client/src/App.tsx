@@ -22,23 +22,25 @@ export function App() {
   }, []);
 
   return (
-    <div className="relative h-full w-full select-none bg-black">
+    <div className="fixed inset-0 bg-black">
       <canvas ref={canvasRef} className="block h-full w-full touch-none [image-rendering:pixelated]" data-testid="game" />
-      <div className="absolute left-2 top-2 flex gap-2 font-mono text-xs uppercase">
-        {name && <span className="badge badge-neutral rounded-none border-2 border-base-content/30">{name}</span>}
-        <span
-          className={`badge rounded-none border-2 border-base-content/30 ${status === "connected" ? "badge-success" : status === "connecting" ? "badge-warning" : "badge-error"}`}
-        >
-          {STATUS_LABEL[status]}
-        </span>
-      </div>
-      {status === "disconnected" && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-          <button type="button" className="btn btn-primary rounded-none font-mono uppercase" onClick={() => { window.location.reload(); }}>
-            {t.reconnect}
-          </button>
+      <div className="pointer-events-none absolute inset-0 font-mono text-sm uppercase">
+        <div className="absolute left-[max(0.5rem,env(safe-area-inset-left))] right-[max(0.5rem,env(safe-area-inset-right))] top-[max(0.5rem,env(safe-area-inset-top))] flex flex-wrap gap-2">
+          {name && <span className="badge badge-neutral rounded-none border-2 border-base-content/30">{name}</span>}
+          <span
+            className={`badge rounded-none border-2 border-base-content/30 ${status === "connected" ? "badge-success" : status === "connecting" ? "badge-warning" : "badge-error"}`}
+          >
+            {STATUS_LABEL[status]}
+          </span>
         </div>
-      )}
+        {status === "disconnected" && (
+          <div className="pointer-events-auto absolute inset-0 flex items-center justify-center bg-black/60 pb-[max(0.5rem,env(safe-area-inset-bottom))] pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] pt-[max(0.5rem,env(safe-area-inset-top))]">
+            <button type="button" className="btn btn-primary btn-lg rounded-none font-mono uppercase" onClick={() => { window.location.reload(); }}>
+              {t.reconnect}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

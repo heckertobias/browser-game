@@ -25,7 +25,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
 - [x] **T6** (AK-1, AK-3–5): `render.ts`/`game.ts` mit variablem Ausschnitt: `cameraOrigin`, Balken und Clip über
   21:9, Culling (`isVisible`), `screenToWorld`; Canvas füllt das Fenster, Größe per ResizeObserver
   (`device-pixel-content-box`, Fallback gerundet) und DPR-Vergleich. Vitest für die reinen Funktionen.
-- [ ] **T7** (AK-6–8): `styles.css` (touch-action, overscroll-behavior, user-select, touch-callout, tap-highlight,
+- [x] **T7** (AK-6–8): `styles.css` (touch-action, overscroll-behavior, user-select, touch-callout, tap-highlight,
   `100dvh`), Viewport-Meta, `gesturestart`; HUD mit Safe Areas, `pointer-events-none`, `text-sm`, `btn-lg`.
   `PointerHold` (primärer Zeiger, `lostpointercapture`) + Vitest.
 - [ ] **T8** (AK-14): `ScreenWakeLock` (Neuanforderung bei Sichtbarkeit und erster Eingabe, still ohne Unterstützung)
