@@ -45,9 +45,10 @@ if [[ "$IS_RC" == 1 ]]; then
     --jq '[.[] | select(.event == "pull_request" or .event == "push")][0] | if . == null then "" elif .status != "completed" then "läuft" else .conclusion end')"
   none="kein CI-Lauf – Draft-PR angelegt?"
 else
-  ci="$(gh run list --repo "$REPO" --workflow ci.yml --commit "$HEAD_SHA" --event push --json status,conclusion \
-    --jq '.[0] | if . == null then "" elif .status != "completed" then "läuft" else .conclusion end')"
-  none="keiner"
+  # Auto-Merges (GITHUB_TOKEN) lösen keinen Push-Lauf aus; dann zählt der nächtliche (schedule) oder ein manueller Lauf
+  ci="$(gh run list --repo "$REPO" --workflow ci.yml --commit "$HEAD_SHA" --json event,status,conclusion \
+    --jq '[.[] | select(.event == "push" or .event == "workflow_dispatch" or .event == "schedule")][0] | if . == null then "" elif .status != "completed" then "läuft" else .conclusion end')"
+  none="kein Lauf – gh workflow run ci.yml --ref main"
 fi
 [[ "$ci" != "läuft" ]] || die "CI auf $HEAD_SHA läuft noch – abwarten"
 [[ "$ci" == "success" ]] || die "CI auf $HEAD_SHA ist nicht grün (Status: ${ci:-$none})"

@@ -44,6 +44,11 @@ Releases (geändert 2026-10-25, vorher 3 Tage). Sicherheitsupdates sind davon au
 installiert und nicht an Dependabot vorbei den neuesten Patch zieht. Für npm gilt dasselbe auch bei Installationen von Hand:
 `client/.npmrc` setzt `min-release-age=7` (wirksam ab npm 11.10).
 Patch und Minor werden nach grüner CI automatisch gemergt, Major-Updates manuell.
+Der Cooldown greift nicht, wenn die Registry kein Veröffentlichungsdatum liefert (z. B. MCR; Dependabot schreibt dann
+„Cooldown could not be applied“ in den PR). Das trifft vor allem Digest-Updates ohne `update-type`, aber auch Tag-Updates
+dieser Registries; Docker Hub (`node`) hat Cooldown. Solche PRs und Gruppen mit einem solchen Eintrag bekommen das Label
+`wartet-7-tage`; `dependabot-wartet.yml` aktiviert täglich den Auto-Merge, sobald der letzte Commit 7 Tage alt ist.
+Sicherheitsupdates (Label `security`, außer Major) werden sofort gemergt. Nur ausdrücklich erkannte Minor- und Patch-Updates mergen sofort.
 
 **CD:**
 - CI baut die Docker-Images für **amd64 und arm64** (Testbetrieb auf einem Raspberry Pi) bei jedem Push, PR und
@@ -63,6 +68,8 @@ Patch und Minor werden nach grüner CI automatisch gemergt, Major-Updates manuel
 - Lokale Commits müssen signiert sein, sonst lehnt GitHub den Push ab.
 - Merges durch Auto-Merge laufen mit `GITHUB_TOKEN` und lösen deshalb **keinen** neuen Workflow auf `main` aus.
   Die CI läuft deshalb zusätzlich **nächtlich** (`schedule`) auf `main` und prüft den Stand inklusive Trivy-Scan.
+  `scripts/release.sh` akzeptiert für `main` deshalb auch Läufe per `schedule` und `workflow_dispatch`
+  (`gh workflow run ci.yml --ref main`), nicht nur `push`.
 - Updates (auch Dependabot- und Basis-Image-Sicherheitsfixes) erreichen den Betrieb **nur über ein Release**. Meldet der
   nächtliche Scan eine neue Schwachstelle oder kommt ein wichtiges Update, ist ein Patch-Release (`X.Y.Z+1`) fällig.
 - Neue Third-Party-Actions müssen erst in die Allowlist (`scripts/github-setup.sh`) und per SHA gepinnt werden.

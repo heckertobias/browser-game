@@ -1,6 +1,11 @@
 name: Dependabot Auto-Merge
 
-# Patch- und Minor-Updates werden automatisch gemergt, sobald `ci-ok` grün ist.
+# Minor- und Patch-Updates werden automatisch gemergt, sobald `ci-ok` grün ist (Dependabot-Cooldown: 7 Tage).
+# Sicherheitsupdates (Label `security`, außer Major) werden sofort gemergt, ohne Cooldown.
+# Wo der Cooldown nicht greift, wartet der PR 7 Tage: Das ist der Fall, wenn die Registry kein Veröffentlichungsdatum
+# liefert (Dependabot schreibt „Cooldown could not be applied“ in den PR, z. B. bei MCR; Docker Hub hat Cooldown),
+# bei Digest-Updates ohne `update-type` und bei Gruppen mit einem solchen Eintrag.
+# Diese PRs bekommen das Label `wartet-7-tage`; dependabot-wartet.yml aktiviert den Auto-Merge nach 7 Tagen.
 # Major-Updates bleiben offen und werden manuell geprüft.
 on:
   pull_request:
@@ -16,12 +21,40 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
     steps:
       - id: metadata
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-      - name: Auto-Merge aktivieren
-        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+      - id: typed
+        name: Haben alle Einträge einen update-type?
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
+          UPDATED: ${{ steps.metadata.outputs.updated-dependencies-json }}
+        run: |
+          if jq -e 'all(.[]; .updateType != "")' <<<"$UPDATED" >/dev/null; then
+            echo "all_typed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "all_typed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Auto-Merge aktivieren (Sicherheitsupdate oder Minor/Patch)
+        if: >-
+          steps.metadata.outputs.update-type != 'version-update:semver-major' &&
+          (contains(github.event.pull_request.labels.*.name, 'security') ||
+          (steps.typed.outputs.all_typed == 'true' &&
+          !contains(github.event.pull_request.body, 'Cooldown could not be applied') &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-patch')))
         run: gh pr merge --auto --squash "$PR_URL"
+      - name: Update 7 Tage warten lassen
+        if: >-
+          steps.metadata.outputs.update-type != 'version-update:semver-major' &&
+          !contains(github.event.pull_request.labels.*.name, 'security') &&
+          !contains(github.event.pull_request.labels.*.name, 'wartet-7-tage') &&
+          (steps.metadata.outputs.update-type == '' ||
+          steps.typed.outputs.all_typed == 'false' ||
+          contains(github.event.pull_request.body, 'Cooldown could not be applied'))
+        run: |
+          gh pr edit "$PR_URL" --add-label wartet-7-tage
+          gh pr comment "$PR_URL" --body "Kein wirksamer Cooldown: Auto-Merge frühestens 7 Tage nach dem letzten Commit (dependabot-wartet.yml)."

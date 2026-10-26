@@ -146,5 +146,5 @@ Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md), [ADR
 - Gearbeitet wird auf Branches mit PR (Spec: `spec/NNN-name` mit Draft-PR, Merge-Commit; Tooling/Doku: kurzlebiger Branch, Squash);
   `main` nimmt nur PRs mit grüner CI. Commits müssen **signiert** sein.
 - Issues und Pull Requests können nur Collaborators eröffnen.
-- Dependabot-Updates laufen als PR durch die CI; Patch- und Minor-Updates werden automatisch gemergt.
+- Dependabot-Updates laufen als PR durch die CI; Patch- und Minor-Updates werden automatisch gemergt, Updates ohne wirksamen Cooldown (z. B. Digests) erst nach 7 Tagen (Label `wartet-7-tage`), Sicherheitsupdates (außer Major) sofort.
 - Sicherheitslücken bitte vertraulich melden: [SECURITY.md](SECURITY.md)
