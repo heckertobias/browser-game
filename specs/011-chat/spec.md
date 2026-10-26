@@ -2,9 +2,9 @@
 
 **Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
-Setzt voraus: [003 – Accounts & gespeicherte Position](../003-accounts/spec.md) (Spielername) ·
-[002 – Tastenbelegung & erstes Menü](../002-keybindings/spec.md) (Tasten steuern mal die Figur, mal etwas anderes) ·
-[007 – Handy hochkant, Sichtfeld ohne Ränder, Web-App](../007-mobil/spec.md) (HUD am Handy)
+Setzt voraus: [003 – Accounts & gespeicherte Position](../003-accounts/spec.md) (Spielername, nur Angemeldete) ·
+[007 – Handy hochkant, Sichtfeld ohne Ränder, Web-App](../007-mobil/spec.md) (HUD am Handy) ·
+Berührt: [002 – Tastenbelegung & erstes Menü](../002-keybindings/spec.md) (Esc beim Tippen bricht nur das Tippen ab)
 
 ## Ziel
 
@@ -69,7 +69,6 @@ gemeinsam anfühlt. Bewusst ganz einfach: ein Kanal für alle.
 
 ## Out of Scope
 
-- Private Nachrichten (Flüstern), Gruppen-, Gilden- oder Handelskanäle
 - Chat nur für Spieler in der Nähe, Sprechblasen über der Figur
 - Melden, Blockieren, Stummschalten, Moderation durch Admins
 - Filter für Beleidigungen in Nachrichten
@@ -78,6 +77,7 @@ gemeinsam anfühlt. Bewusst ganz einfach: ein Kanal für alle.
 - Systemmeldungen im Chat (z. B. „X ist jetzt online“)
 - Benachrichtigungen außerhalb des Spiels (→ 008)
 - Taste für den Chat frei belegen (Enter ist vorerst fest)
+- Flüstern, weitere Kanäle und Slash-Commands – geplant (siehe [Vision](../000-vision/spec.md)), eigene Specs
 
 ## Offene Fragen
 

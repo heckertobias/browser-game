@@ -47,6 +47,10 @@ Ein 2D-Pixel-Art-MMORPG im Browser mit zwei Seiten:
 - Spiel verlassen: In der offenen Welt bleibt die Figur nach dem Gehen noch 20 Sekunden in der Welt (und kann dort
   später auch sterben); in sicheren Zonen kann man sich sofort abmelden. Wartende Figuren sind erkennbar
   (zunächst andere Farbe, später z. B. hinsetzen).
+- Chat: Spieler unterhalten sich im Spiel. Zum Start ein gemeinsamer Kanal für alle
+  ([011](../011-chat/spec.md)); später kommen Flüstern (private Nachrichten) und weitere Kanäle dazu.
+- Slash-Commands: Im Chat lassen sich Befehle eingeben (z. B. `/befehl …`), zunächst vor allem, um beim Testen
+  gezielt Dinge auszulösen. Details folgen in einer eigenen Spec; Grundlage ist der Chat aus 011.
 - UI-Stil: Pixel-Akzente – Menüs und HUD bleiben gut lesbar, mit pixeliger Schrift, Rahmen und Icons
 - Öffentliche Seiten (Landing) serverseitig gerendert
 
