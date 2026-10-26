@@ -125,7 +125,7 @@ public sealed partial class SmtpModel(
         Input.Host = Input.Host.Trim();
         if (Input.Host.Contains(':', StringComparison.Ordinal) || Input.Host.Contains('/', StringComparison.Ordinal) || Input.Host.Contains(' ', StringComparison.Ordinal))
         {
-            ModelState.AddModelError("Input.Host", "Beim Server nur den Namen eintragen, z. B. „mx2ea8.netcup.net“ – ohne Port, ohne https://. Der Port gehört ins Feld „Port“.");
+            ModelState.AddModelError("Input.Host", "Beim Server nur den Namen eintragen, z. B. „mx.mailhost.example“ – ohne Port, ohne https://. Der Port gehört ins Feld „Port“.");
         }
 
         if (RetrievalPorts.TryGetValue(Input.Port, out var protocol))

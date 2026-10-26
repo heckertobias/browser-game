@@ -6,7 +6,7 @@
 
 Single-Dev-Projekt, öffentlich auf GitHub. Gewünscht: direkt auf `main` arbeiten, trotzdem
 automatische Abhängigkeits-Updates mit CI-Prüfung, und nur Collaborators dürfen Issues und PRs eröffnen.
-Ausgerollt wird zunächst als Docker-Container im Homelab.
+Ausgerollt wird zunächst als Docker-Container in einer privaten Testumgebung.
 
 ## Entscheidung
 
@@ -51,17 +51,17 @@ dieser Registries; Docker Hub (`node`) hat Cooldown. Solche PRs und Gruppen mit 
 Sicherheitsupdates (Label `security`, außer Major) werden sofort gemergt. Nur ausdrücklich erkannte Minor- und Patch-Updates mergen sofort.
 
 **CD:**
-- CI baut die Docker-Images für **amd64 und arm64** (Testbetrieb auf einem Raspberry Pi) bei jedem Push, PR und
+- CI baut die Docker-Images für **amd64 und arm64** (z. B. Raspberry Pi) bei jedem Push, PR und
   nächtlich und scannt jede Architektur mit Trivy. arm64 entsteht per Cross-Build ohne Emulation.
 - **Veröffentlicht wird nur bei Release-Tags** (geändert 2026-10-24): Ohne Tag landet nichts in GHCR, also auch kein
   wanderndes `:main`. Mit Tag entstehen `:X.Y.Z` und `:latest`, jeweils mit Build-Provenance-Attestation.
 - **Releases:** Ein signierter Tag `vX.Y.Z` (nur der Admin darf `v*` anlegen; Tags sind unveränderlich, Releases
   per „Immutable Releases“ ebenfalls) veröffentlicht `:X.Y.Z` und `:latest` und legt ein GitHub Release mit Notes an.
   Deployt wird immer eine fest gepinnte Version, kein wanderndes Tag.
-  _(Ersetzt durch ADR 0009: `scripts/deploy.sh` rollt per Arcane-API aus; Vorlage und Git Sync entfallen. Dort auch RC-Tags `vX.Y.Z-rc.N`, die kein `:latest` bekommen.)_
+  _(Ersetzt durch ADR 0009 und 0012: Deploy über einen lokalen Hook; Vorlage und Git Sync entfallen. Dort auch RC-Tags `vX.Y.Z-rc.N`, die kein `:latest` bekommen.)_
 - Zwei Images aus einem Dockerfile: `browser-game` (Spiel) und `browser-game-admin` (ADR 0006), gleiche Tags.
-- Das Homelab **zieht** das Image (pull-basiert). GitHub braucht damit keinen eingehenden Zugriff und keine
-  Zugangsdaten zum Homelab. Wie das Homelab aktualisiert, wird beim ersten Rollout entschieden.
+- Die Testumgebung **zieht** das Image (pull-basiert). GitHub braucht damit keinen eingehenden Zugriff und keine
+  Zugangsdaten zur Testumgebung.
 
 ## Konsequenzen
 

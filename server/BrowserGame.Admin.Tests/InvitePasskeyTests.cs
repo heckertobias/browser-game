@@ -2,7 +2,7 @@ using System.Net;
 
 namespace BrowserGame.Admin.Tests;
 
-/// <summary>Regression (0.2.0 auf dem Pi): Passkey-Schritt meldete „Name/Email field is required“ und verschwieg den Grund.</summary>
+/// <summary>Regression (0.2.0 in der Testumgebung): Passkey-Schritt meldete „Name/Email field is required“ und verschwieg den Grund.</summary>
 public sealed class InvitePasskeyTests
 {
     private static async Task<(FormClient Client, string Token, string ChooseMethodHtml)> UpToChooseMethodAsync(AdminFactory factory)

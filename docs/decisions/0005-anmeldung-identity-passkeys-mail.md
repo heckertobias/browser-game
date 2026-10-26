@@ -17,7 +17,7 @@ vielen Fehlversuchen und Account löschen. Selbst gebaute Authentifizierung ist 
 - **Account-Seiten als Razor Pages** (serverseitig, Formulare mit Antiforgery). Für Passkeys rendert die Seite die
   WebAuthn-Optionen direkt ins HTML; ein kleines TS-Modul ruft `navigator.credentials` auf und schickt das Ergebnis
   per Formular zurück. Dadurch entsteht **keine JSON-API** und es braucht keine OpenAPI-Verträge.
-- **Mail per SMTP** über ein eigenes Netcup-Postfach nur fürs Spiel (MailKit). Zugangsdaten nur in der `.env` des
+- **Mail per SMTP** über ein eigenes Postfach nur fürs Spiel (MailKit). Zugangsdaten nur in der `.env` des
   Deployments. In der Entwicklung werden Mails ins Log geschrieben.
 - Passwortregeln nach NIST: mindestens 10 Zeichen, keine Zwangs-Sonderzeichen.
 - Schlüssel für Cookies/Tokens (Data Protection) liegen in der Datenbank, damit Anmeldungen Neustarts und das

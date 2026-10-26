@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
-# Release oder Release Candidate in zwei Schritten (ADR 0002, 0009, 0011):
+# Release oder Release Candidate in zwei Schritten (ADR 0002, 0009, 0011, 0012):
 #   1. Signierten Tag pushen → CI baut, scannt und veröffentlicht die Images und legt ein GitHub Release an
 #        vX.Y.Z      nur von main:  :X.Y.Z + :latest
 #        vX.Y.Z-rc.N von jedem Branch außer main (impl-Branch):  nur :X.Y.Z-rc.N, GitHub Release als Vorabversion
-#   2. Erst wenn die Images existieren: scripts/deploy.sh rollt die Version über die Arcane-API aus
+#   2. Erst wenn die Images existieren: der lokale Deploy-Hook rollt die Version aus (falls vorhanden)
 #
 # Aufruf: scripts/release.sh [--dry-run] 0.3.0 | 0.3.0-rc.1
-#   --dry-run  alle Prüfungen, dann scripts/deploy.sh --dry-run --unreleased; kein Tag, kein Push, kein API-Aufruf
+#   --dry-run  alle Prüfungen, dann Hook --dry-run --unreleased; kein Tag, kein Push
+#
+# Deploy-Hook: ausführbare Datei $BROWSER_GAME_DEPLOY, sonst ~/.config/browser-game/deploy (außerhalb des Repos).
+# Aufrufe im Repo-Verzeichnis, mit BROWSER_GAME_REPO gesetzt:
+#   HOOK --check                        vor dem Tag; ein Fehler bricht ab
+#   HOOK --dry-run --unreleased VERSION beim Trockenlauf
+#   HOOK VERSION                        nach CI und GitHub Release
 set -euo pipefail
 
 DRY=0
@@ -21,12 +27,14 @@ TAG="v$VERSION"
 IS_RC=0
 [[ "$VERSION" == *-rc.* ]] && IS_RC=1
 
+HOOK="${BROWSER_GAME_DEPLOY:-${XDG_CONFIG_HOME:-$HOME/.config}/browser-game/deploy}"
+[[ "$HOOK" == /* ]] || HOOK="$PWD/$HOOK"
+if [[ -x "$HOOK" ]]; then HAS_HOOK=1; else HAS_HOOK=0; fi
+
 # Immer im Repo dieses Skripts arbeiten, nicht im aktuellen Verzeichnis
-# Relative Pfade aus der Umgebung beziehen sich auf das Aufrufverzeichnis, daher vor dem cd auflösen (deploy.sh erbt sie)
-[[ -z "${ARCANE_CONFIG:-}" || "$ARCANE_CONFIG" == /* ]] || ARCANE_CONFIG="$PWD/$ARCANE_CONFIG"
-[[ -z "${ARCANE_CA_CERT:-}" || "$ARCANE_CA_CERT" == /* ]] || ARCANE_CA_CERT="$PWD/$ARCANE_CA_CERT"
 root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)" || die "Repo des Skripts nicht gefunden (Aufruf über Symlink?)"
 cd "$root"
+export BROWSER_GAME_REPO="$root"
 BRANCH="$(git branch --show-current)"
 [[ -n "$BRANCH" ]] || die "kein Branch ausgecheckt (detached HEAD)"
 if [[ "$IS_RC" == 1 ]]; then
@@ -64,25 +72,47 @@ fi
 
 if [[ "$DRY" == 1 ]]; then
   echo "Trockenlauf: würde Tag $TAG auf $(git log -1 --format='%h %s') setzen, pushen und CI abwarten."
-  exec scripts/deploy.sh --dry-run --unreleased "$VERSION"
+  [[ "$HAS_HOOK" == 1 ]] || { echo "Kein Deploy-Hook ($HOOK) – es würde nur veröffentlicht."; exit 0; }
+  exec "$HOOK" --dry-run --unreleased "$VERSION"
 fi
 
-scripts/deploy.sh --check >/dev/null || die "Arcane-Konfiguration fehlt oder ungültig – erst scripts/deploy.sh --check"
+if [[ "$HAS_HOOK" == 1 ]]; then
+  "$HOOK" --check >/dev/null || die "Deploy-Hook meldet einen Fehler – erst $HOOK --check"
+else
+  echo "Hinweis: kein Deploy-Hook ($HOOK) – es wird nur veröffentlicht, nicht ausgerollt." >&2
+fi
 
 echo "== 1/2: Tag $TAG auf $(git log -1 --format='%h %s')"
 git tag -s "$TAG" -m "$TAG"
-git push --quiet origin "$TAG"
+git push --quiet origin "$TAG" || { git tag -d "$TAG" >/dev/null; die "Tag $TAG nicht gepusht – lokal wieder entfernt"; }
 
+# Netzwerkfehler beim Abfragen zählen nicht als CI-Fehler; erst 10 Fehlversuche in Folge brechen ab.
 echo "   warte auf CI-Lauf für $TAG …"
 run_id=""
 for _ in $(seq 1 30); do
-  run_id="$(gh run list --repo "$REPO" --workflow ci.yml --branch "$TAG" --json databaseId --jq '.[0].databaseId // ""')"
+  run_id="$(gh run list --repo "$REPO" --workflow ci.yml --branch "$TAG" --json databaseId --jq '.[0].databaseId // ""' 2>/dev/null || true)"
   [[ -n "$run_id" ]] && break
   sleep 5
 done
 [[ -n "$run_id" ]] || die "kein CI-Lauf für $TAG gefunden"
-gh run watch "$run_id" --repo "$REPO" --exit-status --interval 15 >/dev/null || die "CI für $TAG fehlgeschlagen: https://github.com/$REPO/actions/runs/$run_id"
+run_url="https://github.com/$REPO/actions/runs/$run_id"
+fails=0
+while :; do
+  if state="$(gh run view "$run_id" --repo "$REPO" --json status,conclusion --jq '.status + " " + .conclusion' 2>/dev/null)"; then
+    fails=0
+    case "$state" in
+      "completed success") break ;;
+      completed*) die "CI für $TAG fehlgeschlagen (${state#completed }): $run_url" ;;
+    esac
+  else
+    fails=$((fails + 1))
+    (( fails < 10 )) || die "CI-Status für $TAG seit 10 Versuchen nicht abfragbar – Lauf prüfen: $run_url"
+  fi
+  sleep 15
+done
 
-echo "== 2/2: $VERSION über Arcane ausrollen"
-scripts/deploy.sh "$VERSION"
+if [[ "$HAS_HOOK" == 1 ]]; then
+  echo "== 2/2: $VERSION ausrollen ($HOOK)"
+  "$HOOK" "$VERSION" || die "Ausrollen fehlgeschlagen; $TAG ist veröffentlicht – erneut: $HOOK $VERSION"
+fi
 echo "Fertig: https://github.com/$REPO/releases/tag/$TAG"

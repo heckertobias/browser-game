@@ -4,13 +4,13 @@ namespace BrowserGame.Data;
 
 /// <summary>
 /// Schreibt täglich eine konsistente Kopie der SQLite-Datenbank (<c>VACUUM INTO</c>), damit ein dateibasiertes
-/// Backup (Homelab: restic um 04:00) nie eine halb geschriebene Datei erwischt (ADR 0004).
+/// Backup (z. B. um 04:00) nie eine halb geschriebene Datei erwischt (ADR 0004).
 /// Aktiv nur bei SQLite und gesetztem <c>Database:BackupPath</c>.
 /// </summary>
 internal sealed partial class SqliteBackupService(
     IServiceScopeFactory scopes, IConfiguration configuration, TimeProvider time, ILogger<SqliteBackupService> logger) : BackgroundService
 {
-    /// <summary>Lokale Uhrzeit des Backups, vor dem Homelab-Backup um 04:00.</summary>
+    /// <summary>Lokale Uhrzeit des Backups, vor einem nächtlichen Backup um 04:00.</summary>
     private static readonly TimeOnly BackupTime = new(3, 50);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

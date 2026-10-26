@@ -36,7 +36,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
 
 ## Prüfung
 - [ ] **T10**: Lokal (DevTools: Größen inkl. 3440×1440 und 5120×1440, Offline-Modus, Service Worker im
-  Application-Tab) und im RC auf dem Pi mit Android (Chrome) und iPhone (Safari): AK-1–14 nach der
+  Application-Tab) und im RC in der Testumgebung mit Android (Chrome) und iPhone (Safari): AK-1–14 nach der
   Abdeckungstabelle – u. a. installieren mit Name und Icon, Start vom Homescreen an- und abgemeldet, Flugmodus in
   beiden Sprachen, rc.N → rc.N+1 ohne alten Stand, Drehen ohne Verbindungsverlust, Gesten, Wake Lock, Spieler-Seiten
   hochkant. Danach AKs abhaken, Status `umgesetzt`, Roadmap aktualisieren, 003 vermerken (Regeln für HUD, Overlay
