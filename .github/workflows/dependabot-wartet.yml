@@ -1,0 +1,34 @@
+name: Dependabot wartet 7 Tage
+
+# Updates ohne wirksamen Cooldown tragen das Label `wartet-7-tage` (dependabot-automerge.yml).
+# Täglich: ist der letzte Commit eines solchen PRs mindestens 7 Tage alt, wird der Auto-Merge aktiviert.
+# Maßgeblich ist der letzte Commit, nicht die Erstellung: Dependabot aktualisiert den PR auf neuere Digests.
+on:
+  schedule:
+    - cron: "43 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freigeben:
+    if: github.repository == 'heckertobias/browser-game'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Auto-Merge für PRs ab 7 Tagen aktivieren
+        run: |
+          prs="$(gh pr list --state open --author "app/dependabot" --label wartet-7-tage --json number,commits \
+            --jq '.[] | select((.commits[-1].committedDate | fromdateiso8601) < (now - 7 * 86400)) | .number')"
+          rc=0
+          for pr in $prs; do
+            gh pr merge --auto --squash "$pr" || { echo "::warning::PR #$pr: Auto-Merge fehlgeschlagen"; rc=1; }
+          done
+          exit "$rc"

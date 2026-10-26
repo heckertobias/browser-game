@@ -157,4 +157,8 @@ upsert_ruleset "release-tags-admin-only" '{
   ]
 }'
 
+echo "== Labels"
+# Dependabot-PRs ohne wirksamen Cooldown (dependabot-automerge.yml, dependabot-wartet.yml)
+gh label create wartet-7-tage --repo "$REPO" --color fbca04 --description "Dependabot: Auto-Merge nach 7 Tagen" --force
+
 echo "Fertig. Manuell prüfen: Issues → 'Collaborators only' (siehe Kopf dieses Skripts)."
