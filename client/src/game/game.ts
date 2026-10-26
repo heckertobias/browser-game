@@ -8,6 +8,7 @@ import { Predictor } from "./prediction";
 import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "./render";
 import type { Vec } from "./vector";
 import { fitViewport, type Viewport } from "./viewport";
+import { ScreenWakeLock } from "./wakeLock";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected";
 
@@ -36,6 +37,7 @@ export class Game {
   private exactSize = false;
   private dpr = 0;
   private readonly resizeObserver = new ResizeObserver((entries) => { this.handleResize(entries); });
+  private readonly wakeLock = new ScreenWakeLock(navigator.wakeLock, document);
   private self: DrawablePlayer | null = null;
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly events: GameEvents) {
@@ -48,6 +50,7 @@ export class Game {
   start(): void {
     this.dpr = window.devicePixelRatio || 1;
     this.observeSize();
+    this.wakeLock.start();
     this.events.onStatus("connecting");
     this.connection = connect(gameSocketUrl(window.location), {
       onWelcome: (welcome) => { this.handleWelcome(welcome); },
@@ -63,6 +66,7 @@ export class Game {
     this.resizeObserver.disconnect();
     this.connection?.close();
     this.input.dispose();
+    this.wakeLock.stop();
   }
 
   private handleWelcome(welcome: Welcome): void {
