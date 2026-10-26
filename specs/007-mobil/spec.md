@@ -1,6 +1,6 @@
 # 007 – Handy hochkant, Sichtfeld ohne Ränder und installierbare Web-App
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) ·
 [006 – Deutsch und Englisch](../006-sprachen/spec.md) (Texte der Offline-Seite) ·
