@@ -9,7 +9,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
   Hinweis in ADR 0003 auf die geänderte Vision.
 
 ## Server
-- [ ] **T2** (AK-10, AK-11): `client/scripts/icons.mjs` (PNG per `node:zlib`) und erzeugte Icons in `wwwroot/icons/`,
+- [x] **T2** (AK-10, AK-11): `client/scripts/icons.mjs` (PNG per `node:zlib`) und erzeugte Icons in `wwwroot/icons/`,
   `wwwroot/manifest.webmanifest`, Kopf-Tags im `_Layout`. `GameServerFactory` kopiert Manifest und Icons;
   Integrationstests: Manifest-Felder und Content-Type, Icons 200/`image/png`/Größe, Tags auf der Startseite.
 - [ ] **T3** (AK-12, AK-13): `Pwa/service-worker.js` (Embedded Resource), `ServiceWorkerScript.Render` + Unit-Tests,

@@ -8,6 +8,7 @@
   },
   "scripts": {
     "gen": "cd .. && buf generate",
+    "icons": "node scripts/icons.mjs",
     "dev": "npm run gen && vite",
     "build": "npm run gen && vite build && npm run build:landing && npm run build:admin && npm run build:passkeys",
     "build:landing": "tailwindcss -i src/landing.css -o ../server/BrowserGame.Server/wwwroot/css/site.css --minify",
