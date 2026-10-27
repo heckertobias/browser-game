@@ -35,11 +35,21 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
   prüfen: absolute Kopf-Links unverändert, `wwwroot/play/offline.html` mit gehashten Assets, `/sw.js` listet sie.
 - [x] **T9b** (AK-15): Version unten rechts im HUD (`version.ts`, `vite-env.d.ts`, `App.tsx`) + Vitest; Dockerfile
   `ARG APP_VERSION`; CI-Build-Arg `APP_VERSION` in allen drei Docker-Builds; README-Zeile.
+- [ ] **T9c** (AK-12, AK-16): Service Worker liefert die vorgehaltenen Assets der Offline-Seite zuerst aus dem Cache
+  (Netz nur, wenn der Eintrag fehlt) – sonst erscheint sie bei 502–504 vom Proxy oder 404 nach einem Deploy ohne Stil
+  und Text. Unit-Test in `ServiceWorkerScriptTests` als Regressionsanker; Prüfung manuell (T10).
+- [ ] **T9d** (AK-16, AK-17): `reload.ts` (`reloadPage`: Rückmeldung „lädt …“, nach 8 s Hinweis) im Overlay und auf der
+  Offline-Seite (`offline.html` mit `#offline-hint`, `offline.ts`); `update.ts` (`entryScript`, `classifyServer`,
+  `ServerWatch`) und Overlay-Zustände in `App.tsx`; Schlüssel `reloading`, `reloadStuck`, `updateAvailable`,
+  `updateReload` in `i18n.ts`. Vitest für `reload.ts`, `update.ts` und die neuen Schlüssel.
 
 ## Prüfung
 - [ ] **T10**: Lokal (DevTools: Größen inkl. 3440×1440 und 5120×1440, Offline-Modus, Service Worker im
-  Application-Tab) und im RC in der Testumgebung mit Android (Chrome) und iPhone (Safari): AK-1–15 nach der
+  Application-Tab) und im RC in der Testumgebung mit Android (Chrome) und iPhone (Safari): AK-1–17 nach der
   Abdeckungstabelle – u. a. installieren mit Name und Icon, Start vom Homescreen an- und abgemeldet, Flugmodus in
   beiden Sprachen, rc.N → rc.N+1 ohne alten Stand, Drehen ohne Verbindungsverlust, Gesten, Wake Lock, Spieler-Seiten
-  hochkant. Danach AKs abhaken, Status `umgesetzt`, Roadmap aktualisieren, 003 vermerken (Regeln für HUD, Overlay
-  und Account-Seiten).
+  hochkant; bei laufender App Server stoppen und wieder starten (ein Tipp genügt, ohne App-Neustart), rc.N → rc.N+1
+  bei laufender App („Neue Version verfügbar“, ein Tipp genügt), App öffnen, während der Server gestoppt ist
+  (Offline-Seite mit Stil und Text); Diagnose am iPhone, falls der Hinweis „Spiel neu öffnen“ erscheint. Danach AKs
+  abhaken, Status `umgesetzt`, Roadmap aktualisieren, 003 vermerken (Regeln für HUD, Overlay und Account-Seiten,
+  Neuladen über `reloadPage`).

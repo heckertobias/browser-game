@@ -21,6 +21,8 @@ eine App auf den Homescreen legen und im Vollbild starten.
 - Als **Spieler** möchte ich, dass mein Bildschirm beim Spielen nicht ausgeht.
 - Als **Spieler ohne Netz** möchte ich eine verständliche Meldung statt einer Fehlerseite des Browsers.
 - Als **Tester** möchte ich im Spiel sehen, welche Version gerade läuft.
+- Als **Spieler am Handy** möchte ich nach einem Verbindungsabbruch oder Update weiterspielen, ohne die App neu zu
+  starten.
 
 ## Akzeptanzkriterien
 
@@ -66,6 +68,14 @@ eine App auf den Homescreen legen und im Vollbild starten.
 - **AK-15:** Gegeben ich bin im Spiel, dann sehe ich unten rechts klein und unaufdringlich die Version, die mein
   Gerät gerade ausführt (z. B. `0.4.0-rc.3`). Nach einem Update zeigt sie die neue Version (prüft AK-13).
 
+### Verbindung und Update
+- **AK-16:** Gegeben ich bin im Spiel und die Verbindung zum Server bricht ab (z. B. während eine neue Version
+  ausgerollt wird), dann sehe ich das, und sobald der Server wieder erreichbar ist, spiele ich mit einem Tipp weiter –
+  auch in der Homescreen-App, ohne sie neu zu starten. Nach dem Tipp sehe ich sofort, dass etwas passiert; klappt es
+  nicht, sagt mir das Spiel, was ich tun kann.
+- **AK-17:** Gegeben die Verbindung ist abgebrochen und inzwischen läuft eine neue Version des Spiels, dann sagt mir
+  das Spiel in meiner Sprache, dass es ein Update gibt und ich neu laden muss.
+
 ## Out of Scope
 
 - Push-Benachrichtigungen (→ [008](../008-push/spec.md))
@@ -75,6 +85,8 @@ eine App auf den Homescreen legen und im Vollbild starten.
 - Ein eigenes Layout für Tablets (sie folgen denselben Regeln wie Handy und Monitor)
 - Das Admin-Interface als installierbare App
 - Ausrichtung sperren: Hochkant und quer sind beide erlaubt
+- Wartungsmodus (eigene, spätere Spec)
+- Automatisch weiterspielen ohne Tippen, sobald der Server wieder erreichbar ist
 
 ## Offene Fragen
 
@@ -91,5 +103,6 @@ _Keine._
 - Touch-Steuerung: Tippen und Halten aufs Spielbild, kein virtueller Joystick.
 - Web-App: installierbar, Offline-Hinweis, Bildschirm bleibt an. Push als eigene, spätere Spec.
 - Reihenfolge: nach 006, vor dem Rest von 003.
+- Nach einem Abbruch geht es mit einem Tipp weiter, nicht automatisch (keine Neulade-Schleifen).
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
