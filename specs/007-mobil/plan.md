@@ -13,7 +13,7 @@ Client /play ── viewport.ts    Gerätepixel → ganzzahliger Faktor k und si
              ── styles.css     touch-action, overscroll-behavior, user-select, touch-callout, 100dvh, safe-area im HUD
              ── offline.html   „Keine Verbindung“ in beiden Sprachen (Vite-Mehrseiten-Build, Texte aus i18n.ts)
              ── main.tsx       registriert /sw.js (nur Produktions-Build)
-             ── version.ts     Version aus VITE_APP_VERSION (Docker-Build-Arg APP_VERSION = Release-Tag), sonst „dev“
+             ── version.ts     Version aus VITE_APP_VERSION (Build-Arg APP_VERSION: Release-Tag, sonst Commit-Hash), lokal „dev“
 Server ────── /manifest.webmanifest, /icons/*   statisch; verlinkt im _Layout und in play/index.html
              ── GET /sw.js     Service Worker aus Vorlage, Version = Hash von play/offline.html
              ── Cache-Header   index.html, offline.html, Manifest: no-cache · /play/assets: immutable
@@ -322,21 +322,27 @@ Heute schon richtig: ein Zeiger zur Zeit, `setPointerCapture`, Folgen bei `point
 ### Version (AK-15)
 - **Im Bundle, nicht vom Server:** Angezeigt wird, was das Gerät ausführt. Eine Server-Abfrage zeigte die Version
   des Servers und könnte einen hängenden alten Stand (AK-13) nicht aufdecken.
-- **Fluss:** Release-Tag `vX.Y.Z[-rc.N]` → CI-Job `docker`: Schritt `version` nimmt bei Tag-Builds (`PUBLISH`)
-  `steps.meta.outputs.version` (gleicher Wert wie das Image-Tag, z. B. `0.4.0-rc.3`), prüft das Format wie
-  `release.sh` und setzt sonst einen leeren Wert → `build-args: APP_VERSION=…` bei **allen drei** Builds (Scan amd64,
+- **Fluss:** CI-Job `docker`, Schritt `version` → `build-args: APP_VERSION=…` bei **allen drei** Builds (Scan amd64,
   Scan arm64, Push) → Dockerfile Stage `client`: `ARG APP_VERSION` direkt vor `RUN … npm run build`, dort als
   `VITE_APP_VERSION` → Vite ersetzt `import.meta.env.VITE_APP_VERSION` statisch → `version.ts`.
-- **Fallback `dev`** (genau eine Stelle: `formatVersion` in `version.ts`) für PR-, main- und nächtliche CI, lokales
-  `npm run dev`/`npm run build` und `docker build` ohne Argument. Kein Commit-SHA: Nicht-Release-Images werden nie
-  veröffentlicht oder ausgerollt (ADR 0002); `.git` fehlt im Docker-Kontext; ein Wert pro Commit machte den Cache für
-  Client-Build und `dotnet publish` bei jedem Lauf ungültig.
+  - Tag-Build (`PUBLISH`): `steps.meta.outputs.version` (gleicher Wert wie das Image-Tag, z. B. `0.4.0-rc.3`),
+    Format geprüft wie in `release.sh`.
+  - Sonst (PR, main, nächtlich, manuell): die ersten 7 Zeichen des Commit-Hashs, damit jeder Build eindeutig
+    zuordenbar ist. Bei PRs `github.event.pull_request.head.sha` statt `github.sha`: Dieser ist der flüchtige
+    Merge-Commit, der in keiner Branch-Historie steht. Gebaut wird zwar der Merge-Stand, aber PR-Images werden nie
+    veröffentlicht (ADR 0002); das Label identifiziert den Commit.
+- **Lokal `dev`** (genau eine Stelle: `formatVersion`, wenn der Wert leer ist): `npm run dev`/`npm run build` und
+  `docker build` ohne Argument. `.git` fehlt im Docker-Kontext, eine lokale Arbeitskopie ist oft nicht committet,
+  und solche Builds werden nie ausgerollt. Kein `child_process`/`@types/node` in `vite.config.ts`.
 - **Gleicher Build-Arg in Scan- und Push-Builds:** Nur so übernimmt der Push-Build die Schichten aus dem gha-Cache,
   und das veröffentlichte Image ist das gescannte.
-- **Docker-Cache:** `ARG` gilt nur in der Stage `client` und steht nach `npm ci`. Eine neue Version führt nur den
-  Client-Build und das Publish neu aus.
-- **Content-Hash:** Der String steckt im Spiel-Chunk (nur `App.tsx` importiert `version.ts`) → jedes Release hat einen
-  neuen Asset-Namen, gewollt für AK-13. `offline.html` und ihre Assets bleiben gleich → die SW-Version ändert sich
+- **Docker-Cache:** `ARG` gilt nur in der Stage `client` und steht nach `npm ci`. Weil sich der Wert mit jedem Commit
+  ändert, laufen bei jedem CI-Build der Client-Build und – über den geänderten `wwwroot` – `dotnet publish` des
+  Spiels (je Architektur) neu. `npm ci`, Restore und das Admin-Publish bleiben im Cache. Aufschlag: Sekunden bis etwa
+  eine Minute je Matrix-Job, hingenommen für die Eindeutigkeit. Den Wert erst nach dem Build einzusetzen (`sed`),
+  hielte den Cache, ließe aber den Asset-Namen gleich (`immutable`) – das widerspricht AK-13.
+- **Content-Hash:** Der String steckt im Spiel-Chunk (nur `App.tsx` importiert `version.ts`) → jede Version (Release oder
+  Commit) hat einen neuen Asset-Namen, gewollt für AK-13. `offline.html` und ihre Assets bleiben gleich → die SW-Version ändert sich
   nicht bei jedem Release; richtig so, der SW cacht keinen App-Code.
 - **Anzeige:** `App.tsx`, letztes Kind der HUD-Ebene (also auch über dem Overlay „getrennt“), unten rechts mit
   Safe-Area-Abstand, `text-xs normal-case text-base-content/60`, keine Badge, nicht interaktiv. Ohne Präfix
@@ -368,7 +374,8 @@ liegen aber ebenfalls im Safe-Area-Container und sind nie interaktiv.
   - `wakeLock.test.ts` mit Fakes: fordert bei Start an, erneut bei Sichtbarkeit, nicht wenn verborgen, gibt bei
     `stop` frei, wirft nicht ohne API oder bei Ablehnung; nach Ablehnung erneut bei jeder Eingabe bis zum Erfolg;
     `touchend` statt Touch-`pointerup`; ein Versuch pro Tippen; erneut nach Freigabe ohne `visibilitychange`.
-  - `version.test.ts`: `formatVersion` – `undefined`, `""`, `"  "` → `dev`; `"0.4.0-rc.3"` und `"0.4.0"` unverändert.
+  - `version.test.ts`: `formatVersion` – `undefined`, `""`, `"  "` → `dev`; `"0.4.0-rc.3"`, `"0.4.0"` und ein
+    Commit-Hash (`"5539bc0"`) unverändert.
   - `i18n.test.ts`: Offline-Schlüssel in beiden Sprachen nicht leer (Rest erzwingt `tsc`).
 - **Server (xUnit)**
   - `ServiceWorkerScriptTests` (Unit): Assets aus HTML, Version ändert sich mit dem HTML, gleiche Eingabe → gleiche
@@ -401,7 +408,7 @@ liegen aber ebenfalls im Safe-Area-Container und sind nie interaktiv.
 | 12 | Service Worker: Navigation → Netz, sonst Offline-Seite; Texte aus `i18n.ts` | Unit `ServiceWorkerScriptTests`, Integration `/sw.js` und `offline.html`, Vitest Schlüssel; **manuell:** Flugmodus, Start und Neuladen, Deutsch und Englisch, „Erneut versuchen“ |
 | 13 | `no-cache` für HTML/Manifest/SW, `immutable` für Assets, SW cacht kein App-Code, Version aus Offline-HTML | Integration Cache-Header, Unit Version; **manuell:** rc.N installiert, rc.N+1 ausrollen, App neu starten → neues Bundle (Versionsanzeige, AK-15) |
 | 14 | `ScreenWakeLock` mit Neuanforderung bei Sichtbarkeit und bei Eingabe bis zum Erfolg | Vitest mit Fakes; **manuell:** Bildschirm-Timeout 30 s, im Spiel einmal tippen und warten; App wechseln → Timeout greift wieder; iPhone im Safari-Tab und als Homescreen-App |
-| 15 | Release-Tag → CI-Build-Arg `APP_VERSION` (Scan- und Push-Builds gleich) → `VITE_APP_VERSION` → Bundle; HUD unten rechts, `text-xs`, safe-area, über dem Overlay; sonst `dev` | Vitest `formatVersion`; **manuell:** `npm run dev` → `dev`; im RC zeigt rc.N `X.Y.Z-rc.N`, nach Ausrollen von rc.N+1 und Neustart vom Homescreen `…-rc.N+1`; iPhone quer und hochkant; Overlay „getrennt“ lässt die Version sichtbar |
+| 15 | CI-Build-Arg `APP_VERSION` (Release-Tag, sonst kurzer Commit-Hash; bei PRs Head-Commit; Scan- und Push-Builds gleich) → `VITE_APP_VERSION` → Bundle; HUD unten rechts, `text-xs`, safe-area, über dem Overlay; lokal `dev` | Vitest `formatVersion`; **manuell:** `npm run dev` → `dev`; PR-Build zeigt den kurzen Head-Hash; im RC zeigt rc.N `X.Y.Z-rc.N`, nach Ausrollen von rc.N+1 und Neustart vom Homescreen `…-rc.N+1`; iPhone quer und hochkant; Overlay „getrennt“ lässt die Version sichtbar |
 
 ## Constitution-Check
 
