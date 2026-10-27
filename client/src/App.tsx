@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Game, type ConnectionStatus } from "./game/game";
 import { t } from "./i18n";
+import { APP_VERSION } from "./version";
 
 const STATUS_LABEL: Record<ConnectionStatus, string> = {
   connecting: t.statusConnecting,
@@ -40,6 +41,7 @@ export function App() {
             </button>
           </div>
         )}
+        <span className="absolute bottom-[max(0.5rem,env(safe-area-inset-bottom))] right-[max(0.5rem,env(safe-area-inset-right))] text-xs normal-case text-base-content/60" data-testid="version">{APP_VERSION}</span>
       </div>
     </div>
   );

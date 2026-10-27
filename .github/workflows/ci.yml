@@ -174,6 +174,22 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest,enable=${{ !contains(github.ref_name, '-') }}
+      # Version im Client-Bundle (007 AK-15): Release-/RC-Tag, sonst kurzer Commit-Hash (bei PRs der Head-Commit,
+      # nicht der flüchtige Merge-Commit).
+      - name: Version fürs Client-Bundle
+        id: version
+        env:
+          META_VERSION: ${{ steps.meta.outputs.version }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [[ "$PUBLISH" == "true" ]]; then
+            v="$META_VERSION"
+            # Format wie scripts/release.sh
+            [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]] || { echo "Unerwartete Version: '$v'" >&2; exit 1; }
+          else
+            v="${COMMIT_SHA::7}"
+          fi
+          echo "value=$v" >> "$GITHUB_OUTPUT"
       # Pro Architektur lokal bauen und scannen (Basis-Image-Pakete unterscheiden sich je Architektur).
       - name: Build amd64 (zum Scannen)
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -181,6 +197,7 @@ jobs:
           context: .
           target: ${{ matrix.target }}
           platforms: linux/amd64
+          build-args: APP_VERSION=${{ steps.version.outputs.value }}
           load: true
           tags: browser-game-${{ matrix.target }}:scan-amd64
           cache-from: type=gha,scope=${{ matrix.target }}
@@ -198,6 +215,7 @@ jobs:
           context: .
           target: ${{ matrix.target }}
           platforms: linux/arm64
+          build-args: APP_VERSION=${{ steps.version.outputs.value }}
           load: true
           tags: browser-game-${{ matrix.target }}:scan-arm64
           cache-from: type=gha,scope=${{ matrix.target }}
@@ -223,6 +241,7 @@ jobs:
           context: .
           target: ${{ matrix.target }}
           platforms: linux/amd64,linux/arm64
+          build-args: APP_VERSION=${{ steps.version.outputs.value }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

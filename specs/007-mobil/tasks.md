@@ -33,7 +33,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
 - [x] **T9** (AK-10–13): `index.html` Kopf-Tags; Offline-Seite (`offline.html`, `src/offline.ts`, Schlüssel
   `offline*` in `i18n.ts`) als zweite Vite-Eingabe; `pwa.ts` registriert `/sw.js` nur im Produktions-Build. Build
   prüfen: absolute Kopf-Links unverändert, `wwwroot/play/offline.html` mit gehashten Assets, `/sw.js` listet sie.
-- [ ] **T9b** (AK-15): Version unten rechts im HUD (`version.ts`, `vite-env.d.ts`, `App.tsx`) + Vitest; Dockerfile
+- [x] **T9b** (AK-15): Version unten rechts im HUD (`version.ts`, `vite-env.d.ts`, `App.tsx`) + Vitest; Dockerfile
   `ARG APP_VERSION`; CI-Build-Arg `APP_VERSION` in allen drei Docker-Builds; README-Zeile.
 
 ## Prüfung
