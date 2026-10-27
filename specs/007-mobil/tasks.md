@@ -33,10 +33,12 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
 - [x] **T9** (AK-10–13): `index.html` Kopf-Tags; Offline-Seite (`offline.html`, `src/offline.ts`, Schlüssel
   `offline*` in `i18n.ts`) als zweite Vite-Eingabe; `pwa.ts` registriert `/sw.js` nur im Produktions-Build. Build
   prüfen: absolute Kopf-Links unverändert, `wwwroot/play/offline.html` mit gehashten Assets, `/sw.js` listet sie.
+- [ ] **T9b** (AK-15): Version unten rechts im HUD (`version.ts`, `vite-env.d.ts`, `App.tsx`) + Vitest; Dockerfile
+  `ARG APP_VERSION`; CI-Build-Arg `APP_VERSION` in allen drei Docker-Builds; README-Zeile.
 
 ## Prüfung
 - [ ] **T10**: Lokal (DevTools: Größen inkl. 3440×1440 und 5120×1440, Offline-Modus, Service Worker im
-  Application-Tab) und im RC in der Testumgebung mit Android (Chrome) und iPhone (Safari): AK-1–14 nach der
+  Application-Tab) und im RC in der Testumgebung mit Android (Chrome) und iPhone (Safari): AK-1–15 nach der
   Abdeckungstabelle – u. a. installieren mit Name und Icon, Start vom Homescreen an- und abgemeldet, Flugmodus in
   beiden Sprachen, rc.N → rc.N+1 ohne alten Stand, Drehen ohne Verbindungsverlust, Gesten, Wake Lock, Spieler-Seiten
   hochkant. Danach AKs abhaken, Status `umgesetzt`, Roadmap aktualisieren, 003 vermerken (Regeln für HUD, Overlay

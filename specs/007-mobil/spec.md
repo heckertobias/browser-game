@@ -20,6 +20,7 @@ eine App auf den Homescreen legen und im Vollbild starten.
 - Als **Spieler am Handy** möchte ich das Spiel auf meinen Homescreen legen und wie eine App im Vollbild starten.
 - Als **Spieler** möchte ich, dass mein Bildschirm beim Spielen nicht ausgeht.
 - Als **Spieler ohne Netz** möchte ich eine verständliche Meldung statt einer Fehlerseite des Browsers.
+- Als **Tester** möchte ich im Spiel sehen, welche Version gerade läuft.
 
 ## Akzeptanzkriterien
 
@@ -60,6 +61,10 @@ eine App auf den Homescreen legen und im Vollbild starten.
 ### Bildschirm
 - **AK-14:** Gegeben ich bin im Spiel und es ist im Vordergrund, dann geht der Bildschirm nicht von selbst aus.
   Verlasse ich das Spiel oder wechsle die App, gilt wieder die normale Einstellung des Geräts.
+
+### Version
+- **AK-15:** Gegeben ich bin im Spiel, dann sehe ich unten rechts klein und unaufdringlich die Version, die mein
+  Gerät gerade ausführt (z. B. `0.4.0-rc.3`). Nach einem Update zeigt sie die neue Version (prüft AK-13).
 
 ## Out of Scope
 

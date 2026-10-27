@@ -13,6 +13,7 @@ Client /play ── viewport.ts    Gerätepixel → ganzzahliger Faktor k und si
              ── styles.css     touch-action, overscroll-behavior, user-select, touch-callout, 100dvh, safe-area im HUD
              ── offline.html   „Keine Verbindung“ in beiden Sprachen (Vite-Mehrseiten-Build, Texte aus i18n.ts)
              ── main.tsx       registriert /sw.js (nur Produktions-Build)
+             ── version.ts     Version aus VITE_APP_VERSION (Docker-Build-Arg APP_VERSION = Release-Tag), sonst „dev“
 Server ────── /manifest.webmanifest, /icons/*   statisch; verlinkt im _Layout und in play/index.html
              ── GET /sw.js     Service Worker aus Vorlage, Version = Hash von play/offline.html
              ── Cache-Header   index.html, offline.html, Manifest: no-cache · /play/assets: immutable
@@ -318,9 +319,39 @@ Heute schon richtig: ein Zeiger zur Zeit, `setPointerCapture`, Folgen bei `point
     Einstellung. Kein NoSleep-Video-Trick (Abhängigkeit/Asset, Akku).
 - In `Game.start()`/`stop()`.
 
+### Version (AK-15)
+- **Im Bundle, nicht vom Server:** Angezeigt wird, was das Gerät ausführt. Eine Server-Abfrage zeigte die Version
+  des Servers und könnte einen hängenden alten Stand (AK-13) nicht aufdecken.
+- **Fluss:** Release-Tag `vX.Y.Z[-rc.N]` → CI-Job `docker`: Schritt `version` nimmt bei Tag-Builds (`PUBLISH`)
+  `steps.meta.outputs.version` (gleicher Wert wie das Image-Tag, z. B. `0.4.0-rc.3`), prüft das Format wie
+  `release.sh` und setzt sonst einen leeren Wert → `build-args: APP_VERSION=…` bei **allen drei** Builds (Scan amd64,
+  Scan arm64, Push) → Dockerfile Stage `client`: `ARG APP_VERSION` direkt vor `RUN … npm run build`, dort als
+  `VITE_APP_VERSION` → Vite ersetzt `import.meta.env.VITE_APP_VERSION` statisch → `version.ts`.
+- **Fallback `dev`** (genau eine Stelle: `formatVersion` in `version.ts`) für PR-, main- und nächtliche CI, lokales
+  `npm run dev`/`npm run build` und `docker build` ohne Argument. Kein Commit-SHA: Nicht-Release-Images werden nie
+  veröffentlicht oder ausgerollt (ADR 0002); `.git` fehlt im Docker-Kontext; ein Wert pro Commit machte den Cache für
+  Client-Build und `dotnet publish` bei jedem Lauf ungültig.
+- **Gleicher Build-Arg in Scan- und Push-Builds:** Nur so übernimmt der Push-Build die Schichten aus dem gha-Cache,
+  und das veröffentlichte Image ist das gescannte.
+- **Docker-Cache:** `ARG` gilt nur in der Stage `client` und steht nach `npm ci`. Eine neue Version führt nur den
+  Client-Build und das Publish neu aus.
+- **Content-Hash:** Der String steckt im Spiel-Chunk (nur `App.tsx` importiert `version.ts`) → jedes Release hat einen
+  neuen Asset-Namen, gewollt für AK-13. `offline.html` und ihre Assets bleiben gleich → die SW-Version ändert sich
+  nicht bei jedem Release; richtig so, der SW cacht keinen App-Code.
+- **Anzeige:** `App.tsx`, letztes Kind der HUD-Ebene (also auch über dem Overlay „getrennt“), unten rechts mit
+  Safe-Area-Abstand, `text-xs normal-case text-base-content/60`, keine Badge, nicht interaktiv. Ohne Präfix
+  (`0.4.0-rc.3`). `normal-case` ist Pflicht, die HUD-Ebene setzt `uppercase`.
+- **12 px statt 14 px:** AK-6 meint Anzeigen und Buttons, die man zum Spielen braucht. Die Version ist passiv und soll
+  laut AK-15 „klein und unaufdringlich“ sein.
+- **Kein i18n:** Die Versionsnummer ist ein Wert, kein Text; `dev` ist ein technischer Bezeichner.
+- **Typ:** `src/vite-env.d.ts` deklariert `ImportMetaEnv.VITE_APP_VERSION?: string`. Kein `define` in
+  `vite.config.ts` (kein `@types/node`, keine neue Abhängigkeit).
+
 ## Regeln für 003 und spätere UI
 HUD-Elemente und Overlays liegen im Safe-Area-Container, Touch-Ziele ≥ 44 px (`btn-lg` bzw. `min-h-11`), Schrift ≥ 14 px,
 nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 320/360/390 px Breite.
+Ausnahme: rein informative Anzeigen ohne Spielrelevanz (z. B. Version, AK-15) dürfen `text-xs` (12 px) sein,
+liegen aber ebenfalls im Safe-Area-Container und sind nie interaktiv.
 
 ## Tests
 
@@ -337,6 +368,7 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
   - `wakeLock.test.ts` mit Fakes: fordert bei Start an, erneut bei Sichtbarkeit, nicht wenn verborgen, gibt bei
     `stop` frei, wirft nicht ohne API oder bei Ablehnung; nach Ablehnung erneut bei jeder Eingabe bis zum Erfolg;
     `touchend` statt Touch-`pointerup`; ein Versuch pro Tippen; erneut nach Freigabe ohne `visibilitychange`.
+  - `version.test.ts`: `formatVersion` – `undefined`, `""`, `"  "` → `dev`; `"0.4.0-rc.3"` und `"0.4.0"` unverändert.
   - `i18n.test.ts`: Offline-Schlüssel in beiden Sprachen nicht leer (Rest erzwingt `tsc`).
 - **Server (xUnit)**
   - `ServiceWorkerScriptTests` (Unit): Assets aus HTML, Version ändert sich mit dem HTML, gleiche Eingabe → gleiche
@@ -367,8 +399,9 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
 | 10 | Manifest, Icons, Kopf-Tags | Integration `PwaTests`; **manuell:** Android „App installieren“, iPhone „Zum Home-Bildschirm“ mit Name und Icon |
 | 11 | `start_url /play`, `scope /`, `standalone`; Anmeldung per Redirect | Integration (Manifest-Felder, bestehender Redirect-Test); **manuell:** Start vom Homescreen an- und abgemeldet, ohne Browserleiste |
 | 12 | Service Worker: Navigation → Netz, sonst Offline-Seite; Texte aus `i18n.ts` | Unit `ServiceWorkerScriptTests`, Integration `/sw.js` und `offline.html`, Vitest Schlüssel; **manuell:** Flugmodus, Start und Neuladen, Deutsch und Englisch, „Erneut versuchen“ |
-| 13 | `no-cache` für HTML/Manifest/SW, `immutable` für Assets, SW cacht kein App-Code, Version aus Offline-HTML | Integration Cache-Header, Unit Version; **manuell:** rc.N installiert, rc.N+1 ausrollen, App neu starten → neues Bundle (Asset-Hash per Remote-Debugging) |
+| 13 | `no-cache` für HTML/Manifest/SW, `immutable` für Assets, SW cacht kein App-Code, Version aus Offline-HTML | Integration Cache-Header, Unit Version; **manuell:** rc.N installiert, rc.N+1 ausrollen, App neu starten → neues Bundle (Versionsanzeige, AK-15) |
 | 14 | `ScreenWakeLock` mit Neuanforderung bei Sichtbarkeit und bei Eingabe bis zum Erfolg | Vitest mit Fakes; **manuell:** Bildschirm-Timeout 30 s, im Spiel einmal tippen und warten; App wechseln → Timeout greift wieder; iPhone im Safari-Tab und als Homescreen-App |
+| 15 | Release-Tag → CI-Build-Arg `APP_VERSION` (Scan- und Push-Builds gleich) → `VITE_APP_VERSION` → Bundle; HUD unten rechts, `text-xs`, safe-area, über dem Overlay; sonst `dev` | Vitest `formatVersion`; **manuell:** `npm run dev` → `dev`; im RC zeigt rc.N `X.Y.Z-rc.N`, nach Ausrollen von rc.N+1 und Neustart vom Homescreen `…-rc.N+1`; iPhone quer und hochkant; Overlay „getrennt“ lässt die Version sichtbar |
 
 ## Constitution-Check
 
