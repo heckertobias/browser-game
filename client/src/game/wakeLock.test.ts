@@ -154,7 +154,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     await flush();
   });
 
-  it("stays silent on rejection and retries once per input window", async () => {
+  it("stays silent on rejection and retries on every input until it gets the lock", async () => {
     const { api, lock, fire, show } = setup();
     api.mode = "deny";
     lock.start();
@@ -164,15 +164,63 @@ describe("ScreenWakeLock (AK-14)", () => {
     await flush();
     expect(api.requests).toBe(2);
     fire("keydown");
+    await flush();
+    expect(api.requests).toBe(3);
+    fire("pointerup");
+    await flush();
+    expect(api.requests).toBe(4);
+    api.mode = "grant";
+    fire("keydown");
+    await flush();
+    expect(api.requests).toBe(5);
+    fire("pointerup");
+    fire("keydown");
+    show();
+    await flush();
+    expect(api.requests).toBe(5);
+  });
+
+  it("requests on touchend, not on touch pointerup", async () => {
+    const { api, doc, lock, fire } = setup();
+    api.mode = "deny";
+    lock.start();
+    await flush();
+    doc.dispatchEvent(Object.assign(new Event("pointerup"), { pointerType: "touch" }));
+    await flush();
+    expect(api.requests).toBe(1);
+    fire("touchend");
+    await flush();
+    expect(api.requests).toBe(2);
+  });
+
+  it("one request per tap while pending", () => {
+    const { api, doc, lock, fire } = setup();
+    api.mode = "manual";
+    lock.start();
+    doc.dispatchEvent(Object.assign(new Event("pointerup"), { pointerType: "touch" }));
+    fire("touchend");
+    fire("keydown");
+    expect(api.requests).toBe(1);
+  });
+
+  it("requests again on input after the lock was released without visibilitychange", async () => {
+    const { api, lock, fire } = setup();
+    lock.start();
+    await flush();
+    api.sentinel(0).released = true;
     fire("pointerup");
     await flush();
     expect(api.requests).toBe(2);
-    show();
+  });
+
+  it("ignores repeated keydown", async () => {
+    const { api, doc, lock } = setup();
+    api.mode = "deny";
+    lock.start();
     await flush();
-    expect(api.requests).toBe(3);
-    fire("keydown");
+    doc.dispatchEvent(Object.assign(new Event("keydown"), { repeat: true }));
     await flush();
-    expect(api.requests).toBe(4);
+    expect(api.requests).toBe(1);
   });
 
   it("gets the lock on input after a rejection", async () => {

@@ -12,19 +12,17 @@ export interface WakeLockApi {
 /** Ausschnitt von `document`, den ScreenWakeLock braucht (ohne DOM testbar). */
 export interface WakeLockDocument {
   readonly visibilityState: DocumentVisibilityState;
-  addEventListener(type: string, listener: () => void, options: { signal: AbortSignal }): void;
+  addEventListener(type: string, listener: (event: Event) => void, options: { signal: AbortSignal }): void;
 }
 
-/** Eingaben, nach denen erneut angefordert wird (Browser, die eine Nutzergeste verlangen); bei Touch ist erst pointerup eine Geste. */
-export const WAKE_LOCK_INPUT_EVENTS = ["pointerup", "keydown"] as const;
+/** Eingaben, nach denen erneut angefordert wird (Browser, die eine Nutzergeste verlangen); Touch zählt erst bei touchend, pointerup nur für Maus und Stift. */
+export const WAKE_LOCK_INPUT_EVENTS = ["pointerup", "touchend", "keydown"] as const;
 
 /** Hält den Bildschirm an, solange das Spiel sichtbar ist (AK-14); ohne Unterstützung oder bei Ablehnung still. */
 export class ScreenWakeLock {
   private sentinel: WakeLockSentinelLike | null = null;
   private pending = false;
   private abort: AbortController | null = null;
-  /** Nach Start bzw. Sichtbarwerden darf eine Eingabe einmal neu anfordern. */
-  private retryOnInput = false;
 
   constructor(private readonly api: WakeLockApi | undefined, private readonly doc: WakeLockDocument) {}
 
@@ -35,14 +33,16 @@ export class ScreenWakeLock {
     // Der Browser gibt die Sperre beim Verstecken selbst frei (sentinel.released = true).
     this.doc.addEventListener("visibilitychange", () => {
       if (this.doc.visibilityState !== "visible") return;
-      this.retryOnInput = true;
       this.request();
     }, { signal });
-    const onInput = () => {
-      if (this.retryOnInput && this.request()) this.retryOnInput = false;
+    const onInput = (event: Event) => {
+      // Bei Touch löst pointerup vor touchend aus und würde es per `pending` blockieren.
+      if (event.type === "pointerup" && "pointerType" in event && event.pointerType === "touch") return;
+      // Gehaltenes keydown wiederholt sich; eine dauerhaft abgelehnte Sperre würde ~30 Anfragen/s auslösen.
+      if ("repeat" in event && event.repeat) return;
+      this.request();
     };
     for (const type of WAKE_LOCK_INPUT_EVENTS) this.doc.addEventListener(type, onInput, { signal });
-    this.retryOnInput = true;
     this.request();
   }
 
@@ -54,14 +54,12 @@ export class ScreenWakeLock {
     if (sentinel) sentinel.release().catch(() => { /* schon freigegeben */ });
   }
 
-  /** true, wenn eine Anforderung gestartet wurde. */
-  private request(): boolean {
+  private request(): void {
     const api = this.api;
-    if (!api || !this.abort || this.pending || this.doc.visibilityState !== "visible") return false;
-    if (this.sentinel && !this.sentinel.released) return false;
+    if (!api || !this.abort || this.pending || this.doc.visibilityState !== "visible") return;
+    if (this.sentinel && !this.sentinel.released) return;
     this.pending = true;
     void this.acquire(api);
-    return true;
   }
 
   private async acquire(api: WakeLockApi): Promise<void> {
