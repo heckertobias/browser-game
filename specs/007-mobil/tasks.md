@@ -53,3 +53,4 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
   (Offline-Seite mit Stil und Text); Diagnose am iPhone, falls der Hinweis „Spiel neu öffnen“ erscheint. Danach AKs
   abhaken, Status `umgesetzt`, Roadmap aktualisieren, 003 vermerken (Regeln für HUD, Overlay und Account-Seiten,
   Neuladen über `reloadPage`).
+  Stand: iPhone (Safari-Tab und Homescreen-App) geprüft, Android offen; 007 bleibt bis dahin `in arbeit`.
