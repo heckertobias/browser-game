@@ -28,7 +28,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
 - [x] **T7** (AK-6–8): `styles.css` (touch-action, overscroll-behavior, user-select, touch-callout, tap-highlight,
   `100dvh`), Viewport-Meta, `gesturestart`; HUD mit Safe Areas, `pointer-events-none`, `text-sm`, `btn-lg`.
   `PointerHold` (primärer Zeiger, `lostpointercapture`) + Vitest.
-- [x] **T8** (AK-14): `ScreenWakeLock` (Neuanforderung bei Sichtbarkeit und erster Eingabe, still ohne Unterstützung)
+- [x] **T8** (AK-14): `ScreenWakeLock` (Neuanforderung bei Sichtbarkeit und bei Eingabe bis zum Erfolg, Touch per `touchend`, still ohne Unterstützung)
   + Vitest mit Fakes; in `Game.start/stop`.
 - [x] **T9** (AK-10–13): `index.html` Kopf-Tags; Offline-Seite (`offline.html`, `src/offline.ts`, Schlüssel
   `offline*` in `i18n.ts`) als zweite Vite-Eingabe; `pwa.ts` registriert `/sw.js` nur im Produktions-Build. Build

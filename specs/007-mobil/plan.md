@@ -309,8 +309,10 @@ Heute schon richtig: ein Zeiger zur Zeit, `setPointerCapture`, Folgen bei `point
 ### Bildschirm an (AK-14, `game/wakeLock.ts`)
 - `ScreenWakeLock` mit injizierbarer API (`navigator.wakeLock`) und `document`:
   - `start()`: anfordern, wenn `visibilityState === "visible"`; bei `visibilitychange` → sichtbar erneut anfordern
-    (der Browser gibt die Sperre beim Verstecken selbst frei); zusätzlich beim ersten `pointerup`/`keydown` (bei Touch ist erst `pointerup` eine Nutzergeste), falls noch
-    keine Sperre besteht (Browser, die eine Nutzergeste verlangen).
+    (der Browser gibt die Sperre beim Verstecken selbst frei); zusätzlich bei jedem `keydown`, `pointerup` (Maus,
+    Stift) bzw. `touchend` (Touch), solange keine Sperre besteht. WebKit verlangt für die erste Sperre pro Seite eine
+    Nutzergeste, danach geht die Neuanforderung bei Sichtbarkeit ohne. Touch-`pointerup` fordert nicht an, damit es
+    das `touchend` desselben Tippens nicht blockiert.
   - `stop()`: Listener weg, Sperre freigeben.
   - Nicht unterstützt oder abgelehnt (`NotAllowedError`, Akku-Sparmodus): still nichts tun – dann gilt die normale
     Einstellung. Kein NoSleep-Video-Trick (Abhängigkeit/Asset, Akku).
@@ -333,7 +335,8 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
   - `input.test.ts`: `PointerHold` – zweiter Finger ignoriert, nicht primärer/rechte Taste ignoriert, `release` mit
     fremder ID wirkungslos, `lostpointercapture`/`cancel` stoppen.
   - `wakeLock.test.ts` mit Fakes: fordert bei Start an, erneut bei Sichtbarkeit, nicht wenn verborgen, gibt bei
-    `stop` frei, wirft nicht ohne API oder bei Ablehnung.
+    `stop` frei, wirft nicht ohne API oder bei Ablehnung; nach Ablehnung erneut bei jeder Eingabe bis zum Erfolg;
+    `touchend` statt Touch-`pointerup`; ein Versuch pro Tippen; erneut nach Freigabe ohne `visibilitychange`.
   - `i18n.test.ts`: Offline-Schlüssel in beiden Sprachen nicht leer (Rest erzwingt `tsc`).
 - **Server (xUnit)**
   - `ServiceWorkerScriptTests` (Unit): Assets aus HTML, Version ändert sich mit dem HTML, gleiche Eingabe → gleiche
@@ -365,7 +368,7 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
 | 11 | `start_url /play`, `scope /`, `standalone`; Anmeldung per Redirect | Integration (Manifest-Felder, bestehender Redirect-Test); **manuell:** Start vom Homescreen an- und abgemeldet, ohne Browserleiste |
 | 12 | Service Worker: Navigation → Netz, sonst Offline-Seite; Texte aus `i18n.ts` | Unit `ServiceWorkerScriptTests`, Integration `/sw.js` und `offline.html`, Vitest Schlüssel; **manuell:** Flugmodus, Start und Neuladen, Deutsch und Englisch, „Erneut versuchen“ |
 | 13 | `no-cache` für HTML/Manifest/SW, `immutable` für Assets, SW cacht kein App-Code, Version aus Offline-HTML | Integration Cache-Header, Unit Version; **manuell:** rc.N installiert, rc.N+1 ausrollen, App neu starten → neues Bundle (Asset-Hash per Remote-Debugging) |
-| 14 | `ScreenWakeLock` mit Neuanforderung bei Sichtbarkeit | Vitest mit Fakes; **manuell:** Bildschirm-Timeout 30 s, im Spiel warten; App wechseln → Timeout greift wieder |
+| 14 | `ScreenWakeLock` mit Neuanforderung bei Sichtbarkeit und bei Eingabe bis zum Erfolg | Vitest mit Fakes; **manuell:** Bildschirm-Timeout 30 s, im Spiel einmal tippen und warten; App wechseln → Timeout greift wieder; iPhone im Safari-Tab und als Homescreen-App |
 
 ## Constitution-Check
 
@@ -385,6 +388,8 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
   der Homescreen-App (Service Worker und Anmeldung entstehen beim ersten Start neu); Wake Lock in Homescreen-Apps erst
   ab iOS 18.4 zuverlässig; ob Safari `start_url` statt der aktuellen Seite nutzt, im RC prüfen (Fallback: vom Spiel
   aus hinzufügen).
+- **AK-14 auf iOS:** Nur Tippen oder Taste zählt als Geste, Ziehen nicht (WebKit-Bug 212117). Wer nur zieht, bekommt
+  keine Sperre; der Bildschirm bleibt erst nach dem ersten Tippen an. Bewusst akzeptiert, kein „Tippen zum Starten“.
 - **Ohne `devicePixelContentBoxSize`** (Safari) bei gebrochenem DPR (nur Seitenzoom am Mac) kann ein Gerätepixel
   Rundung leicht weichzeichnen.
 - **Vite und absolute Kopf-Links** bei `base: "/play/"`: Build-Ausgabe prüfen (T9).
