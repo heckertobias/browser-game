@@ -38,6 +38,15 @@ public sealed partial class ServiceWorkerScriptTests
         Assert.Equal(ExpectedPrecache, precache);
     }
 
+    [Fact] // AK-12, AK-16
+    public void Precached_assets_are_served_from_cache_first()
+    {
+        var script = ServiceWorkerScript.Render(OfflineHtml);
+
+        Assert.Contains("caches.match(url.pathname).then((r) => r ?? fetch(request))", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("fetch(request).catch(", script, StringComparison.Ordinal);
+    }
+
     [Fact] // AK-13
     public void Version_is_sha256_prefix_of_html()
     {

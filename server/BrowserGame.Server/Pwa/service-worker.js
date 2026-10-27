@@ -25,6 +25,8 @@ self.addEventListener("fetch", (event) => {
   }
   const url = new URL(request.url);
   if (url.origin === self.location.origin && PRECACHE.includes(url.pathname)) {
-    event.respondWith(fetch(request).catch(() => caches.match(url.pathname).then((r) => r ?? Response.error())));
+    // Cache zuerst: Namen mit Inhalts-Hash; bei 502–504 (Deploy) oder 404 (neuer Server kennt alte Namen nicht)
+    // käme die Offline-Seite sonst ohne Stil und Text (007 AK-12, AK-16).
+    event.respondWith(caches.match(url.pathname).then((r) => r ?? fetch(request)));
   }
 });

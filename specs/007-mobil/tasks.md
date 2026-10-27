@@ -35,7 +35,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
   prüfen: absolute Kopf-Links unverändert, `wwwroot/play/offline.html` mit gehashten Assets, `/sw.js` listet sie.
 - [x] **T9b** (AK-15): Version unten rechts im HUD (`version.ts`, `vite-env.d.ts`, `App.tsx`) + Vitest; Dockerfile
   `ARG APP_VERSION`; CI-Build-Arg `APP_VERSION` in allen drei Docker-Builds; README-Zeile.
-- [ ] **T9c** (AK-12, AK-16): Service Worker liefert die vorgehaltenen Assets der Offline-Seite zuerst aus dem Cache
+- [x] **T9c** (AK-12, AK-16): Service Worker liefert die vorgehaltenen Assets der Offline-Seite zuerst aus dem Cache
   (Netz nur, wenn der Eintrag fehlt) – sonst erscheint sie bei 502–504 vom Proxy oder 404 nach einem Deploy ohne Stil
   und Text. Unit-Test in `ServiceWorkerScriptTests` als Regressionsanker; Prüfung manuell (T10).
 - [ ] **T9d** (AK-16, AK-17): `reload.ts` (`reloadPage`: Rückmeldung „lädt …“, nach 8 s Hinweis) im Overlay und auf der
