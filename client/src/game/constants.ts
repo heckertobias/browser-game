@@ -1,8 +1,12 @@
-/** Logische Auflösung: Jeder sieht genau diesen Weltausschnitt (ADR 0003). */
-export const LOGICAL_WIDTH = 640;
-export const LOGICAL_HEIGHT = 360;
+/** Sichtfeld (ADR 0010): kurze Seite möglichst nah an 360 Weltpixeln, nie mehr als 400; lange Seite höchstens 21:9. */
+export const TARGET_SHORT_SIDE = 360;
+export const MAX_SHORT_SIDE = 400;
+export const MAX_ASPECT_LONG = 21;
+export const MAX_ASPECT_SHORT = 9;
 
 export const PLAYER_SIZE = 16;
+/** Culling (ADR 0010): Figur samt Namen (≤ 16 Zeichen) muss das Sichtfeld um diesen Rand in Weltpixeln schneiden. */
+export const CULL_MARGIN = 64;
 export const GRID_MINOR = 32;
 export const GRID_MAJOR = 256;
 

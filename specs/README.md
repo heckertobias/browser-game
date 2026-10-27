@@ -81,7 +81,7 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 2 | [004 – Admin-Interface & SMTP-Einstellungen](004-admin/spec.md) | umgesetzt | 001 |
 | 3 | [003 – Accounts & gespeicherte Position](003-accounts/spec.md) | in arbeit (pausiert nach T7, ab T8 nach 007) | 004 |
 | 4 | [006 – Deutsch und Englisch](006-sprachen/spec.md) | umgesetzt | 001, 004, 003 bis T7 |
-| 5 | [007 – Handy hochkant, Sichtfeld ohne Ränder, Web-App](007-mobil/spec.md) | bereit | 001, 006 |
+| 5 | [007 – Handy hochkant, Sichtfeld ohne Ränder, Web-App](007-mobil/spec.md) | in arbeit | 001, 006 |
 | 6 | [005 – Sachliches Layout fürs Admin-Interface](005-admin-layout/spec.md) | bereit | 004 |
 | 7 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | bereit | 003 |
 | später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |

@@ -17,7 +17,10 @@ COPY client/ client/
 # Tailwind scannt die Razor-Seiten von Spiel und Admin.
 COPY server/BrowserGame.Server/Pages/ server/BrowserGame.Server/Pages/
 COPY server/BrowserGame.Admin/Pages/ server/BrowserGame.Admin/Pages/
-RUN cd client && npm run build
+# Version im Spiel (007 AK-15): Release-Tag bzw. kurzer Commit-Hash aus der CI; ohne Argument leer → "dev".
+# Erst hier, damit npm ci im Cache bleibt.
+ARG APP_VERSION
+RUN cd client && VITE_APP_VERSION="$APP_VERSION" npm run build
 
 # 2) Gemeinsamer Restore für Spiel und Admin
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0@sha256:afd0ccff9d306812a69ef0f47458376b6acb544ae866cfc4b8d28ff0eef35ea7 AS restore

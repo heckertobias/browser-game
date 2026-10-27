@@ -10,7 +10,7 @@
             var active = code == current;
             <button type="submit" name="Language" value="@code" lang="@code"
                     disabled="@active" aria-current="@(active ? "true" : null)"
-                    class="btn btn-xs join-item rounded-none font-mono uppercase @(active ? "btn-primary disabled:bg-primary disabled:text-primary-content" : "")">@T[$"Language.{code}"]</button>
+                    class="btn btn-sm join-item rounded-none font-mono uppercase @(active ? "btn-primary disabled:bg-primary disabled:text-primary-content" : "")">@T[$"Language.{code}"]</button>
         }
     </div>
 </form>

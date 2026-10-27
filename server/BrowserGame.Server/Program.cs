@@ -2,6 +2,7 @@ using BrowserGame.Server.Accounts;
 using BrowserGame.Data;
 using BrowserGame.Server.Game;
 using BrowserGame.Server.Localization;
+using BrowserGame.Server.Pwa;
 using Microsoft.AspNetCore.Localization;
 
 if (await WebDefaults.TryRunHealthProbeAsync(args) is { } exitCode)
@@ -52,7 +53,8 @@ app.UseWebSockets(new WebSocketOptions
     KeepAliveInterval = TimeSpan.FromSeconds(10),
     KeepAliveTimeout = TimeSpan.FromSeconds(10),
 });
-app.UseStaticFiles();
+var staticFiles = new StaticFileOptions { OnPrepareResponse = PwaCaching.Apply };
+app.UseStaticFiles(staticFiles);
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
@@ -60,10 +62,11 @@ app.UseRateLimiter();
 app.MapRazorPages();
 app.Map("/ws", GameEndpoint.HandleAsync);
 app.MapHealthChecks("/health");
+app.MapGet("/sw.js", ServiceWorkerScript.HandleAsync);
 // Client (Vite-Build) liegt in wwwroot/play. `nonfile`: Pfade mit Dateiendung (Assets) fallen nicht auf
 // index.html zurück – sonst verdeckt die Route die Static-Files-Middleware und Assets kämen als HTML.
-app.MapFallbackToFile("/play", "play/index.html").RequireAuthorization();
-app.MapFallbackToFile("/play/{*path:nonfile}", "play/index.html").RequireAuthorization();
+app.MapFallbackToFile("/play", "play/index.html", staticFiles).RequireAuthorization();
+app.MapFallbackToFile("/play/{*path:nonfile}", "play/index.html", staticFiles).RequireAuthorization();
 
 await app.RunAsync();
 return 0;

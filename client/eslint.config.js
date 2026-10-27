@@ -19,4 +19,9 @@ export default defineConfig(
     },
   },
   { files: ["eslint.config.js"], extends: [tseslint.configs.disableTypeChecked] },
+  {
+    files: ["scripts/**/*.mjs"],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: { globals: globals.node },
+  },
 );

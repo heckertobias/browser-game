@@ -69,6 +69,8 @@ docker build --target game  -t browser-game .        # Spiel (Standardziel)
 docker build --target admin -t browser-game-admin .  # Admin-Interface
 ```
 
+Optional `--build-arg APP_VERSION=$(git rev-parse --short HEAD)` (oder eine Version wie `0.4.0`): Version unten rechts im Spiel, sonst `dev`.
+
 Beide laufen read-only und ohne Capabilities; Daten liegen im Volume `/data` (SQLite), `App__PublicUrl` ist Pflicht:
 
 ```bash

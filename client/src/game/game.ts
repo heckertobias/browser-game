@@ -1,13 +1,14 @@
 import type { Snapshot, Welcome } from "../generated/browsergame/v1/game_pb";
 import { t } from "../i18n";
-import { INTERPOLATION_DELAY_MS, LOGICAL_HEIGHT, LOGICAL_WIDTH } from "./constants";
+import { INTERPOLATION_DELAY_MS } from "./constants";
 import { InputTracker } from "./input";
 import { SnapshotBuffer } from "./interpolation";
 import { connect, gameSocketUrl, type GameConnection } from "./net";
 import { Predictor } from "./prediction";
-import { cameraOrigin, render, type DrawablePlayer } from "./render";
+import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "./render";
 import type { Vec } from "./vector";
-import { computeViewport, type Viewport } from "./viewport";
+import { fitViewport, type Viewport } from "./viewport";
+import { ScreenWakeLock } from "./wakeLock";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected";
 
@@ -32,6 +33,11 @@ export class Game {
   private lastFrame = 0;
   private frameHandle = 0;
   private viewport: Viewport | null = null;
+  private pendingSize: { width: number; height: number } | null = null;
+  private exactSize = false;
+  private dpr = 0;
+  private readonly resizeObserver = new ResizeObserver((entries) => { this.handleResize(entries); });
+  private readonly wakeLock = new ScreenWakeLock(navigator.wakeLock, document);
   private self: DrawablePlayer | null = null;
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly events: GameEvents) {
@@ -42,6 +48,9 @@ export class Game {
   }
 
   start(): void {
+    this.dpr = window.devicePixelRatio || 1;
+    this.observeSize();
+    this.wakeLock.start();
     this.events.onStatus("connecting");
     this.connection = connect(gameSocketUrl(window.location), {
       onWelcome: (welcome) => { this.handleWelcome(welcome); },
@@ -54,8 +63,10 @@ export class Game {
 
   stop(): void {
     cancelAnimationFrame(this.frameHandle);
+    this.resizeObserver.disconnect();
     this.connection?.close();
     this.input.dispose();
+    this.wakeLock.stop();
   }
 
   private handleWelcome(welcome: Welcome): void {
@@ -92,21 +103,22 @@ export class Game {
   private fixedStep(): void {
     if (!this.predictor?.initialized || !this.connection) return;
     const position = { x: this.predictor.x, y: this.predictor.y };
-    const direction = this.input.direction(position, (clientX, clientY, rect) => this.toWorld(clientX, clientY, rect, position));
+    const direction = this.input.direction(position, (clientX, clientY, rect) => {
+      if (!this.viewport || rect.width <= 0 || rect.height <= 0) return position;
+      return screenToWorld(
+        clientX - rect.left,
+        clientY - rect.top,
+        rect.width,
+        rect.height,
+        this.viewport,
+        cameraOrigin(position, this.viewport),
+      );
+    });
     this.connection.sendInput(this.predictor.step(direction));
   }
 
-  /** Bildschirm- → Weltkoordinaten; die Kamera ist auf die eigene Figur zentriert. */
-  private toWorld(clientX: number, clientY: number, rect: DOMRect, camera: Vec): Vec {
-    const origin = cameraOrigin(camera, this.viewport?.scale ?? 1);
-    return {
-      x: origin.x + ((clientX - rect.left) / rect.width) * LOGICAL_WIDTH,
-      y: origin.y + ((clientY - rect.top) / rect.height) * LOGICAL_HEIGHT,
-    };
-  }
-
   private draw(now: number): void {
-    this.resizeIfNeeded();
+    this.updateViewport();
     if (!this.viewport) return;
 
     const others = this.snapshots.sample(now - INTERPOLATION_DELAY_MS);
@@ -119,14 +131,46 @@ export class Game {
     render(this.ctx, this.viewport, camera, players);
   }
 
-  private resizeIfNeeded(): void {
+  private observeSize(): void {
+    try {
+      this.resizeObserver.observe(this.canvas, { box: "device-pixel-content-box" });
+    } catch {
+      this.resizeObserver.observe(this.canvas); // ältere Browser kennen die Box nicht
+    }
+  }
+
+  private handleResize(entries: readonly ResizeObserverEntry[]): void {
+    for (const entry of entries) {
+      const exact = "devicePixelContentBoxSize" in entry ? entry.devicePixelContentBoxSize[0] : undefined;
+      this.exactSize = exact !== undefined;
+      this.pendingSize = exact ? { width: exact.inlineSize, height: exact.blockSize } : this.measureCss();
+    }
+  }
+
+  /** Fallback ohne devicePixelContentBoxSize (Safari): iOS hat ganzzahlige DPR, dort exakt. */
+  private measureCss(): { width: number; height: number } {
     const dpr = window.devicePixelRatio || 1;
-    const next = computeViewport(window.innerWidth, window.innerHeight, dpr);
-    if (this.viewport?.width === next.width && this.viewport.height === next.height && this.viewport.scale === next.scale) return;
-    this.viewport = next;
-    this.canvas.width = next.width;
-    this.canvas.height = next.height;
-    this.canvas.style.width = `${String(next.width / dpr)}px`;
-    this.canvas.style.height = `${String(next.height / dpr)}px`;
+    return { width: Math.round(this.canvas.clientWidth * dpr), height: Math.round(this.canvas.clientHeight * dpr) };
+  }
+
+  /** Übernimmt eine gemeldete Größe im Frame (AK-5); Größe 0 (minimiert) wird nicht übernommen. */
+  private updateViewport(): void {
+    const dpr = window.devicePixelRatio || 1;
+    if (dpr !== this.dpr) {
+      this.dpr = dpr;
+      // Mit device-pixel-content-box meldet der ResizeObserver DPR-Wechsel selbst; im Fallback ändert sich die CSS-Größe nicht.
+      if (!this.exactSize) this.pendingSize = this.measureCss();
+    }
+    const size = this.pendingSize;
+    if (!size) return;
+    this.pendingSize = null;
+    if (size.width <= 0 || size.height <= 0) {
+      this.viewport = null;
+      return;
+    }
+    if (this.viewport?.canvasWidth === size.width && this.viewport.canvasHeight === size.height) return;
+    this.viewport = fitViewport(size.width, size.height);
+    this.canvas.width = this.viewport.canvasWidth;
+    this.canvas.height = this.viewport.canvasHeight;
   }
 }

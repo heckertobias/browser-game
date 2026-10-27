@@ -7,9 +7,16 @@ const en = {
   statusConnected: "connected",
   statusDisconnected: "disconnected",
   reconnect: "Reconnect",
+  reloading: "loading …",
+  reloadStuck: "Nothing happening? Close the game and open it again.",
+  updateAvailable: "New version available. Please reload.",
+  updateReload: "Reload",
   canvasUnsupported: "Canvas 2D is not supported",
   kickedSignedInElsewhere: "Signed in on another device",
   kickedContinueHere: "Continue here",
+  offlineTitle: "No connection",
+  offlineMessage: "Check your internet connection.",
+  offlineRetry: "Try again",
 } as const;
 
 type Texts = Record<keyof typeof en, string>;
@@ -20,10 +27,20 @@ const de: Texts = {
   statusConnected: "verbunden",
   statusDisconnected: "getrennt",
   reconnect: "Neu verbinden",
+  reloading: "lädt …",
+  reloadStuck: "Passiert nichts? Schließe das Spiel und öffne es neu.",
+  updateAvailable: "Neue Version verfügbar. Bitte neu laden.",
+  updateReload: "Neu laden",
   canvasUnsupported: "Canvas 2D wird nicht unterstützt",
   kickedSignedInElsewhere: "Auf einem anderen Gerät angemeldet",
   kickedContinueHere: "Hier weiterspielen",
+  offlineTitle: "Keine Verbindung",
+  offlineMessage: "Prüfe deine Internetverbindung.",
+  offlineRetry: "Erneut versuchen",
 };
+
+/** Beide Wörterbücher, z. B. für Tests. */
+export const dictionaries: Record<Language, Texts> = { en, de };
 
 const CULTURE_COOKIE = ".AspNetCore.Culture";
 

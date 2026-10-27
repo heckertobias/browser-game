@@ -13,11 +13,15 @@ Client /play ── viewport.ts    Gerätepixel → ganzzahliger Faktor k und si
              ── styles.css     touch-action, overscroll-behavior, user-select, touch-callout, 100dvh, safe-area im HUD
              ── offline.html   „Keine Verbindung“ in beiden Sprachen (Vite-Mehrseiten-Build, Texte aus i18n.ts)
              ── main.tsx       registriert /sw.js (nur Produktions-Build)
+             ── version.ts     Version aus VITE_APP_VERSION (Build-Arg APP_VERSION: Release-Tag, sonst Commit-Hash), lokal „dev“
+             ── reload.ts      Neu laden mit Rückmeldung „lädt …“; hängt es, Hinweis „Spiel neu öffnen“ (AK-16, auch Offline-Seite)
+             ── update.ts      getrennt: /play abfragen, Entry-Script vergleichen → „Neue Version verfügbar“ (AK-17)
 Server ────── /manifest.webmanifest, /icons/*   statisch; verlinkt im _Layout und in play/index.html
              ── GET /sw.js     Service Worker aus Vorlage, Version = Hash von play/offline.html
              ── Cache-Header   index.html, offline.html, Manifest: no-cache · /play/assets: immutable
              ── _Layout        Spieler-Seiten handytauglich (dvh, Touch-Ziele, Überschrift bricht um)
-Service Worker  Seitenaufrufe gehen ans Netz; schlägt das fehl → Offline-Seite aus dem Cache. Sonst wird nichts gecacht.
+Service Worker  Seitenaufrufe gehen ans Netz; schlägt das fehl → Offline-Seite aus dem Cache, ihre Assets zuerst aus dem
+                Cache. Sonst wird nichts gecacht.
 ```
 
 ## Entschiedene Fragen
@@ -31,12 +35,21 @@ Service Worker  Seitenaufrufe gehen ans Netz; schlägt das fehl → Offline-Seit
 4. **Offline-Seite auch bei 502–504** (Proxy erreicht den Server nicht, z. B. während eines Deploys).
 5. **Zoom auf `/play` gesperrt** (`user-scalable=no`, `touch-action: none`); die Spieler-Seiten bleiben zoombar.
 6. **Platzhalter-Icon und Name `Browser Game`**, ersetzen, sobald es Grafik bzw. einen Namen gibt.
+7. **Nach einem Abbruch ein Tipp, keine Automatik (AK-16):** Rückmeldung „lädt …“ und nach einer Wartezeit der Hinweis,
+   das Spiel neu zu öffnen. Kein automatisches Neuladen (keine Schleifen) und kein zweiter Navigationsversuch, bis eine
+   Diagnose am iPhone zeigt, dass er nötig ist (RC rc.4: Tipp auf „Neu verbinden“ ohne jede Wirkung, Ursache offen).
 
 ## Verträge
 
 **Protobuf:** keine Änderung. Der Server kennt die Bildschirmgröße nicht und braucht sie nicht (ADR 0010).
 
 **OpenAPI:** keine Änderung. Manifest und Service Worker sind statische bzw. generierte Dateien, keine JSON-API.
+
+**AK-16, AK-17:** keine Änderung. Die Update-Erkennung lädt das HTML von `/play` (keine JSON-API) und vergleicht das
+Entry-Script (Dateiname mit Inhalts-Hash) mit dem laufenden. Verworfen: Version im `Welcome` (Protobuf) – der Server
+müsste die Version zur Laufzeit kennen, und sie käme erst nach einem Wiederverbinden an; `version.json` – wäre eine
+HTTP-API (OpenAPI) und bräuchte Build-Code in `vite.config.ts`. Ein späterer Wartungsmodus kündigt sich voraussichtlich
+per `ServerMessage` an; dann ändert sich das Protobuf.
 
 ## Sichtfeld (AK-1–5, ADR 0010)
 
@@ -106,7 +119,7 @@ ein Schritt genügt. Beispiele und Abweichungen: Tabelle in ADR 0010.
 - **Browser-Zoom** ändert CSS-Pixel und DPR, nicht die Gerätepixel des Fensters → gleicher Ausschnitt. Herauszoomen
   zeigt also nicht mehr Welt; das HUD (CSS) wächst mit dem Zoom.
 - **Sehr kleine Fenster:** nie fraktional verkleinern (anders als ADR 0003). Kurze Seite ≤ 400 Gerätepixel → `k = 1`,
-  man sieht weniger (z. B. 480×270 → 480×270 Welt). 401–508 → `k = 2` (200–254). Mehr als 400 sieht man nie.
+  man sieht weniger (z. B. 480×270 → 480×270 Welt). 401–800 → `k = 2` (200–400). Mehr als 400 sieht man nie.
 - Fenstergröße 0 (minimiert): Größe nicht übernehmen, nicht zeichnen.
 
 ### Rendering (`render.ts`, `game.ts`)
@@ -204,7 +217,7 @@ nach ADR 0010 abdecken (siehe dort) – ohne die Bildschirmgröße vom Client zu
     }
     const url = new URL(request.url);
     if (url.origin === self.location.origin && PRECACHE.includes(url.pathname)) {
-      event.respondWith(fetch(request).catch(() => caches.match(url.pathname).then((r) => r ?? Response.error())));
+      event.respondWith(caches.match(url.pathname).then((r) => r ?? fetch(request))); // Cache zuerst (Hash im Namen)
     }
   });
   ```
@@ -221,8 +234,19 @@ nach ADR 0010 abdecken (siehe dort) – ohne die Bildschirmgröße vom Client zu
   `IWebHostEnvironment.WebRootFileProvider` (pro Anfrage; Datei ~1 KB), `Content-Type: text/javascript; charset=utf-8`,
   `Cache-Control: no-cache`, anonym. Keine statische `wwwroot/sw.js` (würde den Endpunkt verdecken).
   `Service-Worker-Allowed` ist nicht nötig: Skript liegt im Root, Scope `/`.
-- **skipWaiting + clients.claim** sind gefahrlos: Der Service Worker liefert nie App-Code aus, es gibt also keine
-  gemischten Stände.
+- **skipWaiting + clients.claim** sind gefahrlos: Der Service Worker liefert App-Code höchstens als Datei mit
+  Inhalts-Hash aus (mit dem Spiel geteilte Chunks der Offline-Seite, z. B. `styles-*.css`) – gleicher Name, gleicher
+  Inhalt –, es gibt also keine gemischten Stände.
+- **Assets der Offline-Seite zuerst aus dem Cache (AK-12, AK-16):** Bei einem Deploy antwortet der Proxy mit 502–504,
+  danach kennt der neue Server die alten Asset-Namen nicht (404). Mit „Netz zuerst, Cache nur bei Netzfehler“ erschiene
+  die Offline-Seite dann ohne Stil und ohne Text. Ihre Assets tragen Inhalts-Hashes, Cache zuerst ist also immer
+  richtig; fehlt ein Eintrag, geht die Anfrage ans Netz.
+  - Nichts bleibt veraltet liegen: Der Cache heißt nach dem Hash von `offline.html` und enthält genau sie und ihre
+    Assets. Ändert sich `offline.html` nicht, bleiben Namen und Inhalte gültig. Ändert sie sich, gibt es eine neue
+    `/sw.js`, ein neuer Cache wird angelegt, `activate` löscht den alten. Bis dahin passen alte Offline-Seite und alte
+    Assets zueinander – genau das braucht der Deploy-Fall.
+  - Eine Änderung der Vorlage ändert `/sw.js` Byte für Byte; installierte Clients übernehmen den neuen Service Worker
+    beim nächsten Start (gleicher Cache-Name, wird neu gefüllt).
 - 008 (Push) ergänzt später `push`/`notificationclick` in derselben Vorlage.
 
 ### Cache-Header (AK-13)
@@ -233,8 +257,9 @@ nach ADR 0010 abdecken (siehe dort) – ohne die Bildschirmgröße vom Client zu
   - `/play/index.html`, `/play/offline.html`, `/manifest.webmanifest` → `no-cache`.
   - Sonst unverändert. Razor-Seiten sind dynamisch (Formularseiten setzen über Antiforgery ohnehin `no-store`).
 - Ergebnis: Ein Start lädt immer das aktuelle `index.html` und damit das aktuelle Bundle; der Service Worker cacht
-  kein App-HTML und kein Bundle. Läuft eine alte Sitzung weiter (App im Hintergrund), trennt der Deploy den WebSocket;
-  „Neu verbinden“ lädt neu und damit die neue Version.
+  kein App-HTML und vom Bundle nur die mit der Offline-Seite geteilten Dateien (Inhalts-Hash). Läuft eine alte Sitzung
+  weiter (App im Hintergrund), trennt der Deploy den WebSocket; „Neu verbinden“ lädt neu und damit die neue Version,
+  vorher meldet das Overlay „Neue Version verfügbar“ (AK-16, AK-17, siehe „Verbindungsabbruch und Update“).
 
 ### CSP
 Keine Änderung. `manifest-src` und `worker-src` fallen auf `default-src 'self'` zurück; Offline-Seite und Client
@@ -309,16 +334,92 @@ Heute schon richtig: ein Zeiger zur Zeit, `setPointerCapture`, Folgen bei `point
 ### Bildschirm an (AK-14, `game/wakeLock.ts`)
 - `ScreenWakeLock` mit injizierbarer API (`navigator.wakeLock`) und `document`:
   - `start()`: anfordern, wenn `visibilityState === "visible"`; bei `visibilitychange` → sichtbar erneut anfordern
-    (der Browser gibt die Sperre beim Verstecken selbst frei); zusätzlich beim ersten `pointerdown`/`keydown`, falls noch
-    keine Sperre besteht (Browser, die eine Nutzergeste verlangen).
+    (der Browser gibt die Sperre beim Verstecken selbst frei); zusätzlich bei jedem `keydown`, `pointerup` (Maus,
+    Stift) bzw. `touchend` (Touch), solange keine Sperre besteht. WebKit verlangt für die erste Sperre pro Seite eine
+    Nutzergeste, danach geht die Neuanforderung bei Sichtbarkeit ohne. Touch-`pointerup` fordert nicht an, damit es
+    das `touchend` desselben Tippens nicht blockiert.
   - `stop()`: Listener weg, Sperre freigeben.
   - Nicht unterstützt oder abgelehnt (`NotAllowedError`, Akku-Sparmodus): still nichts tun – dann gilt die normale
     Einstellung. Kein NoSleep-Video-Trick (Abhängigkeit/Asset, Akku).
 - In `Game.start()`/`stop()`.
 
+### Version (AK-15)
+- **Im Bundle, nicht vom Server:** Angezeigt wird, was das Gerät ausführt. Eine Server-Abfrage zeigte die Version
+  des Servers und könnte einen hängenden alten Stand (AK-13) nicht aufdecken.
+- **Fluss:** CI-Job `docker`, Schritt `version` → `build-args: APP_VERSION=…` bei **allen drei** Builds (Scan amd64,
+  Scan arm64, Push) → Dockerfile Stage `client`: `ARG APP_VERSION` direkt vor `RUN … npm run build`, dort als
+  `VITE_APP_VERSION` → Vite ersetzt `import.meta.env.VITE_APP_VERSION` statisch → `version.ts`.
+  - Tag-Build (`PUBLISH`): `steps.meta.outputs.version` (gleicher Wert wie das Image-Tag, z. B. `0.4.0-rc.3`),
+    Format geprüft wie in `release.sh`.
+  - Sonst (PR, main, nächtlich, manuell): die ersten 7 Zeichen des Commit-Hashs, damit jeder Build eindeutig
+    zuordenbar ist. Bei PRs `github.event.pull_request.head.sha` statt `github.sha`: Dieser ist der flüchtige
+    Merge-Commit, der in keiner Branch-Historie steht. Gebaut wird zwar der Merge-Stand, aber PR-Images werden nie
+    veröffentlicht (ADR 0002); das Label identifiziert den Commit.
+- **Lokal `dev`** (genau eine Stelle: `formatVersion`, wenn der Wert leer ist): `npm run dev`/`npm run build` und
+  `docker build` ohne Argument. `.git` fehlt im Docker-Kontext, eine lokale Arbeitskopie ist oft nicht committet,
+  und solche Builds werden nie ausgerollt. Kein `child_process`/`@types/node` in `vite.config.ts`.
+- **Gleicher Build-Arg in Scan- und Push-Builds:** Nur so übernimmt der Push-Build die Schichten aus dem gha-Cache,
+  und das veröffentlichte Image ist das gescannte.
+- **Docker-Cache:** `ARG` gilt nur in der Stage `client` und steht nach `npm ci`. Weil sich der Wert mit jedem Commit
+  ändert, laufen bei jedem CI-Build der Client-Build und – über den geänderten `wwwroot` – `dotnet publish` des
+  Spiels (je Architektur) neu. `npm ci`, Restore und das Admin-Publish bleiben im Cache. Aufschlag: Sekunden bis etwa
+  eine Minute je Matrix-Job, hingenommen für die Eindeutigkeit. Den Wert erst nach dem Build einzusetzen (`sed`),
+  hielte den Cache, ließe aber den Asset-Namen gleich (`immutable`) – das widerspricht AK-13.
+- **Content-Hash:** Der String steckt im Spiel-Chunk (nur `App.tsx` importiert `version.ts`) → jede Version (Release oder
+  Commit) hat einen neuen Asset-Namen, gewollt für AK-13. `offline.html` und ihre Assets bleiben gleich → die SW-Version ändert sich
+  nicht bei jedem Release; richtig so, der SW cacht keinen App-Code.
+- **Anzeige:** `App.tsx`, letztes Kind der HUD-Ebene (also auch über dem Overlay „getrennt“), unten rechts mit
+  Safe-Area-Abstand, `text-xs normal-case text-base-content/60`, keine Badge, nicht interaktiv. Ohne Präfix
+  (`0.4.0-rc.3`). `normal-case` ist Pflicht, die HUD-Ebene setzt `uppercase`.
+- **12 px statt 14 px:** AK-6 meint Anzeigen und Buttons, die man zum Spielen braucht. Die Version ist passiv und soll
+  laut AK-15 „klein und unaufdringlich“ sein.
+- **Kein i18n:** Die Versionsnummer ist ein Wert, kein Text; `dev` ist ein technischer Bezeichner.
+- **Typ:** `src/vite-env.d.ts` deklariert `ImportMetaEnv.VITE_APP_VERSION?: string`. Kein `define` in
+  `vite.config.ts` (kein `@types/node`, keine neue Abhängigkeit).
+
+### Verbindungsabbruch und Update (AK-16, AK-17)
+Anlass: Im RC (rc.3 → rc.4, iPhone, Homescreen-App) bewirkte ein Tipp auf „Neu verbinden“ lange nach dem Deploy
+nichts – kein Flackern, kein Neuladen. Ob der Tipp nicht ankommt, `location.reload()` ignoriert wird oder die
+Navigation hängt, ist offen; ohne Rückmeldung sehen alle drei gleich aus. Wiederverbinden gab es bisher nur über diesen
+Button (`net.ts` meldet `onClose`, sonst nichts).
+
+- **`src/reload.ts`** – `reloadPage(win, onStuck)`: startet einen Timer (`RELOAD_STUCK_MS = 8000`) und ruft
+  `location.reload()`. Wechselt die Seite, stirbt der Timer mit ihr; lebt sie nach 8 s noch, ruft er `onStuck`.
+  Der Aufrufer zeigt vorher „lädt …“ (Button deaktiviert) und bei `onStuck` den Hinweis „Passiert nichts? Schließe das
+  Spiel und öffne es neu.“ (Button wieder aktiv). Kein zweiter Navigationsversuch (Entschiedene Frage 7).
+  Genutzt im Overlay „getrennt“ und für „Erneut versuchen“ auf der Offline-Seite (`offline.ts`, Hinweis in
+  `#offline-hint`); später auch im `kicked`-Overlay (003).
+- **`src/update.ts`** (ohne DOM testbar):
+  - `entryScript(html)`: `src` des ersten `<script type="module" … src>` (Reihenfolge der Attribute egal), sonst `null`.
+    Vite schreibt genau ein solches Skript (`/play/assets/index-<hash>.js`); der Hash ändert sich mit jeder Version
+    (AK-15).
+  - `classifyServer(current, response, html)`: nicht `ok` (Netz, 502–504, 404 …) → `unreachable`; umgeleitet (z. B.
+    Anmeldung abgelaufen) → `same` (der Tipp führt zur Anmeldung, kein falscher Update-Hinweis); Entry-Script bekannt
+    und anders als `current` → `update`; sonst `same`.
+  - `ServerWatch` (Abhängigkeiten injizierbar wie bei `ScreenWakeLock`: `fetch`, Timer, `document`, `window`): läuft,
+    solange der Status `disconnected` ist. Fragt `GET /play` (`cache: "no-store"`, Timeout 5 s per
+    `AbortController`) sofort, dann alle `SERVER_POLL_MS = 5000`, außerdem sofort bei `online` und bei
+    `visibilitychange` → sichtbar. Nur sichtbar, nie zwei Anfragen gleichzeitig. Bei `update`: einmal `onUpdate`,
+    danach Schluss.
+  - Das laufende Entry-Script liest `App.tsx` aus dem DOM (`script[type="module"][src]`). Im Dev-Modus sind beide
+    gleich → nie ein Update-Hinweis.
+  - Die Anfrage aus der Seite ist keine Navigation und steht nicht im Precache, der Service Worker reicht sie also
+    nur durch.
+- **Overlay `App.tsx`** (Status `disconnected`):
+  - normal: Button „Neu verbinden“;
+  - `update`: Satz „Neue Version verfügbar. Bitte neu laden.“ über dem Button „Neu laden“;
+  - nach dem Tipp: Button „lädt …“, deaktiviert; nach 8 s ohne Seitenwechsel: Hinweis darunter, Button wieder aktiv.
+  - Sätze `normal-case`, mindestens `text-sm` (AK-6); Button wie bisher `btn-lg`. Die Version bleibt letztes Kind der
+    HUD-Ebene (AK-15).
+- **Kein automatisches Neuladen** (Spec, Entschiedene Fragen): Der Spieler tippt; die Abfrage ändert nur den Text.
+- **Texte** (`i18n.ts`, ADR 0008): `reloading`, `reloadStuck`, `updateAvailable`, `updateReload`.
+
 ## Regeln für 003 und spätere UI
 HUD-Elemente und Overlays liegen im Safe-Area-Container, Touch-Ziele ≥ 44 px (`btn-lg` bzw. `min-h-11`), Schrift ≥ 14 px,
 nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 320/360/390 px Breite.
+Ausnahme: rein informative Anzeigen ohne Spielrelevanz (z. B. Version, AK-15) dürfen `text-xs` (12 px) sein,
+liegen aber ebenfalls im Safe-Area-Container und sind nie interaktiv.
+Neu laden aus Overlays (z. B. „Hier weiterspielen“) immer über `reloadPage` (Rückmeldung, Hinweis bei Hängen, AK-16).
 
 ## Tests
 
@@ -327,17 +428,30 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
     iPhone hochkant/quer, Android gerundet und exakt 1080×2400, Ultrawide, 32:9, kleine Fenster). Invarianten über alle
     Größen 200…4000 × 200…4000 (Schritt z. B. 37) und mehrere DPR: `scale` ganzzahlig ≥ 1; Canvas = Gerätegröße;
     `view × scale + 2·offset` = Canvas (±1); kurze Sicht ≤ 400; lange/kurze ≤ 21/9 (+1 Gerätepixel); bei kurzer Seite
-    ≥ 1601 Gerätepixeln kurze Sicht ≥ 324; Offsets nur über 21:9.
+    ≥ 1601 Gerätepixeln kurze Sicht ≥ 320 (−11 %, ADR 0010); Offsets nur über 21:9.
   - `render.test.ts`: `cameraOrigin` (gerundet auf Gerätepixel, Kamera mittig), `screenToWorld` (Mitte → Kamera, mit
     Offset), `isVisible` (Rand, Name).
   - `input.test.ts`: `PointerHold` – zweiter Finger ignoriert, nicht primärer/rechte Taste ignoriert, `release` mit
     fremder ID wirkungslos, `lostpointercapture`/`cancel` stoppen.
   - `wakeLock.test.ts` mit Fakes: fordert bei Start an, erneut bei Sichtbarkeit, nicht wenn verborgen, gibt bei
-    `stop` frei, wirft nicht ohne API oder bei Ablehnung.
+    `stop` frei, wirft nicht ohne API oder bei Ablehnung; nach Ablehnung erneut bei jeder Eingabe bis zum Erfolg;
+    `touchend` statt Touch-`pointerup`; ein Versuch pro Tippen; erneut nach Freigabe ohne `visibilitychange`.
+  - `version.test.ts`: `formatVersion` – `undefined`, `""`, `"  "` → `dev`; `"0.4.0-rc.3"`, `"0.4.0"` und ein
+    Commit-Hash (`"5539bc0"`) unverändert.
   - `i18n.test.ts`: Offline-Schlüssel in beiden Sprachen nicht leer (Rest erzwingt `tsc`).
+  - `reload.test.ts` mit Fake-Fenster: lädt sofort einmal neu; `onStuck` erst nach `RELOAD_STUCK_MS`, genau einmal.
+  - `update.test.ts`: `entryScript` (echte Vite-Ausgabe mit `crossorigin`, `src` vor `type`, einfache
+    Anführungszeichen, Seite ohne Modul-Skript → `null`, Modul-Skript ohne `src` übersprungen); `classifyServer`
+    (502/503/504/404 → `unreachable`, umgeleitet → `same`, gleich → `same`, anders → `update`, unbekannt → `same`);
+    `ServerWatch` mit Fakes: fragt sofort, wiederholt nach 5 s, Timeout nach 5 s zählt als nicht erreichbar, nicht
+    wenn verborgen, sofort bei Sichtbarkeit und `online`, nie parallel, `update` → einmal `onUpdate` und Schluss,
+    `stop` beendet alles (auch eine noch laufende Antwort).
+  - `i18n.test.ts`: neue Schlüssel (`reloading`, `reloadStuck`, `updateAvailable`, `updateReload`) in beiden Sprachen
+    nicht leer.
 - **Server (xUnit)**
   - `ServiceWorkerScriptTests` (Unit): Assets aus HTML, Version ändert sich mit dem HTML, gleiche Eingabe → gleiche
-    Ausgabe, ohne HTML leerer Precache, Ausgabe enthält keine Platzhalter mehr.
+    Ausgabe, ohne HTML leerer Precache, Ausgabe enthält keine Platzhalter mehr, vorgehaltene Assets zuerst aus dem
+    Cache (Regressionsanker, AK-12/16).
   - `PwaTests` (Integration): `/manifest.webmanifest` → 200, `application/manifest+json`, Felder (`start_url`,
     `scope`, `display`, `id`), jedes Icon 200 `image/png` mit Größe laut IHDR = `sizes`; `apple-touch-icon` 180×180;
     `/sw.js` anonym 200, `text/javascript`, `no-cache`, enthält Asset aus Platzhalter-`offline.html`;
@@ -364,8 +478,11 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
 | 10 | Manifest, Icons, Kopf-Tags | Integration `PwaTests`; **manuell:** Android „App installieren“, iPhone „Zum Home-Bildschirm“ mit Name und Icon |
 | 11 | `start_url /play`, `scope /`, `standalone`; Anmeldung per Redirect | Integration (Manifest-Felder, bestehender Redirect-Test); **manuell:** Start vom Homescreen an- und abgemeldet, ohne Browserleiste |
 | 12 | Service Worker: Navigation → Netz, sonst Offline-Seite; Texte aus `i18n.ts` | Unit `ServiceWorkerScriptTests`, Integration `/sw.js` und `offline.html`, Vitest Schlüssel; **manuell:** Flugmodus, Start und Neuladen, Deutsch und Englisch, „Erneut versuchen“ |
-| 13 | `no-cache` für HTML/Manifest/SW, `immutable` für Assets, SW cacht kein App-Code, Version aus Offline-HTML | Integration Cache-Header, Unit Version; **manuell:** rc.N installiert, rc.N+1 ausrollen, App neu starten → neues Bundle (Asset-Hash per Remote-Debugging) |
-| 14 | `ScreenWakeLock` mit Neuanforderung bei Sichtbarkeit | Vitest mit Fakes; **manuell:** Bildschirm-Timeout 30 s, im Spiel warten; App wechseln → Timeout greift wieder |
+| 13 | `no-cache` für HTML/Manifest/SW, `immutable` für Assets, SW cacht kein App-Code, Version aus Offline-HTML | Integration Cache-Header, Unit Version; **manuell:** rc.N installiert, rc.N+1 ausrollen, App neu starten → neues Bundle (Versionsanzeige, AK-15) |
+| 14 | `ScreenWakeLock` mit Neuanforderung bei Sichtbarkeit und bei Eingabe bis zum Erfolg | Vitest mit Fakes; **manuell:** Bildschirm-Timeout 30 s, im Spiel einmal tippen und warten; App wechseln → Timeout greift wieder; iPhone im Safari-Tab und als Homescreen-App |
+| 15 | CI-Build-Arg `APP_VERSION` (Release-Tag, sonst kurzer Commit-Hash; bei PRs Head-Commit; Scan- und Push-Builds gleich) → `VITE_APP_VERSION` → Bundle; HUD unten rechts, `text-xs`, safe-area, über dem Overlay; lokal `dev` | Vitest `formatVersion`; **manuell:** `npm run dev` → `dev`; PR-Build zeigt den kurzen Head-Hash; im RC zeigt rc.N `X.Y.Z-rc.N`, nach Ausrollen von rc.N+1 und Neustart vom Homescreen `…-rc.N+1`; iPhone quer und hochkant; Overlay „getrennt“ lässt die Version sichtbar |
+| 16 | Overlay: Tipp → sofort „lädt …“ (`reloadPage`), nach 8 s ohne Seitenwechsel Hinweis „Spiel neu öffnen“, Button wieder aktiv; Offline-Seite ebenso; Service Worker liefert die Assets der Offline-Seite zuerst aus dem Cache (auch bei 502–504 und 404) | Vitest `reload.test.ts`, Unit `ServiceWorkerScriptTests`; **manuell:** Homescreen-App (iPhone, Android) und Browser-Tab: Server stoppen, „getrennt“ abwarten, Server starten, Tipp → Spiel läuft ohne App-Neustart; App öffnen, während der Server gestoppt ist → Offline-Seite mit Stil und Text in beiden Sprachen; erscheint der Hinweis, Diagnose am iPhone |
+| 17 | `ServerWatch` fragt bei „getrennt“ `/play` ab (sofort, alle 5 s, bei `online` und Sichtbarkeit), vergleicht das Entry-Script; anders → „Neue Version verfügbar. Bitte neu laden.“ mit „Neu laden“ | Vitest `update.test.ts`, `i18n.test.ts`; **manuell:** rc.N läuft in der App, rc.N+1 ausrollen → Hinweis in beiden Sprachen, Tipp → Versionsanzeige `…-rc.N+1` (AK-15) |
 
 ## Constitution-Check
 
@@ -385,6 +502,8 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
   der Homescreen-App (Service Worker und Anmeldung entstehen beim ersten Start neu); Wake Lock in Homescreen-Apps erst
   ab iOS 18.4 zuverlässig; ob Safari `start_url` statt der aktuellen Seite nutzt, im RC prüfen (Fallback: vom Spiel
   aus hinzufügen).
+- **AK-14 auf iOS:** Nur Tippen oder Taste zählt als Geste, Ziehen nicht (WebKit-Bug 212117). Wer nur zieht, bekommt
+  keine Sperre; der Bildschirm bleibt erst nach dem ersten Tippen an. Bewusst akzeptiert, kein „Tippen zum Starten“.
 - **Ohne `devicePixelContentBoxSize`** (Safari) bei gebrochenem DPR (nur Seitenzoom am Mac) kann ein Gerätepixel
   Rundung leicht weichzeichnen.
 - **Vite und absolute Kopf-Links** bei `base: "/play/"`: Build-Ausgabe prüfen (T9).
@@ -396,3 +515,16 @@ nichts nur per Hover bedienbar; Account-Seiten nutzen das `_Layout` und prüfen 
 - **Fairness gegen manipulierte Clients:** Der Server schickt weiterhin alle Spieler; ein veränderter Client kann mehr
   zeigen. Unverändert gegenüber heute, Begrenzung erst mit Interest-Management (ADR 0010).
 - **001 AK-6** (Ränder statt mehr Welt) ist abgelöst; Vermerk in der 001-Spec (T1).
+- **Neuladen in der iOS-Homescreen-App** (RC rc.4: Tipp ohne Wirkung): Ursache offen. AK-16 sichert Rückmeldung und
+  Hinweis, nicht die Ursache. Erscheint der Hinweis im RC, gezielt am iPhone diagnostizieren (Web-Inspektor); erst
+  dann ggf. ein zweiter Navigationsversuch.
+- **503 und späterer Wartungsmodus:** Der Service Worker macht aus 502–504 die Seite „Keine Verbindung – prüfe deine
+  Internetverbindung“, `ServerWatch` wertet sie als „nicht erreichbar“. Eine Wartungsseite mit 503 würde verdeckt und
+  wie ein Netzproblem aussehen. Die Wartungs-Spec muss das lösen (z. B. eigenes Kennzeichen, das der Service Worker
+  durchreicht, oder Ankündigung per WebSocket → Protobuf).
+- **Langsames Netz:** Nach 8 s erscheint der Hinweis, obwohl die Seite vielleicht noch lädt – harmlos, der Seitenwechsel
+  ersetzt ihn.
+- **Abfragelast:** Jeder getrennte, sichtbare Client lädt alle 5 s `/play` (~1 KB, statisch). Nach einem Deploy
+  kurzzeitig gleichzeitig; bei der heutigen Spielerzahl unkritisch.
+- **Update-Erkennung hängt an der Vite-Ausgabe** (ein Modul-Skript mit `src`). Ändert sie sich, fällt sie auf „gleich“
+  zurück (kein falscher Hinweis); Vitest prüft die heutige Form.

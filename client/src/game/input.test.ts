@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeActions, combinedDirection, DEFAULT_BINDINGS, keyboardDirection, pointerDirection } from "./input";
+import { activeActions, combinedDirection, DEFAULT_BINDINGS, keyboardDirection, POINTER_RELEASE_EVENTS, PointerHold, pointerDirection } from "./input";
 import { clampDirection } from "./vector";
 
 const keys = (...codes: string[]) => activeActions(new Set(codes), DEFAULT_BINDINGS);
@@ -60,5 +60,91 @@ describe("clampDirection", () => {
     expect(clampDirection(10, 0)).toEqual({ x: 1, y: 0 });
     expect(clampDirection(0.5, 0)).toEqual({ x: 0.5, y: 0 });
     expect(clampDirection(Number.NaN, 1)).toEqual({ x: 0, y: 0 });
+  });
+});
+
+describe("PointerHold (007 AK-7)", () => {
+  const p = (pointerId: number, x = 0, y = 0, isPrimary = true, button = 0) => ({ pointerId, clientX: x, clientY: y, isPrimary, button });
+
+  it("primärer Zeiger mit Haupttaste startet das Halten", () => {
+    const hold = new PointerHold();
+    expect(hold.down(p(1, 10, 20))).toBe(true);
+    expect(hold.position()).toEqual({ x: 10, y: 20 });
+  });
+
+  it("Bewegung desselben Zeigers wird verfolgt", () => {
+    const hold = new PointerHold();
+    hold.down(p(1, 10, 20));
+    hold.move(p(1, 30, 40));
+    expect(hold.position()).toEqual({ x: 30, y: 40 });
+  });
+
+  it("Bewegung ohne Halten bewirkt nichts", () => {
+    const hold = new PointerHold();
+    hold.move(p(1, 30, 40));
+    expect(hold.position()).toBeNull();
+  });
+
+  it("nicht primärer Zeiger startet nicht", () => {
+    const hold = new PointerHold();
+    expect(hold.down(p(1, 0, 0, false))).toBe(false);
+    expect(hold.position()).toBeNull();
+  });
+
+  it.each([1, 2])("Taste %i startet nicht", (button) => {
+    const hold = new PointerHold();
+    expect(hold.down(p(1, 0, 0, true, button))).toBe(false);
+    expect(hold.position()).toBeNull();
+  });
+
+  it("zweiter Finger wird ignoriert", () => {
+    const hold = new PointerHold();
+    hold.down(p(1, 10, 20));
+    expect(hold.down(p(2, 50, 50, false))).toBe(false);
+    hold.move(p(2, 60, 60));
+    expect(hold.position()).toEqual({ x: 10, y: 20 });
+  });
+
+  it("zweites primäres down mit anderer ID während des Haltens startet nicht", () => {
+    const hold = new PointerHold();
+    hold.down(p(1, 10, 20));
+    expect(hold.down(p(2, 50, 50))).toBe(false);
+    expect(hold.position()).toEqual({ x: 10, y: 20 });
+  });
+
+  it("Release mit fremder ID bewirkt nichts", () => {
+    const hold = new PointerHold();
+    hold.down(p(1, 10, 20));
+    hold.release(2);
+    expect(hold.position()).toEqual({ x: 10, y: 20 });
+  });
+
+  it("Loslassen des ersten Fingers beendet das Halten, auch wenn der zweite noch liegt", () => {
+    const hold = new PointerHold();
+    hold.down(p(1, 10, 20));
+    hold.down(p(2, 50, 50, false));
+    hold.release(1);
+    hold.move(p(2, 60, 60, false));
+    expect(hold.position()).toBeNull();
+  });
+
+  it("nach Release kann neu gestartet werden", () => {
+    const hold = new PointerHold();
+    hold.down(p(1, 10, 20));
+    hold.release(1);
+    expect(hold.down(p(3, 5, 6))).toBe(true);
+    expect(hold.position()).toEqual({ x: 5, y: 6 });
+  });
+
+  it("reset beendet das Halten", () => {
+    const hold = new PointerHold();
+    hold.down(p(1, 10, 20));
+    hold.reset();
+    hold.move(p(1, 30, 40));
+    expect(hold.position()).toBeNull();
+  });
+
+  it("verlorenes Capture beendet das Halten wie pointerup", () => {
+    expect(POINTER_RELEASE_EVENTS).toEqual(expect.arrayContaining(["pointerup", "pointercancel", "lostpointercapture"]));
   });
 });
