@@ -63,4 +63,12 @@ describe("Wörterbücher", () => {
       }
     }
   });
+
+  it("enthalten die Texte für Neuladen und Update in beiden Sprachen (007 AK-16, AK-17)", () => {
+    for (const texts of Object.values(dictionaries)) {
+      for (const key of ["reloading", "reloadStuck", "updateAvailable", "updateReload"] as const) {
+        expect(texts[key].trim()).not.toBe("");
+      }
+    }
+  });
 });

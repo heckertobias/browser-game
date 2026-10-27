@@ -38,7 +38,7 @@ Reihenfolge: Verträge (keine) → Server → Client → Prüfung. Jeder Task br
 - [x] **T9c** (AK-12, AK-16): Service Worker liefert die vorgehaltenen Assets der Offline-Seite zuerst aus dem Cache
   (Netz nur, wenn der Eintrag fehlt) – sonst erscheint sie bei 502–504 vom Proxy oder 404 nach einem Deploy ohne Stil
   und Text. Unit-Test in `ServiceWorkerScriptTests` als Regressionsanker; Prüfung manuell (T10).
-- [ ] **T9d** (AK-16, AK-17): `reload.ts` (`reloadPage`: Rückmeldung „lädt …“, nach 8 s Hinweis) im Overlay und auf der
+- [x] **T9d** (AK-16, AK-17): `reload.ts` (`reloadPage`: Rückmeldung „lädt …“, nach 8 s Hinweis) im Overlay und auf der
   Offline-Seite (`offline.html` mit `#offline-hint`, `offline.ts`); `update.ts` (`entryScript`, `classifyServer`,
   `ServerWatch`) und Overlay-Zustände in `App.tsx`; Schlüssel `reloading`, `reloadStuck`, `updateAvailable`,
   `updateReload` in `i18n.ts`. Vitest für `reload.ts`, `update.ts` und die neuen Schlüssel.
