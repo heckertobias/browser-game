@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using BrowserGame.Data;
 using BrowserGame.Server.Accounts;
+using BrowserGame.Server.Game;
 using BrowserGame.Server.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,7 @@ namespace BrowserGame.Server.Pages.Account;
 /// den Security-Stamp, damit werden der Link und alle anderen Sitzungen ungültig (spätestens nach 1 min, AccountSetup).
 /// </summary>
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
-public sealed class ResetPasswordModel(UserManager<PlayerAccount> users, IStringLocalizer<Texts> t) : PageModel
+public sealed class ResetPasswordModel(UserManager<PlayerAccount> users, IStringLocalizer<Texts> t, GameLoop game) : PageModel
 {
     [BindProperty(SupportsGet = true)]
     public string? UserId { get; set; }
@@ -64,7 +65,8 @@ public sealed class ResetPasswordModel(UserManager<PlayerAccount> users, IString
         {
             await users.SetLockoutEndDateAsync(found.User, null);
             await users.ResetAccessFailedCountAsync(found.User);
-            // 003 T11: hier GameLoop.ForceLeave – laufende Spiel-Verbindung sofort beenden (AK-15).
+            // Laufende Spiel-Verbindung sofort beenden (AK-15).
+            game.ForceLeave(found.User.Id, savePosition: true);
             Done = true;
             return Page();
         }

@@ -1,5 +1,6 @@
 using BrowserGame.Data;
 using BrowserGame.Server.Accounts;
+using BrowserGame.Server.Game;
 using BrowserGame.Server.Localization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,7 +19,7 @@ namespace BrowserGame.Server.Pages.Account;
 [Authorize]
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
 public sealed class DeleteModel(
-    UserManager<PlayerAccount> users, SignInManager<PlayerAccount> signIn, PasskeyCeremonies ceremonies, IStringLocalizer<Texts> t) : PageModel
+    UserManager<PlayerAccount> users, SignInManager<PlayerAccount> signIn, PasskeyCeremonies ceremonies, IStringLocalizer<Texts> t, GameLoop game) : PageModel
 {
     [BindProperty]
     public string? Password { get; set; }
@@ -100,7 +101,8 @@ public sealed class DeleteModel(
 
     private async Task<IActionResult> DeleteAndSignOutAsync(PlayerAccount user)
     {
-        // 003 T11: hier GameLoop.ForceLeave – Figur sofort entfernen, Verbindung mit Kicked(SIGNED_OUT) schließen (AK-16). Position dabei NICHT speichern (Account wird gelöscht, FK).
+        // Position nicht speichern: Der Account wird gleich gelöscht (FK, AK-16).
+        game.ForceLeave(user.Id, savePosition: false);
         var result = await users.DeleteAsync(user);
         if (!result.Succeeded)
         {

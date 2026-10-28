@@ -48,6 +48,9 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
     /// <summary>Verbindungszeichenfolge dieser Factory; bleibt gleich, damit ein zweiter Server dieselbe DB nutzen kann.</summary>
     public string ConnectionString { get; } = TestDatabase.NewConnectionString("bg-test");
 
+    /// <summary>Nachlauf getrennter Figuren in Sekunden (003 AK-20); Tests, die darin reconnecten, setzen mehr.</summary>
+    public string LingerSeconds { get; init; } = "0.5";
+
     /// <summary>Statt echter Mails: alle Mails, die der Server verschicken würde.</summary>
     public CapturingEmailSender Mails { get; } = new();
 
@@ -58,6 +61,8 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
         builder.UseSetting("ConnectionStrings:Game", ConnectionString);
         // Im Testserver kommen alle Anfragen von derselben „IP“ – Limit hoch, damit Tests sich nicht gegenseitig bremsen.
         builder.UseSetting("RateLimiting:AuthRequestsPerMinute", "1000");
+        // Verkürzter Nachlauf (003 AK-20), damit Tests nicht 20 s warten.
+        builder.UseSetting("Game:LingerSeconds", LingerSeconds);
         builder.ConfigureTestServices(services => services.AddSingleton<GameEmailSender>(Mails));
     }
 

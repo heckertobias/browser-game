@@ -47,7 +47,7 @@ app.UseRequestLocalization(o =>
     o.FallBackToParentUICultures = false;
 });
 
-// Erkennt Verbindungen, die ohne Close-Frame verschwinden (AK-4).
+// Erkennt Verbindungen, die ohne Close-Frame verschwinden (003 AK-20).
 app.UseWebSockets(new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromSeconds(10),

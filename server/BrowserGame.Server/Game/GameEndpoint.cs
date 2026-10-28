@@ -48,8 +48,9 @@ internal static class GameEndpoint
         var aborted = context.RequestAborted;
         var connection = game.Join(account.Id, name, saved is null ? null : (saved.X, saved.Y));
 
-        var sending = SendLoopAsync(socket, connection, aborted);
-        var (status, reason) = await ReceiveLoopAsync(socket, connection, aborted);
+        using var receiving = CancellationTokenSource.CreateLinkedTokenSource(aborted);
+        var sending = SendLoopAsync(socket, connection, receiving, aborted);
+        var (status, reason) = await ReceiveLoopAsync(socket, connection, receiving.Token);
 
         game.Leave(connection); // beendet auch die Sende-Schleife
         await sending;
@@ -114,13 +115,23 @@ internal static class GameEndpoint
         }
     }
 
-    private static async Task SendLoopAsync(WebSocket socket, PlayerConnection connection, CancellationToken cancellationToken)
+    private static readonly TimeSpan KickCloseTimeout = TimeSpan.FromSeconds(5);
+
+    private static async Task SendLoopAsync(
+        WebSocket socket, PlayerConnection connection, CancellationTokenSource receiving, CancellationToken cancellationToken)
     {
         try
         {
             await foreach (var bytes in connection.Outbox.Reader.ReadAllAsync(cancellationToken))
             {
                 await socket.SendAsync(bytes, WebSocketMessageType.Binary, endOfMessage: true, cancellationToken);
+            }
+
+            if (connection.WasKicked && socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
+            {
+                await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "kicked", CancellationToken.None);
+                // Antwortet der Client nicht mit Close, endet die Empfangs-Schleife nach dem Timeout.
+                receiving.CancelAfter(KickCloseTimeout);
             }
         }
         catch (Exception ex) when (ex is WebSocketException or OperationCanceledException)

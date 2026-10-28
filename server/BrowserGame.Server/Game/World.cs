@@ -12,6 +12,12 @@ internal sealed class Player(string id, string name, uint color, double x, doubl
     public double Y { get; set; } = y;
     public uint LastProcessedSeq { get; set; }
 
+    /// <summary>Verbindung weg, Figur wartet noch (003 AK-20).</summary>
+    public bool Away => AwaySince.HasValue;
+
+    /// <summary>Tick, ab dem die Figur wartet.</summary>
+    internal uint? AwaySince { get; set; }
+
     internal uint LastQueuedSeq { get; set; }
     internal double DirX { get; set; }
     internal double DirY { get; set; }
@@ -73,13 +79,48 @@ internal sealed class World(double speed, int tickRateHz, Random random)
         (player.DirX, player.DirY) = (0, 0);
     }
 
+    /// <summary>Verbindung weg: Figur bleibt stehen und nimmt keine Eingaben mehr an (003 AK-20).</summary>
+    public void SetAway(string id, uint tick)
+    {
+        if (!_players.TryGetValue(id, out var player))
+        {
+            return;
+        }
+
+        player.AwaySince = tick;
+        player.PendingInputs.Clear();
+        player.TicksWithoutInput = 0;
+        (player.DirX, player.DirY) = (0, 0);
+    }
+
+    /// <summary>Eine Verbindung übernimmt die wartende Figur wieder (003 AK-21).</summary>
+    public void ClearAway(string id)
+    {
+        if (_players.TryGetValue(id, out var player))
+        {
+            player.AwaySince = null;
+        }
+    }
+
+    /// <summary>Entfernt Figuren, die seit mindestens <paramref name="lingerTicks"/> Ticks warten, und liefert sie zurück.</summary>
+    public IReadOnlyList<Player> RemoveExpiredAway(uint tick, uint lingerTicks)
+    {
+        var expired = _players.Values.Where(p => p.AwaySince is { } since && tick - since >= lingerTicks).ToList();
+        foreach (var player in expired)
+        {
+            _players.Remove(player.Id);
+        }
+
+        return expired;
+    }
+
     public bool RemovePlayer(string id) => _players.Remove(id);
 
     public Player? GetPlayer(string id) => _players.GetValueOrDefault(id);
 
     public void EnqueueInput(string playerId, MoveInput input)
     {
-        if (!_players.TryGetValue(playerId, out var player) || input.Seq <= player.LastQueuedSeq)
+        if (!_players.TryGetValue(playerId, out var player) || player.Away || input.Seq <= player.LastQueuedSeq)
         {
             return;
         }
@@ -96,6 +137,11 @@ internal sealed class World(double speed, int tickRateHz, Random random)
     {
         foreach (var player in _players.Values)
         {
+            if (player.Away)
+            {
+                continue;
+            }
+
             if (player.PendingInputs.TryDequeue(out var input))
             {
                 (player.DirX, player.DirY) = ClampDirection(input.DirX, input.DirY);

@@ -45,7 +45,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 ## Server – Spiel
 - [x] **T10** (AK-8, AK-17, AK-18): `/ws` nur angemeldet + bestätigt, Origin-Prüfung; Spieler-ID = Account-ID,
   Name aus dem Account, Position laden, stabile Farbe.
-- [ ] **T11** (AK-12, AK-20–23): `World` mit `away`/Linger (+ Unit-Tests), `GameLoop` mit Übernahme, Rauswurf
+- [x] **T11** (AK-12, AK-20–23): `World` mit `away`/Linger (+ Unit-Tests), `GameLoop` mit Übernahme, Rauswurf
   (`Kicked`) und `ForceLeave` (aus Logout, Reset, Löschen).
 - [ ] **T12** (AK-18, AK-19): `PositionStore` – gebündeltes Speichern alle 5 s, beim Entfernen und beim Herunterfahren.
 
