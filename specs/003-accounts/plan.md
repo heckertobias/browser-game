@@ -168,7 +168,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 ## Deployment
 
 `deploy/compose.yaml`:
-- Volume `browsergame-data:/data` (das Root-Dateisystem bleibt read-only).
+- Volume `data:/data` (das Root-Dateisystem bleibt read-only).
 - Umgebung:
   - `Database__Provider: Sqlite`, `ConnectionStrings__Game: Data Source=/data/game.db`.
   - `App__PublicUrl: https://${VIRTUAL_HOST}`, `Passkeys__ServerDomain: ${VIRTUAL_HOST}`.

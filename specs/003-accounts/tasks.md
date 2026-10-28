@@ -54,7 +54,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   _Seit 006: Texte aus `client/src/i18n.ts` (Schlüssel fürs Overlay sind angelegt); kein Sprachumschalter im Spiel._
 
 ## Tests / Prüfung
-- [ ] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen
+- [x] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen
   SQLite und PostgreSQL (Provider per Umgebungsvariable).
   _AK-1, AK-2, AK-3, AK-7, AK-9 und AK-13 samt Test-Infrastruktur (`CapturingEmailSender`, `FormClient`,
   `AccountTestFlows`) schon mit T7 erledigt._
