@@ -6,7 +6,7 @@ Gehört zu: [spec.md](spec.md) · Entscheidungen: [ADR 0004](../../docs/decision
 ## Überblick
 
 ```
-Browser ── /Account/*  Razor Pages (Registrieren, Anmelden, Bestätigen, Passwort vergessen, Account verwalten)
+Browser ── /Account/*  Razor Pages (Registrieren, Anmelden, Passwort vergessen, Account verwalten)
         ── /play       nur angemeldet + E-Mail bestätigt, sonst → /Account/Login
         ── /ws         gleiches Cookie + Origin-Prüfung; Spieler = Account
 Server  ── ASP.NET Core Identity (EF Core) ── SQLite | PostgreSQL (per Konfiguration, Bibliothek BrowserGame.Data aus 004)
@@ -79,8 +79,8 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
   - Reset-Mail nur an Accounts mit bestätigter E-Mail; die Antwort bleibt für alle gleich (AK-14).
   - Ein erfolgreicher Reset hebt eine Lockout-Sperre auf und setzt die Fehlversuche zurück (AK-15).
 - `IdentityPasskeyOptions.ServerDomain` aus `Passkeys:ServerDomain`; erlaubter Origin aus `App:PublicUrl`.
-- **Rate-Limiting** (ASP.NET `RateLimiter`, pro Client-IP) für Anmelden, Registrieren, Passwort vergessen,
-  Passwort zurücksetzen und Bestätigung erneut senden: 10 Anfragen pro Minute (AK-10). Hinter nginx-proxy werden die Forwarded-Header ausgewertet
+- **Rate-Limiting** (ASP.NET `RateLimiter`, pro Client-IP) für Anmelden, Registrieren (beide Schritte), Passwort
+  vergessen, Passwort zurücksetzen, Account verwalten und Löschen: 10 Anfragen pro Minute (AK-10). Hinter nginx-proxy werden die Forwarded-Header ausgewertet
   (`ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`, Container nur im Proxy-Netz).
 - **Namen** (`PlayerNames`, reine Logik):
   - `Normalize`: trimmen, prüfen auf `^[A-Za-z]{3,16}$`, dann erster Buchstabe groß, Rest klein (AK-5, AK-6).
@@ -94,7 +94,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 | Seite | Zweck | AK |
 |---|---|---|
 | `Register` | Schritt 1: nur E-Mail, Antwort immer gleich; Mail mit Link (neu) bzw. „Du hast schon einen Account“ (vorhanden) | 2, 3, 9 |
-| `Register/Complete` (Name frei) | Schritt 2 über den Link: Spielername, dann Passwort **oder** Passkey; legt den Account bestätigt an und meldet an | 2, 4–7b |
+| `CompleteRegistration` | Schritt 2 über den Link: Spielername, dann Passwort **oder** Passkey; legt den Account bestätigt an und meldet an | 2, 4–7b |
 | `Login` | E-Mail + Passwort oder „Mit Passkey anmelden“ (Request-Options ohne Nutzer); einheitliche Fehlermeldung | 9, 10 |
 | `ForgotPassword`, `ResetPassword` | Reset-Link anfordern (immer gleiche Antwort) bzw. neues Passwort setzen | 14, 15 |
 | `Manage` | Passkeys auflisten/hinzufügen/entfernen, Passwort setzen (falls keins), Abmelden, Link zu Löschen | 13–13c |
@@ -192,11 +192,11 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 | 2 | Register in zwei Schritten | Integration mit Test-Mailsender: Mail mit Link; Schritt 2 mit Passwort und mit Passkey → Account bestätigt, angemeldet |
 | 3 | Account erst in Schritt 2, befristeter Link | Integration: nach Schritt 1 kein Account, Name frei; abgelaufener oder benutzter Link abgewiesen; vorhandene Adresse → gleiche Seite, Hinweis-Mail |
 | 4 | Passkey-Registrierung ohne Passwort | Integration mit Software-Authenticator (Test-Helfer, kein Paket); **manuell** mit echten Geräten (T17) |
-| 5, 6, 7b | `PlayerNames` | Unit: Längen, Zeichen, Schreibweise, Sperrliste |
-| 7 | eindeutiger `NormalizedUserName` | Integration: zweite Registrierung mit „tobias“ abgelehnt |
+| 5, 6, 7b | `PlayerNames` | Unit: Längen, Zeichen, Schreibweise, Sperrliste; Integration: Schritt 2 lehnt mit Begründung ab, speichert normalisiert |
+| 7 | eindeutiger `NormalizedUserName` | Integration: Schritt 2 lehnt einen vergebenen Namen in anderer Schreibweise ab, auch wenn er erst zwischen Namenswahl und Abschluss vergeben wurde |
 | 8 | Welcome/Snapshot mit Account-Namen | Integration (WS): Name im Snapshot |
-| 9 | einheitliche Fehlermeldung | Integration: falsches Passwort und unbekannte Mail → identische Antwort |
-| 10 | Lockout + Rate-Limiter | Integration: 6. Fehlversuch gesperrt; 11. Anfrage/Minute → 429 |
+| 9 | einheitliche Fehlermeldung | Integration: falsches Passwort und unbekannte Mail → identische Antwort; Registrierung Schritt 1 gleich für neue und vorhandene Adresse; Sperre sieht aus wie falsches Passwort |
+| 10 | Lockout + Rate-Limiter | Integration: nach 5 Fehlversuchen scheitert auch das richtige Passwort, andere Accounts nicht; Limit überschritten → 429 (im Test mit verkürztem Limit) |
 | 11 | persistentes Cookie, 30 Tage fest | Integration: `Set-Cookie` mit Expires ≈ 30 Tage |
 | 12 | Übernahme + `Kicked(SIGNED_IN_ELSEWHERE)` | Integration (WS): zweite Verbindung → erste bekommt Kicked, eine Figur |
 | 13 | Logout | Integration: danach `/play` → Login |
@@ -205,9 +205,9 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 | 15 | Reset-Token einmalig/befristet, Security-Stamp | Integration: zweite Nutzung scheitert; alte Sitzung danach abgemeldet |
 | 16 | Delete mit Bestätigung, Cascade | Integration (Passwort und Passkey): Account weg, Name wieder registrierbar |
 | 17, 18 | Position laden/speichern | Integration: erster Beitritt am Startpunkt; Bewegung, gehen, wiederkommen → gleiche Stelle |
-| 19 | gebündeltes Speichern + Flush beim Stop | Integration: neuer Server auf derselben DB-Datei → Position ≤ 5 s alt |
+| 19 | gebündeltes Speichern + Flush beim Stop | Integration: neuer Server auf derselben Datenbank → Position ≤ 5 s alt; Unit: Standard 5 s |
 | 19b | HUD zeigt gerundete eigene Position | Vitest: Formatierung; **manuell**: gehen, wiederkommen, gleiche Koordinaten |
-| 20, 23 | `away` + Entfernen nach Linger | Unit (`World`); Integration mit verkürztem Linger: `away=true`, dann weg |
+| 20, 23 | `away` + Entfernen nach Linger | Unit (`World`); Integration mit verkürztem Linger: `away=true`, dann weg; Unit: Standard 20 s ohne Konfiguration |
 | 21 | Übernahme wartender Figur | Integration: innerhalb Linger neu verbinden → gleiche ID/Position, `away=false` |
 | 22 | `ForceLeave` beim Logout | Integration: nach Logout sofort aus Snapshot verschwunden |
 
