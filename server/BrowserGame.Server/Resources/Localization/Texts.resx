@@ -8,6 +8,7 @@
   <data name="Validation.NameRequired" xml:space="preserve"><value>Please enter a player name.</value></data>
   <data name="Validation.PasswordRequired" xml:space="preserve"><value>Please enter your password.</value></data>
   <data name="Validation.ConfirmPasswordRequired" xml:space="preserve"><value>Please repeat the password.</value></data>
+  <data name="Validation.NewPasswordRequired" xml:space="preserve"><value>Please enter a new password.</value></data>
   <data name="PlayerName.Length" xml:space="preserve"><value>The name must be {0} to {1} characters long.</value></data>
   <data name="PlayerName.Characters" xml:space="preserve"><value>The name may only contain the letters A–Z (no accented letters, digits, spaces or special characters).</value></data>
   <data name="PlayerName.Blocked" xml:space="preserve"><value>This name is not allowed.</value></data>
@@ -24,6 +25,19 @@
   <data name="Login.Password" xml:space="preserve"><value>Password</value></data>
   <data name="Login.NoAccount" xml:space="preserve"><value>No account yet? Sign up</value></data>
   <data name="Login.GenericError" xml:space="preserve"><value>Sign-in failed. Check your email and password. After several failed attempts, sign-in is locked for a short time.</value></data>
+  <data name="Login.ForgotPassword" xml:space="preserve"><value>Forgot your password?</value></data>
+  <data name="ForgotPassword.Title" xml:space="preserve"><value>Forgot password</value></data>
+  <data name="ForgotPassword.Intro" xml:space="preserve"><value>Enter your email address and we'll send you a link to set a new password.</value></data>
+  <data name="ForgotPassword.Submit" xml:space="preserve"><value>Send link</value></data>
+  <data name="ForgotPassword.Sent" xml:space="preserve"><value>If there is a confirmed account for this address, we've sent you an email with a link to set a new password. The link is valid for 3 hours.</value></data>
+  <data name="ForgotPassword.BackToLogin" xml:space="preserve"><value>Back to sign in</value></data>
+  <data name="ResetPassword.Title" xml:space="preserve"><value>Set new password</value></data>
+  <data name="ResetPassword.PasswordLabel" xml:space="preserve"><value>New password (at least 10 characters)</value></data>
+  <data name="ResetPassword.ConfirmPasswordLabel" xml:space="preserve"><value>Repeat new password</value></data>
+  <data name="ResetPassword.Submit" xml:space="preserve"><value>Save password</value></data>
+  <data name="ResetPassword.Done" xml:space="preserve"><value>Your password has been changed. All other sessions have been signed out. Sign in with your new password.</value></data>
+  <data name="ResetPassword.Invalid" xml:space="preserve"><value>The link is invalid, has expired or has already been used.</value></data>
+  <data name="ResetPassword.RequestNew" xml:space="preserve"><value>Request a new link</value></data>
   <data name="Register.NameLabel" xml:space="preserve"><value>Player name (3 to 16 letters A–Z)</value></data>
   <data name="Register.PasswordLabel" xml:space="preserve"><value>Password (at least 10 characters)</value></data>
   <data name="Register.ConfirmPasswordLabel" xml:space="preserve"><value>Repeat password</value></data>

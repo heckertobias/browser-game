@@ -24,7 +24,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   _Wird durch 004 T4 ersetzt: SMTP-Einstellungen aus der DB (Admin-Interface) statt `Mail:*`._
 - [x] **T7** (AK-1–3, AK-7, AK-9, AK-13): Razor Pages `Register` (Passwort-Weg), `Login`, `ConfirmEmail`,
   `ResendConfirmation`, `Logout`; Startseite mit Anmelde-Links; `/play` mit `RequireAuthorization`.
-- [ ] **T8** (AK-14, AK-15): `ForgotPassword`, `ResetPassword`.
+- [x] **T8** (AK-14, AK-15): `ForgotPassword`, `ResetPassword`.
   _Seit 006: Texte in `Texts.resx`/`Texts.de.resx`; die Reset-Mail kommt schon aus `GameEmailSender` in der
   Sprache des Accounts – Integrationstest je Sprache ergänzen._
 - [ ] **T9** (AK-4, AK-13b, AK-13c, AK-16): Passkeys bei Registrierung, Anmeldung und `Manage`; `CanRemoveCredential`

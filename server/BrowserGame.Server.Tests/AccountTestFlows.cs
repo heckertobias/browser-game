@@ -36,13 +36,39 @@ public static partial class AccountTestFlows
             ["ReturnUrl"] = returnUrl ?? "",
         });
 
+    public static Task<(HttpResponseMessage Response, string Html)> ForgotPasswordAsync(FormClient client, string email) =>
+        client.PostAsync("/Account/ForgotPassword", "/Account/ForgotPassword", new Dictionary<string, string> { ["Email"] = email });
+
+    /// <summary>Löst den Link aus der Reset-Mail ein: übernimmt <c>userId</c> und <c>code</c> aus dem Link.</summary>
+    public static Task<(HttpResponseMessage Response, string Html)> ResetPasswordAsync(
+        FormClient client, string link, string password, string? confirm = null)
+    {
+        var query = System.Web.HttpUtility.ParseQueryString(link[(link.IndexOf('?', StringComparison.Ordinal) + 1)..]);
+        return client.PostAsync(link, "/Account/ResetPassword", new Dictionary<string, string>
+        {
+            ["UserId"] = query["userId"] ?? "",
+            ["Code"] = query["code"] ?? "",
+            ["Password"] = password,
+            ["ConfirmPassword"] = confirm ?? password,
+        });
+    }
+
     /// <summary>Legt einen Account mit bestätigter E-Mail-Adresse direkt über Identity an.</summary>
-    public static async Task<CreatedAccount> CreateConfirmedAccountAsync(GameServerFactory factory)
+    public static Task<CreatedAccount> CreateConfirmedAccountAsync(GameServerFactory factory) =>
+        CreateConfirmedAccountAsync(factory, language: null);
+
+    public static async Task<CreatedAccount> CreateConfirmedAccountAsync(GameServerFactory factory, string? language)
     {
         var account = new CreatedAccount(UniqueEmail(), UniqueName());
         await using var scope = factory.Services.CreateAsyncScope();
         var users = scope.ServiceProvider.GetRequiredService<UserManager<Account>>();
-        var result = await users.CreateAsync(new Account { UserName = account.Name, Email = account.Email, EmailConfirmed = true }, Password);
+        var user = new Account { UserName = account.Name, Email = account.Email, EmailConfirmed = true };
+        if (language is not null)
+        {
+            user.Language = language;
+        }
+
+        var result = await users.CreateAsync(user, Password);
         Assert.True(result.Succeeded, string.Join("; ", result.Errors.Select(e => e.Description)));
         return account;
     }
