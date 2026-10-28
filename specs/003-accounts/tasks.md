@@ -43,7 +43,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
     entfallen. Bestehende Registrierungs-Tests und Test-Helfer dürfen angepasst werden (mit dem User abgestimmt).
 
 ## Server – Spiel
-- [ ] **T10** (AK-8, AK-17, AK-18): `/ws` nur angemeldet + bestätigt, Origin-Prüfung; Spieler-ID = Account-ID,
+- [x] **T10** (AK-8, AK-17, AK-18): `/ws` nur angemeldet + bestätigt, Origin-Prüfung; Spieler-ID = Account-ID,
   Name aus dem Account, Position laden, stabile Farbe.
 - [ ] **T11** (AK-12, AK-20–23): `World` mit `away`/Linger (+ Unit-Tests), `GameLoop` mit Übernahme, Rauswurf
   (`Kicked`) und `ForceLeave` (aus Logout, Reset, Löschen).

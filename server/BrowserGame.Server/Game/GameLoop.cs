@@ -5,9 +5,13 @@ using Google.Protobuf;
 namespace BrowserGame.Server.Game;
 
 /// <summary>Verbindung eines Spielers zwischen WebSocket-Handler und Tick-Thread.</summary>
-internal sealed class PlayerConnection(string playerId)
+internal sealed class PlayerConnection(string playerId, string name, (double X, double Y)? savedPosition)
 {
     public string PlayerId { get; } = playerId;
+    public string Name { get; } = name;
+
+    /// <summary>Zuletzt gespeicherte Position; ohne sie startet die Figur am Startpunkt (AK-17, AK-18).</summary>
+    public (double X, double Y)? SavedPosition { get; } = savedPosition;
 
     /// <summary>Eingaben vom Client; bei Flut fallen die ältesten weg.</summary>
     public Channel<MoveInput> Inbox { get; } = Channel.CreateBounded<MoveInput>(
@@ -23,13 +27,12 @@ internal sealed partial class GameLoop(ILogger<GameLoop> logger) : BackgroundSer
 {
     private readonly Channel<(PlayerConnection Connection, bool Joined)> _membership = Channel.CreateUnbounded<(PlayerConnection, bool)>();
     private readonly Dictionary<string, PlayerConnection> _connections = [];
-    private readonly Random _random = new();
     private readonly World _world = new(GameSettings.Speed, GameSettings.TickRateHz, new Random());
     private uint _tick;
 
-    public PlayerConnection Join()
+    public PlayerConnection Join(string accountId, string name, (double X, double Y)? savedPosition)
     {
-        var connection = new PlayerConnection(PlayerIdentity.NewId());
+        var connection = new PlayerConnection(accountId, name, savedPosition);
         _membership.Writer.TryWrite((connection, true));
         return connection;
     }
@@ -73,18 +76,43 @@ internal sealed partial class GameLoop(ILogger<GameLoop> logger) : BackgroundSer
             var (connection, joined) = change;
             if (joined)
             {
-                var player = _world.AddPlayer(connection.PlayerId, PlayerIdentity.RandomName(_random), PlayerIdentity.RandomColor(_random));
-                _connections.Add(player.Id, connection);
+                var player = AddOrTakeOver(connection);
                 var welcome = new Welcome { PlayerId = player.Id, Name = player.Name, Speed = (float)_world.Speed, TickRateHz = (uint)_world.TickRateHz };
                 connection.Outbox.Writer.TryWrite(new ServerMessage { Welcome = welcome }.ToByteArray());
                 LogJoined(player.Id, player.Name, _connections.Count);
             }
-            else if (_connections.Remove(connection.PlayerId))
+            else if (_connections.TryGetValue(connection.PlayerId, out var current) && ReferenceEquals(current, connection))
             {
+                _connections.Remove(connection.PlayerId);
                 _world.RemovePlayer(connection.PlayerId);
                 LogLeft(connection.PlayerId, _connections.Count);
             }
         }
+    }
+
+    private Player AddOrTakeOver(PlayerConnection connection)
+    {
+        if (_connections.Remove(connection.PlayerId, out var previous))
+        {
+            // Derselbe Account ist schon verbunden: Nur die neueste Verbindung steuert die Figur, die alte bekommt nichts mehr.
+            previous.Outbox.Writer.TryComplete();
+        }
+
+        var player = _world.GetPlayer(connection.PlayerId);
+        if (player is not null)
+        {
+            _world.RestartInputs(player.Id);
+        }
+        else
+        {
+            var color = PlayerColors.For(connection.PlayerId);
+            player = connection.SavedPosition is { } saved
+                ? _world.AddPlayer(connection.PlayerId, connection.Name, color, saved.X, saved.Y)
+                : _world.AddPlayer(connection.PlayerId, connection.Name, color);
+        }
+
+        _connections.Add(player.Id, connection);
+        return player;
     }
 
     private void BroadcastSnapshot()

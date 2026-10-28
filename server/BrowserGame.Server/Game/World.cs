@@ -43,13 +43,34 @@ internal sealed class World(double speed, int tickRateHz, Random random)
     public double StepDistance => Speed / TickRateHz;
     public IReadOnlyCollection<Player> Players => _players.Values;
 
+    /// <summary>Neue Figur am Startpunkt der Welt: zufällig im SpawnRadius um (0,0) (003 AK-17).</summary>
     public Player AddPlayer(string id, string name, uint color)
     {
         var angle = random.NextDouble() * 2 * Math.PI;
         var radius = random.NextDouble() * SpawnRadius;
-        var player = new Player(id, name, color, Math.Cos(angle) * radius, Math.Sin(angle) * radius);
+        return AddPlayer(id, name, color, Math.Cos(angle) * radius, Math.Sin(angle) * radius);
+    }
+
+    public Player AddPlayer(string id, string name, uint color, double x, double y)
+    {
+        var player = new Player(id, name, color, x, y);
         _players.Add(id, player);
         return player;
+    }
+
+    /// <summary>Eine neue Verbindung steuert die Figur: Ihre Eingaben zählen wieder ab 1, alte Eingaben verfallen.</summary>
+    public void RestartInputs(string id)
+    {
+        if (!_players.TryGetValue(id, out var player))
+        {
+            return;
+        }
+
+        player.PendingInputs.Clear();
+        player.LastQueuedSeq = 0;
+        player.LastProcessedSeq = 0;
+        player.TicksWithoutInput = 0;
+        (player.DirX, player.DirY) = (0, 0);
     }
 
     public bool RemovePlayer(string id) => _players.Remove(id);

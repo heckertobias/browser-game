@@ -55,6 +55,8 @@ dotnet run --project server/BrowserGame.Admin
 
 Die Startseite unter `http://localhost:5080/` verlinkt auf `/play`; das funktioniert dort erst nach
 `npm run build` (der Build landet in den `wwwroot`-Ordnern von Spiel und Admin).
+Das Spiel (`/ws`) verlangt eine Anmeldung: zuerst unter `http://localhost:5080/Account/Register` registrieren bzw.
+unter `/Account/Login` anmelden. Das Cookie gilt auch für den Vite-Server auf Port 5173.
 Ohne SMTP-Einstellungen landen Mail-Links in der Entwicklung im Log des Spiels.
 
 Tests: `dotnet test` in `server/` (SQLite; mit `TEST_DB_PROVIDER=Postgres` und `TEST_POSTGRES=Host=…;Username=…;Password=…`
