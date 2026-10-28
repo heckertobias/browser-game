@@ -33,6 +33,12 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   _Seit 006: Texte zweisprachig; die Passkey-Anmeldung setzt wie die Passwort-Anmeldung
   `LanguageCookie.Append(Response, user.Language)` (006 AK-6), die Passkey-Registrierung setzt `Account.Language`
   (006 AK-7); `passkeys.ts` hat ein eigenes kleines Wörterbuch und darf nichts mit `language.ts` teilen._
+  _`passkeys.ts`/`passkeys.js` gibt es schon aus 004/006; hier werden sie nur eingebunden._
+  - [ ] **T9a** (AK-13b, AK-13c, AK-16): `CanRemoveCredential` + Unit-Test; `Manage` (Passkeys auflisten und
+    entfernen, Passwort setzen, Abmelden, Link zu Löschen); `Delete` mit Passwort; „Mein Account“ auf der Startseite.
+  - [ ] **T9b** (AK-4, AK-11, AK-13b, AK-16): `PasskeyCeremonies`; Passkey hinzufügen in `Manage`, Passkey-Anmeldung,
+    `Delete` mit Passkey; Software-Authenticator für die Tests.
+  - [ ] **T9c** (AK-2–4, AK-7, AK-9): Registrierung mit Passkey – Bestätigungsmail zuerst, Passkey über den Link.
 
 ## Server – Spiel
 - [ ] **T10** (AK-8, AK-17, AK-18): `/ws` nur angemeldet + bestätigt, Origin-Prüfung; Spieler-ID = Account-ID,

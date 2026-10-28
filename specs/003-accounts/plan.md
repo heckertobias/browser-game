@@ -92,7 +92,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 ### Seiten (`Pages/Account/`, daisyUI im Pixel-Akzent-Stil wie die Startseite)
 | Seite | Zweck | AK |
 |---|---|---|
-| `Register` | E-Mail + Name, dann Passwort **oder** „Mit Passkey registrieren“ (zweiter Schritt rendert Creation-Options) | 2, 4–7b |
+| `Register` | E-Mail + Name, dann Passwort **oder** „Mit Passkey registrieren“ (Passkey erst nach dem Bestätigungslink, siehe unten) | 2, 4–7b |
 | `Login` | E-Mail + Passwort oder „Mit Passkey anmelden“ (Request-Options ohne Nutzer); einheitliche Fehlermeldung | 9, 10 |
 | `ConfirmEmail`, `ResendConfirmation` | Bestätigungslink einlösen bzw. neu senden (Antwort verrät nichts) | 3 |
 | `ForgotPassword`, `ResetPassword` | Reset-Link anfordern (immer gleiche Antwort) bzw. neues Passwort setzen | 14, 15 |
@@ -104,6 +104,22 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 - Passkey-JS: `client/src/account/passkeys.ts` (eigener Vite-Build als festes `wwwroot/js/passkeys.js`). Nutzt
   `PublicKeyCredential.parseCreationOptionsFromJSON` bzw. `parseRequestOptionsFromJSON` und schreibt das Ergebnis
   in ein verstecktes Formularfeld.
+- **Passkeys (T9):**
+  - Registrierung mit Passkey: Erst kommt die Bestätigungsmail, für jede Adresse gleich (vorhandene Adresse →
+    „Du hast schon einen Account“). Erst der Bestätigungslink führt zum Anlegen des Passkeys; danach ist der Account
+    bestätigt. So verrät die Seite nichts, und es entsteht kein unbenutzter Passkey auf dem Gerät. Bricht jemand
+    danach ab, braucht er einen Weg zurück (Details in T9c).
+  - Passkey-Anmeldung ist wie die Passwort-Anmeldung persistent (AK-11). `PasskeySignInAsync` meldet nur
+    nicht-persistent an, darum einzeln: Assertion, `CanSignInAsync`, Lockout, Sign-Count speichern,
+    `SignInAsync(isPersistent: true)`, Sprach-Cookie.
+  - Der Zustand einer Passkey-Zeremonie liegt 5 min in einem Cookie. Fehlt er oder passt er nicht, gibt es eine
+    Fehlermeldung statt einer Ausnahme (`PasskeyCeremonies`, Grund ins Log).
+  - Login rendert die Request-Options immer, auch nach einem Fehlversuch.
+  - Passkey-Liste: „Passkey {n}, angelegt am {yyyy-MM-dd}“ (UTC), ohne JS.
+  - Passkey-Login bei unbestätigter E-Mail: eigene Meldung (der Passkey beweist den Besitz, es wird nichts verraten).
+  - `Manage` entfernt nur Passkeys und setzt ein Passwort, wenn keins da ist. Passwort ändern oder entfernen gehört
+    nicht dazu. Einen Passkey zu entfernen beendet keine anderen Sitzungen.
+  - `CanRemoveCredential` heißt: Nach dem Entfernen bleibt mindestens eine Anmeldeart.
 - Startseite: „Spielen“ führt zu `/play`; zusätzlich „Anmelden“ / „Registrieren“ bzw. Name + „Mein Account“.
 - `/play`: Fallback-Routen mit `RequireAuthorization()`. Nicht angemeldet → Redirect zu `/Account/Login?returnUrl=/play`
   (AK-1). Die Assets unter `/play/assets` bleiben öffentlich.
@@ -169,7 +185,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 | 1 | `/play` mit `RequireAuthorization` → Login-Redirect | Integration: anonym → 302 auf Login |
 | 2 | Register-Seite, Bestätigungsmail | Integration mit Test-Mailsender: Account angelegt, Mail mit Link |
 | 3 | `RequireConfirmedEmail`, Resend-Seite | Integration: Login vor Bestätigung abgewiesen, nach Link erfolgreich; Resend verschickt neu |
-| 4 | Passkey-Registrierung ohne Passwort | **manuell** (echter Authenticator), Ablauf in tasks.md dokumentiert |
+| 4 | Passkey-Registrierung ohne Passwort | Integration mit Software-Authenticator (Test-Helfer, kein Paket); **manuell** mit echten Geräten (T17) |
 | 5, 6, 7b | `PlayerNames` | Unit: Längen, Zeichen, Schreibweise, Sperrliste |
 | 7 | eindeutiger `NormalizedUserName` | Integration: zweite Registrierung mit „tobias“ abgelehnt |
 | 8 | Welcome/Snapshot mit Account-Namen | Integration (WS): Name im Snapshot |
@@ -178,10 +194,10 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 | 11 | persistentes Cookie, 30 Tage fest | Integration: `Set-Cookie` mit Expires ≈ 30 Tage |
 | 12 | Übernahme + `Kicked(SIGNED_IN_ELSEWHERE)` | Integration (WS): zweite Verbindung → erste bekommt Kicked, eine Figur |
 | 13 | Logout | Integration: danach `/play` → Login |
-| 13b, 13c | Manage-Seite, `CanRemoveCredential` | Unit für die Regel; Passkey-Hinzufügen **manuell** |
+| 13b, 13c | Manage-Seite, `CanRemoveCredential` | Unit für die Regel; Integration mit gespeicherten Passkeys und Software-Authenticator; **manuell** mit echten Geräten |
 | 14 | ForgotPassword | Integration: bekannte und unbekannte Mail → gleiche Antwort, nur bekannte bekommt Mail |
 | 15 | Reset-Token einmalig/befristet, Security-Stamp | Integration: zweite Nutzung scheitert; alte Sitzung danach abgemeldet |
-| 16 | Delete mit Bestätigung, Cascade | Integration: Account weg, Name wieder registrierbar |
+| 16 | Delete mit Bestätigung, Cascade | Integration (Passwort und Passkey): Account weg, Name wieder registrierbar |
 | 17, 18 | Position laden/speichern | Integration: erster Beitritt am Startpunkt; Bewegung, gehen, wiederkommen → gleiche Stelle |
 | 19 | gebündeltes Speichern + Flush beim Stop | Integration: neuer Server auf derselben DB-Datei → Position ≤ 5 s alt |
 | 19b | HUD zeigt gerundete eigene Position | Vitest: Formatierung; **manuell**: gehen, wiederkommen, gleiche Koordinaten |
