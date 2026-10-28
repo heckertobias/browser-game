@@ -50,7 +50,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 - [x] **T12** (AK-18, AK-19): `PositionStore` – gebündeltes Speichern alle 5 s, beim Entfernen und beim Herunterfahren.
 
 ## Client
-- [ ] **T13** (AK-12, AK-19b, AK-20, AK-22): `kicked`-Overlay, `away`-Figuren entsättigt, HUD mit Koordinaten und Link „Mein Account“.
+- [x] **T13** (AK-12, AK-19b, AK-20, AK-22): `kicked`-Overlay, `away`-Figuren entsättigt, HUD mit Koordinaten und Link „Mein Account“.
   _Seit 006: Texte aus `client/src/i18n.ts` (Schlüssel fürs Overlay sind angelegt); kein Sprachumschalter im Spiel._
 
 ## Tests / Prüfung

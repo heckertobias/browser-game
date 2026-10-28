@@ -2,19 +2,23 @@ import type { Snapshot, Welcome } from "../generated/browsergame/v1/game_pb";
 import { t } from "../i18n";
 import { INTERPOLATION_DELAY_MS } from "./constants";
 import { InputTracker } from "./input";
+import { formatCoordinates } from "./hud";
 import { SnapshotBuffer } from "./interpolation";
-import { connect, gameSocketUrl, type GameConnection } from "./net";
+import { connect, gameSocketUrl, type GameConnection, type KickReason } from "./net";
 import { Predictor } from "./prediction";
 import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "./render";
 import type { Vec } from "./vector";
 import { fitViewport, type Viewport } from "./viewport";
 import { ScreenWakeLock } from "./wakeLock";
 
-export type ConnectionStatus = "connecting" | "connected" | "disconnected";
+export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "kicked";
 
 export interface GameEvents {
   onStatus(status: ConnectionStatus): void;
   onWelcome(name: string): void;
+  onKicked(reason: KickReason): void;
+  /** Eigene Koordinaten (gerundet, aus der vorhergesagten Position), nur bei Änderung (AK-19b). */
+  onCoordinates(text: string): void;
 }
 
 /** Nach längerer Pause (Tab im Hintergrund) höchstens so viel Zeit nachholen. */
@@ -39,6 +43,7 @@ export class Game {
   private readonly resizeObserver = new ResizeObserver((entries) => { this.handleResize(entries); });
   private readonly wakeLock = new ScreenWakeLock(navigator.wakeLock, document);
   private self: DrawablePlayer | null = null;
+  private coordinates = "";
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly events: GameEvents) {
     const ctx = canvas.getContext("2d");
@@ -55,6 +60,10 @@ export class Game {
     this.connection = connect(gameSocketUrl(window.location), {
       onWelcome: (welcome) => { this.handleWelcome(welcome); },
       onSnapshot: (snapshot) => { this.handleSnapshot(snapshot); },
+      onKicked: (reason) => {
+        this.events.onKicked(reason);
+        this.events.onStatus("kicked");
+      },
       onClose: () => { this.events.onStatus("disconnected"); },
     });
     this.lastFrame = performance.now();
@@ -115,6 +124,15 @@ export class Game {
       );
     });
     this.connection.sendInput(this.predictor.step(direction));
+    this.reportCoordinates();
+  }
+
+  private reportCoordinates(): void {
+    if (!this.predictor) return;
+    const text = formatCoordinates(this.predictor.x, this.predictor.y);
+    if (text === this.coordinates) return;
+    this.coordinates = text;
+    this.events.onCoordinates(text);
   }
 
   private draw(now: number): void {
