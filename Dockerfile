@@ -58,6 +58,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:c89a6a61f494f20a
 WORKDIR /app
 COPY --from=publish-admin /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data
+# Zeitzonendaten (die chiseled-Basis hat keine): sonst ignoriert .NET TZ und rechnet in UTC.
+COPY --from=restore /usr/share/zoneinfo /usr/share/zoneinfo
 ENV ConnectionStrings__Game="Data Source=/data/game.db"
 USER $APP_UID
 EXPOSE 8080
@@ -70,6 +72,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:c89a6a61f494f20a
 WORKDIR /app
 COPY --from=publish-game /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data
+# Zeitzonendaten (die chiseled-Basis hat keine): sonst ignoriert .NET TZ und rechnet in UTC.
+COPY --from=restore /usr/share/zoneinfo /usr/share/zoneinfo
 ENV ConnectionStrings__Game="Data Source=/data/game.db"
 USER $APP_UID
 EXPOSE 8080

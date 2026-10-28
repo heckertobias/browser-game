@@ -63,7 +63,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   _Schon mit 004 T11 erledigt; in 003 nichts mehr nötig._
 
 ## Betrieb
-- [ ] **T16**: `deploy/compose.yaml` (Volume `/data`, Datenbank, URL, Passkey-Domain, Forwarded-Header),
+- [x] **T16**: `deploy/compose.yaml` (Volume `/data`, Datenbank, URL, Passkey-Domain, Forwarded-Header),
   README-Abschnitt „Konfiguration“ mit allen Variablen.
   _Großteils mit 004 T13 erledigt (`deploy/compose.yaml` mit Volume, URL, Passkey-Domain,
   Forwarded-Header; README „Betrieb“). Offen: Feinschliff, sobald 003 fertig ist._ Hinweise für den Betrieb: Volume ins Backup aufnehmen,
