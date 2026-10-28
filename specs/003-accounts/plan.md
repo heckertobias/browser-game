@@ -122,7 +122,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
     Fehlermeldung statt einer Ausnahme (`PasskeyCeremonies`, Grund ins Log).
   - Login rendert die Request-Options immer, auch nach einem Fehlversuch.
   - Passkey-Liste: „Passkey {n}, angelegt am {yyyy-MM-dd}“ (UTC), ohne JS.
-  - Passkey-Login bei unbestätigter E-Mail: eigene Meldung (der Passkey beweist den Besitz, es wird nichts verraten).
+  - Unbestätigte Accounts gibt es seit T9c nicht mehr; ein Passkey-Login scheitert dann mit der allgemeinen Meldung.
   - `Manage` entfernt nur Passkeys und setzt ein Passwort, wenn keins da ist. Passwort ändern oder entfernen gehört
     nicht dazu. Einen Passkey zu entfernen beendet keine anderen Sitzungen.
   - `CanRemoveCredential` heißt: Nach dem Entfernen bleibt mindestens eine Anmeldeart.
