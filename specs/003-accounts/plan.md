@@ -147,7 +147,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 - `World` bleibt ohne Netzwerk und Datenbank:
   - `AddPlayer(id, name, color, x, y)` statt Zufallsspawn.
   - `SetAway(id, tick)` / `ClearAway(id)`; `Step()` bewegt wartende Figuren nicht.
-  - `RemoveExpiredAway(tick)` liefert die entfernten Figuren zurück.
+  - `RemoveExpiredAway(tick, lingerTicks)` liefert die entfernten Figuren zurück.
 - **Positionen speichern** (`PositionStore`):
   - Der Tick-Thread legt alle 5 s alle Positionen sowie jede entfernte Figur in einen Channel.
   - Ein `BackgroundService` schreibt sie gebündelt per Upsert (AK-19: höchstens ~5 s Verlust).
