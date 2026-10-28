@@ -15,6 +15,14 @@ internal static class GameSettings
 
     public const string LingerSecondsKey = "Game:LingerSeconds";
 
+    /// <summary>
+    /// Standard-Abstand, in dem alle Positionen gespeichert werden (003 AK-19: höchstens so viel Bewegung geht verloren).
+    /// Überschreibbar mit <c>Game:PositionSaveIntervalSeconds</c> (z. B. in Tests).
+    /// </summary>
+    public const double PositionSaveIntervalSeconds = 5;
+
+    public const string PositionSaveIntervalSecondsKey = "Game:PositionSaveIntervalSeconds";
+
     /// <summary>Sekunden in ganze Ticks, aufgerundet; negative Werte zählen als 0.</summary>
     public static uint ToTicks(double seconds) => (uint)Math.Ceiling(Math.Max(0, seconds) * TickRateHz);
 

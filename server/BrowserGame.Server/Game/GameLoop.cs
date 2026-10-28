@@ -27,7 +27,7 @@ internal sealed class PlayerConnection(string playerId, string name, (double X, 
 
 /// <summary>
 /// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, simulieren, Snapshots verschicken.
-/// Dazu Nachlauf getrennter Figuren, Übernahme und Rauswurf (003 AK-12, AK-20–22).
+/// Dazu Nachlauf getrennter Figuren, Übernahme und Rauswurf (003 AK-12, AK-20–22); Positionen an den PositionStore (AK-18, AK-19).
 /// </summary>
 public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration) : BackgroundService
 {
@@ -39,7 +39,18 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     private readonly Dictionary<string, PlayerConnection> _connections = [];
     private readonly World _world = new(GameSettings.Speed, GameSettings.TickRateHz, new Random());
     private readonly uint _lingerTicks = GameSettings.ToTicks(configuration.GetValue(GameSettings.LingerSecondsKey, GameSettings.LingerSeconds));
+
+    // Mindestens 1 Tick, sonst Division durch 0 im Speicher-Takt.
+    private readonly uint _saveIntervalTicks = Math.Max(1u, GameSettings.ToTicks(
+        configuration.GetValue(GameSettings.PositionSaveIntervalSecondsKey, GameSettings.PositionSaveIntervalSeconds)));
+
+    private readonly Channel<IReadOnlyList<PositionToSave>> _positionBatches = Channel.CreateUnbounded<IReadOnlyList<PositionToSave>>(
+        new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
+
     private uint _tick;
+
+    /// <summary>Zu speichernde Positionen für den <see cref="PositionStore"/>; wird beim Herunterfahren geschlossen.</summary>
+    internal ChannelReader<IReadOnlyList<PositionToSave>> PositionBatches => _positionBatches.Reader;
 
     internal PlayerConnection Join(string accountId, string name, (double X, double Y)? savedPosition)
     {
@@ -64,10 +75,49 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1.0 / GameSettings.TickRateHz));
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        try
         {
-            // 003 T12: Tick() liefert die Figuren, deren Position zu speichern ist (AK-18, AK-23) – an den PositionStore geben.
-            _ = Tick();
+            while (await timer.WaitForNextTickAsync(stoppingToken))
+            {
+                TickAndQueuePositions();
+            }
+        }
+        finally
+        {
+            // Herunterfahren: letzter Stand aller Figuren an den PositionStore (003 AK-19).
+            FlushPositions();
+        }
+    }
+
+    /// <summary>
+    /// Ein Tick im laufenden Server: Entfernte Figuren gehen sofort an den PositionStore, alle Figuren (auch wartende)
+    /// im Speicher-Takt (003 AK-18, AK-19, AK-23).
+    /// </summary>
+    internal void TickAndQueuePositions()
+    {
+        var removed = Tick();
+        if (_tick % _saveIntervalTicks == 0)
+        {
+            QueuePositions([.. removed, .. _world.Players]);
+        }
+        else
+        {
+            QueuePositions(removed);
+        }
+    }
+
+    /// <summary>Herunterfahren: alle Figuren speichern, danach nimmt der Channel nichts mehr an (003 AK-19).</summary>
+    internal void FlushPositions()
+    {
+        QueuePositions([.. _world.Players]);
+        _positionBatches.Writer.TryComplete();
+    }
+
+    private void QueuePositions(IReadOnlyList<Player> players)
+    {
+        if (players.Count > 0)
+        {
+            _positionBatches.Writer.TryWrite([.. players.Select(p => new PositionToSave(p.Id, p.X, p.Y))]);
         }
     }
 

@@ -120,7 +120,7 @@ public sealed class GameAccountTests(GameServerFactory factory) : IClassFixture<
         var ct = TestContext.Current.CancellationToken;
         var account = await AccountTestFlows.CreateConfirmedAccountAsync(factory);
         var accountId = await GameSockets.AccountIdAsync(factory, account.Email);
-        // Speichern beim Gehen folgt mit T12; die Position ist hier vorab gespeichert.
+        // Die Position ist hier vorab gespeichert.
         await GameSockets.SeedPositionAsync(factory, accountId, 1234.5, -678.25);
 
         using var deviceA = await GameSockets.ConnectAsync(factory, await GameSockets.SignInCookieAsync(factory, account.Email), GameSockets.Origin, ct);
