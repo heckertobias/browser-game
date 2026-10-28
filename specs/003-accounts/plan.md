@@ -179,7 +179,7 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 ## CI
 
 - Job `server`: Tests mit SQLite (wie bisher).
-- Neuer Job `server-postgres`: dieselben Integrationstests mit `Database__Provider=Postgres` gegen den Service-Container
+- Neuer Job `server-postgres`: dieselben Integrationstests mit `TEST_DB_PROVIDER=Postgres` (+ `TEST_POSTGRES`) gegen den Service-Container
   `postgres:17` (Image per Digest gepinnt), in `ci-ok.needs`.
 - Prüfung, dass die Migrationen beider Provider zum Modell passen
   (`dotnet ef migrations has-pending-model-changes` für beide Kontexte).

@@ -58,8 +58,9 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   SQLite und PostgreSQL (Provider per Umgebungsvariable).
   _AK-1, AK-2, AK-3, AK-7, AK-9 und AK-13 samt Test-Infrastruktur (`CapturingEmailSender`, `FormClient`,
   `AccountTestFlows`) schon mit T7 erledigt._
-- [ ] **T15**: CI-Job `server-postgres` (Service-Container, Digest gepinnt) und Prüfung auf pending model changes für
+- [x] **T15**: CI-Job `server-postgres` (Service-Container, Digest gepinnt) und Prüfung auf pending model changes für
   beide Kontexte; in `ci-ok.needs`.
+  _Schon mit 004 T11 erledigt; in 003 nichts mehr nötig._
 
 ## Betrieb
 - [ ] **T16**: `deploy/compose.yaml` (Volume `/data`, Datenbank, URL, Passkey-Domain, Forwarded-Header),
