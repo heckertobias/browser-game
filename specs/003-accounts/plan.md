@@ -75,9 +75,11 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
   - Security-Stamp-Prüfung alle 1 min. Passwort-Reset, Abmelden und Löschen beenden damit andere Sitzungen (AK-15);
     zusätzlich wird eine laufende Spiel-Verbindung sofort beendet (siehe GameLoop).
   - Token-Lebensdauer (Bestätigung, Reset): 3 Stunden, nur einmal nutzbar (Security-Stamp ändert sich).
+  - Reset-Mail nur an Accounts mit bestätigter E-Mail; die Antwort bleibt für alle gleich (AK-14).
+  - Ein erfolgreicher Reset hebt eine Lockout-Sperre auf und setzt die Fehlversuche zurück (AK-15).
 - `IdentityPasskeyOptions.ServerDomain` aus `Passkeys:ServerDomain`; erlaubter Origin aus `App:PublicUrl`.
-- **Rate-Limiting** (ASP.NET `RateLimiter`, pro Client-IP) für Anmelden, Registrieren, Passwort vergessen und
-  Bestätigung erneut senden: 10 Anfragen pro Minute (AK-10). Hinter nginx-proxy werden die Forwarded-Header ausgewertet
+- **Rate-Limiting** (ASP.NET `RateLimiter`, pro Client-IP) für Anmelden, Registrieren, Passwort vergessen,
+  Passwort zurücksetzen und Bestätigung erneut senden: 10 Anfragen pro Minute (AK-10). Hinter nginx-proxy werden die Forwarded-Header ausgewertet
   (`ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`, Container nur im Proxy-Netz).
 - **Namen** (`PlayerNames`, reine Logik):
   - `Normalize`: trimmen, prüfen auf `^[A-Za-z]{3,16}$`, dann erster Buchstabe groß, Rest klein (AK-5, AK-6).
