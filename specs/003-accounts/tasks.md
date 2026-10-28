@@ -36,7 +36,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   _`passkeys.ts`/`passkeys.js` gibt es schon aus 004/006; hier werden sie nur eingebunden._
   - [x] **T9a** (AK-13b, AK-13c, AK-16): `CanRemoveCredential` + Unit-Test; `Manage` (Passkeys auflisten und
     entfernen, Passwort setzen, Abmelden, Link zu Löschen); `Delete` mit Passwort; „Mein Account“ auf der Startseite.
-  - [ ] **T9b** (AK-4, AK-11, AK-13b, AK-16): `PasskeyCeremonies`; Passkey hinzufügen in `Manage`, Passkey-Anmeldung,
+  - [x] **T9b** (AK-4, AK-11, AK-13b, AK-16): `PasskeyCeremonies`; Passkey hinzufügen in `Manage`, Passkey-Anmeldung,
     `Delete` mit Passkey; Software-Authenticator für die Tests.
   - [ ] **T9c** (AK-2–4, AK-7, AK-9): Registrierung mit Passkey – Bestätigungsmail zuerst, Passkey über den Link.
 

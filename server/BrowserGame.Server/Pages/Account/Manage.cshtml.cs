@@ -16,7 +16,8 @@ namespace BrowserGame.Server.Pages.Account;
 /// <summary>Eigene Anmeldearten verwalten: Passkeys entfernen, Passwort setzen (003 AK-13b, AK-13c). Mindestens eine Anmeldeart bleibt.</summary>
 [Authorize]
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
-public sealed class ManageModel(UserManager<PlayerAccount> users, SignInManager<PlayerAccount> signIn, IStringLocalizer<Texts> t) : PageModel
+public sealed class ManageModel(
+    UserManager<PlayerAccount> users, SignInManager<PlayerAccount> signIn, PasskeyCeremonies ceremonies, IStringLocalizer<Texts> t) : PageModel
 {
     public sealed record PasskeyRow(string Id, int Number, string CreatedOn);
 
@@ -29,6 +30,11 @@ public sealed class ManageModel(UserManager<PlayerAccount> users, SignInManager<
 
     [BindProperty]
     public string? ConfirmNewPassword { get; set; }
+
+    [BindProperty]
+    public string? Credential { get; set; }
+
+    public string PasskeyOptions { get; private set; } = "{}";
 
     public string Name { get; private set; } = "";
 
@@ -43,6 +49,26 @@ public sealed class ManageModel(UserManager<PlayerAccount> users, SignInManager<
     public string? Message { get; private set; }
 
     public async Task<IActionResult> OnGetAsync() => await ShowAsync();
+
+    public async Task<IActionResult> OnPostAddPasskeyAsync()
+    {
+        if (await users.GetUserAsync(User) is not { } user)
+        {
+            return Challenge();
+        }
+
+        if (await ceremonies.AttestAsync(Credential) is { Passkey: { } passkey }
+            && (await users.AddOrUpdatePasskeyAsync(user, passkey)).Succeeded)
+        {
+            Message = t["Manage.PasskeyAdded"];
+        }
+        else
+        {
+            ModelState.AddModelError("", t["Manage.PasskeyAddFailed"]);
+        }
+
+        return await ShowAsync();
+    }
 
     public async Task<IActionResult> OnPostRemovePasskeyAsync()
     {
@@ -140,6 +166,7 @@ public sealed class ManageModel(UserManager<PlayerAccount> users, SignInManager<
         var passkeys = (await users.GetPasskeysAsync(user)).OrderBy(p => p.CreatedAt).ThenBy(p => Convert.ToHexString(p.CredentialId)).ToList();
         Passkeys = [.. passkeys.Select((p, i) =>
             new PasskeyRow(WebEncoders.Base64UrlEncode(p.CredentialId), i + 1, p.CreatedAt.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)))];
+        PasskeyOptions = await ceremonies.CreationOptionsAsync(user);
         CanRemove = AccountCredentials.CanRemoveCredential(HasPassword, passkeys.Count);
         return Page();
     }

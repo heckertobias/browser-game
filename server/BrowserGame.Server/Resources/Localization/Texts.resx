@@ -85,4 +85,13 @@
   <data name="Delete.Done" xml:space="preserve"><value>Your account has been deleted. Your player name is available again.</value></data>
   <data name="Delete.Home" xml:space="preserve"><value>Back to the start page</value></data>
   <data name="Delete.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Common.Or" xml:space="preserve"><value>or</value></data>
+  <data name="Login.WithPasskey" xml:space="preserve"><value>Sign in with a passkey</value></data>
+  <data name="Login.PasskeyFailed" xml:space="preserve"><value>Signing in with a passkey failed. Please try again or use your password.</value></data>
+  <data name="Login.PasskeyUnconfirmed" xml:space="preserve"><value>Please confirm your email address first. You can have the email sent again below.</value></data>
+  <data name="Manage.AddPasskey" xml:space="preserve"><value>Add passkey</value></data>
+  <data name="Manage.PasskeyAdded" xml:space="preserve"><value>Passkey added.</value></data>
+  <data name="Manage.PasskeyAddFailed" xml:space="preserve"><value>The passkey could not be added. Please try again.</value></data>
+  <data name="Delete.SubmitPasskey" xml:space="preserve"><value>Confirm with passkey and delete</value></data>
+  <data name="Delete.PasskeyFailed" xml:space="preserve"><value>The passkey could not be confirmed. Please try again.</value></data>
 </root>

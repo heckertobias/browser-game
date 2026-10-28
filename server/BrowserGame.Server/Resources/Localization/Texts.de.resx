@@ -85,4 +85,13 @@
   <data name="Delete.Done" xml:space="preserve"><value>Dein Account wurde gelöscht. Dein Spielername ist wieder frei.</value></data>
   <data name="Delete.Home" xml:space="preserve"><value>Zur Startseite</value></data>
   <data name="Delete.Cancel" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="Common.Or" xml:space="preserve"><value>oder</value></data>
+  <data name="Login.WithPasskey" xml:space="preserve"><value>Mit Passkey anmelden</value></data>
+  <data name="Login.PasskeyFailed" xml:space="preserve"><value>Die Anmeldung mit Passkey ist fehlgeschlagen. Versuche es erneut oder nutze dein Passwort.</value></data>
+  <data name="Login.PasskeyUnconfirmed" xml:space="preserve"><value>Bitte bestätige zuerst deine E-Mail-Adresse. Die Mail kannst du dir unten erneut schicken lassen.</value></data>
+  <data name="Manage.AddPasskey" xml:space="preserve"><value>Passkey hinzufügen</value></data>
+  <data name="Manage.PasskeyAdded" xml:space="preserve"><value>Passkey hinzugefügt.</value></data>
+  <data name="Manage.PasskeyAddFailed" xml:space="preserve"><value>Der Passkey konnte nicht hinzugefügt werden. Bitte versuche es erneut.</value></data>
+  <data name="Delete.SubmitPasskey" xml:space="preserve"><value>Mit Passkey bestätigen und löschen</value></data>
+  <data name="Delete.PasskeyFailed" xml:space="preserve"><value>Der Passkey konnte nicht bestätigt werden. Bitte versuche es erneut.</value></data>
 </root>

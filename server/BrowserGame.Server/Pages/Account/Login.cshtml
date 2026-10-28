@@ -23,8 +23,22 @@
     <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">@T["Common.SignIn"]</button>
 </form>
 
+<div class="divider font-mono text-xs">@T["Common.Or"]</div>
+
+<form method="post" asp-page-handler="Passkey" data-passkey="get" class="flex flex-col gap-2">
+    <input type="hidden" asp-for="ReturnUrl" />
+    <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
+    <input type="hidden" name="Credential" />
+    <button type="submit" class="btn btn-outline rounded-none font-mono uppercase">@T["Login.WithPasskey"]</button>
+    <p class="text-error text-sm" data-passkey-error hidden></p>
+</form>
+
 <div class="flex flex-col gap-3 text-sm">
     <a class="link" href="/Account/ForgotPassword">@T["Login.ForgotPassword"]</a>
     <a class="link" href="/Account/Register">@T["Login.NoAccount"]</a>
     <a class="link" href="/Account/ResendConfirmation">@T["Common.ResendConfirmation"]</a>
 </div>
+
+@section Scripts {
+    <script type="module" src="~/js/passkeys.js" asp-append-version="true"></script>
+}

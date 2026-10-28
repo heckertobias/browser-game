@@ -22,5 +22,22 @@ else
             <button type="submit" class="btn btn-error rounded-none font-mono uppercase">@T["Delete.Submit"]</button>
         </form>
     }
+    @if (Model.HasPassword && Model.PasskeyOptions is not null)
+    {
+        <div class="divider font-mono text-xs">@T["Common.Or"]</div>
+    }
+    @if (Model.PasskeyOptions is not null)
+    {
+        <form method="post" asp-page-handler="Passkey" data-passkey="get" class="flex flex-col gap-2">
+            <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
+            <input type="hidden" name="Credential" />
+            <button type="submit" class="btn btn-error rounded-none font-mono uppercase">@T["Delete.SubmitPasskey"]</button>
+            <p class="text-error text-sm" data-passkey-error hidden></p>
+        </form>
+    }
     <a href="/Account/Manage" class="link text-sm">@T["Delete.Cancel"]</a>
+}
+
+@section Scripts {
+    <script type="module" src="~/js/passkeys.js" asp-append-version="true"></script>
 }

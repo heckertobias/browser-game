@@ -34,6 +34,12 @@
 {
     <p class="text-sm">@T["Manage.LastCredentialHint"]</p>
 }
+<form method="post" asp-page-handler="AddPasskey" data-passkey="create" class="flex flex-col gap-2">
+    <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
+    <input type="hidden" name="Credential" />
+    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase w-fit">@T["Manage.AddPasskey"]</button>
+    <p class="text-error text-sm" data-passkey-error hidden></p>
+</form>
 
 <h2 class="font-mono uppercase">@T["Manage.PasswordHeading"]</h2>
 @if (Model.HasPassword)
@@ -63,3 +69,7 @@ else
     <a href="/Account/Delete" class="btn btn-outline btn-error rounded-none font-mono uppercase">@T["Manage.DeleteLink"]</a>
     <a href="/play" class="link text-sm">@T["Index.Play"]</a>
 </div>
+
+@section Scripts {
+    <script type="module" src="~/js/passkeys.js" asp-append-version="true"></script>
+}

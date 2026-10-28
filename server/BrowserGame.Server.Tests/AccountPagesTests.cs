@@ -253,10 +253,13 @@ public sealed partial class AccountPagesTests(GameServerFactory factory) : IClas
         response.Headers.TryGetValues("Set-Cookie", out var cookies)
         && cookies.Any(c => SessionCookieOnly.Any(name => c.StartsWith(name + "=", StringComparison.Ordinal)));
 
-    /// <summary>Entfernt, was sich pro Anfrage ändert (Antiforgery-Token, eingegebene E-Mail-Adresse).</summary>
+    /// <summary>Entfernt, was sich pro Anfrage ändert (Antiforgery-Token, Passkey-Optionen mit zufälliger Challenge, eingegebene E-Mail-Adresse).</summary>
     private static string Normalize(string html, string email) =>
-        TokenPattern().Replace(html, "").Replace(email, "", StringComparison.OrdinalIgnoreCase);
+        PasskeyOptionsPattern().Replace(TokenPattern().Replace(html, ""), "").Replace(email, "", StringComparison.OrdinalIgnoreCase);
 
     [GeneratedRegex("<input name=\"__RequestVerificationToken\"[^>]*>")]
     private static partial Regex TokenPattern();
+
+    [GeneratedRegex("<script type=\"application/json\" data-passkey-options>.*?</script>", RegexOptions.Singleline)]
+    private static partial Regex PasskeyOptionsPattern();
 }

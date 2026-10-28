@@ -75,6 +75,32 @@ public static partial class AccountTestFlows
         return account;
     }
 
+    /// <summary>Die WebAuthn-Optionen (JSON) aus dem <c>data-passkey-options</c>-Skript der Seite.</summary>
+    public static string PasskeyOptions(string html) =>
+        PasskeyOptionsPattern().Match(html) is { Success: true } match
+            ? match.Groups[1].Value
+            : throw new InvalidOperationException("Keine Passkey-Optionen im HTML.");
+
+    /// <summary>Legt über die Manage-Seite einen Passkey des Authenticators an.</summary>
+    public static async Task<(HttpResponseMessage Response, string Html)> AddPasskeyAsync(FormClient client, SoftwareAuthenticator authenticator)
+    {
+        var (_, page) = await client.GetAsync("/Account/Manage");
+        return await client.PostWithTokenAsync(
+            "/Account/Manage?handler=AddPasskey",
+            new Dictionary<string, string> { ["Credential"] = authenticator.Create(PasskeyOptions(page)) },
+            FormClient.AntiforgeryToken(page));
+    }
+
+    public static async Task<(HttpResponseMessage Response, string Html)> PasskeyLoginAsync(
+        FormClient client, SoftwareAuthenticator authenticator, string? returnUrl = null)
+    {
+        var (_, page) = await client.GetAsync("/Account/Login");
+        return await client.PostWithTokenAsync(
+            "/Account/Login?handler=Passkey",
+            new Dictionary<string, string> { ["Credential"] = authenticator.Get(PasskeyOptions(page)), ["ReturnUrl"] = returnUrl ?? "" },
+            FormClient.AntiforgeryToken(page));
+    }
+
     public static string PasskeyId(byte[] credentialId) => WebEncoders.Base64UrlEncode(credentialId);
 
     public static Task<(HttpResponseMessage Response, string Html)> RemovePasskeyAsync(FormClient client, string passkeyId) =>
@@ -140,6 +166,9 @@ public static partial class AccountTestFlows
         LinkPattern().Match(mailText) is { Success: true } match
             ? match.Groups[1].Value
             : throw new InvalidOperationException("Kein Link in der Mail:\n" + mailText);
+
+    [GeneratedRegex("<script type=\"application/json\" data-passkey-options>(.*?)</script>", RegexOptions.Singleline)]
+    private static partial Regex PasskeyOptionsPattern();
 
     [GeneratedRegex(@"https?://[^/\s]+(/\S+)")]
     private static partial Regex LinkPattern();
