@@ -38,7 +38,9 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
     entfernen, Passwort setzen, Abmelden, Link zu Löschen); `Delete` mit Passwort; „Mein Account“ auf der Startseite.
   - [x] **T9b** (AK-4, AK-11, AK-13b, AK-16): `PasskeyCeremonies`; Passkey hinzufügen in `Manage`, Passkey-Anmeldung,
     `Delete` mit Passkey; Software-Authenticator für die Tests.
-  - [ ] **T9c** (AK-2–4, AK-7, AK-9): Registrierung mit Passkey – Bestätigungsmail zuerst, Passkey über den Link.
+  - [ ] **T9c** (AK-2–4, AK-5–7b, AK-9; 006 AK-7): Registrierung einheitlich in zwei Schritten – erst E-Mail und Link,
+    dann Name und Passwort oder Passkey. Ersetzt den Passwort-Weg aus T7; `ConfirmEmail` und `ResendConfirmation`
+    entfallen. Bestehende Registrierungs-Tests und Test-Helfer dürfen angepasst werden (mit dem User abgestimmt).
 
 ## Server – Spiel
 - [ ] **T10** (AK-8, AK-17, AK-18): `/ws` nur angemeldet + bestätigt, Origin-Prüfung; Spieler-ID = Account-ID,

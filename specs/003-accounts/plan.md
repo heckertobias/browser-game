@@ -74,7 +74,8 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
     immer persistent (AK-11).
   - Security-Stamp-Prüfung alle 1 min. Passwort-Reset, Abmelden und Löschen beenden damit andere Sitzungen (AK-15);
     zusätzlich wird eine laufende Spiel-Verbindung sofort beendet (siehe GameLoop).
-  - Token-Lebensdauer (Bestätigung, Reset): 3 Stunden, nur einmal nutzbar (Security-Stamp ändert sich).
+  - Reset-Link: 3 Stunden, nur einmal nutzbar (Security-Stamp ändert sich). Registrierungslink: 30 Minuten
+    (einstellbar, siehe Passkeys/Registrierung), faktisch einmal nutzbar, weil die Adresse danach vergeben ist.
   - Reset-Mail nur an Accounts mit bestätigter E-Mail; die Antwort bleibt für alle gleich (AK-14).
   - Ein erfolgreicher Reset hebt eine Lockout-Sperre auf und setzt die Fehlversuche zurück (AK-15).
 - `IdentityPasskeyOptions.ServerDomain` aus `Passkeys:ServerDomain`; erlaubter Origin aus `App:PublicUrl`.
@@ -92,9 +93,9 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 ### Seiten (`Pages/Account/`, daisyUI im Pixel-Akzent-Stil wie die Startseite)
 | Seite | Zweck | AK |
 |---|---|---|
-| `Register` | E-Mail + Name, dann Passwort **oder** „Mit Passkey registrieren“ (Passkey erst nach dem Bestätigungslink, siehe unten) | 2, 4–7b |
+| `Register` | Schritt 1: nur E-Mail, Antwort immer gleich; Mail mit Link (neu) bzw. „Du hast schon einen Account“ (vorhanden) | 2, 3, 9 |
+| `Register/Complete` (Name frei) | Schritt 2 über den Link: Spielername, dann Passwort **oder** Passkey; legt den Account bestätigt an und meldet an | 2, 4–7b |
 | `Login` | E-Mail + Passwort oder „Mit Passkey anmelden“ (Request-Options ohne Nutzer); einheitliche Fehlermeldung | 9, 10 |
-| `ConfirmEmail`, `ResendConfirmation` | Bestätigungslink einlösen bzw. neu senden (Antwort verrät nichts) | 3 |
 | `ForgotPassword`, `ResetPassword` | Reset-Link anfordern (immer gleiche Antwort) bzw. neues Passwort setzen | 14, 15 |
 | `Manage` | Passkeys auflisten/hinzufügen/entfernen, Passwort setzen (falls keins), Abmelden, Link zu Löschen | 13–13c |
 | `Delete` | Bestätigung per Passwort oder Passkey, dann Account + Daten löschen, abmelden | 16 |
@@ -105,10 +106,15 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
   `PublicKeyCredential.parseCreationOptionsFromJSON` bzw. `parseRequestOptionsFromJSON` und schreibt das Ergebnis
   in ein verstecktes Formularfeld.
 - **Passkeys (T9):**
-  - Registrierung mit Passkey: Erst kommt die Bestätigungsmail, für jede Adresse gleich (vorhandene Adresse →
-    „Du hast schon einen Account“). Erst der Bestätigungslink führt zum Anlegen des Passkeys; danach ist der Account
-    bestätigt. So verrät die Seite nichts, und es entsteht kein unbenutzter Passkey auf dem Gerät. Bricht jemand
-    danach ab, braucht er einen Weg zurück (Details in T9c).
+  - Registrierung (T9c, ersetzt den Passwort-Weg aus T7): Schritt 1 fragt nur die E-Mail ab, die Antwort ist für jede
+    Adresse gleich. Der Link trägt E-Mail und Ablaufzeit, signiert per Data Protection (`ToTimeLimitedDataProtector`); in der DB
+    entsteht noch nichts. Gültigkeit per Einstellung `Registration:LinkLifetimeMinutes`, Standard 30. Mail und
+    Seite nennen die Dauer („Der Link ist 30 Minuten gültig“), keine Uhrzeit (Zeitzone unbekannt). Einladungslinks
+    setzen später nur eine längere Dauer.
+    Schritt 2 legt den Account mit Name und Passwort oder Passkey an, bestätigt (`EmailConfirmed = true`), setzt
+    `Account.Language` (006 AK-7) und meldet persistent an. Existiert die Adresse inzwischen, ist der Link wertlos;
+    damit ist er faktisch nur einmal nutzbar. Es gibt keine unbestätigten Accounts mehr; `ConfirmEmail` und
+    `ResendConfirmation` entfallen. Später sollen Einladungslinks denselben Schritt 2 nutzen.
   - Passkey-Anmeldung ist wie die Passwort-Anmeldung persistent (AK-11). `PasskeySignInAsync` meldet nur
     nicht-persistent an, darum einzeln: Assertion, `CanSignInAsync`, Lockout, Sign-Count speichern,
     `SignInAsync(isPersistent: true)`, Sprach-Cookie.
@@ -183,8 +189,8 @@ HTML gerendert (ADR 0005). Es entsteht keine JSON-API, deren Typen der Client te
 | AK | Wie erfüllt | Wie getestet |
 |---|---|---|
 | 1 | `/play` mit `RequireAuthorization` → Login-Redirect | Integration: anonym → 302 auf Login |
-| 2 | Register-Seite, Bestätigungsmail | Integration mit Test-Mailsender: Account angelegt, Mail mit Link |
-| 3 | `RequireConfirmedEmail`, Resend-Seite | Integration: Login vor Bestätigung abgewiesen, nach Link erfolgreich; Resend verschickt neu |
+| 2 | Register in zwei Schritten | Integration mit Test-Mailsender: Mail mit Link; Schritt 2 mit Passwort und mit Passkey → Account bestätigt, angemeldet |
+| 3 | Account erst in Schritt 2, befristeter Link | Integration: nach Schritt 1 kein Account, Name frei; abgelaufener oder benutzter Link abgewiesen; vorhandene Adresse → gleiche Seite, Hinweis-Mail |
 | 4 | Passkey-Registrierung ohne Passwort | Integration mit Software-Authenticator (Test-Helfer, kein Paket); **manuell** mit echten Geräten (T17) |
 | 5, 6, 7b | `PlayerNames` | Unit: Längen, Zeichen, Schreibweise, Sperrliste |
 | 7 | eindeutiger `NormalizedUserName` | Integration: zweite Registrierung mit „tobias“ abgelehnt |
@@ -227,4 +233,5 @@ Alle Integrationstests laufen gegen SQLite **und** PostgreSQL (CI).
 - **Forwarded-Header** werden ohne Proxy-Allowlist vertraut. Das ist sicher nur, solange der Container keinen Port
   veröffentlicht (nur Proxy-Netz). Deshalb steht das im README und als Kommentar in der Compose.
 - **Mails** können im Spam landen. SPF/DKIM für die Mail-Domain gehören zur Einrichtung des Postfachs (Betrieb).
+- **Unbestätigte Accounts aus der Zeit vor T9c** (nur Testumgebung) kommen nicht mehr weiter; vor dem Release löschen.
 - **Datenbank-Datei** auf der SD-Karte: WAL mit gebündelten Schreibzugriffen alle 5 s hält die Schreiblast gering.
