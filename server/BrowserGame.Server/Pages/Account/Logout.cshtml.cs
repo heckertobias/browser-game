@@ -17,6 +17,7 @@ public sealed class LogoutModel(SignInManager<PlayerAccount> signIn, UserManager
             await users.UpdateSecurityStampAsync(user);
         }
 
+        // 003 T11: hier GameLoop.ForceLeave – Figur sofort entfernen (AK-22).
         await signIn.SignOutAsync();
         return Redirect("/");
     }

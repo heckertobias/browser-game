@@ -62,4 +62,27 @@
   <data name="Mail.PasswordReset.Body" xml:space="preserve"><value>Hallo {0},&#10;&#10;über diesen Link kannst du ein neues Passwort setzen:&#10;{1}&#10;&#10;Der Link ist 3 Stunden gültig und funktioniert nur einmal. Wenn du das nicht angefordert hast, ignoriere diese Mail.</value></data>
   <data name="Mail.AlreadyRegistered.Subject" xml:space="preserve"><value>Du hast schon einen Account</value></data>
   <data name="Mail.AlreadyRegistered.Body" xml:space="preserve"><value>Hallo {0},&#10;&#10;jemand hat versucht, mit deiner E-Mail-Adresse einen neuen Account anzulegen. Du hast bereits einen. Hier kannst du dich anmelden:&#10;{1}&#10;&#10;Passwort vergessen? {2}&#10;&#10;Wenn du das nicht warst, musst du nichts tun.</value></data>
+  <data name="Manage.Title" xml:space="preserve"><value>Mein Account</value></data>
+  <data name="Manage.SignedInAs" xml:space="preserve"><value>Angemeldet als {0} ({1})</value></data>
+  <data name="Manage.PasskeysHeading" xml:space="preserve"><value>Deine Passkeys</value></data>
+  <data name="Manage.NoPasskeys" xml:space="preserve"><value>Noch kein Passkey.</value></data>
+  <data name="Manage.PasskeyLabel" xml:space="preserve"><value>Passkey {0}, angelegt am {1}</value></data>
+  <data name="Manage.RemovePasskey" xml:space="preserve"><value>Entfernen</value></data>
+  <data name="Manage.PasskeyRemoved" xml:space="preserve"><value>Passkey entfernt.</value></data>
+  <data name="Manage.LastCredential" xml:space="preserve"><value>Das ist deine einzige Anmeldeart. Lege zuerst ein Passwort oder einen weiteren Passkey an.</value></data>
+  <data name="Manage.LastCredentialHint" xml:space="preserve"><value>Deine einzige Anmeldeart kannst du nicht entfernen.</value></data>
+  <data name="Manage.PasswordHeading" xml:space="preserve"><value>Passwort</value></data>
+  <data name="Manage.HasPassword" xml:space="preserve"><value>Du kannst dich auch mit deinem Passwort anmelden.</value></data>
+  <data name="Manage.NoPassword" xml:space="preserve"><value>Du hast noch kein Passwort und meldest dich nur mit Passkey an. Hier kannst du eines setzen.</value></data>
+  <data name="Manage.SetPassword" xml:space="preserve"><value>Passwort setzen</value></data>
+  <data name="Manage.PasswordSet" xml:space="preserve"><value>Passwort gesetzt.</value></data>
+  <data name="Manage.DeleteLink" xml:space="preserve"><value>Account löschen</value></data>
+  <data name="Delete.Title" xml:space="preserve"><value>Account löschen</value></data>
+  <data name="Delete.Warning" xml:space="preserve"><value>Damit werden dein Account, dein Spielername und alles, was dazugehört, gelöscht. Das lässt sich nicht rückgängig machen. Dein Name ist danach wieder frei.</value></data>
+  <data name="Delete.PasswordLabel" xml:space="preserve"><value>Mit deinem Passwort bestätigen</value></data>
+  <data name="Delete.Submit" xml:space="preserve"><value>Account endgültig löschen</value></data>
+  <data name="Delete.WrongPassword" xml:space="preserve"><value>Falsches Passwort. Nach mehreren Fehlversuchen ist die Bestätigung kurz gesperrt.</value></data>
+  <data name="Delete.Done" xml:space="preserve"><value>Dein Account wurde gelöscht. Dein Spielername ist wieder frei.</value></data>
+  <data name="Delete.Home" xml:space="preserve"><value>Zur Startseite</value></data>
+  <data name="Delete.Cancel" xml:space="preserve"><value>Abbrechen</value></data>
 </root>

@@ -1,6 +1,8 @@
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using BrowserGame.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace BrowserGame.Server.Tests;
 
@@ -71,6 +73,66 @@ public static partial class AccountTestFlows
         var result = await users.CreateAsync(user, Password);
         Assert.True(result.Succeeded, string.Join("; ", result.Errors.Select(e => e.Description)));
         return account;
+    }
+
+    public static string PasskeyId(byte[] credentialId) => WebEncoders.Base64UrlEncode(credentialId);
+
+    public static Task<(HttpResponseMessage Response, string Html)> RemovePasskeyAsync(FormClient client, string passkeyId) =>
+        client.PostAsync("/Account/Manage", "/Account/Manage?handler=RemovePasskey", new Dictionary<string, string> { ["PasskeyId"] = passkeyId });
+
+    public static Task<(HttpResponseMessage Response, string Html)> SetPasswordAsync(FormClient client, string password, string? confirm = null) =>
+        client.PostAsync("/Account/Manage", "/Account/Manage?handler=SetPassword", new Dictionary<string, string>
+        {
+            ["NewPassword"] = password,
+            ["ConfirmNewPassword"] = confirm ?? password,
+        });
+
+    /// <summary>Legt einen bestätigten Account an und meldet ihn an (Passwort <see cref="Password"/>).</summary>
+    public static async Task<(FormClient Client, CreatedAccount Account)> SignInAsync(GameServerFactory factory, string? language = null)
+    {
+        var account = await CreateConfirmedAccountAsync(factory, language);
+        var client = factory.CreateFormClient();
+        await LoginAsync(client, account.Email);
+        return (client, account);
+    }
+
+    /// <summary>Hinterlegt einen Passkey direkt im Account (ohne Zeremonie) und gibt die Credential-ID zurück.</summary>
+    public static async Task<byte[]> AddStoredPasskeyAsync(GameServerFactory factory, string email, DateTimeOffset? createdAt = null)
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        var users = scope.ServiceProvider.GetRequiredService<UserManager<Account>>();
+        var user = (await users.FindByEmailAsync(email))!;
+        var credentialId = RandomNumberGenerator.GetBytes(16);
+        var result = await users.AddOrUpdatePasskeyAsync(user, new UserPasskeyInfo(
+            credentialId: credentialId,
+            publicKey: [1, 2, 3],
+            createdAt: createdAt ?? DateTimeOffset.UtcNow,
+            signCount: 0,
+            transports: ["internal"],
+            isUserVerified: true,
+            isBackupEligible: false,
+            isBackedUp: false,
+            attestationObject: [],
+            clientDataJson: []));
+        Assert.True(result.Succeeded, string.Join("; ", result.Errors.Select(e => e.Description)));
+        return credentialId;
+    }
+
+    /// <summary>Entfernt das Passwort ohne den Security-Stamp zu ändern, damit eine laufende Sitzung bleibt.</summary>
+    public static async Task RemovePasswordDirectlyAsync(GameServerFactory factory, string email)
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        var users = scope.ServiceProvider.GetRequiredService<UserManager<Account>>();
+        var user = (await users.FindByEmailAsync(email))!;
+        user.PasswordHash = null;
+        Assert.True((await users.UpdateAsync(user)).Succeeded);
+    }
+
+    public static async Task<int> PasskeyCountAsync(GameServerFactory factory, string email)
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        var users = scope.ServiceProvider.GetRequiredService<UserManager<Account>>();
+        return (await users.GetPasskeysAsync((await users.FindByEmailAsync(email))!)).Count;
     }
 
     /// <summary>Der Link (Pfad und Query) aus dem Text einer Mail.</summary>

@@ -1,0 +1,26 @@
+@page
+@model DeleteModel
+@{
+    ViewData["Title"] = T["Delete.Title"].Value;
+}
+@if (Model.Deleted)
+{
+    <p>@T["Delete.Done"]</p>
+    <a href="/" class="btn rounded-none font-mono uppercase">@T["Delete.Home"]</a>
+}
+else
+{
+    <partial name="_Errors" />
+    <div class="alert alert-warning rounded-none" role="alert">@T["Delete.Warning"]</div>
+    @if (Model.HasPassword)
+    {
+        <form method="post" class="flex flex-col gap-3">
+            <label class="flex flex-col gap-1">
+                <span class="label-text">@T["Delete.PasswordLabel"]</span>
+                <input asp-for="Password" type="password" autocomplete="current-password" class="input input-bordered w-full rounded-none" />
+            </label>
+            <button type="submit" class="btn btn-error rounded-none font-mono uppercase">@T["Delete.Submit"]</button>
+        </form>
+    }
+    <a href="/Account/Manage" class="link text-sm">@T["Delete.Cancel"]</a>
+}

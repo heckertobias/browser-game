@@ -62,4 +62,27 @@
   <data name="Mail.PasswordReset.Body" xml:space="preserve"><value>Hello {0},&#10;&#10;Use this link to set a new password:&#10;{1}&#10;&#10;The link is valid for 3 hours and works only once. If you didn't request this, ignore this email.</value></data>
   <data name="Mail.AlreadyRegistered.Subject" xml:space="preserve"><value>You already have an account</value></data>
   <data name="Mail.AlreadyRegistered.Body" xml:space="preserve"><value>Hello {0},&#10;&#10;Someone tried to create a new account with your email address. You already have one. You can sign in here:&#10;{1}&#10;&#10;Forgot your password? {2}&#10;&#10;If this wasn't you, you don't need to do anything.</value></data>
+  <data name="Manage.Title" xml:space="preserve"><value>My account</value></data>
+  <data name="Manage.SignedInAs" xml:space="preserve"><value>Signed in as {0} ({1})</value></data>
+  <data name="Manage.PasskeysHeading" xml:space="preserve"><value>Your passkeys</value></data>
+  <data name="Manage.NoPasskeys" xml:space="preserve"><value>No passkeys yet.</value></data>
+  <data name="Manage.PasskeyLabel" xml:space="preserve"><value>Passkey {0}, added {1}</value></data>
+  <data name="Manage.RemovePasskey" xml:space="preserve"><value>Remove</value></data>
+  <data name="Manage.PasskeyRemoved" xml:space="preserve"><value>Passkey removed.</value></data>
+  <data name="Manage.LastCredential" xml:space="preserve"><value>This is your only way to sign in. Add a password or another passkey first.</value></data>
+  <data name="Manage.LastCredentialHint" xml:space="preserve"><value>You can't remove your only way to sign in.</value></data>
+  <data name="Manage.PasswordHeading" xml:space="preserve"><value>Password</value></data>
+  <data name="Manage.HasPassword" xml:space="preserve"><value>You can also sign in with your password.</value></data>
+  <data name="Manage.NoPassword" xml:space="preserve"><value>You don't have a password yet and sign in with a passkey only. You can set one here.</value></data>
+  <data name="Manage.SetPassword" xml:space="preserve"><value>Set password</value></data>
+  <data name="Manage.PasswordSet" xml:space="preserve"><value>Password set.</value></data>
+  <data name="Manage.DeleteLink" xml:space="preserve"><value>Delete account</value></data>
+  <data name="Delete.Title" xml:space="preserve"><value>Delete account</value></data>
+  <data name="Delete.Warning" xml:space="preserve"><value>This deletes your account, your player name and everything that belongs to it. It cannot be undone. Your name becomes available to others again.</value></data>
+  <data name="Delete.PasswordLabel" xml:space="preserve"><value>Confirm with your password</value></data>
+  <data name="Delete.Submit" xml:space="preserve"><value>Delete account permanently</value></data>
+  <data name="Delete.WrongPassword" xml:space="preserve"><value>Wrong password. After several failed attempts, confirming is blocked for a few minutes.</value></data>
+  <data name="Delete.Done" xml:space="preserve"><value>Your account has been deleted. Your player name is available again.</value></data>
+  <data name="Delete.Home" xml:space="preserve"><value>Back to the start page</value></data>
+  <data name="Delete.Cancel" xml:space="preserve"><value>Cancel</value></data>
 </root>
