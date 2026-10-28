@@ -72,15 +72,21 @@ public sealed partial class PasswordResetTests(GameServerFactory factory) : ICla
     {
         using var client = factory.CreateFormClient();
         var email = AccountTestFlows.UniqueEmail();
-        await AccountTestFlows.RegisterAsync(client, email, AccountTestFlows.UniqueName());
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var users = scope.ServiceProvider.GetRequiredService<UserManager<Account>>();
+            var created = await users.CreateAsync(
+                new Account { UserName = AccountTestFlows.UniqueName(), Email = email, EmailConfirmed = false }, AccountTestFlows.Password);
+            Assert.True(created.Succeeded, string.Join("; ", created.Errors.Select(e => e.Description)));
+        }
+
         var unknown = AccountTestFlows.UniqueEmail();
 
         var (_, html) = await AccountTestFlows.ForgotPasswordAsync(client, email);
         var (_, unknownHtml) = await AccountTestFlows.ForgotPasswordAsync(client, unknown);
 
         Assert.Equal(Normalize(unknownHtml, unknown), Normalize(html, email));
-        var mail = Assert.Single(factory.Mails.To(email));
-        Assert.Equal("Bitte bestätige deine E-Mail-Adresse", mail.Subject);
+        Assert.Empty(factory.Mails.To(email));
     }
 
     [Fact] // AK-14

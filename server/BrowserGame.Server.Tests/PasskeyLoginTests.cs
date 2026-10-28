@@ -153,7 +153,7 @@ public sealed class PasskeyLoginTests(GameServerFactory factory) : IClassFixture
     }
 
     [Fact] // AK-3
-    public async Task Unconfirmed_account_gets_confirm_message()
+    public async Task Unconfirmed_account_cannot_sign_in_with_passkey()
     {
         using var authenticator = new SoftwareAuthenticator();
         var account = await AccountWithPasskeyAsync(authenticator);
@@ -170,6 +170,6 @@ public sealed class PasskeyLoginTests(GameServerFactory factory) : IClassFixture
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.False(HasSession(response));
-        Assert.Contains("Bitte bestätige zuerst deine E-Mail-Adresse.", HtmlTexts.Visible(html), StringComparison.Ordinal);
+        Assert.Contains("Die Anmeldung mit Passkey ist fehlgeschlagen.", HtmlTexts.Visible(html), StringComparison.Ordinal);
     }
 }

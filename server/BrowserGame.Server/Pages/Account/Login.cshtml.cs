@@ -61,11 +61,7 @@ public sealed class LoginModel(
         ModelState.Clear();
         if (await ceremonies.AssertAsync(Credential) is { User: { } user, Passkey: { } passkey })
         {
-            if (!await signIn.CanSignInAsync(user))
-            {
-                ModelState.AddModelError("", t["Login.PasskeyUnconfirmed"]);
-            }
-            else if (await users.IsLockedOutAsync(user))
+            if (!await signIn.CanSignInAsync(user) || await users.IsLockedOutAsync(user))
             {
                 ModelState.AddModelError("", t["Login.PasskeyFailed"]);
             }

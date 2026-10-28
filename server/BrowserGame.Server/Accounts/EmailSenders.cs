@@ -2,42 +2,39 @@ using System.Globalization;
 using System.Text.Encodings.Web;
 using BrowserGame.Data;
 using BrowserGame.Server.Localization;
-using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGame.Server.Accounts;
 
 /// <summary>
-/// Mailtexte in der Sprache des Accounts (006 AK-9), nicht der aktuellen Anfrage; der Versandweg ist austauschbar.
+/// Mailtexte in der Sprache des Accounts (006 AK-9); der Registrierungslink vor dem Account in der Sprache der Anfrage.
+/// Der Versandweg ist austauschbar.
 /// </summary>
-public abstract class GameEmailSender : IEmailSender<Account>
+public abstract class GameEmailSender
 {
-    public Task SendConfirmationLinkAsync(Account user, string email, string confirmationLink) =>
-        Compose(user, email, "Mail.Confirmation", confirmationLink, confirmationLink);
+    /// <summary>Link zu Schritt 2 der Registrierung (003 AK-2). Es gibt noch keinen Account: Sprache der Anfrage.</summary>
+    public Task SendRegistrationLinkAsync(string email, string language, string link, int lifetimeMinutes) =>
+        Compose(language, email, "Mail.Registration", link, link, lifetimeMinutes);
 
     public Task SendPasswordResetLinkAsync(Account user, string email, string resetLink) =>
-        Compose(user, email, "Mail.PasswordReset", resetLink, resetLink);
+        Compose(user.Language, email, "Mail.PasswordReset", resetLink, user.UserName, resetLink);
 
     /// <summary>Registrierung mit einer schon vorhandenen Adresse: Hinweis an den Inhaber statt Fehlermeldung auf der Seite.</summary>
     public Task SendAlreadyRegisteredAsync(Account user, string email, string loginLink, string forgotPasswordLink) =>
-        Compose(user, email, "Mail.AlreadyRegistered", loginLink, loginLink, forgotPasswordLink);
+        Compose(user.Language, email, "Mail.AlreadyRegistered", loginLink, user.UserName, loginLink, forgotPasswordLink);
 
-    /// <summary>Codes statt Links nutzen wir nicht (nur für das Identity-Interface).</summary>
-    public Task SendPasswordResetCodeAsync(Account user, string email, string resetCode) =>
-        throw new NotSupportedException("Passwort-Reset läuft über Links.");
-
-    /// <summary>Text-Mail plus schlichtes HTML mit klickbarem Link; <paramref name="language"/> ist die Sprache des Accounts.</summary>
+    /// <summary>Text-Mail plus schlichtes HTML mit klickbarem Link; <paramref name="language"/> ist die Sprache der Mail.</summary>
     protected abstract Task SendAsync(string recipient, string subject, string text, string link, string language);
 
     protected static string ToHtml(string text, string link, string language) =>
         $"<div lang=\"{HtmlEncoder.Default.Encode(language)}\">{MailHtml.FromText(text, link)}</div>";
 
-    private Task Compose(Account user, string email, string key, string htmlLink, params string[] links)
+    private Task Compose(string? language, string email, string key, string htmlLink, params object?[] args)
     {
-        var language = GameLanguages.Normalize(user.Language);
-        var culture = CultureInfo.GetCultureInfo(language);
+        var normalized = GameLanguages.Normalize(language);
+        var culture = CultureInfo.GetCultureInfo(normalized);
         var subject = Text(key + ".Subject", culture);
-        var text = Format(culture, Text(key + ".Body", culture), [user.UserName, .. links]);
-        return SendAsync(email, subject, text, htmlLink, language);
+        var text = Format(culture, Text(key + ".Body", culture), args);
+        return SendAsync(email, subject, text, htmlLink, normalized);
     }
 
     private static string Text(string key, CultureInfo culture) => Texts.ResourceManager.GetString(key, culture) ?? key;
@@ -84,7 +81,7 @@ internal static class EmailSetup
     public static void AddGameEmail(this WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<GameEmailSender, PlayerEmailSender>();
-        builder.Services.AddSingleton<IEmailSender<Account>>(sp => sp.GetRequiredService<GameEmailSender>());
+        builder.Services.AddSingleton<RegistrationLinks>();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<AccountLinks>();
         builder.Services.AddScoped<AccountEmails>();

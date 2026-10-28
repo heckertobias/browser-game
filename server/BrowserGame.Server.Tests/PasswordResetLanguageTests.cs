@@ -58,7 +58,7 @@ public sealed partial class PasswordResetLanguageTests(GameServerFactory factory
         AssertAll(form, "<title>Forgot password – Browser Game</title>", "Enter your email address and we'll send you a link to set a new password.",
             ">Email<", ">Send link</button>", "Back to sign in");
         AssertAll(empty, "Please enter your email address.");
-        AssertAll(sent, "If there is a confirmed account for this address", "The link is valid for 3 hours.", "Back to sign in", "Resend confirmation email");
+        AssertAll(sent, "If there is a confirmed account for this address", "The link is valid for 3 hours.", "Back to sign in");
     }
 
     [Fact] // 006 AK-10

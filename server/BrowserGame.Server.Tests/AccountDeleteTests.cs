@@ -65,8 +65,8 @@ public sealed class AccountDeleteTests(GameServerFactory factory) : IClassFixtur
         Assert.Equal(HttpStatusCode.Redirect, play.StatusCode);
         Assert.Contains("/Account/Login", play.Headers.Location?.OriginalString, StringComparison.Ordinal);
         using var again = factory.CreateFormClient();
-        var (_, registered) = await AccountTestFlows.RegisterAsync(again, account.Email, account.Name);
-        Assert.Contains("Fast geschafft", HtmlTexts.Visible(registered), StringComparison.Ordinal);
+        var (registered, _) = await AccountTestFlows.RegisterAsync(factory, again, account.Email, account.Name);
+        Assert.Equal(HttpStatusCode.Redirect, registered.StatusCode);
         Assert.Equal(account.Name, (await FindAsync(account.Email))?.UserName);
     }
 

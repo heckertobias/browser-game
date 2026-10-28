@@ -77,8 +77,9 @@ public sealed class DeletePasskeyTests(GameServerFactory factory) : IClassFixtur
         Assert.Contains(response.Headers.GetValues("Set-Cookie"), c => c.StartsWith("bg.auth=;", StringComparison.Ordinal));
         Assert.False(await ExistsAsync(account.Email));
         using var other = factory.CreateFormClient();
-        var (_, registered) = await AccountTestFlows.RegisterAsync(other, AccountTestFlows.UniqueEmail(), account.Name);
-        Assert.Contains("Fast geschafft", registered, StringComparison.Ordinal);
+        var (registered, _) = await AccountTestFlows.RegisterAsync(factory, other, AccountTestFlows.UniqueEmail(), account.Name);
+        Assert.Equal(HttpStatusCode.Redirect, registered.StatusCode);
+        Assert.Equal("/play", registered.Headers.Location?.OriginalString);
     }
 
     [Fact]

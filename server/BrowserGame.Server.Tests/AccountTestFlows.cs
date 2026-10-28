@@ -19,15 +19,51 @@ public static partial class AccountTestFlows
     public static string UniqueName() =>
         "T" + new string(Guid.NewGuid().ToString("N")[..12].Select(c => char.IsDigit(c) ? (char)('g' + (c - '0')) : c).ToArray());
 
-    public static Task<(HttpResponseMessage Response, string Html)> RegisterAsync(
-        FormClient client, string email, string name, string password = Password, string? confirm = null) =>
-        client.PostAsync("/Account/Register", "/Account/Register", new Dictionary<string, string>
+    public const string CompleteRegistrationPath = "/Account/CompleteRegistration";
+
+    /// <summary>Schritt 1: nur die E-Mail-Adresse.</summary>
+    public static Task<(HttpResponseMessage Response, string Html)> RequestRegistrationAsync(FormClient client, string email) =>
+        client.PostAsync("/Account/Register", "/Account/Register", new Dictionary<string, string> { ["Email"] = email });
+
+    /// <summary>Der neueste Registrierungslink (Pfad und Query) an <paramref name="email"/>.</summary>
+    public static string RegistrationLink(GameServerFactory factory, string email) =>
+        factory.Mails.To(email).Select(m => LinkFromMail(m.Text)).Last(l => l.StartsWith(CompleteRegistrationPath + "?", StringComparison.Ordinal));
+
+    /// <summary>Schritt 2, Name wählen; bei gültigem Namen enthält die Antwort Passwort- und Passkey-Formular.</summary>
+    public static Task<(HttpResponseMessage Response, string Html)> ChooseNameAsync(FormClient client, string link, string name) =>
+        client.PostAsync(link, link, new Dictionary<string, string> { ["Name"] = name });
+
+    /// <summary>Schritt 2 mit Passwort (der Server prüft den Namen erneut).</summary>
+    public static Task<(HttpResponseMessage Response, string Html)> CompleteWithPasswordAsync(
+        FormClient client, string link, string name, string password = Password, string? confirm = null) =>
+        client.PostAsync(link, link, new Dictionary<string, string>
         {
-            ["Email"] = email,
+            ["Step"] = "password",
             ["Name"] = name,
             ["Password"] = password,
             ["ConfirmPassword"] = confirm ?? password,
         });
+
+    /// <summary>Schritt 2 mit Passkey: Name wählen, dann den Passkey des Authenticators anlegen.</summary>
+    public static async Task<(HttpResponseMessage Response, string Html)> CompleteWithPasskeyAsync(
+        FormClient client, string link, string name, SoftwareAuthenticator authenticator)
+    {
+        var (_, page) = await ChooseNameAsync(client, link, name);
+        return await client.PostWithTokenAsync(link, new Dictionary<string, string>
+        {
+            ["Step"] = "passkey",
+            ["Name"] = name,
+            ["Credential"] = authenticator.Create(PasskeyOptions(page)),
+        }, FormClient.AntiforgeryToken(page));
+    }
+
+    /// <summary>Beide Schritte mit Passwort; liefert die letzte Antwort (Erfolg: Redirect auf /play, angemeldet).</summary>
+    public static async Task<(HttpResponseMessage Response, string Html)> RegisterAsync(
+        GameServerFactory factory, FormClient client, string email, string name, string password = Password, string? confirm = null)
+    {
+        await RequestRegistrationAsync(client, email);
+        return await CompleteWithPasswordAsync(client, RegistrationLink(factory, email), name, password, confirm);
+    }
 
     public static Task<(HttpResponseMessage Response, string Html)> LoginAsync(
         FormClient client, string email, string password = Password, string? returnUrl = null) =>

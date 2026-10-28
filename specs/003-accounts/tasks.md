@@ -27,7 +27,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 - [x] **T8** (AK-14, AK-15): `ForgotPassword`, `ResetPassword`.
   _Seit 006: Texte in `Texts.resx`/`Texts.de.resx`; die Reset-Mail kommt schon aus `GameEmailSender` in der
   Sprache des Accounts – Integrationstest je Sprache ergänzen._
-- [ ] **T9** (AK-4, AK-13b, AK-13c, AK-16): Passkeys bei Registrierung, Anmeldung und `Manage`; `CanRemoveCredential`
+- [x] **T9** (AK-4, AK-13b, AK-13c, AK-16): Passkeys bei Registrierung, Anmeldung und `Manage`; `CanRemoveCredential`
   + Unit-Test; Passwort setzen; `Delete` mit Bestätigung. Dazu `client/src/account/passkeys.ts` als fester
   Build `wwwroot/js/passkeys.js`.
   _Seit 006: Texte zweisprachig; die Passkey-Anmeldung setzt wie die Passwort-Anmeldung
@@ -38,7 +38,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
     entfernen, Passwort setzen, Abmelden, Link zu Löschen); `Delete` mit Passwort; „Mein Account“ auf der Startseite.
   - [x] **T9b** (AK-4, AK-11, AK-13b, AK-16): `PasskeyCeremonies`; Passkey hinzufügen in `Manage`, Passkey-Anmeldung,
     `Delete` mit Passkey; Software-Authenticator für die Tests.
-  - [ ] **T9c** (AK-2–4, AK-5–7b, AK-9; 006 AK-7): Registrierung einheitlich in zwei Schritten – erst E-Mail und Link,
+  - [x] **T9c** (AK-2–4, AK-5–7b, AK-9; 006 AK-7): Registrierung einheitlich in zwei Schritten – erst E-Mail und Link,
     dann Name und Passwort oder Passkey. Ersetzt den Passwort-Weg aus T7; `ConfirmEmail` und `ResendConfirmation`
     entfallen. Bestehende Registrierungs-Tests und Test-Helfer dürfen angepasst werden (mit dem User abgestimmt).
 

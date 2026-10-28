@@ -6,7 +6,7 @@ namespace BrowserGame.Server.Tests;
 /// <summary>006 T7: Mailtexte je Sprache des Accounts.</summary>
 public class EmailLanguageTests
 {
-    private const string Link = "https://game.test/Account/ConfirmEmail?code=a&b=1";
+    private const string Link = "https://game.test/Account/CompleteRegistration?code=a&b=1";
     private const string Login = "https://game.test/Account/Login";
     private const string Forgot = "https://game.test/Account/ForgotPassword";
 
@@ -26,7 +26,7 @@ public class EmailLanguageTests
     private static async Task<(string To, string Subject, string Text, string Html, string Language)[]> AllMailsAsync(Account account)
     {
         var sender = new Captured();
-        await sender.SendConfirmationLinkAsync(account, "t@example.org", Link);
+        await sender.SendRegistrationLinkAsync("t@example.org", account.Language, Link, 30);
         await sender.SendPasswordResetLinkAsync(account, "t@example.org", Link);
         await sender.SendAlreadyRegisteredAsync(account, "t@example.org", Login, Forgot);
         return [.. sender.Mails];
@@ -37,10 +37,10 @@ public class EmailLanguageTests
     {
         var mails = await AllMailsAsync(AccountWith("de"));
 
-        Assert.Equal("Bitte bestätige deine E-Mail-Adresse", mails[0].Subject);
+        Assert.Equal("Registrierung abschließen", mails[0].Subject);
         Assert.Equal(
-            $"Hallo Tobias,\n\nbitte bestätige deine E-Mail-Adresse, damit du spielen kannst:\n{Link}\n\n"
-            + "Der Link ist 3 Stunden gültig. Wenn du dich nicht registriert hast, kannst du diese Mail ignorieren.",
+            $"Hallo,\n\nüber diesen Link wählst du deinen Spielernamen und legst deinen Account an:\n{Link}\n\n"
+            + "Der Link ist 30 Minuten gültig. Wenn du dich nicht registriert hast, kannst du diese Mail ignorieren.",
             mails[0].Text);
         Assert.Equal("Passwort zurücksetzen", mails[1].Subject);
         Assert.Equal(
@@ -60,10 +60,10 @@ public class EmailLanguageTests
     {
         var mails = await AllMailsAsync(AccountWith("en"));
 
-        Assert.Equal("Please confirm your email address", mails[0].Subject);
+        Assert.Equal("Complete your sign-up", mails[0].Subject);
         Assert.Equal(
-            $"Hello Tobias,\n\nPlease confirm your email address so you can play:\n{Link}\n\n"
-            + "The link is valid for 3 hours. If you didn't sign up, you can ignore this email.",
+            $"Hello,\n\nUse this link to choose your player name and create your account:\n{Link}\n\n"
+            + "The link is valid for 30 minutes. If you didn't sign up, you can ignore this email.",
             mails[0].Text);
         Assert.Equal("Reset your password", mails[1].Subject);
         Assert.Equal(
@@ -111,7 +111,7 @@ public class EmailLanguageTests
         var mails = await AllMailsAsync(AccountWith(language));
 
         Assert.All(mails, m => Assert.StartsWith($"<div lang=\"{language}\">", m.Html, StringComparison.Ordinal));
-        Assert.Contains("<a href=\"https://game.test/Account/ConfirmEmail?code=a&amp;b=1\">", mails[0].Html, StringComparison.Ordinal);
+        Assert.Contains("<a href=\"https://game.test/Account/CompleteRegistration?code=a&amp;b=1\">", mails[0].Html, StringComparison.Ordinal);
     }
 
     [Theory]
