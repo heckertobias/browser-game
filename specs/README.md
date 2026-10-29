@@ -84,6 +84,9 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 5 | [007 – Handy hochkant, Sichtfeld ohne Ränder, Web-App](007-mobil/spec.md) | in arbeit | 001, 006 |
 | 6 | [005 – Sachliches Layout fürs Admin-Interface](005-admin-layout/spec.md) | bereit | 004 |
 | 7 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | bereit | 003 |
+| 8 | [012 – HP & Mana](012-hp-mana/spec.md) | bereit | 001 |
+| 9 | 013 – Rudimentäres Kampfsystem (Fern- + Nahkampf) | geplant, noch keine Spec | 012 |
+| 10 | 014 – Gegner (erstes Ziel, das HP hat und zurückwirkt) | geplant, noch keine Spec | 012, 013 |
 | später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |
 | später | [011 – Chat](011-chat/spec.md) | bereit | 003, 007 |
 | später | [008 – Push-Benachrichtigungen](008-push/spec.md) | entwurf | 007, Haus |
