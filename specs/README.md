@@ -86,7 +86,8 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 7 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | bereit | 003 |
 | 8 | [012 – HP & Mana](012-hp-mana/spec.md) | bereit | 001 |
 | 9 | [013 – Rudimentäres Kampfsystem](013-kampfsystem/spec.md) | bereit | 012 |
-| 10 | 014 – Gegner (erstes Ziel, das HP hat und zurückwirkt) | geplant, noch keine Spec | 012, 013 |
+| 10 | [016 – Blickrichtung](016-blickrichtung/spec.md) | bereit | 001 |
+| 11 | 014 – Gegner (erstes Ziel, das HP hat und zurückwirkt) | geplant, noch keine Spec | 012, 013, 015, 016 |
 | später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |
 | später | [011 – Chat](011-chat/spec.md) | bereit | 003, 007 |
 | später | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | bereit | 011, 012, 003 |
