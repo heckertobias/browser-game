@@ -9,9 +9,9 @@ using PlayerAccount = BrowserGame.Data.Account;
 
 namespace BrowserGame.Server.Pages.Account;
 
-/// <summary>Bestätigungsmail erneut anfordern (003 AK-3); die Antwort verrät nicht, ob es die Adresse gibt.</summary>
+/// <summary>Link zum Zurücksetzen anfordern (003 AK-14); die Antwort verrät nicht, ob es die Adresse gibt.</summary>
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
-public sealed class ResendConfirmationModel(UserManager<PlayerAccount> users, AccountEmails emails) : PageModel
+public sealed class ForgotPasswordModel(UserManager<PlayerAccount> users, AccountEmails emails) : PageModel
 {
     [BindProperty]
     [Required(ErrorMessage = "Validation.EmailRequired")]
@@ -26,9 +26,9 @@ public sealed class ResendConfirmationModel(UserManager<PlayerAccount> users, Ac
             return Page();
         }
 
-        if (await users.FindByEmailAsync(Email.Trim()) is { EmailConfirmed: false } user)
+        if (await users.FindByEmailAsync(Email.Trim()) is { EmailConfirmed: true } user)
         {
-            await emails.SendConfirmationAsync(user);
+            await emails.SendPasswordResetAsync(user);
         }
 
         Sent = true;

@@ -23,10 +23,13 @@ kommen dort wieder heraus, wo sie aufgehört haben. Das ist die Grundlage für a
 ### Registrierung & Name
 - **AK-1:** Gegeben ich bin nicht angemeldet, wenn ich auf „Spielen“ klicke, dann werde ich zur Anmeldung geführt
   und komme erst danach ins Spiel.
-- **AK-2:** Gegeben ich habe noch keinen Account, wenn ich E-Mail, Passwort und Spielernamen angebe, dann wird
-  mein Account angelegt und ich bekomme eine Mail mit einem Bestätigungslink.
-- **AK-3:** Gegeben meine E-Mail-Adresse ist noch nicht bestätigt, dann kann ich nicht spielen und kann mir den
-  Bestätigungslink erneut schicken lassen. Nach dem Klick auf den Link kann ich spielen.
+- **AK-2:** Gegeben ich habe noch keinen Account, wenn ich meine E-Mail-Adresse angebe, dann bekomme ich eine Mail
+  mit einem Link. Über den Link wähle ich meinen Spielernamen und lege ein Passwort oder einen Passkey fest. Danach
+  ist mein Account angelegt und ich bin angemeldet.
+- **AK-3:** Gegeben ich habe den Link aus der Mail noch nicht benutzt, dann gibt es noch keinen Account und keinen
+  reservierten Namen. Der Link gilt nur begrenzte Zeit; danach kann ich mich erneut registrieren. Gebe ich eine
+  Adresse an, zu der es schon einen Account gibt, dann sieht die Seite genauso aus, und an die Adresse geht ein
+  Hinweis statt eines Links.
 - **AK-4:** Gegeben ich lege einen Account an, wenn ich statt eines Passworts einen Passkey verwende, dann kann ich
   mich künftig allein mit dem Passkey anmelden.
 - **AK-5:** Gegeben ich wähle einen Spielernamen, dann muss er 3 bis 16 Zeichen lang sein und darf nur aus den
@@ -100,6 +103,8 @@ kommen dort wieder heraus, wo sie aufgehört haben. Das ist die Grundlage für a
 - Zonen, in denen man sich sofort abmelden kann, und Gefahr während der 20 Sekunden (z. B. sterben) – später
 - Eigene Darstellung für wartende Figuren (z. B. hinsetzen) – kommt mit Sprites
 - Tastenbelegung (→ 002), Haus und Offline-Fortschritt (eigene Specs)
+- Code zum Eintippen statt Link in der Registrierungsmail – später
+- Einladungslinks (z. B. bei abgeschalteter Registrierung) – eigene Spec; sie sollen denselben zweiten Schritt nutzen
 
 ## Offene Fragen
 
@@ -110,6 +115,8 @@ _Keine._
 - Kein Gastmodus; Anmeldung per E-Mail + Passwort oder Passkey.
 - Name: 3–16 Buchstaben A–Z, Schreibweise wird vereinheitlicht (erster groß, Rest klein), eindeutig, nicht änderbar.
 - E-Mail-Bestätigung, Passwort vergessen und Account löschen gehören zu dieser Spec.
+- Registrierung für alle Anmeldearten gleich: erst die E-Mail-Adresse bestätigen, dann Name und Passwort oder Passkey.
+  Ein Account entsteht erst nach der Bestätigung.
 - Eine neue Anmeldung im Spiel wirft die alte hinaus.
 - Nach Tab schließen/Verbindungsabbruch bleibt die Figur 20 s (anders eingefärbt); bewusstes Abmelden: sofort weg.
 - Angemeldet bleiben: 30 Tage.

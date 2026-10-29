@@ -1,0 +1,43 @@
+@page
+@model DeleteModel
+@{
+    ViewData["Title"] = T["Delete.Title"].Value;
+}
+@if (Model.Deleted)
+{
+    <p>@T["Delete.Done"]</p>
+    <a href="/" class="btn rounded-none font-mono uppercase">@T["Delete.Home"]</a>
+}
+else
+{
+    <partial name="_Errors" />
+    <div class="alert alert-warning rounded-none" role="alert">@T["Delete.Warning"]</div>
+    @if (Model.HasPassword)
+    {
+        <form method="post" class="flex flex-col gap-3">
+            <label class="flex flex-col gap-1">
+                <span class="label-text">@T["Delete.PasswordLabel"]</span>
+                <input asp-for="Password" type="password" autocomplete="current-password" class="input input-bordered w-full rounded-none" />
+            </label>
+            <button type="submit" class="btn btn-error rounded-none font-mono uppercase">@T["Delete.Submit"]</button>
+        </form>
+    }
+    @if (Model.HasPassword && Model.PasskeyOptions is not null)
+    {
+        <div class="divider font-mono text-xs">@T["Common.Or"]</div>
+    }
+    @if (Model.PasskeyOptions is not null)
+    {
+        <form method="post" asp-page-handler="Passkey" data-passkey="get" class="flex flex-col gap-2">
+            <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
+            <input type="hidden" name="Credential" />
+            <button type="submit" class="btn btn-error rounded-none font-mono uppercase">@T["Delete.SubmitPasskey"]</button>
+            <p class="text-error text-sm" data-passkey-error hidden></p>
+        </form>
+    }
+    <a href="/Account/Manage" class="link text-sm">@T["Delete.Cancel"]</a>
+}
+
+@section Scripts {
+    <script type="module" src="~/js/passkeys.js" asp-append-version="true"></script>
+}

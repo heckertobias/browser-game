@@ -48,8 +48,9 @@ deutschsprachige Spieler beschränkt.
   ich das Spiel, schalte auf einer Spieler-Seite um und komme danach in der neuen Sprache zurück.
 
 ### Mails
-- **AK-9:** Gegeben das Spiel schickt mir eine Mail (Bestätigung, erneute Bestätigung, Passwort zurücksetzen,
-  Hinweis „Du hast schon einen Account“), dann ist sie in der Sprache meines Accounts.
+- **AK-9:** Gegeben das Spiel schickt mir eine Mail (Passwort zurücksetzen, Hinweis „Du hast schon einen Account“),
+  dann ist sie in der Sprache meines Accounts. Die Registrierungsmail (003 AK-2) geht vor dem Account raus und ist in
+  der Sprache, in der ich mich registriere.
 
 ### Vollständigkeit
 - **AK-10:** Gegeben ich nutze eine der beiden Sprachen, dann ist jeder Text, den ich als Spieler sehe, in dieser

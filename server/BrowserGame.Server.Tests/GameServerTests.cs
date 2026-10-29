@@ -176,11 +176,7 @@ public sealed class GameServerTests(GameServerFactory factory) : IClassFixture<G
         Assert.Equal(WebSocketCloseStatus.MessageTooBig, await ReceiveCloseStatusAsync(socket, ct));
     }
 
-    private async Task<WebSocket> ConnectAsync(CancellationToken ct)
-    {
-        var uri = new UriBuilder(factory.Server.BaseAddress) { Scheme = "ws", Path = "/ws" }.Uri;
-        return await factory.Server.CreateWebSocketClient().ConnectAsync(uri, ct);
-    }
+    private async Task<WebSocket> ConnectAsync(CancellationToken ct) => (await GameSockets.ConnectNewPlayerAsync(factory, ct)).Socket;
 
     private static async Task SendInputsAsync(WebSocket socket, float dirX, float dirY, CancellationToken ct)
     {

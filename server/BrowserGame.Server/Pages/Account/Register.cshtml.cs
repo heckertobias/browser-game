@@ -7,85 +7,49 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Localization;
 using PlayerAccount = BrowserGame.Data.Account;
 
 namespace BrowserGame.Server.Pages.Account;
 
 /// <summary>
-/// Registrierung mit E-Mail, Name und Passwort (003 AK-2, AK-5 bis AK-7b, 006 AK-7). Eine schon vergebene E-Mail-Adresse
-/// verrät die Seite nicht: Sie zeigt dieselbe Erfolgsansicht, der Inhaber bekommt eine Mail.
+/// Schritt 1 der Registrierung (003 AK-2, AK-3, AK-9): nur die E-Mail-Adresse. Die Antwort ist für jede Adresse gleich;
+/// neue Adressen bekommen den Link zu Schritt 2, vorhandene einen Hinweis. In der DB entsteht nichts.
 /// </summary>
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
-public sealed class RegisterModel(UserManager<PlayerAccount> users, AccountEmails emails, IStringLocalizer<Texts> t) : PageModel
+public sealed class RegisterModel(UserManager<PlayerAccount> users, AccountEmails emails, RegistrationLinks registrationLinks) : PageModel
 {
     [BindProperty]
     [Required(ErrorMessage = "Validation.EmailRequired")]
     public string Email { get; set; } = "";
 
-    [BindProperty]
-    [Required(ErrorMessage = "Validation.NameRequired")]
-    public string Name { get; set; } = "";
-
-    [BindProperty]
-    [Required(ErrorMessage = "Validation.PasswordRequired")]
-    public string Password { get; set; } = "";
-
-    [BindProperty]
-    [Required(ErrorMessage = "Validation.ConfirmPasswordRequired")]
-    public string ConfirmPassword { get; set; } = "";
-
     public bool Sent { get; private set; }
+
+    public int LifetimeMinutes => registrationLinks.LifetimeMinutes;
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var name = "";
-        if (!string.IsNullOrWhiteSpace(Name))
+        if (!ModelState.IsValid)
         {
-            var nameError = PlayerNames.TryNormalize(Name, out name);
-            if (nameError != PlayerNameError.None)
-            {
-                ModelState.AddModelError(nameof(Name), PlayerNames.Describe(nameError));
-            }
+            return Page();
         }
 
-        if (!string.IsNullOrEmpty(ConfirmPassword) && Password != ConfirmPassword)
-        {
-            ModelState.AddModelError(nameof(ConfirmPassword), t["Register.PasswordMismatch"]);
-        }
-
-        return ModelState.IsValid ? await CreateAsync(name) : Page();
-    }
-
-    private async Task<IActionResult> CreateAsync(string name)
-    {
         var email = Email.Trim();
-        var account = new PlayerAccount { UserName = name, Email = email, Language = GameLanguages.Normalize(CultureInfo.CurrentUICulture.Name) };
-        var result = await users.CreateAsync(account, Password);
-        if (result.Succeeded)
+        if (!new EmailAddressAttribute().IsValid(email))
         {
-            await emails.SendConfirmationAsync(account);
-            Sent = true;
+            ModelState.AddModelError(nameof(Email), users.ErrorDescriber.InvalidEmail(email).Description);
             return Page();
         }
 
-        var errors = result.Errors.Where(e => e.Code != nameof(IdentityErrorDescriber.DuplicateEmail)).ToList();
-        if (errors.Count == 0)
+        if (await users.FindByEmailAsync(email) is { } existing)
         {
-            if (await users.FindByEmailAsync(email) is { } existing)
-            {
-                await emails.SendAlreadyRegisteredAsync(existing);
-            }
-
-            Sent = true;
-            return Page();
+            await emails.SendAlreadyRegisteredAsync(existing);
+        }
+        else
+        {
+            await emails.SendRegistrationLinkAsync(email, GameLanguages.Normalize(CultureInfo.CurrentUICulture.Name));
         }
 
-        foreach (var error in errors)
-        {
-            ModelState.AddModelError("", error.Description);
-        }
-
+        Sent = true;
         return Page();
     }
 }

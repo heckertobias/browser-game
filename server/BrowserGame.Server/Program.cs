@@ -25,6 +25,9 @@ builder.Services.AddRazorPages()
     .AddDataAnnotationsLocalization(o => o.DataAnnotationLocalizerProvider = (_, f) => f.Create(typeof(Texts)));
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<GameLoop>();
+builder.Services.AddSingleton<PositionStore>();
+// Vor dem GameLoop registriert: Hosted Services stoppen rückwärts, so schreibt der Store noch dessen letzten Stand (003 AK-19).
+builder.Services.AddHostedService(sp => sp.GetRequiredService<PositionStore>());
 builder.Services.AddHostedService(sp => sp.GetRequiredService<GameLoop>());
 
 var app = builder.Build();
@@ -47,7 +50,7 @@ app.UseRequestLocalization(o =>
     o.FallBackToParentUICultures = false;
 });
 
-// Erkennt Verbindungen, die ohne Close-Frame verschwinden (AK-4).
+// Erkennt Verbindungen, die ohne Close-Frame verschwinden (003 AK-20).
 app.UseWebSockets(new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromSeconds(10),

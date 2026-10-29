@@ -71,8 +71,7 @@ public sealed partial class LanguageSwitchTests(GameServerFactory factory) : ICl
     [InlineData("/Account/Login")]
     [InlineData("/Account/Login?ReturnUrl=%2Fplay")]
     [InlineData("/Account/Register")]
-    [InlineData("/Account/ResendConfirmation")]
-    [InlineData("/Account/ConfirmEmail")]
+    [InlineData("/Account/CompleteRegistration")]
     public async Task Switcher_is_on_every_player_page(string url)
     {
         using var client = ClientWith("de");
@@ -188,15 +187,15 @@ public sealed partial class LanguageSwitchTests(GameServerFactory factory) : ICl
     public async Task Switch_on_a_result_page_returns_to_the_get_page()
     {
         using var client = ClientWith("de");
-        var (_, sent) = await client.PostAsync("/Account/ResendConfirmation", "/Account/ResendConfirmation",
+        var (_, sent) = await client.PostAsync("/Account/Register", "/Account/Register",
             new Dictionary<string, string> { ["Email"] = AccountTestFlows.UniqueEmail() });
         var returnUrl = ReturnUrlOf(sent);
 
-        var (response, _) = await SwitchAsync(client, "/Account/ResendConfirmation", "en", returnUrl);
+        var (response, _) = await SwitchAsync(client, "/Account/Register", "en", returnUrl);
 
-        Assert.Equal("/Account/ResendConfirmation", response.Headers.Location?.OriginalString);
+        Assert.Equal("/Account/Register", response.Headers.Location?.OriginalString);
         var (_, html) = await client.GetAsync(response.Headers.Location!.OriginalString);
-        Assert.Contains("Send email", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
+        Assert.Contains("Enter your email address. We'll send you a link to create your account.", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 
     [Fact] // AK-5
@@ -278,8 +277,7 @@ public sealed partial class LanguageSwitchTests(GameServerFactory factory) : ICl
     [InlineData("/Account/Login")]
     [InlineData("/Account/Login?ReturnUrl=%2Fplay")]
     [InlineData("/Account/Register")]
-    [InlineData("/Account/ResendConfirmation")]
-    [InlineData("/Account/ConfirmEmail")]
+    [InlineData("/Account/CompleteRegistration")]
     public async Task Layout_loads_language_js(string url)
     {
         using var client = ClientWith("de");

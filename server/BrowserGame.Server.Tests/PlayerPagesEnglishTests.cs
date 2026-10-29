@@ -68,7 +68,7 @@ public sealed partial class PlayerPagesEnglishTests(GameServerFactory factory) :
         var (_, withReturn) = await client.GetAsync("/Account/Login?ReturnUrl=%2Fplay");
 
         AssertAll(html, "<title>Sign in – Browser Game</title>", ">Email<", ">Password<", ">Sign in</button>",
-            "No account yet? Sign up", "Resend confirmation email");
+            "No account yet? Sign up");
         Assert.DoesNotContain("Sign in to play.", Decode(html), StringComparison.Ordinal);
         AssertAll(withReturn, "Sign in to play.");
     }
@@ -92,8 +92,8 @@ public sealed partial class PlayerPagesEnglishTests(GameServerFactory factory) :
 
         var (_, html) = await client.GetAsync("/Account/Register");
 
-        AssertAll(html, "<title>Sign up – Browser Game</title>", ">Email<", "Player name (3 to 16 letters A–Z)",
-            "Password (at least 10 characters)", "Repeat password", ">Sign up</button>", "Already have an account? Sign in");
+        AssertAll(html, "<title>Sign up – Browser Game</title>", ">Email<",
+            "Enter your email address. We'll send you a link to create your account.", ">Sign up</button>", "Already have an account? Sign in");
     }
 
     [Fact] // AK-10
@@ -102,7 +102,7 @@ public sealed partial class PlayerPagesEnglishTests(GameServerFactory factory) :
         using var client = EnglishClient();
 
         var (_, html) = await AccountTestFlows.RegisterAsync(
-            client, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName(), confirm: "ein-anderes-passwort");
+            factory, client, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName(), confirm: "ein-anderes-passwort");
 
         Assert.Equal(1, Occurrences(Decode(html), "The passwords do not match."));
     }
@@ -113,7 +113,7 @@ public sealed partial class PlayerPagesEnglishTests(GameServerFactory factory) :
         using var client = factory.CreateFormClient();
 
         var (_, html) = await AccountTestFlows.RegisterAsync(
-            client, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName(), confirm: "ein-anderes-passwort");
+            factory, client, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName(), confirm: "ein-anderes-passwort");
 
         Assert.Equal(1, Occurrences(Decode(html), "Die Passwörter stimmen nicht überein."));
     }
@@ -123,37 +123,36 @@ public sealed partial class PlayerPagesEnglishTests(GameServerFactory factory) :
     {
         using var client = EnglishClient();
 
-        var (_, html) = await AccountTestFlows.RegisterAsync(client, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName());
+        var (_, html) = await AccountTestFlows.RequestRegistrationAsync(client, AccountTestFlows.UniqueEmail());
 
-        AssertAll(html, "Almost done! We've sent you an email. Click the link in it to confirm your email address.",
-            "Didn't get an email? Send it again", "href=\"/Account/ResendConfirmation\"");
+        AssertAll(html,
+            "Almost done! We've sent you an email with a link. Use it to choose your player name and set a password or passkey. The link is valid for 30 minutes.",
+            "Didn't get an email? Sign up again", "href=\"/Account/Register\"");
     }
 
     [Fact] // AK-10
-    public async Task Email_confirmation_is_english()
+    public async Task Complete_registration_is_english()
     {
         using var client = EnglishClient();
         var email = AccountTestFlows.UniqueEmail();
+        var name = AccountTestFlows.UniqueName();
 
-        var (_, invalid) = await client.GetAsync("/Account/ConfirmEmail");
-        await AccountTestFlows.RegisterAsync(client, email, AccountTestFlows.UniqueName());
-        var (_, confirmed) = await client.GetAsync(AccountTestFlows.LinkFromMail(Assert.Single(factory.Mails.To(email)).Text));
+        var (_, invalid) = await client.GetAsync("/Account/CompleteRegistration");
+        await AccountTestFlows.RequestRegistrationAsync(client, email);
+        var link = AccountTestFlows.RegistrationLink(factory, email);
+        var (_, nameStep) = await client.GetAsync(link);
+        var (_, noName) = await AccountTestFlows.ChooseNameAsync(client, link, "");
+        var (_, credentialStep) = await AccountTestFlows.ChooseNameAsync(client, link, name);
+        var (_, noPassword) = await AccountTestFlows.CompleteWithPasswordAsync(client, link, name, "", "");
 
-        AssertAll(invalid, "<title>Confirm email – Browser Game</title>", "The link is invalid or has expired.", "Resend confirmation email");
-        AssertAll(confirmed, "Your email address is confirmed.", "Play now");
-    }
-
-    [Fact] // AK-10
-    public async Task Resend_confirmation_is_english()
-    {
-        using var client = EnglishClient();
-
-        var (_, page) = await client.GetAsync("/Account/ResendConfirmation");
-        var (_, sent) = await client.PostAsync(
-            "/Account/ResendConfirmation", "/Account/ResendConfirmation", new Dictionary<string, string> { ["Email"] = AccountTestFlows.UniqueEmail() });
-
-        AssertAll(page, "<title>Confirmation email – Browser Game</title>", "Send email");
-        AssertAll(sent, "If there is an unconfirmed account for this address, we've sent you a new email.");
+        AssertAll(invalid, "<title>Create account – Browser Game</title>", "The link is invalid or has expired.", "Sign up again");
+        AssertAll(nameStep, $"You're creating an account for {email}. First choose your player name.",
+            "Player name (3 to 16 letters A–Z)", ">Continue</button>");
+        AssertAll(noName, "Please enter a player name.");
+        AssertAll(credentialStep, $"Your player name: {name[..1].ToUpperInvariant()}{name[1..].ToLowerInvariant()}. Now choose how you sign in: with a password or a passkey.",
+            "Password (at least 10 characters)", "Repeat password", ">Sign up with password</button>", ">Sign up with a passkey</button>",
+            "Choose a different name");
+        AssertAll(noPassword, "Please enter your password.", "Please repeat the password.");
     }
 
     [Fact] // AK-10
@@ -176,8 +175,7 @@ public sealed partial class PlayerPagesEnglishTests(GameServerFactory factory) :
     [InlineData("/Account/Login")]
     [InlineData("/Account/Login?ReturnUrl=%2Fplay")]
     [InlineData("/Account/Register")]
-    [InlineData("/Account/ResendConfirmation")]
-    [InlineData("/Account/ConfirmEmail")]
+    [InlineData("/Account/CompleteRegistration")]
     public async Task Player_pages_have_no_fixed_texts(string url)
     {
         using var german = factory.CreateFormClient();
@@ -208,41 +206,38 @@ public sealed partial class PlayerPagesEnglishTests(GameServerFactory factory) :
     }
 
     [Fact] // AK-10
-    public async Task Resend_and_registration_results_have_no_fixed_texts()
+    public async Task Registration_results_have_no_fixed_texts()
     {
         using var german = factory.CreateFormClient();
         using var english = EnglishClient();
-        var resend = new Dictionary<string, string> { ["Email"] = AccountTestFlows.UniqueEmail() };
 
-        var (_, deSent) = await german.PostAsync("/Account/ResendConfirmation", "/Account/ResendConfirmation", resend);
-        var (_, enSent) = await english.PostAsync("/Account/ResendConfirmation", "/Account/ResendConfirmation", resend);
-        var (_, deRegistered) = await AccountTestFlows.RegisterAsync(german, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName());
-        var (_, enRegistered) = await AccountTestFlows.RegisterAsync(english, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName());
+        var (_, deRegistered) = await AccountTestFlows.RequestRegistrationAsync(german, AccountTestFlows.UniqueEmail());
+        var (_, enRegistered) = await AccountTestFlows.RequestRegistrationAsync(english, AccountTestFlows.UniqueEmail());
 
-        Assert.Contains("Falls es zu dieser Adresse", Decode(deSent), StringComparison.Ordinal);
-        Assert.Contains("If there is an unconfirmed account", Decode(enSent), StringComparison.Ordinal);
         Assert.Contains("Fast geschafft!", Decode(deRegistered), StringComparison.Ordinal);
         Assert.Contains("Almost done!", Decode(enRegistered), StringComparison.Ordinal);
-        AssertNoFixedTexts(deSent, enSent);
         AssertNoFixedTexts(deRegistered, enRegistered);
     }
 
     [Fact] // AK-10
-    public async Task Confirmed_email_page_has_no_fixed_texts()
+    public async Task Registration_steps_have_no_fixed_texts()
     {
         using var german = factory.CreateFormClient();
         using var english = EnglishClient();
         var deEmail = AccountTestFlows.UniqueEmail();
         var enEmail = AccountTestFlows.UniqueEmail();
-        await AccountTestFlows.RegisterAsync(german, deEmail, AccountTestFlows.UniqueName());
-        await AccountTestFlows.RegisterAsync(english, enEmail, AccountTestFlows.UniqueName());
+        await AccountTestFlows.RequestRegistrationAsync(german, deEmail);
+        await AccountTestFlows.RequestRegistrationAsync(english, enEmail);
+        var deLink = AccountTestFlows.RegistrationLink(factory, deEmail);
+        var enLink = AccountTestFlows.RegistrationLink(factory, enEmail);
 
-        var (_, deHtml) = await german.GetAsync(AccountTestFlows.LinkFromMail(Assert.Single(factory.Mails.To(deEmail)).Text));
-        var (_, enHtml) = await english.GetAsync(AccountTestFlows.LinkFromMail(Assert.Single(factory.Mails.To(enEmail)).Text));
+        var (_, deName) = await german.GetAsync(deLink);
+        var (_, enName) = await english.GetAsync(enLink);
+        var (_, deCredential) = await AccountTestFlows.ChooseNameAsync(german, deLink, AccountTestFlows.UniqueName());
+        var (_, enCredential) = await AccountTestFlows.ChooseNameAsync(english, enLink, AccountTestFlows.UniqueName());
 
-        Assert.Contains("bestätigt", Decode(deHtml), StringComparison.Ordinal);
-        Assert.Contains("Your email address is confirmed.", Decode(enHtml), StringComparison.Ordinal);
-        AssertNoFixedTexts(deHtml, enHtml);
+        AssertNoFixedTexts(deName, enName);
+        AssertNoFixedTexts(deCredential, enCredential);
     }
 
     private static void AssertNoFixedTexts(string deHtml, string enHtml)
