@@ -15,7 +15,7 @@ COPY client/package.json client/package-lock.json client/.npmrc client/
 RUN cd client && npm ci
 COPY client/ client/
 # Tailwind scannt die Razor-Seiten von Spiel und Admin.
-COPY server/BrowserGame.Server/Pages/ server/BrowserGame.Server/Pages/
+COPY server/BrowserGame.Server/Features/ server/BrowserGame.Server/Features/
 COPY server/BrowserGame.Admin/Pages/ server/BrowserGame.Admin/Pages/
 # Version im Spiel (007 AK-15): Release-Tag bzw. kurzer Commit-Hash aus der CI; ohne Argument leer → "dev".
 # Erst hier, damit npm ci im Cache bleibt.
