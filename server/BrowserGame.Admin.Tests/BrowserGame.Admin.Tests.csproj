@@ -18,9 +18,9 @@
 
   <ItemGroup>
     <!-- Gemeinsame Test-Helfer -->
-    <Compile Include="..\BrowserGame.Server.Tests\FakeSmtpServer.cs" Link="FakeSmtpServer.cs" />
-    <Compile Include="..\BrowserGame.Server.Tests\FormClient.cs" Link="FormClient.cs" />
-    <Compile Include="..\BrowserGame.Server.Tests\TestDatabase.cs" Link="TestDatabase.cs" />
+    <Compile Include="..\BrowserGame.Server.Tests\TestSupport\FakeSmtpServer.cs" Link="FakeSmtpServer.cs" />
+    <Compile Include="..\BrowserGame.Server.Tests\TestSupport\FormClient.cs" Link="FormClient.cs" />
+    <Compile Include="..\BrowserGame.Server.Tests\TestSupport\TestDatabase.cs" Link="TestDatabase.cs" />
   </ItemGroup>
 
   <ItemGroup>

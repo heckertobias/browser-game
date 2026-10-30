@@ -1,8 +1,10 @@
-using BrowserGame.Server.Accounts;
+using BrowserGame.Server.Features.Accounts;
 using BrowserGame.Data;
-using BrowserGame.Server.Game;
-using BrowserGame.Server.Localization;
-using BrowserGame.Server.Pwa;
+using BrowserGame.Server.Features.Game;
+using BrowserGame.Server.Features.Localization;
+using BrowserGame.Server.Features.Localization.Resources;
+using BrowserGame.Server.Features.Pwa;
+using BrowserGame.Server.Shared.Pages;
 using Microsoft.AspNetCore.Localization;
 
 if (await WebDefaults.TryRunHealthProbeAsync(args) is { } exitCode)
@@ -20,11 +22,20 @@ if (databaseProvider == DatabaseProvider.Sqlite)
 
 builder.AddGameAccounts();
 builder.AddGameEmail();
-builder.Services.AddLocalization(o => o.ResourcesPath = "Resources");
-builder.Services.AddRazorPages()
+builder.Services.AddLocalization(o => o.ResourcesPath = "");
+builder.Services.AddRazorPages(o =>
+    {
+        // Razor-Seiten leben in den Feature-Ordnern (Features/<Feature>/Presentation/…).
+        // Die URLs bleiben wie bisher (/Account/Login …): die Konvention entfernt <Feature> und Presentation aus der Route.
+        o.RootDirectory = "/Features";
+        o.Conventions.Add(new FeaturePageRouteConvention());
+    })
     .AddDataAnnotationsLocalization(o => o.DataAnnotationLocalizerProvider = (_, f) => f.Create(typeof(Texts)));
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<GameLoop>();
+builder.Services.AddSingleton<PositionStore>();
+// Vor dem GameLoop registriert: Hosted Services stoppen rückwärts, so schreibt der Store noch dessen letzten Stand (003 AK-19).
+builder.Services.AddHostedService(sp => sp.GetRequiredService<PositionStore>());
 builder.Services.AddHostedService(sp => sp.GetRequiredService<GameLoop>());
 
 var app = builder.Build();
@@ -47,7 +58,7 @@ app.UseRequestLocalization(o =>
     o.FallBackToParentUICultures = false;
 });
 
-// Erkennt Verbindungen, die ohne Close-Frame verschwinden (AK-4).
+// Erkennt Verbindungen, die ohne Close-Frame verschwinden (003 AK-20).
 app.UseWebSockets(new WebSocketOptions
 {
     KeepAliveInterval = TimeSpan.FromSeconds(10),

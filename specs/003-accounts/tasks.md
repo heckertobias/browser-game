@@ -24,44 +24,54 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   _Wird durch 004 T4 ersetzt: SMTP-Einstellungen aus der DB (Admin-Interface) statt `Mail:*`._
 - [x] **T7** (AK-1–3, AK-7, AK-9, AK-13): Razor Pages `Register` (Passwort-Weg), `Login`, `ConfirmEmail`,
   `ResendConfirmation`, `Logout`; Startseite mit Anmelde-Links; `/play` mit `RequireAuthorization`.
-- [ ] **T8** (AK-14, AK-15): `ForgotPassword`, `ResetPassword`.
+- [x] **T8** (AK-14, AK-15): `ForgotPassword`, `ResetPassword`.
   _Seit 006: Texte in `Texts.resx`/`Texts.de.resx`; die Reset-Mail kommt schon aus `GameEmailSender` in der
   Sprache des Accounts – Integrationstest je Sprache ergänzen._
-- [ ] **T9** (AK-4, AK-13b, AK-13c, AK-16): Passkeys bei Registrierung, Anmeldung und `Manage`; `CanRemoveCredential`
+- [x] **T9** (AK-4, AK-13b, AK-13c, AK-16): Passkeys bei Registrierung, Anmeldung und `Manage`; `CanRemoveCredential`
   + Unit-Test; Passwort setzen; `Delete` mit Bestätigung. Dazu `client/src/account/passkeys.ts` als fester
   Build `wwwroot/js/passkeys.js`.
   _Seit 006: Texte zweisprachig; die Passkey-Anmeldung setzt wie die Passwort-Anmeldung
   `LanguageCookie.Append(Response, user.Language)` (006 AK-6), die Passkey-Registrierung setzt `Account.Language`
   (006 AK-7); `passkeys.ts` hat ein eigenes kleines Wörterbuch und darf nichts mit `language.ts` teilen._
+  _`passkeys.ts`/`passkeys.js` gibt es schon aus 004/006; hier werden sie nur eingebunden._
+  - [x] **T9a** (AK-13b, AK-13c, AK-16): `CanRemoveCredential` + Unit-Test; `Manage` (Passkeys auflisten und
+    entfernen, Passwort setzen, Abmelden, Link zu Löschen); `Delete` mit Passwort; „Mein Account“ auf der Startseite.
+  - [x] **T9b** (AK-4, AK-11, AK-13b, AK-16): `PasskeyCeremonies`; Passkey hinzufügen in `Manage`, Passkey-Anmeldung,
+    `Delete` mit Passkey; Software-Authenticator für die Tests.
+  - [x] **T9c** (AK-2–4, AK-5–7b, AK-9; 006 AK-7): Registrierung einheitlich in zwei Schritten – erst E-Mail und Link,
+    dann Name und Passwort oder Passkey. Ersetzt den Passwort-Weg aus T7; `ConfirmEmail` und `ResendConfirmation`
+    entfallen. Bestehende Registrierungs-Tests und Test-Helfer dürfen angepasst werden (mit dem User abgestimmt).
 
 ## Server – Spiel
-- [ ] **T10** (AK-8, AK-17, AK-18): `/ws` nur angemeldet + bestätigt, Origin-Prüfung; Spieler-ID = Account-ID,
+- [x] **T10** (AK-8, AK-17, AK-18): `/ws` nur angemeldet + bestätigt, Origin-Prüfung; Spieler-ID = Account-ID,
   Name aus dem Account, Position laden, stabile Farbe.
-- [ ] **T11** (AK-12, AK-20–23): `World` mit `away`/Linger (+ Unit-Tests), `GameLoop` mit Übernahme, Rauswurf
+- [x] **T11** (AK-12, AK-20–23): `World` mit `away`/Linger (+ Unit-Tests), `GameLoop` mit Übernahme, Rauswurf
   (`Kicked`) und `ForceLeave` (aus Logout, Reset, Löschen).
-- [ ] **T12** (AK-18, AK-19): `PositionStore` – gebündeltes Speichern alle 5 s, beim Entfernen und beim Herunterfahren.
+- [x] **T12** (AK-18, AK-19): `PositionStore` – gebündeltes Speichern alle 5 s, beim Entfernen und beim Herunterfahren.
 
 ## Client
-- [ ] **T13** (AK-12, AK-19b, AK-20, AK-22): `kicked`-Overlay, `away`-Figuren entsättigt, HUD mit Koordinaten und Link „Mein Account“.
+- [x] **T13** (AK-12, AK-19b, AK-20, AK-22): `kicked`-Overlay, `away`-Figuren entsättigt, HUD mit Koordinaten und Link „Mein Account“.
   _Seit 006: Texte aus `client/src/i18n.ts` (Schlüssel fürs Overlay sind angelegt); kein Sprachumschalter im Spiel._
 
 ## Tests / Prüfung
-- [ ] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen
+- [x] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen
   SQLite und PostgreSQL (Provider per Umgebungsvariable).
   _AK-1, AK-2, AK-3, AK-7, AK-9 und AK-13 samt Test-Infrastruktur (`CapturingEmailSender`, `FormClient`,
   `AccountTestFlows`) schon mit T7 erledigt._
-- [ ] **T15**: CI-Job `server-postgres` (Service-Container, Digest gepinnt) und Prüfung auf pending model changes für
+- [x] **T15**: CI-Job `server-postgres` (Service-Container, Digest gepinnt) und Prüfung auf pending model changes für
   beide Kontexte; in `ci-ok.needs`.
+  _Schon mit 004 T11 erledigt; in 003 nichts mehr nötig._
 
 ## Betrieb
-- [ ] **T16**: `deploy/compose.yaml` (Volume `/data`, Datenbank, URL, Passkey-Domain, Forwarded-Header),
+- [x] **T16**: `deploy/compose.yaml` (Volume `/data`, Datenbank, URL, Passkey-Domain, Forwarded-Header),
   README-Abschnitt „Konfiguration“ mit allen Variablen.
-  _Großteils mit 004 T13 erledigt (Vorlage `deploy/compose.template.yaml` mit Volume, URL, Passkey-Domain,
+  _Großteils mit 004 T13 erledigt (`deploy/compose.yaml` mit Volume, URL, Passkey-Domain,
   Forwarded-Header; README „Betrieb“). Offen: Feinschliff, sobald 003 fertig ist._ Hinweise für den Betrieb: Volume ins Backup aufnehmen,
   Mail-Postfach + SPF/DKIM.
 - [ ] **T17**: Manuelle Prüfung in der Testumgebung:
   - AK-4, AK-13b und AK-13c mit echten Passkeys (Handy + Laptop)
-  - Mail-Empfang (Bestätigung, Reset)
+  - Mail-Empfang (Registrierungslink, Hinweis bei vorhandener Adresse, Reset)
   - AK-12 mit zwei Geräten, AK-20 und AK-21 per Tab schließen und neu laden
+  - AK-19b: gehen, Spiel verlassen, wiederkommen → gleiche Koordinaten im HUD
 
   Danach alle AKs abhaken und Spec-Status auf `umgesetzt`.

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Validation.EmailRequired" xml:space="preserve"><value>Bitte E-Mail angeben.</value></data>
+  <data name="Validation.NameRequired" xml:space="preserve"><value>Bitte einen Spielernamen angeben.</value></data>
+  <data name="Validation.PasswordRequired" xml:space="preserve"><value>Bitte Passwort angeben.</value></data>
+  <data name="Validation.ConfirmPasswordRequired" xml:space="preserve"><value>Bitte das Passwort wiederholen.</value></data>
+  <data name="Validation.NewPasswordRequired" xml:space="preserve"><value>Bitte ein neues Passwort angeben.</value></data>
+  <data name="PlayerName.Length" xml:space="preserve"><value>Der Name muss {0} bis {1} Zeichen lang sein.</value></data>
+  <data name="PlayerName.Characters" xml:space="preserve"><value>Der Name darf nur aus den Buchstaben A–Z bestehen (keine Umlaute, Ziffern, Leer- oder Sonderzeichen).</value></data>
+  <data name="PlayerName.Blocked" xml:space="preserve"><value>Dieser Name ist nicht erlaubt.</value></data>
+  <data name="Common.GameName" xml:space="preserve"><value>Browser Game</value></data>
+  <data name="Common.SignIn" xml:space="preserve"><value>Anmelden</value></data>
+  <data name="Common.Register" xml:space="preserve"><value>Registrieren</value></data>
+  <data name="Common.Email" xml:space="preserve"><value>E-Mail</value></data>
+  <data name="Index.Tagline" xml:space="preserve"><value>Eine Fantasy-Welt im Browser. Kein Download – einfach loslaufen.</value></data>
+  <data name="Index.Play" xml:space="preserve"><value>Spielen</value></data>
+  <data name="Index.SignedInAs" xml:space="preserve"><value>Angemeldet als {0}</value></data>
+  <data name="Index.SignOut" xml:space="preserve"><value>Abmelden</value></data>
+  <data name="Login.ReturnHint" xml:space="preserve"><value>Melde dich an, um zu spielen.</value></data>
+  <data name="Login.Password" xml:space="preserve"><value>Passwort</value></data>
+  <data name="Login.NoAccount" xml:space="preserve"><value>Noch keinen Account? Registrieren</value></data>
+  <data name="Login.GenericError" xml:space="preserve"><value>Anmeldung fehlgeschlagen. Prüfe E-Mail und Passwort. Nach mehreren Fehlversuchen ist die Anmeldung kurz gesperrt.</value></data>
+  <data name="Login.ForgotPassword" xml:space="preserve"><value>Passwort vergessen?</value></data>
+  <data name="ForgotPassword.Title" xml:space="preserve"><value>Passwort vergessen</value></data>
+  <data name="ForgotPassword.Intro" xml:space="preserve"><value>Gib deine E-Mail-Adresse an. Wir schicken dir einen Link, mit dem du ein neues Passwort setzen kannst.</value></data>
+  <data name="ForgotPassword.Submit" xml:space="preserve"><value>Link senden</value></data>
+  <data name="ForgotPassword.Sent" xml:space="preserve"><value>Falls es zu dieser Adresse einen bestätigten Account gibt, haben wir dir eine Mail mit einem Link geschickt, über den du ein neues Passwort setzen kannst. Der Link ist 3 Stunden gültig.</value></data>
+  <data name="ForgotPassword.BackToLogin" xml:space="preserve"><value>Zurück zur Anmeldung</value></data>
+  <data name="ResetPassword.Title" xml:space="preserve"><value>Neues Passwort setzen</value></data>
+  <data name="ResetPassword.PasswordLabel" xml:space="preserve"><value>Neues Passwort (mindestens 10 Zeichen)</value></data>
+  <data name="ResetPassword.ConfirmPasswordLabel" xml:space="preserve"><value>Neues Passwort wiederholen</value></data>
+  <data name="ResetPassword.Submit" xml:space="preserve"><value>Passwort speichern</value></data>
+  <data name="ResetPassword.Done" xml:space="preserve"><value>Dein Passwort wurde geändert. Alle anderen Sitzungen wurden abgemeldet. Melde dich mit dem neuen Passwort an.</value></data>
+  <data name="ResetPassword.Invalid" xml:space="preserve"><value>Der Link ist ungültig, abgelaufen oder wurde schon benutzt.</value></data>
+  <data name="ResetPassword.RequestNew" xml:space="preserve"><value>Neuen Link anfordern</value></data>
+  <data name="Register.NameLabel" xml:space="preserve"><value>Spielername (3 bis 16 Buchstaben A–Z)</value></data>
+  <data name="Register.PasswordLabel" xml:space="preserve"><value>Passwort (mindestens 10 Zeichen)</value></data>
+  <data name="Register.ConfirmPasswordLabel" xml:space="preserve"><value>Passwort wiederholen</value></data>
+  <data name="Register.HaveAccount" xml:space="preserve"><value>Schon einen Account? Anmelden</value></data>
+  <data name="Register.PasswordMismatch" xml:space="preserve"><value>Die Passwörter stimmen nicht überein.</value></data>
+  <data name="Register.Sent" xml:space="preserve"><value>Fast geschafft! Wir haben dir eine Mail mit einem Link geschickt. Über den Link wählst du deinen Spielernamen und legst ein Passwort oder einen Passkey fest. Der Link ist {0} Minuten gültig.</value></data>
+  <data name="Register.NoMail" xml:space="preserve"><value>Keine Mail bekommen? Erneut registrieren</value></data>
+  <data name="Register.Intro" xml:space="preserve"><value>Gib deine E-Mail-Adresse an. Wir schicken dir einen Link, über den du deinen Account anlegst.</value></data>
+  <data name="Mail.Registration.Subject" xml:space="preserve"><value>Registrierung abschließen</value></data>
+  <data name="Mail.Registration.Body" xml:space="preserve"><value>Hallo,&#10;&#10;über diesen Link wählst du deinen Spielernamen und legst deinen Account an:&#10;{0}&#10;&#10;Der Link ist {1} Minuten gültig. Wenn du dich nicht registriert hast, kannst du diese Mail ignorieren.</value></data>
+  <data name="CompleteRegistration.Title" xml:space="preserve"><value>Account anlegen</value></data>
+  <data name="CompleteRegistration.Intro" xml:space="preserve"><value>Du legst einen Account für {0} an. Wähle zuerst deinen Spielernamen.</value></data>
+  <data name="CompleteRegistration.Next" xml:space="preserve"><value>Weiter</value></data>
+  <data name="CompleteRegistration.NameChosen" xml:space="preserve"><value>Dein Spielername: {0}. Lege jetzt fest, wie du dich anmeldest: mit Passwort oder Passkey.</value></data>
+  <data name="CompleteRegistration.WithPassword" xml:space="preserve"><value>Mit Passwort registrieren</value></data>
+  <data name="CompleteRegistration.WithPasskey" xml:space="preserve"><value>Mit Passkey registrieren</value></data>
+  <data name="CompleteRegistration.PasskeyFailed" xml:space="preserve"><value>Der Passkey konnte nicht angelegt werden. Bitte versuche es erneut oder nutze ein Passwort.</value></data>
+  <data name="CompleteRegistration.ChangeName" xml:space="preserve"><value>Anderen Namen wählen</value></data>
+  <data name="CompleteRegistration.Invalid" xml:space="preserve"><value>Der Link ist ungültig oder abgelaufen.</value></data>
+  <data name="CompleteRegistration.RegisterAgain" xml:space="preserve"><value>Erneut registrieren</value></data>
+  <data name="Language.Label" xml:space="preserve"><value>Sprache</value></data>
+  <data name="Language.de" xml:space="preserve"><value>Deutsch</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
+  <data name="Language.en" xml:space="preserve"><value>English</value><comment>Endonym: in jeder Sprache gleich, nicht übersetzen.</comment></data>
+  <data name="Language.Confirm" xml:space="preserve"><value>Beim Umschalten wird die Seite neu geladen und deine Eingaben gehen verloren. Trotzdem umschalten?</value></data>
+  <data name="Mail.PasswordReset.Subject" xml:space="preserve"><value>Passwort zurücksetzen</value></data>
+  <data name="Mail.PasswordReset.Body" xml:space="preserve"><value>Hallo {0},&#10;&#10;über diesen Link kannst du ein neues Passwort setzen:&#10;{1}&#10;&#10;Der Link ist 3 Stunden gültig und funktioniert nur einmal. Wenn du das nicht angefordert hast, ignoriere diese Mail.</value></data>
+  <data name="Mail.AlreadyRegistered.Subject" xml:space="preserve"><value>Du hast schon einen Account</value></data>
+  <data name="Mail.AlreadyRegistered.Body" xml:space="preserve"><value>Hallo {0},&#10;&#10;jemand hat versucht, mit deiner E-Mail-Adresse einen neuen Account anzulegen. Du hast bereits einen. Hier kannst du dich anmelden:&#10;{1}&#10;&#10;Passwort vergessen? {2}&#10;&#10;Wenn du das nicht warst, musst du nichts tun.</value></data>
+  <data name="Manage.Title" xml:space="preserve"><value>Mein Account</value></data>
+  <data name="Manage.SignedInAs" xml:space="preserve"><value>Angemeldet als {0} ({1})</value></data>
+  <data name="Manage.PasskeysHeading" xml:space="preserve"><value>Deine Passkeys</value></data>
+  <data name="Manage.NoPasskeys" xml:space="preserve"><value>Noch kein Passkey.</value></data>
+  <data name="Manage.PasskeyLabel" xml:space="preserve"><value>Passkey {0}, angelegt am {1}</value></data>
+  <data name="Manage.RemovePasskey" xml:space="preserve"><value>Entfernen</value></data>
+  <data name="Manage.PasskeyRemoved" xml:space="preserve"><value>Passkey entfernt.</value></data>
+  <data name="Manage.LastCredential" xml:space="preserve"><value>Das ist deine einzige Anmeldeart. Lege zuerst ein Passwort oder einen weiteren Passkey an.</value></data>
+  <data name="Manage.LastCredentialHint" xml:space="preserve"><value>Deine einzige Anmeldeart kannst du nicht entfernen.</value></data>
+  <data name="Manage.PasswordHeading" xml:space="preserve"><value>Passwort</value></data>
+  <data name="Manage.HasPassword" xml:space="preserve"><value>Du kannst dich auch mit deinem Passwort anmelden.</value></data>
+  <data name="Manage.NoPassword" xml:space="preserve"><value>Du hast noch kein Passwort und meldest dich nur mit Passkey an. Hier kannst du eines setzen.</value></data>
+  <data name="Manage.SetPassword" xml:space="preserve"><value>Passwort setzen</value></data>
+  <data name="Manage.PasswordSet" xml:space="preserve"><value>Passwort gesetzt.</value></data>
+  <data name="Manage.DeleteLink" xml:space="preserve"><value>Account löschen</value></data>
+  <data name="Delete.Title" xml:space="preserve"><value>Account löschen</value></data>
+  <data name="Delete.Warning" xml:space="preserve"><value>Damit werden dein Account, dein Spielername und alles, was dazugehört, gelöscht. Das lässt sich nicht rückgängig machen. Dein Name ist danach wieder frei.</value></data>
+  <data name="Delete.PasswordLabel" xml:space="preserve"><value>Mit deinem Passwort bestätigen</value></data>
+  <data name="Delete.Submit" xml:space="preserve"><value>Account endgültig löschen</value></data>
+  <data name="Delete.WrongPassword" xml:space="preserve"><value>Falsches Passwort. Nach mehreren Fehlversuchen ist die Bestätigung kurz gesperrt.</value></data>
+  <data name="Delete.Done" xml:space="preserve"><value>Dein Account wurde gelöscht. Dein Spielername ist wieder frei.</value></data>
+  <data name="Delete.Home" xml:space="preserve"><value>Zur Startseite</value></data>
+  <data name="Delete.Cancel" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="Common.Or" xml:space="preserve"><value>oder</value></data>
+  <data name="Login.WithPasskey" xml:space="preserve"><value>Mit Passkey anmelden</value></data>
+  <data name="Login.PasskeyFailed" xml:space="preserve"><value>Die Anmeldung mit Passkey ist fehlgeschlagen. Versuche es erneut oder nutze dein Passwort.</value></data>
+  <data name="Manage.AddPasskey" xml:space="preserve"><value>Passkey hinzufügen</value></data>
+  <data name="Manage.PasskeyAdded" xml:space="preserve"><value>Passkey hinzugefügt.</value></data>
+  <data name="Manage.PasskeyAddFailed" xml:space="preserve"><value>Der Passkey konnte nicht hinzugefügt werden. Bitte versuche es erneut.</value></data>
+  <data name="Delete.SubmitPasskey" xml:space="preserve"><value>Mit Passkey bestätigen und löschen</value></data>
+  <data name="Delete.PasskeyFailed" xml:space="preserve"><value>Der Passkey konnte nicht bestätigt werden. Bitte versuche es erneut.</value></data>
+</root>

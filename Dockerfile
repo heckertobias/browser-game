@@ -15,7 +15,7 @@ COPY client/package.json client/package-lock.json client/.npmrc client/
 RUN cd client && npm ci
 COPY client/ client/
 # Tailwind scannt die Razor-Seiten von Spiel und Admin.
-COPY server/BrowserGame.Server/Pages/ server/BrowserGame.Server/Pages/
+COPY server/BrowserGame.Server/Features/ server/BrowserGame.Server/Features/
 COPY server/BrowserGame.Admin/Pages/ server/BrowserGame.Admin/Pages/
 # Version im Spiel (007 AK-15): Release-Tag bzw. kurzer Commit-Hash aus der CI; ohne Argument leer → "dev".
 # Erst hier, damit npm ci im Cache bleibt.
@@ -58,6 +58,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:c89a6a61f494f20a
 WORKDIR /app
 COPY --from=publish-admin /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data
+# Zeitzonendaten (die chiseled-Basis hat keine): sonst ignoriert .NET TZ und rechnet in UTC.
+COPY --from=restore /usr/share/zoneinfo /usr/share/zoneinfo
 ENV ConnectionStrings__Game="Data Source=/data/game.db"
 USER $APP_UID
 EXPOSE 8080
@@ -70,6 +72,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:c89a6a61f494f20a
 WORKDIR /app
 COPY --from=publish-game /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data
+# Zeitzonendaten (die chiseled-Basis hat keine): sonst ignoriert .NET TZ und rechnet in UTC.
+COPY --from=restore /usr/share/zoneinfo /usr/share/zoneinfo
 ENV ConnectionStrings__Game="Data Source=/data/game.db"
 USER $APP_UID
 EXPOSE 8080

@@ -11,11 +11,11 @@
     "icons": "node scripts/icons.mjs",
     "dev": "npm run gen && vite",
     "build": "npm run gen && vite build && npm run build:landing && npm run build:admin && npm run build:passkeys",
-    "build:landing": "tailwindcss -i src/landing.css -o ../server/BrowserGame.Server/wwwroot/css/site.css --minify",
+    "build:landing": "tailwindcss -i src/styles/landing.css -o ../server/BrowserGame.Server/wwwroot/css/site.css --minify",
     "test": "npm run gen && vitest run",
     "typecheck": "npm run gen && tsc --noEmit",
     "lint": "npm run gen && eslint .",
-    "build:admin": "tailwindcss -i src/admin.css -o ../server/BrowserGame.Admin/wwwroot/css/site.css --minify",
+    "build:admin": "tailwindcss -i src/styles/admin.css -o ../server/BrowserGame.Admin/wwwroot/css/site.css --minify",
     "build:passkeys": "vite build -c vite.passkeys.config.ts && mkdir -p ../server/BrowserGame.Admin/wwwroot/js && cp ../server/BrowserGame.Server/wwwroot/js/passkeys.js ../server/BrowserGame.Admin/wwwroot/js/passkeys.js"
   },
   "dependencies": {

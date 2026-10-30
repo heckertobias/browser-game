@@ -1,0 +1,23 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = T["Common.Register"].Value;
+}
+@if (Model.Sent)
+{
+    <p>@T["Register.Sent", Model.LifetimeMinutes]</p>
+    <a class="link text-sm" href="/Account/Register">@T["Register.NoMail"]</a>
+}
+else
+{
+    <p>@T["Register.Intro"]</p>
+    <partial name="_Errors" />
+    <form method="post" class="flex flex-col gap-3">
+        <label class="flex flex-col gap-1">
+            <span class="label-text">@T["Common.Email"]</span>
+            <input asp-for="Email" type="email" autocomplete="username" class="input input-bordered w-full rounded-none" />
+        </label>
+        <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">@T["Common.Register"]</button>
+    </form>
+    <a class="link text-sm" href="/Account/Login">@T["Register.HaveAccount"]</a>
+}
