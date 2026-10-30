@@ -1,6 +1,6 @@
-import { language, t } from "./i18n";
-import { browserReloadWindow, reloadPage } from "./reload";
-import "./styles.css";
+import { language, t } from "../../i18n/i18n";
+import { browserReloadWindow, reloadPage } from "../services/reload";
+import "../../../styles/global.css";
 
 function element(id: string): HTMLElement {
   const found = document.getElementById(id);

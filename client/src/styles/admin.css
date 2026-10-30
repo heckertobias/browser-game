@@ -1,4 +1,4 @@
 /* Styles des Admin-Interfaces (server/BrowserGame.Admin/Pages). Gleiches Tailwind/daisyUI wie Spiel und Startseite. */
 @import "tailwindcss" source(none);
-@source "../../server/BrowserGame.Admin/Pages";
+@source "../../../server/BrowserGame.Admin/Pages";
 @plugin "daisyui";

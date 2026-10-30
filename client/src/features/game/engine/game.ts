@@ -1,15 +1,15 @@
-import type { Snapshot, Welcome } from "../generated/browsergame/v1/game_pb";
-import { t } from "../i18n";
+import type { Snapshot, Welcome } from "../../../generated/browsergame/v1/game_pb";
+import { t } from "../../i18n/i18n";
 import { INTERPOLATION_DELAY_MS } from "./constants";
-import { InputTracker } from "./input";
-import { formatCoordinates } from "./hud";
-import { SnapshotBuffer } from "./interpolation";
-import { connect, gameSocketUrl, type GameConnection, type KickReason } from "./net";
-import { Predictor } from "./prediction";
-import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "./render";
+import { InputTracker } from "../input/input";
+import { formatCoordinates } from "../render/hud";
+import { SnapshotBuffer } from "../state/interpolation";
+import { connect, gameSocketUrl, type GameConnection, type KickReason } from "../network/net";
+import { Predictor } from "../state/prediction";
+import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "../render/render";
 import type { Vec } from "./vector";
-import { fitViewport, type Viewport } from "./viewport";
-import { ScreenWakeLock } from "./wakeLock";
+import { fitViewport, type Viewport } from "../render/viewport";
+import { ScreenWakeLock } from "../input/wakeLock";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "kicked";
 

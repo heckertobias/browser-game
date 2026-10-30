@@ -1,4 +1,4 @@
-import { MAX_ASPECT_LONG, MAX_ASPECT_SHORT, MAX_SHORT_SIDE, TARGET_SHORT_SIDE } from "./constants";
+import { MAX_ASPECT_LONG, MAX_ASPECT_SHORT, MAX_SHORT_SIDE, TARGET_SHORT_SIDE } from "../engine/constants";
 
 /** Canvas in Gerätepixeln, ganzzahliger Faktor und sichtbare Welt (ADR 0010). */
 export interface Viewport {

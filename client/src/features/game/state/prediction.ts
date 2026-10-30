@@ -1,4 +1,4 @@
-import { clampDirection, type Vec } from "./vector";
+import { clampDirection, type Vec } from "../engine/vector";
 
 export interface PendingInput {
   seq: number;

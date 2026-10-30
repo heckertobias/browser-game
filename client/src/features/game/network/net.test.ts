@@ -5,7 +5,7 @@ import {
   ServerMessageSchema,
   type Snapshot,
   type Welcome,
-} from "../generated/browsergame/v1/game_pb";
+} from "../../../generated/browsergame/v1/game_pb";
 import { createReceiver, type KickReason } from "./net";
 
 type Payload = Parameters<typeof create<typeof ServerMessageSchema>>[1] extends infer I

@@ -5,8 +5,8 @@ import {
   ServerMessageSchema,
   type Snapshot,
   type Welcome,
-} from "../generated/browsergame/v1/game_pb";
-import type { PendingInput } from "./prediction";
+} from "../../../generated/browsergame/v1/game_pb";
+import type { PendingInput } from "../state/prediction";
 
 /** Gründe, bei denen der Server die Verbindung bewusst beendet (AK-12, AK-22). */
 export type KickReason = Kicked_Reason.SIGNED_IN_ELSEWHERE | Kicked_Reason.SIGNED_OUT;

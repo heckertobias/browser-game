@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_ASPECT_LONG, MAX_ASPECT_SHORT, MAX_SHORT_SIDE } from "./constants";
+import { MAX_ASPECT_LONG, MAX_ASPECT_SHORT, MAX_SHORT_SIDE } from "../engine/constants";
 import { chooseScale, computeViewport, fitViewport, type Viewport } from "./viewport";
 
 function vp(

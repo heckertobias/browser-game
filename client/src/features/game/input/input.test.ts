@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { activeActions, combinedDirection, DEFAULT_BINDINGS, keyboardDirection, POINTER_RELEASE_EVENTS, PointerHold, pointerDirection } from "./input";
-import { clampDirection } from "./vector";
+import { clampDirection } from "../engine/vector";
 
 const keys = (...codes: string[]) => activeActions(new Set(codes), DEFAULT_BINDINGS);
 

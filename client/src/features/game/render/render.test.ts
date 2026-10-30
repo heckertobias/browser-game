@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CULL_MARGIN } from "./constants";
+import { CULL_MARGIN } from "../engine/constants";
 import { cameraOrigin, isVisible, screenToWorld } from "./render";
 import type { Viewport } from "./viewport";
 

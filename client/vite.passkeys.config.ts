@@ -8,7 +8,7 @@ export default defineConfig({
   publicDir: false,
   build: {
     lib: {
-      entry: { passkeys: "src/account/passkeys.ts", language: "src/account/language.ts" },
+      entry: { passkeys: "src/features/account/api/passkeys.ts", language: "src/features/i18n/language.ts" },
       formats: ["es"],
       fileName: (_format, entryName) => `${entryName}.js`,
     },
