@@ -26,11 +26,16 @@ Details: [`specs/README.md`](specs/README.md)
 | `specs/_template/` | Vorlagen für neue Features |
 | `contracts/` | Maschinenlesbare Verträge: OpenAPI (HTTP), Protobuf (WebSocket) |
 | `docs/decisions/` | Architekturentscheidungen (ADRs) |
+| `docs/project-structure.md` | Detaillierte Projektstruktur (wo ist was, warum) |
 | `scripts/` | Hilfsskripte: `github-setup.sh` (Repo-Härtung), `release.sh`, `release-notes.sh` |
 | `.github/` | CI-Workflows, Dependabot |
 | `deploy/` | Compose für den Betrieb (Version über `GAME_VERSION`) |
-| `server/` | C# / ASP.NET Core: Spielserver, Admin-Interface, gemeinsame Datenschicht |
-| `client/` | TypeScript, React, Canvas, daisyUI |
+| `server/` | C# / ASP.NET Core: `Features/<Name>/` mit Präsentation, Anwendung, Domain, Infrastruktur; gemeinsame Daten- und Infrastruktur-Ebene (`BrowserGame.Data`), Admin als eigener Dienst |
+| `client/` | TypeScript, React, Canvas, daisyUI: `src/app/` (Einstieg), `src/features/<name>/` (game, account, i18n, pwa), `src/styles/` |
+
+Beide Seiten ordnen nach Feature: Client `src/features/<name>/`, Server `Features/<Name>/`; die Aufteilung ist in
+[`docs/project-structure.md`](docs/project-structure.md) und [ADR 0013](docs/decisions/0013-projektstruktur.md)
+dokumentiert. Tests und Builds decken die Umsetzung ab.
 
 ## Tech-Stack
 
