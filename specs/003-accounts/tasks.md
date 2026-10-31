@@ -52,6 +52,8 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 ## Client
 - [x] **T13** (AK-12, AK-19b, AK-20, AK-22): `kicked`-Overlay, `away`-Figuren entsättigt, HUD mit Koordinaten und Link „Mein Account“.
   _Seit 006: Texte aus `client/src/i18n.ts` (Schlüssel fürs Overlay sind angelegt); kein Sprachumschalter im Spiel._
+  - [x] **T13a** (007 AK-5, AK-6, AK-8): Fix aus dem RC-Test auf dem iPhone – nach dem Drehen lässt sich „Mein Account“
+    nicht mehr antippen; die Spielansicht samt HUD lässt sich verschieben statt fest zu stehen.
 
 ## Tests / Prüfung
 - [x] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen

@@ -75,7 +75,7 @@ export function App() {
   return (
     <div className="fixed inset-0 bg-black">
       <canvas ref={canvasRef} className="block h-full w-full touch-none [image-rendering:pixelated]" data-testid="game" />
-      <div className="pointer-events-none absolute inset-0 font-mono text-sm uppercase">
+      <div className="pointer-events-none absolute inset-0 touch-none font-mono text-sm uppercase" data-testid="hud">
         <div className="absolute left-[max(0.5rem,env(safe-area-inset-left))] right-[max(0.5rem,env(safe-area-inset-right))] top-[max(0.5rem,env(safe-area-inset-top))] flex flex-wrap items-start gap-2">
           {name && <span className="badge badge-neutral rounded-none border-2 border-base-content/30">{name}</span>}
           {status !== "kicked" && (
@@ -88,7 +88,7 @@ export function App() {
           {coordinates && (
             <span className="badge badge-neutral rounded-none border-2 border-base-content/30" data-testid="coords">{coordinates}</span>
           )}
-          <a href="/Account/Manage" className="btn min-h-11 rounded-none font-mono uppercase pointer-events-auto ml-auto" data-testid="account">{t.myAccount}</a>
+          <a href="/Account/Manage" draggable={false} className="btn min-h-11 rounded-none font-mono uppercase pointer-events-auto ml-auto" data-testid="account">{t.myAccount}</a>
         </div>
         {status === "disconnected" && (
           <div className={OVERLAY}>
