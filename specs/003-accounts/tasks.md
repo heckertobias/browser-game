@@ -52,6 +52,11 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
 ## Client
 - [x] **T13** (AK-12, AK-19b, AK-20, AK-22): `kicked`-Overlay, `away`-Figuren entsättigt, HUD mit Koordinaten und Link „Mein Account“.
   _Seit 006: Texte aus `client/src/i18n.ts` (Schlüssel fürs Overlay sind angelegt); kein Sprachumschalter im Spiel._
+  - [x] **T13a** (007 AK-5, AK-6, AK-8): Fix aus dem RC-Test auf dem iPhone – nach dem Drehen lässt sich „Mein Account“
+    nicht mehr antippen; die Spielansicht samt HUD lässt sich verschieben statt fest zu stehen.
+  - [x] **T13b/T13c** (zurückgenommen): Statusleiste `black-translucent` traf den Button wieder, ließ aber unten eine
+    Leiste frei; `100vh` in der Homescreen-App half nicht (RC rc.4). Statusleiste wieder `black`, der versetzte Button
+    ist ein bekannter Fehler (007 plan „Risiken“).
 
 ## Tests / Prüfung
 - [x] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen
@@ -68,7 +73,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   _Großteils mit 004 T13 erledigt (`deploy/compose.yaml` mit Volume, URL, Passkey-Domain,
   Forwarded-Header; README „Betrieb“). Offen: Feinschliff, sobald 003 fertig ist._ Hinweise für den Betrieb: Volume ins Backup aufnehmen,
   Mail-Postfach + SPF/DKIM.
-- [ ] **T17**: Manuelle Prüfung in der Testumgebung:
+- [x] **T17**: Manuelle Prüfung in der Testumgebung:
   - AK-4, AK-13b und AK-13c mit echten Passkeys (Handy + Laptop)
   - Mail-Empfang (Registrierungslink, Hinweis bei vorhandener Adresse, Reset)
   - AK-12 mit zwei Geräten, AK-20 und AK-21 per Tab schließen und neu laden
