@@ -31,10 +31,7 @@ Service Worker  Seitenaufrufe gehen ans Netz; schlägt das fehl → Offline-Seit
    ein Zehntel (hart: 400 Weltpixel), weniger nur bei niedriger Auflösung.
 2. **Zielwert 360, Obergrenze 400.** 16:9-Vollbild (720/1080/1440/2160) zeigt exakt 640×360 wie bisher.
 3. **`display: standalone`** (Statusleiste sichtbar, keine Browserleiste; iOS kennt `fullscreen` nicht), iOS-Statusleiste
-   `black-translucent` (003 T13b): Mit `black` beginnt die Ansicht unter der Statusleiste, im Querformat bei 0; nach
-   dem Zurückdrehen behält iOS den Versatz für Tipps, „Mein Account“ reagiert dann über dem Button. Seiten halten per
-   `env(safe-area-inset-*)` Abstand zur Statusleiste. In der Homescreen-App ist der Layout-Viewport damit um die
-   Statusleiste zu kurz; Vollbild-Container nutzen dort `100vh` (`standalone:h-screen`), `<html>` ist schwarz (003 T13c).
+   `black`.
 4. **Offline-Seite auch bei 502–504** (Proxy erreicht den Server nicht, z. B. während eines Deploys).
 5. **Zoom auf `/play` gesperrt** (`user-scalable=no`, `touch-action: none`); die Spieler-Seiten bleiben zoombar.
 6. **Platzhalter-Icon und Name `Browser Game`**, ersetzen, sobald es Grafik bzw. einen Namen gibt.
@@ -184,7 +181,7 @@ nach ADR 0010 abdecken (siehe dort) – ohne die Bildschirmgröße vom Client zu
   <meta name="apple-mobile-web-app-title" content="Browser Game" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   ```
   Im Layout `content` von Titel aus `T["Common.GameName"]` (ADR 0008: kein Text im Markup).
 
@@ -274,15 +271,14 @@ Spiel. Der Service Worker reicht Seitenaufrufe nur durch (Weiterleitungen bei Na
 iOS gibt Homescreen-Apps einen eigenen Cookie-Speicher – dort meldet man sich ggf. einmal in der App an.
 
 ### Spieler-Seiten am Handy (AK-9, `_Layout.cshtml` und Seiten)
-- `body`: `min-h-dvh` statt `min-h-screen` (iOS-100vh), Abstand `p-2 sm:p-4`, je Seite mindestens
-  `env(safe-area-inset-*)` (003 T13b, Statusleiste `black-translucent`).
+- `body`: `min-h-dvh` statt `min-h-screen` (iOS-100vh), `p-2 sm:p-4`.
 - `h1`: `text-2xl sm:text-3xl break-words hyphens-auto` – „BESTÄTIGUNGSMAIL“ in `text-3xl` mono mit
   `tracking-widest` ist breiter als ein 390-px-Handy.
 - Sprachumschalter `btn-xs` → `btn-sm`; `Index`: `btn-sm` → `btn`; Linklisten `gap-1` → `gap-3`.
 - Eingabefelder: daisyUI 5 setzt bei Fokus auf Touch-Geräten 16 px (kein iOS-Zoom); `w-full` und `autocomplete` sind
   schon da.
-- Viewport-Meta `width=device-width, initial-scale=1, viewport-fit=cover` (zoombar). `viewport-fit=cover` ist nötig,
-  damit die Insets in der Homescreen-App greifen und Inhalt nicht unter der Uhr liegt (003 T13b).
+- Viewport-Meta bleibt `width=device-width, initial-scale=1` (zoombar, ohne `viewport-fit=cover` – Safari hält Inhalt
+  aus Aussparungen heraus).
 
 ## Client
 
@@ -299,8 +295,7 @@ iOS gibt Homescreen-Apps einen eigenen Cookie-Speicher – dort meldet man sich 
 - Links im HUD sind nicht ziehbar (`draggable={false}`); iOS hebt `<a href>` sonst beim langen Drücken ab (003 T13a).
 
 ### HUD (AK-6)
-- Vollbild-Container `fixed inset-0 bg-black standalone:bottom-auto standalone:h-screen` (Variante `standalone` in
-  `styles.css`, 003 T13c), `<html class="bg-black">`, Canvas darin; HUD als Ebene mit `pointer-events-none touch-none` (Touches gehen
+- Vollbild-Container `fixed inset-0 bg-black`, Canvas darin; HUD als Ebene mit `pointer-events-none touch-none` (Touches gehen
   aufs Canvas), interaktive Elemente `pointer-events-auto`.
 - Abstände aus den Safe Areas: `top-[max(0.5rem,env(safe-area-inset-top))]`,
   `left-[max(0.5rem,env(safe-area-inset-left))]` usw.
@@ -320,8 +315,7 @@ Heute schon richtig: ein Zeiger zur Zeit, `setPointerCapture`, Folgen bei `point
 ### Offline-Seite (AK-12)
 - `client/offline.html` + `src/offline.ts` als zweite Eingabe des Vite-Builds (Mehrseiten:
   `build.rolldownOptions.input` bzw. `rollupOptions` – `index.html`, `offline.html`) → `wwwroot/play/offline.html` mit
-  gehashten Assets. Stil: `styles.css` (Tailwind/daisyUI wie das Spiel). Vollbild wie das Spiel
-  (`standalone:h-screen`, `<html class="bg-black">`, 003 T13c).
+  gehashten Assets. Stil: `styles.css` (Tailwind/daisyUI wie das Spiel).
 - Texte im Client-Wörterbuch (ADR 0008): `offlineTitle` („Keine Verbindung“/„No connection“), `offlineMessage`
   („Prüfe deine Internetverbindung.“/„Check your internet connection.“), `offlineRetry` („Erneut versuchen“/„Try again“).
   `tsc` erzwingt beide Sprachen.
@@ -526,6 +520,10 @@ Neu laden aus Overlays (z. B. „Hier weiterspielen“) immer über `reloadPage`
 - **Neuladen in der iOS-Homescreen-App** (RC rc.4: Tipp ohne Wirkung): Ursache offen. AK-16 sichert Rückmeldung und
   Hinweis, nicht die Ursache. Erscheint der Hinweis im RC, gezielt am iPhone diagnostizieren (Web-Inspektor); erst
   dann ggf. ein zweiter Navigationsversuch.
+- **iOS-Homescreen-App: Tippfläche nach dem Drehen versetzt** (bekannter Fehler, 003 T13b/T13c): Nach hoch → quer →
+  hoch liegt die Tippfläche von „Mein Account“ etwa eine Statusleisten-Höhe über dem Button. `black-translucent` behob
+  das, ließ aber unten eine Leiste frei (auch mit `100vh`); daher bleibt `black`. Neu angehen, wenn das HUD neu gebaut
+  wird.
 - **503 und späterer Wartungsmodus:** Der Service Worker macht aus 502–504 die Seite „Keine Verbindung – prüfe deine
   Internetverbindung“, `ServerWatch` wertet sie als „nicht erreichbar“. Eine Wartungsseite mit 503 würde verdeckt und
   wie ein Netzproblem aussehen. Die Wartungs-Spec muss das lösen (z. B. eigenes Kennzeichen, das der Service Worker

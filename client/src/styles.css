@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-/* Homescreen-App: iOS mit black-translucent kürzt den Layout-Viewport um die Statusleiste, 100vh reicht bis unten (003 T13c). */
-@custom-variant standalone (@media (display-mode: standalone));
-
 /* Nur Spiel (/play) und Offline-Seite; die Razor-Seiten nutzen landing.css/admin.css (007 AK-8). */
 html,
 body {

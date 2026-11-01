@@ -54,14 +54,9 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   _Seit 006: Texte aus `client/src/i18n.ts` (Schlüssel fürs Overlay sind angelegt); kein Sprachumschalter im Spiel._
   - [x] **T13a** (007 AK-5, AK-6, AK-8): Fix aus dem RC-Test auf dem iPhone – nach dem Drehen lässt sich „Mein Account“
     nicht mehr antippen; die Spielansicht samt HUD lässt sich verschieben statt fest zu stehen.
-  - [x] **T13b** (007 AK-5, AK-6, AK-10): Fix aus dem RC-Test auf dem iPhone – nach dem Drehen liegt die Tippfläche
-    von „Mein Account“ um die Höhe der Statusleiste über dem Button. iOS-Statusleiste `black-translucent` in
-    `client/index.html` und `_Layout`; Spiel und Spieler-Seiten halten per `env(safe-area-inset-*)` Abstand zur
-    Statusleiste. Behebt das der RC-Test nicht: als bekannten Fehler aufnehmen (HUD wird ohnehin neu gebaut).
-  - [x] **T13c** (007 AK-1, AK-5, AK-6): Fix aus dem RC-Test rc.3 auf dem iPhone – seit `black-translucent` endet das
-    Spielbild in der Homescreen-App etwa eine Statusleisten-Höhe vor dem unteren Rand; darunter liegt eine Leiste in
-    Hintergrundfarbe. Das Spielbild MUSS den ganzen Bildschirm füllen. Behebt das der RC-Test nicht: T13b zurücknehmen
-    (Statusleiste wieder `black`) und den versetzten Button als bekannten Fehler aufnehmen.
+  - [x] **T13b/T13c** (zurückgenommen): Statusleiste `black-translucent` traf den Button wieder, ließ aber unten eine
+    Leiste frei; `100vh` in der Homescreen-App half nicht (RC rc.4). Statusleiste wieder `black`, der versetzte Button
+    ist ein bekannter Fehler (007 plan „Risiken“).
 
 ## Tests / Prüfung
 - [x] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen
