@@ -22,4 +22,8 @@
   <data name="Nav.Smtp" xml:space="preserve"><value>SMTP settings</value></data>
   <data name="Nav.Admins" xml:space="preserve"><value>Admins</value></data>
   <data name="Nav.Audit" xml:space="preserve"><value>Audit log</value></data>
+  <data name="Theme.Label" xml:space="preserve"><value>Color theme</value></data>
+  <data name="Theme.Light" xml:space="preserve"><value>Light</value></data>
+  <data name="Theme.Dark" xml:space="preserve"><value>Dark</value></data>
+  <data name="Theme.System" xml:space="preserve"><value>System</value></data>
 </root>
