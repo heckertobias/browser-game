@@ -145,6 +145,11 @@ schickt ein leeres Passwort, und der Store behält still das alte (`SaveAsync`: 
 | 18 | Unit (`SmtpSettingsStoreTests`): leerer Benutzername entfernt ein gespeichertes Passwort; Integration: ohne Benutzername → „no login“, kein `alert-warning`, Testmail an `FakeSmtpServer` ohne `AUTH` |
 | 17 | Integration: gespeicherte Einstellungen, abweichende Formularwerte → `TestSaved` schickt über den gespeicherten Server (`FakeSmtpServer`), nicht über den im Formular; ohne gespeicherte Einstellungen kein Button |
 
+**Texte in Tests:** Tests prüfen keine wörtlichen UI-Texte. Sie prüfen Struktur und Zustand (`data-testid`,
+`alert-success`, `is-invalid`, `aria-current`, Store-Inhalt, Mails im `FakeSmtpServer`). Wo ein Text selbst das
+Ergebnis ist (AK-14, Mail-Inhalt), kommt der erwartete Wert aus `AdminTexts` bzw. `MailErrors`, nicht als Literal.
+Bestehende Tests, die ohnehin wegen AK-14 angepasst werden, wechseln dabei auf diese Art – Abläufe bleiben gleich.
+
 Zusätzlich: Statische Dateien (`/lib/bootstrap/…`, `/js/theme.js`, Icon-Font) liefern 200 im gebauten Image
 (Smoke-Test im CI-`docker`-Job bzw. manuell nach dem Release).
 
