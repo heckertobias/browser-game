@@ -33,7 +33,8 @@ Service Worker  Seitenaufrufe gehen ans Netz; schlägt das fehl → Offline-Seit
 3. **`display: standalone`** (Statusleiste sichtbar, keine Browserleiste; iOS kennt `fullscreen` nicht), iOS-Statusleiste
    `black-translucent` (003 T13b): Mit `black` beginnt die Ansicht unter der Statusleiste, im Querformat bei 0; nach
    dem Zurückdrehen behält iOS den Versatz für Tipps, „Mein Account“ reagiert dann über dem Button. Seiten halten per
-   `env(safe-area-inset-*)` Abstand zur Statusleiste.
+   `env(safe-area-inset-*)` Abstand zur Statusleiste. In der Homescreen-App ist der Layout-Viewport damit um die
+   Statusleiste zu kurz; Vollbild-Container nutzen dort `100vh` (`standalone:h-screen`), `<html>` ist schwarz (003 T13c).
 4. **Offline-Seite auch bei 502–504** (Proxy erreicht den Server nicht, z. B. während eines Deploys).
 5. **Zoom auf `/play` gesperrt** (`user-scalable=no`, `touch-action: none`); die Spieler-Seiten bleiben zoombar.
 6. **Platzhalter-Icon und Name `Browser Game`**, ersetzen, sobald es Grafik bzw. einen Namen gibt.
@@ -298,7 +299,8 @@ iOS gibt Homescreen-Apps einen eigenen Cookie-Speicher – dort meldet man sich 
 - Links im HUD sind nicht ziehbar (`draggable={false}`); iOS hebt `<a href>` sonst beim langen Drücken ab (003 T13a).
 
 ### HUD (AK-6)
-- Vollbild-Container `fixed inset-0 bg-black`, Canvas darin; HUD als Ebene mit `pointer-events-none touch-none` (Touches gehen
+- Vollbild-Container `fixed inset-0 bg-black standalone:bottom-auto standalone:h-screen` (Variante `standalone` in
+  `styles.css`, 003 T13c), `<html class="bg-black">`, Canvas darin; HUD als Ebene mit `pointer-events-none touch-none` (Touches gehen
   aufs Canvas), interaktive Elemente `pointer-events-auto`.
 - Abstände aus den Safe Areas: `top-[max(0.5rem,env(safe-area-inset-top))]`,
   `left-[max(0.5rem,env(safe-area-inset-left))]` usw.
@@ -318,7 +320,8 @@ Heute schon richtig: ein Zeiger zur Zeit, `setPointerCapture`, Folgen bei `point
 ### Offline-Seite (AK-12)
 - `client/offline.html` + `src/offline.ts` als zweite Eingabe des Vite-Builds (Mehrseiten:
   `build.rolldownOptions.input` bzw. `rollupOptions` – `index.html`, `offline.html`) → `wwwroot/play/offline.html` mit
-  gehashten Assets. Stil: `styles.css` (Tailwind/daisyUI wie das Spiel).
+  gehashten Assets. Stil: `styles.css` (Tailwind/daisyUI wie das Spiel). Vollbild wie das Spiel
+  (`standalone:h-screen`, `<html class="bg-black">`, 003 T13c).
 - Texte im Client-Wörterbuch (ADR 0008): `offlineTitle` („Keine Verbindung“/„No connection“), `offlineMessage`
   („Prüfe deine Internetverbindung.“/„Check your internet connection.“), `offlineRetry` („Erneut versuchen“/„Try again“).
   `tsc` erzwingt beide Sprachen.

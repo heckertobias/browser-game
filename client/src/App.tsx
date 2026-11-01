@@ -73,7 +73,7 @@ export function App() {
   };
 
   return (
-    <div className="fixed inset-0 bg-black">
+    <div className="fixed inset-0 bg-black standalone:bottom-auto standalone:h-screen" data-testid="screen">
       <canvas ref={canvasRef} className="block h-full w-full touch-none [image-rendering:pixelated]" data-testid="game" />
       <div className="pointer-events-none absolute inset-0 touch-none font-mono text-sm uppercase" data-testid="hud">
         <div className="absolute left-[max(0.5rem,env(safe-area-inset-left))] right-[max(0.5rem,env(safe-area-inset-right))] top-[max(0.5rem,env(safe-area-inset-top))] flex flex-wrap items-start gap-2">

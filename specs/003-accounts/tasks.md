@@ -58,6 +58,10 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
     von „Mein Account“ um die Höhe der Statusleiste über dem Button. iOS-Statusleiste `black-translucent` in
     `client/index.html` und `_Layout`; Spiel und Spieler-Seiten halten per `env(safe-area-inset-*)` Abstand zur
     Statusleiste. Behebt das der RC-Test nicht: als bekannten Fehler aufnehmen (HUD wird ohnehin neu gebaut).
+  - [x] **T13c** (007 AK-1, AK-5, AK-6): Fix aus dem RC-Test rc.3 auf dem iPhone – seit `black-translucent` endet das
+    Spielbild in der Homescreen-App etwa eine Statusleisten-Höhe vor dem unteren Rand; darunter liegt eine Leiste in
+    Hintergrundfarbe. Das Spielbild MUSS den ganzen Bildschirm füllen. Behebt das der RC-Test nicht: T13b zurücknehmen
+    (Statusleiste wieder `black`) und den versetzten Button als bekannten Fehler aufnehmen.
 
 ## Tests / Prüfung
 - [x] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen
