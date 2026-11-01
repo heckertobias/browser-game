@@ -23,6 +23,8 @@ Umsetzung geht.
 - Muss die Spec während der Umsetzung angepasst werden, passiert das auf dem `impl/`-Branch (erst Spec, dann Code).
 - Mehrere Specs in einem Doku-PR (wie bei 007–010) laufen über einen `spec/`-Branch mit sprechendem Namen ohne
   Nummer, z. B. `spec/handy-push-dotnet`.
+- Reine Code-Umbauten ohne Verhaltensänderung (Ordnerstruktur, Umbenennungen, wie ADR 0013) laufen unter `chore/`,
+  auch wenn sie viel Code berühren; sie brauchen keine Spec.
 - Dependabot behält seine eigenen Branch-Namen.
 
 Alles andere aus ADR 0009 (Rulesets, Release Candidates von jedem Branch außer `main`, Deploy) bleibt.

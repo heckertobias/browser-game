@@ -86,7 +86,7 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 - Der Absendername wird nicht gespeichert, sondern beim Laden über `Account.UserName` gelesen (Namen sind nicht
   änderbar, 003).
 
-### Regeln (`Game/Chat/`, reine Logik ohne Netzwerk und DB)
+### Regeln (`Features/Game/Chat/Domain/`, reine Logik ohne Netzwerk und DB)
 - `ChatRules.Normalize(string) → string?`:
   - Steuerzeichen (`char.IsControl`, also auch Zeilenumbrüche) werden zu Leerzeichen, dann trimmen.
   - Leer → `null` (AK-8); länger als 200 UTF-16-Einheiten → `null` (AK-9).
@@ -100,7 +100,7 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 - Konstanten in `GameSettings`: `ChatMaxLength = 200`, `ChatHistoryCount = 50`, `ChatHistoryHours = 24`,
   `ChatRateLimitCount = 5`, `ChatRateLimitSeconds = 10`.
 
-### Spiel (`Game/`)
+### Spiel (`Features/Game/`)
 - `GameEndpoint.ReceiveLoopAsync`: `SendChat` → `connection.Chat.Writer.TryWrite(text)` (eigener kleiner Channel
   pro Verbindung, `DropOldest`, Kapazität 8). Die bestehende Grenze `MaxClientMessageBytes = 1024` reicht für 200
   Zeichen (≤ 600 Bytes UTF-8 plus Rahmen).
@@ -119,7 +119,9 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
     (AK-17). Wird von der `Delete`-Seite aus 003 T9 aufgerufen, zusammen mit `ForceLeave`.
   - Text, der mit `/` beginnt, ist in 011 ganz normaler Text. Slash-Commands (eigene Spec) setzen später genau hier
     an, bevor eine Nachricht verteilt wird.
-- `ChatStore` (`BackgroundService`, Muster wie `PositionStore` aus 003):
+- `ChatStore` in `Features/Game/Chat/Infrastructure/` (`BackgroundService`, Muster wie `PositionStore` aus 003).
+  Typen, die `GameLoop` mit ihm austauscht (Channel-Einträge, geladene Historie), liegen in Application oder Domain,
+  nicht in Infrastructure (`docs/project-structure.md`):
   - Schreiben: Der Tick-Thread legt angenommene Nachrichten in einen Channel; der Dienst schreibt sie gebündelt
     (spätestens jede Sekunde), beim Herunterfahren alles Ausstehende.
   - `LoadRecentAsync(now)`: jüngste 50 mit `SentAt > now − 24 h`, mit Spielername.
@@ -133,7 +135,7 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 - **`net.ts`:** `chatHistory`, `chatMessage`, `chatRejected` an neue Handler weiterreichen; `sendChat(text)`.
 - **`game.ts`:** reicht die Chat-Ereignisse über `GameEvents` an React weiter (`onChatHistory`, `onChatMessage`,
   `onChatRejected`) und bietet `sendChat(text)`.
-- **`chat/Chat.tsx`** (HUD-Ebene aus 007, unten links, Safe Areas):
+- **`features/game/chat/Chat.tsx`** (HUD-Ebene aus 007, unten links, Safe Areas):
   - Halbtransparenter Kasten (`bg-black/50`), Breite `min(24rem, 100% − Ränder)`, Höhe etwa ein Drittel des
     Fensters (AK-1). Liste mit Zeilen `HH:MM Name: Text`, neueste unten (AK-2).
   - Text nur als React-Textknoten, nie `dangerouslySetInnerHTML`, kein Link-Erkennen (AK-12).

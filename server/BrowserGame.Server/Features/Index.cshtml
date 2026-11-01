@@ -1,0 +1,24 @@
+@page
+@{
+    ViewData["Title"] = T["Common.GameName"].Value;
+    ViewData["Home"] = true;
+}
+<p>@T["Index.Tagline"]</p>
+<a href="/play" class="btn btn-primary btn-lg rounded-none font-mono uppercase" data-testid="play">@T["Index.Play"]</a>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <p class="text-sm">@T["Index.SignedInAs", User.Identity?.Name ?? ""]</p>
+    <div class="flex flex-wrap gap-2">
+        <a href="/Account/Manage" class="btn rounded-none font-mono uppercase">@T["Manage.Title"]</a>
+        <form method="post" asp-page="/Accounts/Presentation/Account/Logout">
+            <button type="submit" class="btn btn-ghost rounded-none font-mono uppercase">@T["Index.SignOut"]</button>
+        </form>
+    </div>
+}
+else
+{
+    <div class="flex flex-wrap gap-2">
+        <a href="/Account/Login" class="btn rounded-none font-mono uppercase">@T["Common.SignIn"]</a>
+        <a href="/Account/Register" class="btn rounded-none font-mono uppercase">@T["Common.Register"]</a>
+    </div>
+}

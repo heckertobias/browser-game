@@ -1,0 +1,60 @@
+@page
+@model CompleteRegistrationModel
+@{
+    ViewData["Title"] = T["CompleteRegistration.Title"].Value;
+}
+@if (Model.Invalid)
+{
+    <div class="alert alert-error rounded-none" role="alert">@T["CompleteRegistration.Invalid"]</div>
+    <div class="flex flex-col gap-3 text-sm">
+        <a class="link" href="/Account/Register">@T["CompleteRegistration.RegisterAgain"]</a>
+        <a class="link" href="/Account/Login">@T["Register.HaveAccount"]</a>
+    </div>
+}
+else if (Model.ChosenName is null)
+{
+    <p>@T["CompleteRegistration.Intro", Model.Email]</p>
+    <partial name="_Errors" />
+    <form method="post" class="flex flex-col gap-3">
+        <label class="flex flex-col gap-1">
+            <span class="label-text">@T["Register.NameLabel"]</span>
+            <input asp-for="Name" type="text" autocomplete="nickname" class="input input-bordered w-full rounded-none" />
+        </label>
+        <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">@T["CompleteRegistration.Next"]</button>
+    </form>
+}
+else
+{
+    <p>@T["CompleteRegistration.NameChosen", Model.ChosenName]</p>
+    <partial name="_Errors" />
+    <form method="post" class="flex flex-col gap-3">
+        <input type="hidden" name="Step" value="@CompleteRegistrationModel.PasswordStep" />
+        <input type="hidden" name="Name" value="@Model.ChosenName" />
+        <label class="flex flex-col gap-1">
+            <span class="label-text">@T["Register.PasswordLabel"]</span>
+            <input asp-for="Password" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
+        </label>
+        <label class="flex flex-col gap-1">
+            <span class="label-text">@T["Register.ConfirmPasswordLabel"]</span>
+            <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
+        </label>
+        <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">@T["CompleteRegistration.WithPassword"]</button>
+    </form>
+
+    <div class="divider font-mono text-xs">@T["Common.Or"]</div>
+
+    <form method="post" data-passkey="create" class="flex flex-col gap-2">
+        <input type="hidden" name="Step" value="@CompleteRegistrationModel.PasskeyStep" />
+        <input type="hidden" name="Name" value="@Model.ChosenName" />
+        <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
+        <input type="hidden" name="Credential" />
+        <button type="submit" class="btn btn-outline rounded-none font-mono uppercase">@T["CompleteRegistration.WithPasskey"]</button>
+        <p class="text-error text-sm" data-passkey-error hidden></p>
+    </form>
+
+    <a class="link text-sm" asp-page="/Accounts/Presentation/Account/CompleteRegistration" asp-route-code="@Model.Code">@T["CompleteRegistration.ChangeName"]</a>
+}
+
+@section Scripts {
+    <script type="module" src="~/js/passkeys.js" asp-append-version="true"></script>
+}

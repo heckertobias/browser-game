@@ -29,7 +29,7 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
 - [ ] **T8** (AK-10, AK-13, AK-15): `net.ts` und `game.ts` – Chat-Nachrichten empfangen und weiterreichen,
   `sendChat`.
 - [ ] **T9** (AK-6): `input.ts` – Tasten bei fokussiertem Eingabefeld ignorieren, Reset bei `focusin`; Vitest.
-- [ ] **T10** (AK-1–5, AK-8, AK-9, AK-12, AK-13): `chat/Chat.tsx` mit Liste, Eingabe, Einklappen, Ungelesen-Punkt,
+- [ ] **T10** (AK-1–5, AK-8, AK-9, AK-12, AK-13): `features/game/chat/Chat.tsx` mit Liste, Eingabe, Einklappen, Ungelesen-Punkt,
   Hinweis „zu schnell“; reine Funktionen `formatTime`, `isAtBottom`, `defaultCollapsed`, Speichern in
   `localStorage` mit Vitest; i18n-Schlüssel de/en.
 - [ ] **T11** (AK-7): Handy – `enterKeyHint`, `interactive-widget=resizes-content`, Anheben per `visualViewport`,
