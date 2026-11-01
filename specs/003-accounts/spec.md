@@ -1,6 +1,6 @@
 # 003 – Accounts & gespeicherte Position
 
-**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [004 – Admin-Interface & SMTP-Einstellungen](../004-admin/spec.md) (Mailversand) · Voraussetzung für: [002 – Tastenbelegung & erstes Menü](../002-keybindings/spec.md)
 
