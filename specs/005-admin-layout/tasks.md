@@ -2,26 +2,38 @@
 
 Gehört zu: [plan.md](plan.md)
 
-Reihenfolge: Build → Layout → Seiten → Tests → Betrieb.
+Reihenfolge: Build → Sprache → Layout → Seiten → SMTP → Tests → Betrieb.
 
 ## Build
 - [ ] **T1** (AK-5): `bootstrap` und `bootstrap-icons` per npm (gepinnt); `build:admin` kopiert sie nach
   `Admin/wwwroot/lib/` (gitignored); `client/src/styles/admin.css` und das Kopieren der Admin-Pages im Dockerfile entfernen.
 
+## Sprache
+- [ ] **T2** (AK-14): `AdminTexts(.resx)`, Kultur fest `en`, `IStringLocalizer` in `_ViewImports`,
+  DataAnnotations-Lokalisierung; `SmtpMailer`-Fehler nach `MailErrors.resx`; `AdminLanguageTests` auf „fest Englisch“.
+
 ## Layout
-- [ ] **T2** (AK-1, AK-2, AK-3, AK-5): `_Layout` mit Seitenleiste (Offcanvas unter `lg`), aktiver Eintrag mit
-  `aria-current`, Konto und Abmelden in der Leiste; `wwwroot/css/admin.css`.
-- [ ] **T3** (AK-4): `_LayoutPlain` für Login, LoginTwoFactor und Invite.
-- [ ] **T4** (AK-10, AK-11, AK-12): `theme.js` synchron im `<head>`, Umschalter Hell/Dunkel/System.
-- [ ] **T5** (AK-7, AK-8): `_Errors` (nur Fehler ohne Feld), `_Message`, `BootstrapValidationTagHelper` (`is-invalid`).
+- [ ] **T3** (AK-1, AK-2, AK-3, AK-5, AK-14): `_Layout` mit Seitenleiste (Offcanvas unter `lg`), aktiver Eintrag mit
+  `aria-current`, Konto und Abmelden in der Leiste; `<html lang>` aus der Kultur; `wwwroot/css/admin.css`.
+- [ ] **T4** (AK-4): `_LayoutPlain` für Login, LoginTwoFactor und Invite.
+- [ ] **T5** (AK-10, AK-11, AK-12): `theme.js` synchron im `<head>`, Umschalter Hell/Dunkel/System.
+- [ ] **T6** (AK-7, AK-8): `_Errors` (nur Fehler ohne Feld), `_Message`, `BootstrapValidationTagHelper` (`is-invalid`).
 
 ## Seiten
-- [ ] **T6** (AK-6, AK-7, AK-9, AK-13): Index, Smtp, Admins, Audit, Account auf Bootstrap umstellen.
-- [ ] **T7** (AK-6, AK-13): Login, LoginTwoFactor, Invite auf Bootstrap umstellen.
+- [ ] **T7** (AK-6, AK-7, AK-9, AK-13, AK-14): Index, Smtp, Admins, Audit, Account auf Bootstrap und Englisch umstellen
+  (inkl. Einladungs- und Testmail, Protokolleinträge).
+- [ ] **T8** (AK-6, AK-13, AK-14): Login, LoginTwoFactor, Invite auf Bootstrap und Englisch umstellen.
+
+## SMTP
+- [ ] **T9** (AK-15, AK-16, AK-17): `TestedPassword` (zeitbegrenzt geschützt) nach erfolgreicher Testmail und beim
+  Speichern; Passwort-Status und Hinweis bei Benutzername ohne Passwort; Handler `TestSaved` über `SmtpMailer` mit
+  gespeichertem Stand.
+- [ ] **T9b** (AK-18): `SmtpSettingsStore.SaveAsync` entfernt das Passwort ohne Benutzername; Status „no login“, kein
+  Hinweis.
 
 ## Tests
-- [ ] **T8**: Integrationstests laut Abdeckungstabelle; bestehende Admin-Tests grün (gegen SQLite und PostgreSQL).
+- [ ] **T10**: Integrationstests laut Abdeckungstabelle; bestehende Admin-Tests grün (gegen SQLite und PostgreSQL).
 
 ## Betrieb
-- [ ] **T9**: Release; manuelle Prüfung in der Testumgebung (AK-3, AK-6, AK-9–12,
+- [ ] **T11**: Release; manuelle Prüfung in der Testumgebung (AK-3, AK-6, AK-9–12,
   Handy). Danach alle AKs abhaken und Spec-Status auf `umgesetzt`.

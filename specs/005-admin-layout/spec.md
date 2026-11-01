@@ -59,8 +59,11 @@ tragen, wenn viele weitere Bereiche dazukommen (Spieler, Server-Status, Spielwer
 - **AK-15:** Gegeben ich habe eine Testmail erfolgreich verschickt, wenn ich danach speichere, dann wird genau das
   getestete Passwort gespeichert; es kann nicht passieren, dass still ein altes oder gar kein Passwort gespeichert
   bleibt.
-- **AK-16:** Gegeben ich speichere ohne Passwort, dann sehe ich deutlich, ob ein Passwort gespeichert ist; ist keins
-  gespeichert, werde ich darauf hingewiesen.
+- **AK-16:** Gegeben ich speichere ohne Passwort, dann sehe ich deutlich, ob ein Passwort gespeichert ist; ist ein
+  Benutzername eingetragen, aber kein Passwort gespeichert, werde ich darauf hingewiesen.
+- **AK-18:** Gegeben mein Mailserver braucht keine Anmeldung, wenn ich den Benutzernamen leer lasse und speichere, dann
+  verschickt das Spiel Mails ohne Anmeldung, ein vorher gespeichertes Passwort wird entfernt, und ich sehe, dass ohne
+  Anmeldung verschickt wird – ohne Warnung.
 - **AK-17:** Gegeben die Einstellungen sind gespeichert, dann kann ich eine Testmail genau mit dem gespeicherten Stand
   schicken – so wie ihn das Spiel für Bestätigungs- und Reset-Mails benutzt.
 
@@ -88,5 +91,7 @@ _Keine._
 - Admin-Interface auf Englisch (aus 006 hierher verschoben, weil 005 ohnehin jede Admin-Seite anfasst).
 - SMTP-Seite: Nach einer Testmail wurde das Passwortfeld geleert; wer danach speicherte, behielt still das alte
   Passwort (beim RC 0.3.0-rc.1 in der Testumgebung aufgefallen). AK-15 bis AK-17 beheben das.
+- Mailserver ohne Anmeldung (z. B. ein Relay im Heimnetz) sind ein gültiger Fall: kein Benutzername heißt keine
+  Anmeldung (AK-18), dafür keine Warnung.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
