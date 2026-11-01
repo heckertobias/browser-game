@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using BrowserGame.Data;
 using BrowserGame.Server.Tests;
@@ -65,7 +66,7 @@ public sealed class SmtpPageTests
     }
 
     [Fact] // AK-9: verständliche Fehlermeldung
-    public async Task Wrong_password_shows_german_error()
+    public async Task Wrong_password_shows_readable_error()
     {
         await using var factory = new AdminFactory();
         await using var smtp = new FakeSmtpServer();
@@ -73,7 +74,7 @@ public sealed class SmtpPageTests
 
         var (_, html) = await admin.Client.PostAsync("/Smtp", "/Smtp?handler=Test", WithRecipient(Form(smtp, "falsch")));
 
-        Assert.Contains("Anmeldung am Mailserver fehlgeschlagen", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
+        Assert.Contains(MailErrors.ResourceManager.GetString(nameof(MailErrors.AuthenticationFailed), CultureInfo.InvariantCulture)!, WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 
     [Fact] // AK-3

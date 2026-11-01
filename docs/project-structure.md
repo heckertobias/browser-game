@@ -79,7 +79,7 @@ Regeln:
 ```
 server/
   BrowserGame.Data/          Geteilt von Spiel und Admin (ADR 0006): Entities, DbContexts, Migrations,
-                             WebDefaults (Health-Probe, Security-Header, Rate-Limits), SmtpMailer,
+                             WebDefaults (Health-Probe, Security-Header, Rate-Limits), SmtpMailer + MailErrors (Resources/: IdentityErrors, MailErrors),
                              SqliteBackupService, PasskeySetup, Settings
   BrowserGame.Server/        Der Spielserver
     Program.cs               Bootstrap: Middleware-Reihenfolge, Registrierung nur über Add…/Use…-Extensions
@@ -107,7 +107,7 @@ server/
         Resources/           Texts.cs + Texts(.de).resx  (ResourcesPath="" – siehe ADR 0013)
       Pwa/Application/       ServiceWorkerScript (+ service-worker.js, Endpoint /sw.js), PwaCaching
     Properties/, wwwroot/    launchSettings, gebaute Client-Ausgaben (manifest, icons, play/, css/)
-  BrowserGame.Admin/         Eigener Admin-Dienst, eigene Pages/; Auth/ (Totp, Invites, Audit); wwwroot/lib/ (Bootstrap, gebaut)
+  BrowserGame.Admin/         Eigener Admin-Dienst, eigene Pages/; Auth/ (Totp, Invites, Audit); wwwroot/lib/ (Bootstrap, gebaut); Resources/ (AdminTexts.cs + AdminTexts.resx, neutral = Englisch)
   BrowserGame.Server.Tests/  Features/{Accounts,Game,Localization,Pwa}, Hosting/, Data/ (Tests von BrowserGame.Data) und TestSupport/
   BrowserGame.Admin.Tests/   Admin-Tests (bindet gemeinsame Helper aus Server.Tests/TestSupport/)
 ```

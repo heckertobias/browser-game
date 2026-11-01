@@ -19,10 +19,10 @@ public sealed partial class SmtpModel(
 
     public sealed class SmtpInput
     {
-        [Required(ErrorMessage = "Bitte Server angeben.")]
+        [Required(ErrorMessage = "Validation.HostRequired")]
         public string Host { get; set; } = "";
 
-        [Range(1, 65535, ErrorMessage = "Port muss zwischen 1 und 65535 liegen.")]
+        [Range(1, 65535, ErrorMessage = "Validation.PortRange")]
         public int Port { get; set; } = 465;
 
         public SmtpSecurity Security { get; set; } = SmtpSecurity.SslOnConnect;
@@ -32,8 +32,8 @@ public sealed partial class SmtpModel(
         /// <summary>Leer = unverändert (AK-8).</summary>
         public string? Password { get; set; }
 
-        [Required(ErrorMessage = "Bitte Absender-Adresse angeben.")]
-        [EmailAddress(ErrorMessage = "Keine gültige Absender-Adresse.")]
+        [Required(ErrorMessage = "Validation.FromAddressRequired")]
+        [EmailAddress(ErrorMessage = "Validation.FromAddressInvalid")]
         public string FromAddress { get; set; } = "";
 
         public string? FromName { get; set; }

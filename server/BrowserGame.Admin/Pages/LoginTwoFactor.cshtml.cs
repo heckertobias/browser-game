@@ -12,7 +12,7 @@ namespace BrowserGame.Admin.Pages;
 public sealed class LoginTwoFactorModel(SignInManager<AdminUser> signIn) : PageModel
 {
     [BindProperty]
-    [Required(ErrorMessage = "Bitte Code angeben.")]
+    [Required(ErrorMessage = "Validation.CodeRequired")]
     public string Code { get; set; } = "";
 
     [BindProperty]

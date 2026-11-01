@@ -9,7 +9,7 @@ Reihenfolge: Build → Sprache → Layout → Seiten → SMTP → Tests → Betr
   `Admin/wwwroot/lib/` (gitignored); `client/src/styles/admin.css` und das Kopieren der Admin-Pages im Dockerfile entfernen.
 
 ## Sprache
-- [ ] **T2** (AK-14): `AdminTexts(.resx)`, Kultur fest `en`, `IStringLocalizer` in `_ViewImports`,
+- [x] **T2** (AK-14): `AdminTexts(.resx)`, Kultur fest `en`, `IStringLocalizer` in `_ViewImports`,
   DataAnnotations-Lokalisierung; `SmtpMailer`-Fehler nach `MailErrors.resx`; `AdminLanguageTests` auf „fest Englisch“.
 
 ## Layout

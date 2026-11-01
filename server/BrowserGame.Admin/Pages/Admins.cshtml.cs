@@ -15,7 +15,7 @@ public sealed class AdminsModel(
     public sealed record AdminRow(string Id, string Name, string Email, bool Active, bool IsMe);
 
     [BindProperty]
-    [EmailAddress(ErrorMessage = "Keine gültige E-Mail-Adresse.")]
+    [EmailAddress(ErrorMessage = "Validation.EmailInvalid")]
     public string? InviteEmail { get; set; }
 
     [BindProperty]

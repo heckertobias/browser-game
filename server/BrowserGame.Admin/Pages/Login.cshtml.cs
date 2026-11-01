@@ -15,11 +15,11 @@ public sealed class LoginModel(SignInManager<AdminUser> signIn, UserManager<Admi
     internal const string GenericError = "Anmeldung fehlgeschlagen. Nach mehreren Fehlversuchen ist die Anmeldung kurz gesperrt.";
 
     [BindProperty]
-    [Required(ErrorMessage = "Bitte E-Mail angeben.")]
+    [Required(ErrorMessage = "Validation.EmailRequired")]
     public string Email { get; set; } = "";
 
     [BindProperty]
-    [Required(ErrorMessage = "Bitte Passwort angeben.")]
+    [Required(ErrorMessage = "Validation.PasswordRequired")]
     public string Password { get; set; } = "";
 
     [BindProperty]

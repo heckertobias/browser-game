@@ -15,13 +15,13 @@ public enum MailStatus
 }
 
 /// <summary>
-/// Ergebnis eines Versands; <see cref="Error"/> ist eine verständliche deutsche Meldung (004 AK-9),
+/// Ergebnis eines Versands; <see cref="Error"/> ist eine verständliche Meldung in der Sprache der Anfrage, neutral Englisch (004 AK-9, 005 AK-14),
 /// <see cref="Detail"/> die technische Ursache fürs Log.
 /// </summary>
 public sealed record MailResult(MailStatus Status, string? Error = null, string? Detail = null)
 {
     public static readonly MailResult Sent = new(MailStatus.Sent);
-    public static readonly MailResult NotConfigured = new(MailStatus.NotConfigured, "Der Mailversand ist noch nicht eingerichtet.");
+    public static MailResult NotConfigured => new(MailStatus.NotConfigured, MailErrors.NotConfigured);
 }
 
 /// <summary>
@@ -82,18 +82,18 @@ public sealed class SmtpMailer(IServiceScopeFactory scopes)
     /// <summary>Übersetzt die typischen Fehler; <c>null</c> = unerwartet, wird weitergeworfen.</summary>
     internal static string? Describe(Exception exception, string host) => exception switch
     {
-        AuthenticationException => "Anmeldung am Mailserver fehlgeschlagen – Benutzername und Passwort prüfen.",
+        AuthenticationException => MailErrors.AuthenticationFailed,
         SslHandshakeException { ServerCertificate: { } certificate } when CertificateNames(certificate) is { Count: > 0 } names
             && !names.Any(n => MatchesHost(n, host))
-            => $"Das Zertifikat des Mailservers gilt für „{string.Join("“, „", names.Take(3))}“, nicht für „{host}“ – trage diesen Namen als Server ein.",
-        SslHandshakeException => "Verschlüsselte Verbindung zum Mailserver fehlgeschlagen – Verschlüsselung und Port prüfen (465 = SSL/TLS, 587 = STARTTLS).",
-        SocketException => "Mailserver nicht erreichbar – Server und Port prüfen.",
-        SmtpCommandException command => $"Der Mailserver hat die Mail abgelehnt: {command.Message}",
-        SmtpProtocolException or ServiceNotConnectedException => "Unerwartete Antwort vom Mailserver – Server, Port und Verschlüsselung prüfen.",
-        ParseException or FormatException => "Ungültige Absender- oder Empfängeradresse.",
-        TimeoutException or OperationCanceledException => "Zeitüberschreitung beim Mailserver.",
-        IOException => "Verbindung zum Mailserver abgebrochen – Server, Port und Verschlüsselung prüfen.",
-        ArgumentException => "Ungültige Einstellungen – beim Server nur den Namen eintragen (ohne Port, ohne https://).",
+            => MailErrors.CertificateNameMismatch(names.Take(3), host),
+        SslHandshakeException => MailErrors.SslHandshakeFailed,
+        SocketException => MailErrors.Unreachable,
+        SmtpCommandException command => MailErrors.Rejected(command.Message),
+        SmtpProtocolException or ServiceNotConnectedException => MailErrors.UnexpectedResponse,
+        ParseException or FormatException => MailErrors.InvalidAddress,
+        TimeoutException or OperationCanceledException => MailErrors.TimedOut,
+        IOException => MailErrors.ConnectionLost,
+        ArgumentException => MailErrors.InvalidSettings,
         _ => null,
     };
 

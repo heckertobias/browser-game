@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Validation.EmailRequired" xml:space="preserve"><value>Please enter your email address.</value></data>
+  <data name="Validation.PasswordRequired" xml:space="preserve"><value>Please enter your password.</value></data>
+  <data name="Validation.CodeRequired" xml:space="preserve"><value>Please enter the code.</value></data>
+  <data name="Validation.EmailInvalid" xml:space="preserve"><value>That is not a valid email address.</value></data>
+  <data name="Validation.HostRequired" xml:space="preserve"><value>Please enter the server.</value></data>
+  <data name="Validation.PortRange" xml:space="preserve"><value>The port must be between 1 and 65535.</value></data>
+  <data name="Validation.FromAddressRequired" xml:space="preserve"><value>Please enter the sender address.</value></data>
+  <data name="Validation.FromAddressInvalid" xml:space="preserve"><value>That is not a valid sender address.</value></data>
+</root>

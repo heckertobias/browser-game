@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using BrowserGame.Data;
@@ -23,19 +24,19 @@ public sealed class SmtpMailerTests(GameServerFactory factory) : IClassFixture<G
     }
 
     [Fact] // AK-9: verständliche Meldung bei falschen Zugangsdaten
-    public async Task Wrong_password_gives_german_error()
+    public async Task Wrong_password_gives_readable_error()
     {
         await using var server = new FakeSmtpServer();
 
         var result = await SmtpMailer.SendAsync(For(server, password: "falsch"), "t@example.org", "Testmail", "Hallo", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(MailStatus.Failed, result.Status);
-        Assert.Equal("Anmeldung am Mailserver fehlgeschlagen – Benutzername und Passwort prüfen.", result.Error);
+        Assert.Equal(MailErrors.ResourceManager.GetString(nameof(MailErrors.AuthenticationFailed), CultureInfo.InvariantCulture), result.Error);
         Assert.Empty(server.Messages);
     }
 
     [Fact] // AK-9: verständliche Meldung, wenn der Server nicht erreichbar ist
-    public async Task Unreachable_server_gives_german_error()
+    public async Task Unreachable_server_gives_readable_error()
     {
         var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
@@ -45,7 +46,7 @@ public sealed class SmtpMailerTests(GameServerFactory factory) : IClassFixture<G
         var settings = new SmtpSettings("127.0.0.1", port, SmtpSecurity.None, null, null, "noreply@example.net", null);
         var result = await SmtpMailer.SendAsync(settings, "t@example.org", "Testmail", "Hallo", cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal("Mailserver nicht erreichbar – Server und Port prüfen.", result.Error);
+        Assert.Equal(MailErrors.ResourceManager.GetString(nameof(MailErrors.Unreachable), CultureInfo.InvariantCulture), result.Error);
     }
 
     [Fact] // AK-11: ohne Einstellungen wird nicht verschickt, aber auch nicht geworfen
