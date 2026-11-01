@@ -13,7 +13,7 @@ Reihenfolge: Build → Sprache → Layout → Seiten → SMTP → Tests → Betr
   DataAnnotations-Lokalisierung; `SmtpMailer`-Fehler nach `MailErrors.resx`; `AdminLanguageTests` auf „fest Englisch“.
 
 ## Layout
-- [ ] **T3** (AK-1, AK-2, AK-3, AK-5, AK-14): `_Layout` mit Seitenleiste (Offcanvas unter `lg`), aktiver Eintrag mit
+- [x] **T3** (AK-1, AK-2, AK-3, AK-5, AK-14): `_Layout` mit Seitenleiste (Offcanvas unter `lg`), aktiver Eintrag mit
   `aria-current`, Konto und Abmelden in der Leiste; `<html lang>` aus der Kultur; `wwwroot/css/admin.css`.
 - [ ] **T4** (AK-4): `_LayoutPlain` für Login, LoginTwoFactor und Invite.
 - [ ] **T5** (AK-10, AK-11, AK-12): `theme.js` synchron im `<head>`, Umschalter Hell/Dunkel/System.

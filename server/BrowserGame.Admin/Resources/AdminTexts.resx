@@ -12,4 +12,14 @@
   <data name="Validation.PortRange" xml:space="preserve"><value>The port must be between 1 and 65535.</value></data>
   <data name="Validation.FromAddressRequired" xml:space="preserve"><value>Please enter the sender address.</value></data>
   <data name="Validation.FromAddressInvalid" xml:space="preserve"><value>That is not a valid sender address.</value></data>
+  <data name="Layout.Brand" xml:space="preserve"><value>Browser Game Admin</value></data>
+  <data name="Layout.Navigation" xml:space="preserve"><value>Admin sections</value></data>
+  <data name="Layout.OpenMenu" xml:space="preserve"><value>Open menu</value></data>
+  <data name="Layout.CloseMenu" xml:space="preserve"><value>Close menu</value></data>
+  <data name="Layout.Account" xml:space="preserve"><value>Your account</value></data>
+  <data name="Layout.SignOut" xml:space="preserve"><value>Sign out</value></data>
+  <data name="Nav.Overview" xml:space="preserve"><value>Overview</value></data>
+  <data name="Nav.Smtp" xml:space="preserve"><value>SMTP settings</value></data>
+  <data name="Nav.Admins" xml:space="preserve"><value>Admins</value></data>
+  <data name="Nav.Audit" xml:space="preserve"><value>Audit log</value></data>
 </root>

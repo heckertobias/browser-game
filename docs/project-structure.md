@@ -107,7 +107,7 @@ server/
         Resources/           Texts.cs + Texts(.de).resx  (ResourcesPath="" – siehe ADR 0013)
       Pwa/Application/       ServiceWorkerScript (+ service-worker.js, Endpoint /sw.js), PwaCaching
     Properties/, wwwroot/    launchSettings, gebaute Client-Ausgaben (manifest, icons, play/, css/)
-  BrowserGame.Admin/         Eigener Admin-Dienst, eigene Pages/; Auth/ (Totp, Invites, Audit); wwwroot/lib/ (Bootstrap, gebaut); Resources/ (AdminTexts.cs + AdminTexts.resx, neutral = Englisch)
+  BrowserGame.Admin/         Eigener Admin-Dienst, eigene Pages/; Auth/ (Totp, Invites, Audit); wwwroot/lib/ (Bootstrap, gebaut); wwwroot/css/admin.css (Layout, eingecheckt); Resources/ (AdminTexts.cs + AdminTexts.resx, neutral = Englisch)
   BrowserGame.Server.Tests/  Features/{Accounts,Game,Localization,Pwa}, Hosting/, Data/ (Tests von BrowserGame.Data) und TestSupport/
   BrowserGame.Admin.Tests/   Admin-Tests (bindet gemeinsame Helper aus Server.Tests/TestSupport/)
 ```

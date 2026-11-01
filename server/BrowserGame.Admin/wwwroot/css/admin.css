@@ -1,0 +1,30 @@
+/* Admin-Layout (005, ADR 0007): Seitenleiste ab lg fest links, darunter Bootstrap-Offcanvas. */
+:root {
+  --admin-sidebar-width: 16rem;
+}
+
+.admin-sidebar .offcanvas-lg {
+  --bs-offcanvas-width: var(--admin-sidebar-width);
+}
+
+@media (min-width: 992px) {
+  .admin-shell {
+    display: grid;
+    grid-template-columns: var(--admin-sidebar-width) minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  .admin-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background-color: var(--bs-tertiary-bg);
+    border-right: var(--bs-border-width) solid var(--bs-border-color);
+  }
+
+  .admin-sidebar .offcanvas-lg,
+  .admin-sidebar .offcanvas-body {
+    height: 100%;
+  }
+}
