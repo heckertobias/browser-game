@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Kicked_Reason } from "../generated/browsergame/v1/game_pb";
-import { Game, type ConnectionStatus } from "../features/game/engine/game";
-import type { KickReason } from "../features/game/network/net";
-import { t } from "../features/i18n/i18n";
-import { browserReloadWindow, reloadPage } from "../features/pwa/services/reload";
-import { ServerWatch, type ServerWatchDeps } from "../features/pwa/services/update";
-import { APP_VERSION } from "../features/pwa/services/version";
+import { Kicked_Reason } from "@/generated/browsergame/v1/game_pb";
+import { Game, type ConnectionStatus } from "@/features/game/engine/game";
+import type { KickReason } from "@/features/game/network/net";
+import { t } from "@/features/localization/i18n";
+import { browserReloadWindow, reloadPage } from "@/features/pwa/services/reload";
+import { ServerWatch, type ServerWatchDeps } from "@/features/pwa/services/update";
+import { APP_VERSION } from "@/features/pwa/services/version";
 
 const STATUS_LABEL: Record<Exclude<ConnectionStatus, "kicked">, string> = {
   connecting: t.statusConnecting,

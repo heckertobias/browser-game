@@ -1,15 +1,15 @@
-import type { Snapshot, Welcome } from "../../../generated/browsergame/v1/game_pb";
-import { t } from "../../i18n/i18n";
-import { INTERPOLATION_DELAY_MS } from "./constants";
-import { InputTracker } from "../input/input";
-import { formatCoordinates } from "../render/hud";
-import { SnapshotBuffer } from "../state/interpolation";
-import { connect, gameSocketUrl, type GameConnection, type KickReason } from "../network/net";
-import { Predictor } from "../state/prediction";
-import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "../render/render";
-import type { Vec } from "./vector";
-import { fitViewport, type Viewport } from "../render/viewport";
-import { ScreenWakeLock } from "../input/wakeLock";
+import type { Snapshot, Welcome } from "@/generated/browsergame/v1/game_pb";
+import { t } from "@/features/localization/i18n";
+import { INTERPOLATION_DELAY_MS } from "@/features/game/core/constants";
+import { InputTracker } from "@/features/game/input/input";
+import { formatCoordinates } from "@/features/game/render/hud";
+import { SnapshotBuffer } from "@/features/game/state/interpolation";
+import { connect, gameSocketUrl, type GameConnection, type KickReason } from "@/features/game/network/net";
+import { Predictor } from "@/features/game/state/prediction";
+import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "@/features/game/render/render";
+import type { Vec } from "@/features/game/core/vector";
+import { fitViewport, type Viewport } from "@/features/game/render/viewport";
+import { ScreenWakeLock } from "@/features/game/input/wakeLock";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "kicked";
 

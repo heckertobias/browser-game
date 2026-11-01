@@ -62,7 +62,7 @@ public class PlayerNamesTests
     {
         foreach (var error in Enum.GetValues<PlayerNameError>().Where(e => e != PlayerNameError.None))
         {
-            Assert.NotEmpty(PlayerNames.Describe(error));
+            Assert.NotEmpty(PlayerNameMessages.Describe(error));
         }
     }
 }

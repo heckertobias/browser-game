@@ -2,11 +2,11 @@ using BrowserGame.Server.Features.Accounts;
 
 namespace BrowserGame.Server.Tests;
 
-public sealed class PlayerNamesDescribeTests
+public sealed class PlayerNameMessagesTests
 {
     private static readonly PlayerNameError[] Errors = [PlayerNameError.Length, PlayerNameError.Characters, PlayerNameError.Blocked];
 
-    private static string[] Describe(string culture) => CultureScope.Run(culture, () => Errors.Select(PlayerNames.Describe).ToArray());
+    private static string[] Describe(string culture) => CultureScope.Run(culture, () => Errors.Select(PlayerNameMessages.Describe).ToArray());
 
     [Fact]
     public void German_texts_are_exact() =>
@@ -35,5 +35,5 @@ public sealed class PlayerNamesDescribeTests
         Assert.All(Describe(culture), text => Assert.DoesNotContain("PlayerName.", text, StringComparison.Ordinal));
 
     [Fact]
-    public void None_has_no_text() => Assert.Equal("", PlayerNames.Describe(PlayerNameError.None));
+    public void None_has_no_text() => Assert.Equal("", PlayerNameMessages.Describe(PlayerNameError.None));
 }

@@ -1,5 +1,5 @@
-import { POINTER_DEAD_ZONE } from "../engine/constants";
-import { clampDirection, ZERO, type Vec } from "../engine/vector";
+import { POINTER_DEAD_ZONE } from "@/features/game/core/constants";
+import { clampDirection, ZERO, type Vec } from "@/features/game/core/vector";
 
 export type Action = "moveUp" | "moveDown" | "moveLeft" | "moveRight";
 

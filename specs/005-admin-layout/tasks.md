@@ -6,7 +6,7 @@ Reihenfolge: Build → Layout → Seiten → Tests → Betrieb.
 
 ## Build
 - [ ] **T1** (AK-5): `bootstrap` und `bootstrap-icons` per npm (gepinnt); `build:admin` kopiert sie nach
-  `Admin/wwwroot/lib/` (gitignored); `client/src/admin.css` und das Kopieren der Admin-Pages im Dockerfile entfernen.
+  `Admin/wwwroot/lib/` (gitignored); `client/src/styles/admin.css` und das Kopieren der Admin-Pages im Dockerfile entfernen.
 
 ## Layout
 - [ ] **T2** (AK-1, AK-2, AK-3, AK-5): `_Layout` mit Seitenleiste (Offcanvas unter `lg`), aktiver Eintrag mit

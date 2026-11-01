@@ -1,5 +1,5 @@
-import { CULL_MARGIN, GRID_MAJOR, GRID_MINOR, PLAYER_SIZE } from "../engine/constants";
-import type { Vec } from "../engine/vector";
+import { CULL_MARGIN, GRID_MAJOR, GRID_MINOR, PLAYER_SIZE } from "@/features/game/core/constants";
+import type { Vec } from "@/features/game/core/vector";
 import type { Viewport } from "./viewport";
 
 export interface DrawablePlayer {

@@ -19,7 +19,7 @@ Keine Änderung.
   `server/BrowserGame.Admin/wwwroot/lib/` (gitignored, wie bisher `site.css`):
   - `bootstrap/bootstrap.min.css`, `bootstrap/bootstrap.bundle.min.js` (inkl. Popper, für Offcanvas und Dropdown)
   - `bootstrap-icons/bootstrap-icons.min.css` + `fonts/`
-- `client/src/admin.css` entfällt. Das eigene CSS kommt als kleine, handgeschriebene Datei
+- `client/src/styles/admin.css` entfällt. Das eigene CSS kommt als kleine, handgeschriebene Datei
   `server/BrowserGame.Admin/wwwroot/css/admin.css` (eingecheckt): Breite der Seitenleiste, Layout im Grid.
 - Dockerfile: Das Kopieren von `server/BrowserGame.Admin/Pages/` in die Client-Stage entfällt (Tailwind scannt dort nicht
   mehr).

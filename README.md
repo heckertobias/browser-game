@@ -30,8 +30,8 @@ Details: [`specs/README.md`](specs/README.md)
 | `scripts/` | Hilfsskripte: `github-setup.sh` (Repo-Härtung), `release.sh`, `release-notes.sh` |
 | `.github/` | CI-Workflows, Dependabot |
 | `deploy/` | Compose für den Betrieb (Version über `GAME_VERSION`) |
-| `server/` | C# / ASP.NET Core: `Features/<Name>/` mit Präsentation, Anwendung, Domain, Infrastruktur; gemeinsame Daten- und Infrastruktur-Ebene (`BrowserGame.Data`), Admin als eigener Dienst |
-| `client/` | TypeScript, React, Canvas, daisyUI: `src/app/` (Einstieg), `src/features/<name>/` (game, account, i18n, pwa), `src/styles/` |
+| `server/` | C# / ASP.NET Core: `Features/<Name>/` (innen nur die nötigen Ordner aus `Domain/`, `Application/`, `Infrastructure/`, `Presentation/`); gemeinsame Daten- und Infrastruktur-Ebene (`BrowserGame.Data`), Admin als eigener Dienst |
+| `client/` | TypeScript, React, Canvas, daisyUI: `src/app/` (Einstieg), `src/features/<name>/` (game, accounts, localization, pwa), `src/styles/` |
 
 Beide Seiten ordnen nach Feature: Client `src/features/<name>/`, Server `Features/<Name>/`; die Aufteilung ist in
 [`docs/project-structure.md`](docs/project-structure.md) und [ADR 0013](docs/decisions/0013-projektstruktur.md)

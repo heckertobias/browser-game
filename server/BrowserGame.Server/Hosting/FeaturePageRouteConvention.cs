@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
-namespace BrowserGame.Server.Shared.Pages;
+namespace BrowserGame.Server.Hosting;
 
 /// <summary>
-/// Razor-Seitentitel-Layout folgt den Feature-Ordnern (<c>Features/&lt;Feature&gt;/Presentation/</c>), die URLs bleiben
+/// Das Layout der Razor-Seiten folgt den Feature-Ordnern (<c>Features/&lt;Feature&gt;/Presentation/</c>), die URLs bleiben
 /// aber wie bisher (<c>/Account/Login</c> …): die Konvention schneidet <c>&lt;Feature&gt;/Presentation/</c> aus der
 /// Route, die aus dem Dateipfad hinter <c>RootDirectory = /Features</c> entsteht.
 /// </summary>

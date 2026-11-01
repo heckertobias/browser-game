@@ -76,4 +76,13 @@ internal static class AccountSetup
 
         services.AddAuthorization();
     }
+
+    public static void AddGameEmail(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<GameEmailSender, PlayerEmailSender>();
+        builder.Services.AddSingleton<RegistrationLinks>();
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<AccountLinks>();
+        builder.Services.AddScoped<AccountEmails>();
+    }
 }

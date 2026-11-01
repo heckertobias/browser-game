@@ -99,7 +99,7 @@ public sealed class CompleteRegistrationModel(
         var error = PlayerNames.TryNormalize(Name, out var name);
         if (error != PlayerNameError.None)
         {
-            ModelState.AddModelError(nameof(Name), PlayerNames.Describe(error));
+            ModelState.AddModelError(nameof(Name), PlayerNameMessages.Describe(error));
             return null;
         }
 

@@ -2,10 +2,8 @@ using BrowserGame.Server.Features.Accounts;
 using BrowserGame.Data;
 using BrowserGame.Server.Features.Game;
 using BrowserGame.Server.Features.Localization;
-using BrowserGame.Server.Features.Localization.Resources;
 using BrowserGame.Server.Features.Pwa;
-using BrowserGame.Server.Shared.Pages;
-using Microsoft.AspNetCore.Localization;
+using BrowserGame.Server.Hosting;
 
 if (await WebDefaults.TryRunHealthProbeAsync(args) is { } exitCode)
 {
@@ -22,41 +20,17 @@ if (databaseProvider == DatabaseProvider.Sqlite)
 
 builder.AddGameAccounts();
 builder.AddGameEmail();
-builder.Services.AddLocalization(o => o.ResourcesPath = "");
-builder.Services.AddRazorPages(o =>
-    {
-        // Razor-Seiten leben in den Feature-Ordnern (Features/<Feature>/Presentation/…).
-        // Die URLs bleiben wie bisher (/Account/Login …): die Konvention entfernt <Feature> und Presentation aus der Route.
-        o.RootDirectory = "/Features";
-        o.Conventions.Add(new FeaturePageRouteConvention());
-    })
-    .AddDataAnnotationsLocalization(o => o.DataAnnotationLocalizerProvider = (_, f) => f.Create(typeof(Texts)));
+builder.Services.AddGameLocalization();
+builder.Services.AddGamePages();
 builder.Services.AddHealthChecks();
-builder.Services.AddSingleton<GameLoop>();
-builder.Services.AddSingleton<PositionStore>();
-// Vor dem GameLoop registriert: Hosted Services stoppen rückwärts, so schreibt der Store noch dessen letzten Stand (003 AK-19).
-builder.Services.AddHostedService(sp => sp.GetRequiredService<PositionStore>());
-builder.Services.AddHostedService(sp => sp.GetRequiredService<GameLoop>());
+builder.Services.AddGame();
 
 var app = builder.Build();
 
 await app.Services.MigrateAsync<GameDbContext>(databaseProvider);
 
 app.UseSecurityHeaders();
-app.UseRequestLocalization(o =>
-{
-    string[] cultures = [.. GameLanguages.Supported];
-    o.SetDefaultCulture(GameLanguages.Default).AddSupportedCultures(cultures).AddSupportedUICultures(cultures);
-    // Nur die bevorzugte Sprache zählt (006 AK-2): "fr, de" ergibt Englisch, nicht Deutsch.
-    o.RequestCultureProviders =
-    [
-        new LanguageOnlyCultureProvider(new CookieRequestCultureProvider()),
-        new LanguageOnlyCultureProvider(new AcceptLanguageHeaderRequestCultureProvider { MaximumAcceptLanguageHeaderValuesToTry = 1 }),
-    ];
-    // Den Rückfall auf Eltern-Kulturen übernimmt der Wrapper; so entsteht aus Nutzereingaben nie eine CultureInfo.
-    o.FallBackToParentCultures = false;
-    o.FallBackToParentUICultures = false;
-});
+app.UseGameLocalization();
 
 // Erkennt Verbindungen, die ohne Close-Frame verschwinden (003 AK-20).
 app.UseWebSockets(new WebSocketOptions

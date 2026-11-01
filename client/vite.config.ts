@@ -6,6 +6,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   base: "/play/",
   plugins: [react(), tailwindcss()],
+  resolve: { tsconfigPaths: true },
   build: {
     outDir: "../server/BrowserGame.Server/wwwroot/play",
     emptyOutDir: true,

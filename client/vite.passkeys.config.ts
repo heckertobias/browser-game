@@ -6,9 +6,10 @@ import { defineConfig } from "vite";
  */
 export default defineConfig({
   publicDir: false,
+  resolve: { tsconfigPaths: true },
   build: {
     lib: {
-      entry: { passkeys: "src/features/account/api/passkeys.ts", language: "src/features/i18n/language.ts" },
+      entry: { passkeys: "src/features/accounts/api/passkeys.ts", language: "src/features/localization/language.ts" },
       formats: ["es"],
       fileName: (_format, entryName) => `${entryName}.js`,
     },

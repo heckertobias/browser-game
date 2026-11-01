@@ -1,8 +1,5 @@
-using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using BrowserGame.Server.Features.Localization;
-using BrowserGame.Server.Features.Localization.Resources;
 
 namespace BrowserGame.Server.Features.Accounts;
 
@@ -49,18 +46,6 @@ internal static partial class PlayerNames
         name = normalized;
         return PlayerNameError.None;
     }
-
-    public static string Describe(PlayerNameError error) => error switch
-    {
-#pragma warning disable CA1863 // Vorlage kommt je Sprache aus der Ressource; Zwischenspeichern lohnt nicht.
-        PlayerNameError.Length => string.Format(CultureInfo.CurrentCulture, Text("PlayerName.Length"), MinLength, MaxLength),
-#pragma warning restore CA1863
-        PlayerNameError.Characters => Text("PlayerName.Characters"),
-        PlayerNameError.Blocked => Text("PlayerName.Blocked"),
-        _ => "",
-    };
-
-    private static string Text(string key) => Texts.ResourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
 
     [GeneratedRegex("^[A-Za-z]+$")]
     private static partial Regex LettersOnly();

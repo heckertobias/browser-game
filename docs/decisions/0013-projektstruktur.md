@@ -10,8 +10,8 @@ feature-orientiert, aber unregelmäßig: Im Client lagen `pwa.ts`, `update.ts`, 
 Im Spielserver standen die Feature-Gruppen (`Accounts/`, `Game/`, `Localization/`, `Pwa/`) neben einem
 separaten `Pages/`-Baum für Razor und einem `Resources/`-Baum für die Textressourcen.
 
-Ziel ist eine gleiche Arbeitsweise auf beiden Seiten: Ordnung nach **Feature**, mit festem inneren Aufbau
-(Präsentation / Anwendung / Domain / Infrastruktur). Details: [`docs/project-structure.md`](../project-structure.md).
+Ziel ist eine gleiche Arbeitsweise auf beiden Seiten: Ordnung nach **Feature**, mit einheitlichen Ordnernamen
+(`Domain/` immer, `Application/`, `Infrastructure/`, `Presentation/` nur bei Bedarf). Details: [`docs/project-structure.md`](../project-structure.md).
 Das Verhalten ändert sich nicht.
 
 ## Entscheidung
@@ -22,9 +22,9 @@ Das Verhalten ändert sich nicht.
 client/src/
   app/                       Einstiegspunkte (main.tsx, App.tsx)
   features/
-    game/                    engine/ · state/ · input/ · render/ · network/
-    account/                 api/ (passkeys.ts, fester Vite-Build passkeys.js)
-    i18n/                    i18n.ts (Wörterbuch) · language.ts (Umschalter für Razor-Seiten)
+    game/                    core/ · engine/ · state/ · input/ · render/ · network/
+    accounts/                api/ (passkeys.ts, fester Vite-Build passkeys.js)
+    localization/            i18n.ts (Wörterbuch) · language.ts (Umschalter für Razor-Seiten)
     pwa/                     services/ (pwa.ts, update.ts, reload.ts, version.ts) · pages/ (offline.ts)
   styles/                    global.css · landing.css · admin.css
   generated/                 Protobuf-Typen aus `buf generate` (Quelle bleibt contracts/)
@@ -32,38 +32,47 @@ client/src/
 
 Tests liegen weiter neben der getesteten Datei (`*.test.ts`, Include-Muster `src/**/*.test.ts` bleibt).
 Ein `shared/`-Ordner gibt es bewusst nicht: Er entsteht erst, wenn Code von mindestens zwei Features genutzt
-wird. `vector.ts` auszulagern wäre zu früh.
+wird. `game/core/` hält die Basis des Spiels (`constants.ts`, `vector.ts`), damit `engine/` nicht im Kreis
+mit `input/`, `render/` und `state/` hängt. Der Pfad-Alias `@/` zeigt auf `client/src/`; ESLint erzwingt die
+Importgrenzen zwischen Features.
 
-### Server: `Features/<Name>/` mit Layern
+### Server: `Features/<Name>/` mit Schichten nach Bedarf
 
 ```
 server/BrowserGame.Server/
-  Program.cs                 Bootstrap und DI
+  Program.cs                 Bootstrap; Registrierung nur über Add…/Use…-Extensions
+  Hosting/                   FeaturePageRouteConvention, PagesSetup
   Features/
+    _ViewImports.cshtml · _ViewStart.cshtml · Index.cshtml · Shared/   Razor-Vorgabe
     Accounts/                AccountSetup.cs · Application/ · Domain/ · Infrastructure/ · Presentation/Account/
-    Game/                    Presentation/ · Application/ · Domain/ · Infrastructure/
-    Localization/            Presentation/ · Services/ · Resources/ (Texts.cs + Texts(.de).resx)
-    Pwa/                     Services/
-  Features/Shared/           Razor: _ViewImports, _ViewStart, _Layout, _Errors, _LanguageSwitch, Index.cshtml
-  Shared/Pages/              FeaturePageRouteConvention, hält die URLs stabil
+    Game/                    GameSetup.cs · Application/ · Domain/ · Infrastructure/ · Presentation/
+    Localization/            LocalizationSetup.cs · Application/ · Presentation/ · Resources/ (Texts.cs + Texts(.de).resx)
+    Pwa/                     Application/
 server/BrowserGame.Data/     unverändert, gemeinsame Daten- und Server-Ebene (ADR 0006)
 server/BrowserGame.Admin/    unverändert, eigener Dienst
 ```
 
-Die Tests wurden umsortiert: `browsergame.Server.Tests` gruppiert nach
-`Features/{Accounts,Game,Localization,Pwa,Data}` plus `TestSupport/`.
+Schichten: `Domain/` ist reine Logik und das Leitbild; `Application/`, `Infrastructure/` und `Presentation/` gibt es nur,
+wenn ein Feature sie wirklich trennt. Abhängigkeiten zeigen nach innen (Infrastructure/Presentation → Application →
+Domain), zwischen Features nur in eine Richtung (heute: Accounts → Game); Localization und Pwa sind Querschnitt.
+Die Schichten stehen nicht im Namespace (`BrowserGame.Server.Features.<Feature>`); Ausnahmen sind Razor-Seiten und
+`Texts`. Spielnahe Features (Chat, Kampf, Gegner …) kommen unter `Features/Game/<Sub>/` bzw. `features/game/<sub>/`.
+Die Tabelle steht in [`docs/project-structure.md`](../project-structure.md).
+
+Die Tests wurden umsortiert: `BrowserGame.Server.Tests` gruppiert nach
+`Features/{Accounts,Game,Localization,Pwa}`, `Hosting/` und `Data/` (Tests des Data-Projekts) plus `TestSupport/`.
 
 ### Drei Besonderheiten bei ASP.NET Core
 
 1. **Razor-Seiten:** `RazorPagesOptions.RootDirectory = "/Features"`. Die Seiten liegen jetzt unter
    `Features/<Feature>/Presentation/…`, die **URLs bleiben** `/Account/Login` usw. Dafür schneidet die
-   `FeaturePageRouteConvention` (in `Shared/Pages/`) `<Feature>/Presentation/` aus der Route, die aus dem
+   `FeaturePageRouteConvention` (in `Hosting/`) `<Feature>/Presentation/` aus der Route, die aus dem
    Dateipfad entsteht.
 
 2. **`asp-page` und Redirects:** Beides löst nach dem seitenrelativen Pfad auf, nicht nach der URL. Die
    Attribute zeigen deshalb auf z. B. `/Localization/Presentation/Language`. Was im Browser sichtbar bleibt,
    ist trotzdem die kurze URL (`action="/Language"`), weil die Konvention die Template kürzt.
-   Die Index-Seite liegt direkt unter `Features/`, damit Razor sie wie bisher unter `/` findet.
+   Die Index-Seite liegt direkt unter `Features/`, damit Razor sie wie bisher unter `/` findet; `_ViewImports` und `_ViewStart` liegen aus demselben Grund dort.
 
 3. **Textressourcen:** `Texts.cs` und `Texts(.de).resx` liegen in `Features/Localization/Resources/`.
    Die `ResourceManagerStringLocalizerFactory` baut den Basisnamen aus `typeof(Texts)`; deshalb bleibt

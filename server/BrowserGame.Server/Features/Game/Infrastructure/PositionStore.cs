@@ -3,9 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Server.Features.Game;
 
-/// <summary>Position einer Figur zum Speichern; im Tick-Thread kopiert, damit spätere Bewegung sie nicht ändert.</summary>
-internal readonly record struct PositionToSave(string AccountId, double X, double Y);
-
 /// <summary>
 /// Schreibt die Positionen aus dem <see cref="GameLoop"/> gebündelt in die Datenbank (003 AK-18, AK-19).
 /// Liest, bis der GameLoop den Channel beim Herunterfahren schließt; darum vor dem GameLoop registrieren,
