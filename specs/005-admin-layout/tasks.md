@@ -17,7 +17,7 @@ Reihenfolge: Build → Sprache → Layout → Seiten → SMTP → Tests → Betr
   `aria-current`, Konto und Abmelden in der Leiste; `<html lang>` aus der Kultur; `wwwroot/css/admin.css`.
 - [x] **T4** (AK-4): `_LayoutPlain` für Login, LoginTwoFactor und Invite.
 - [x] **T5** (AK-10, AK-11, AK-12): `theme.js` synchron im `<head>`, Umschalter Hell/Dunkel/System.
-- [ ] **T6** (AK-7, AK-8): `_Errors` (nur Fehler ohne Feld), `_Message`, `BootstrapValidationTagHelper` (`is-invalid`).
+- [x] **T6** (AK-7, AK-8): `_Errors` (nur Fehler ohne Feld), `_Message`, `BootstrapValidationTagHelper` (`is-invalid`).
 
 ## Seiten
 - [ ] **T7** (AK-6, AK-7, AK-9, AK-13, AK-14): Index, Smtp, Admins, Audit, Account auf Bootstrap und Englisch umstellen

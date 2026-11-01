@@ -5,23 +5,22 @@
     ViewData["Title"] = "SMTP-Einstellungen";
 }
 <partial name="_Errors" />
-@if (Model.Message is not null)
-{
-    <div class="alert alert-success rounded-none">@Model.Message</div>
-}
+<partial name="_Message" model="new PageMessage(MessageKind.Success, Model.Message)" />
 @if (!Model.Configured)
 {
-    <div class="alert alert-warning rounded-none">Noch nicht gespeichert – das Spiel verschickt derzeit keine Mails.</div>
+    <partial name="_Message" model='new PageMessage(MessageKind.Warning, "Noch nicht gespeichert – das Spiel verschickt derzeit keine Mails.")' />
 }
 
 <form method="post" class="grid gap-4 sm:grid-cols-2">
     <label class="flex flex-col gap-1 sm:col-span-2">
         <span class="label-text">Server (nur der Name, z. B. mx.mailhost.example)</span>
         <input asp-for="Input.Host" class="input w-full rounded-none" autocomplete="off" />
+        <span asp-validation-for="Input.Host" class="invalid-feedback"></span>
     </label>
     <label class="flex flex-col gap-1">
         <span class="label-text">Port (465 = SSL/TLS, 587 = STARTTLS)</span>
         <input asp-for="Input.Port" type="number" min="1" max="65535" class="input w-full rounded-none" />
+        <span asp-validation-for="Input.Port" class="invalid-feedback"></span>
     </label>
     <label class="flex flex-col gap-1">
         <span class="label-text">Verschlüsselung</span>
@@ -31,28 +30,34 @@
             <option value="@SmtpSecurity.Auto">Automatisch</option>
             <option value="@SmtpSecurity.None">Keine (nur Testserver)</option>
         </select>
+        <span asp-validation-for="Input.Security" class="invalid-feedback"></span>
     </label>
     <label class="flex flex-col gap-1">
         <span class="label-text">Benutzername</span>
         <input asp-for="Input.Username" autocomplete="off" class="input w-full rounded-none" />
+        <span asp-validation-for="Input.Username" class="invalid-feedback"></span>
     </label>
     <label class="flex flex-col gap-1">
         <span class="label-text">Passwort @(Model.PasswordSet ? "(gesetzt – leer lassen = unverändert)" : "")</span>
         <input asp-for="Input.Password" type="password" autocomplete="new-password" value="" class="input w-full rounded-none" />
+        <span asp-validation-for="Input.Password" class="invalid-feedback"></span>
     </label>
     <label class="flex flex-col gap-1">
         <span class="label-text">Absender-Adresse</span>
         <input asp-for="Input.FromAddress" type="email" class="input w-full rounded-none" />
+        <span asp-validation-for="Input.FromAddress" class="invalid-feedback"></span>
     </label>
     <label class="flex flex-col gap-1">
         <span class="label-text">Absender-Name</span>
         <input asp-for="Input.FromName" class="input w-full rounded-none" placeholder="Browser Game" />
+        <span asp-validation-for="Input.FromName" class="invalid-feedback"></span>
     </label>
 
     <div class="divider font-mono text-xs sm:col-span-2">Testen, bevor du speicherst</div>
     <label class="flex flex-col gap-1 sm:col-span-2">
         <span class="label-text">Testmail an</span>
         <input asp-for="TestRecipient" type="email" class="input w-full rounded-none" />
+        <span asp-validation-for="TestRecipient" class="invalid-feedback"></span>
     </label>
     <button type="submit" asp-page-handler="Test" class="btn rounded-none font-mono uppercase">Testmail senden</button>
     <button type="submit" asp-page-handler="Save" class="btn btn-primary rounded-none font-mono uppercase">Speichern</button>

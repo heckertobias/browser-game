@@ -34,3 +34,8 @@
   width: 100%;
   max-width: 28rem;
 }
+
+/* Fehler ohne Feld (_Errors): kein Abstand unter der Liste im Kasten. */
+.validation-summary-errors ul {
+  margin-bottom: 0;
+}

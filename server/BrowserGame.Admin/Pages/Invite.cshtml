@@ -18,10 +18,12 @@
             <label class="flex flex-col gap-1">
                 <span class="label-text">Name</span>
                 <input asp-for="Name" autocomplete="username" class="input input-bordered w-full rounded-none" required />
+                <span asp-validation-for="Name" class="invalid-feedback"></span>
             </label>
             <label class="flex flex-col gap-1">
                 <span class="label-text">E-Mail</span>
                 <input asp-for="Email" type="email" autocomplete="email" class="input input-bordered w-full rounded-none" required />
+                <span asp-validation-for="Email" class="invalid-feedback"></span>
             </label>
             <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Weiter</button>
         </form>
@@ -42,10 +44,12 @@
             <label class="flex flex-col gap-1">
                 <span class="label-text">Passwort (mindestens 12 Zeichen)</span>
                 <input asp-for="Password" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
+                <span asp-validation-for="Password" class="invalid-feedback"></span>
             </label>
             <label class="flex flex-col gap-1">
                 <span class="label-text">Passwort wiederholen</span>
                 <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
+                <span asp-validation-for="ConfirmPassword" class="invalid-feedback"></span>
             </label>
             <button type="submit" class="btn rounded-none font-mono uppercase">Weiter zur Authenticator-App</button>
         </form>
@@ -60,13 +64,14 @@
             <label class="flex flex-col gap-1">
                 <span class="label-text">Code aus der App</span>
                 <input asp-for="Code" autocomplete="one-time-code" inputmode="numeric" class="input input-bordered w-full rounded-none font-mono" />
+                <span asp-validation-for="Code" class="invalid-feedback"></span>
             </label>
             <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Bestätigen</button>
         </form>
         break;
 
     case InviteStep.Done:
-        <div class="alert alert-success rounded-none">Fertig – du bist als Admin angemeldet.</div>
+        <partial name="_Message" model='new PageMessage(MessageKind.Success, "Fertig – du bist als Admin angemeldet.")' />
         @if (Model.RecoveryCodes.Count > 0)
         {
             <p><strong>Wiederherstellungscodes:</strong> Bewahre sie sicher auf (z. B. im Passwortmanager). Jeder Code

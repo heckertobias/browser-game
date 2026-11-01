@@ -1,0 +1,6 @@
+@model PageMessage
+@* Erfolg oder Hinweis oben auf der Seite (005 AK-8). role="status" statt "alert": wird vorgelesen, ohne zu unterbrechen. *@
+@if (!string.IsNullOrEmpty(Model.Text))
+{
+    <div class="alert @(Model.Kind == MessageKind.Warning ? "alert-warning" : "alert-success")" role="status" data-testid="message">@Model.Text</div>
+}

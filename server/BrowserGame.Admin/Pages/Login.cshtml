@@ -19,10 +19,12 @@
     <label class="flex flex-col gap-1">
         <span class="label-text">E-Mail</span>
         <input asp-for="Email" type="email" autocomplete="username" class="input input-bordered w-full rounded-none" />
+        <span asp-validation-for="Email" class="invalid-feedback"></span>
     </label>
     <label class="flex flex-col gap-1">
         <span class="label-text">Passwort</span>
         <input asp-for="Password" type="password" autocomplete="current-password" class="input input-bordered w-full rounded-none" />
+        <span asp-validation-for="Password" class="invalid-feedback"></span>
     </label>
     <button type="submit" class="btn rounded-none font-mono uppercase">Weiter</button>
 </form>

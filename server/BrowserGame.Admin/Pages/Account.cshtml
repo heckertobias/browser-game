@@ -4,10 +4,7 @@
     ViewData["Title"] = "Mein Account";
 }
 <partial name="_Errors" />
-@if (Model.Message is not null)
-{
-    <div class="alert alert-success rounded-none">@Model.Message</div>
-}
+<partial name="_Message" model="new PageMessage(MessageKind.Success, Model.Message)" />
 
 <h2 class="font-mono uppercase">Passkeys</h2>
 @if (Model.Passkeys.Count == 0)

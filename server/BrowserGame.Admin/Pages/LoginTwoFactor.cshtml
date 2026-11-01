@@ -10,10 +10,12 @@
     <label class="flex flex-col gap-1">
         <span class="label-text">Code</span>
         <input asp-for="Code" autocomplete="one-time-code" inputmode="text" class="input input-bordered w-full rounded-none font-mono" />
+        <span asp-validation-for="Code" class="invalid-feedback"></span>
     </label>
     <label class="label cursor-pointer justify-start gap-2">
         <input asp-for="IsRecoveryCode" type="checkbox" class="checkbox rounded-none" />
         <span class="label-text">Das ist ein Wiederherstellungscode</span>
+        <span asp-validation-for="IsRecoveryCode" class="invalid-feedback"></span>
     </label>
     <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Anmelden</button>
 </form>

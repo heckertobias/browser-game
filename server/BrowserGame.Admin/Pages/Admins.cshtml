@@ -4,10 +4,7 @@
     ViewData["Title"] = "Admins";
 }
 <partial name="_Errors" />
-@if (Model.Message is not null)
-{
-    <div class="alert alert-success rounded-none">@Model.Message</div>
-}
+<partial name="_Message" model="new PageMessage(MessageKind.Success, Model.Message)" />
 @if (Model.InviteLink is not null)
 {
     <label class="flex flex-col gap-1">
@@ -44,6 +41,7 @@
     <label class="flex flex-col gap-1 grow">
         <span class="label-text">E-Mail (optional – sonst nur Link)</span>
         <input asp-for="InviteEmail" type="email" class="input input-bordered w-full rounded-none" />
+        <span asp-validation-for="InviteEmail" class="invalid-feedback"></span>
     </label>
     <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Einladen</button>
 </form>
