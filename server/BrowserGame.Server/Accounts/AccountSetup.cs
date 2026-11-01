@@ -23,7 +23,7 @@ internal static class AccountSetup
             {
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-                options.SignIn.RequireConfirmedEmail = true; // AK-3
+                options.SignIn.RequireConfirmedEmail = true; // Sicherheitsnetz: Accounts entstehen nur bestätigt (AK-2)
 
                 // NIST: Länge statt Zeichenklassen
                 options.Password.RequiredLength = 10;
@@ -66,9 +66,10 @@ internal static class AccountSetup
         // Abmelden, Passwort-Reset und Löschen ändern den Security-Stamp → andere Sitzungen enden spätestens nach 1 min (AK-15).
         services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = TimeSpan.FromMinutes(1));
 
-        // Bestätigungs- und Reset-Links (AK-15: befristet; einmalig, weil sich der Security-Stamp danach ändert).
+        // Reset-Links (AK-15: befristet; einmalig, weil sich der Security-Stamp danach ändert).
         services.Configure<DataProtectionTokenProviderOptions>(o => o.TokenLifespan = TimeSpan.FromHours(3));
 
+        services.AddScoped<PasskeyCeremonies>();
         services.AddPasskeyOptions(builder.Configuration, builder.Environment.IsDevelopment());
 
         services.AddAuthRateLimiting(builder.Configuration);

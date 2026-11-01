@@ -1,13 +1,18 @@
 using System.Net.WebSockets;
 using BrowserGame.Contracts.V1;
+using BrowserGame.Data;
 using Google.Protobuf;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Server.Game;
 
 /// <summary>WebSocket <c>/ws</c>: binäre Protobuf-Nachrichten in beide Richtungen.</summary>
 internal static class GameEndpoint
 {
-    public static async Task HandleAsync(HttpContext context, GameLoop game)
+    public static async Task HandleAsync(
+        HttpContext context, GameLoop game, UserManager<Account> users, GameDbContext db,
+        IConfiguration configuration, IWebHostEnvironment environment)
     {
         if (!context.WebSockets.IsWebSocketRequest)
         {
@@ -15,12 +20,37 @@ internal static class GameEndpoint
             return;
         }
 
+        // 401 statt Redirect zur Anmeldung: WebSocket-Clients folgen keinem Redirect.
+        if (context.User.Identity?.IsAuthenticated != true)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return;
+        }
+
+        Uri.TryCreate(configuration["App:PublicUrl"], UriKind.Absolute, out var publicUrl);
+        var requestOrigin = new Uri($"{context.Request.Scheme}://{context.Request.Host}");
+        if (!GameAccess.IsAllowedOrigin(context.Request.Headers.Origin.ToString(), publicUrl, environment.IsDevelopment(), requestOrigin))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
+        }
+
+        var account = await users.GetUserAsync(context.User);
+        if (account is not { EmailConfirmed: true, UserName: { } name })
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return;
+        }
+
+        var saved = await db.PlayerPositions.AsNoTracking().FirstOrDefaultAsync(p => p.AccountId == account.Id, context.RequestAborted);
+
         using var socket = await context.WebSockets.AcceptWebSocketAsync();
         var aborted = context.RequestAborted;
-        var connection = game.Join();
+        var connection = game.Join(account.Id, name, saved is null ? null : (saved.X, saved.Y));
 
-        var sending = SendLoopAsync(socket, connection, aborted);
-        var (status, reason) = await ReceiveLoopAsync(socket, connection, aborted);
+        using var receiving = CancellationTokenSource.CreateLinkedTokenSource(aborted);
+        var sending = SendLoopAsync(socket, connection, receiving, aborted);
+        var (status, reason) = await ReceiveLoopAsync(socket, connection, receiving.Token);
 
         game.Leave(connection); // beendet auch die Sende-Schleife
         await sending;
@@ -85,13 +115,23 @@ internal static class GameEndpoint
         }
     }
 
-    private static async Task SendLoopAsync(WebSocket socket, PlayerConnection connection, CancellationToken cancellationToken)
+    private static readonly TimeSpan KickCloseTimeout = TimeSpan.FromSeconds(5);
+
+    private static async Task SendLoopAsync(
+        WebSocket socket, PlayerConnection connection, CancellationTokenSource receiving, CancellationToken cancellationToken)
     {
         try
         {
             await foreach (var bytes in connection.Outbox.Reader.ReadAllAsync(cancellationToken))
             {
                 await socket.SendAsync(bytes, WebSocketMessageType.Binary, endOfMessage: true, cancellationToken);
+            }
+
+            if (connection.WasKicked && socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
+            {
+                await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "kicked", CancellationToken.None);
+                // Antwortet der Client nicht mit Close, endet die Empfangs-Schleife nach dem Timeout.
+                receiving.CancelAfter(KickCloseTimeout);
             }
         }
         catch (Exception ex) when (ex is WebSocketException or OperationCanceledException)

@@ -289,11 +289,13 @@ iOS gibt Homescreen-Apps einen eigenen Cookie-Speicher – dort meldet man sich 
   `touch-action` wird entlang der Vorfahren geschnitten – Buttons bleiben klickbar, aber nichts im Spiel scrollt oder
   zoomt; Doppeltipp-Zoom und Pull-to-Refresh entfallen.
 - iOS ignoriert `user-scalable=no` beim Pinch: zusätzlich `gesturestart`/`gesturechange` → `preventDefault()` (WebKit).
-- `index.html` Viewport: `width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no` .
+- `index.html` Viewport: `width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no`.
+  `maximum-scale=1`, weil iOS sonst beim Drehen zoomt und Tipps das Canvas statt das HUD treffen (003 T13a).
 - Kontextmenü auf dem Canvas ist schon unterdrückt (`contextmenu`).
+- Links im HUD sind nicht ziehbar (`draggable={false}`); iOS hebt `<a href>` sonst beim langen Drücken ab (003 T13a).
 
 ### HUD (AK-6)
-- Vollbild-Container `fixed inset-0 bg-black`, Canvas darin; HUD als Ebene mit `pointer-events-none` (Touches gehen
+- Vollbild-Container `fixed inset-0 bg-black`, Canvas darin; HUD als Ebene mit `pointer-events-none touch-none` (Touches gehen
   aufs Canvas), interaktive Elemente `pointer-events-auto`.
 - Abstände aus den Safe Areas: `top-[max(0.5rem,env(safe-area-inset-top))]`,
   `left-[max(0.5rem,env(safe-area-inset-left))]` usw.
@@ -518,6 +520,10 @@ Neu laden aus Overlays (z. B. „Hier weiterspielen“) immer über `reloadPage`
 - **Neuladen in der iOS-Homescreen-App** (RC rc.4: Tipp ohne Wirkung): Ursache offen. AK-16 sichert Rückmeldung und
   Hinweis, nicht die Ursache. Erscheint der Hinweis im RC, gezielt am iPhone diagnostizieren (Web-Inspektor); erst
   dann ggf. ein zweiter Navigationsversuch.
+- **iOS-Homescreen-App: Tippfläche nach dem Drehen versetzt** (bekannter Fehler, 003 T13b/T13c): Nach hoch → quer →
+  hoch liegt die Tippfläche von „Mein Account“ etwa eine Statusleisten-Höhe über dem Button. `black-translucent` behob
+  das, ließ aber unten eine Leiste frei (auch mit `100vh`); daher bleibt `black`. Neu angehen, wenn das HUD neu gebaut
+  wird.
 - **503 und späterer Wartungsmodus:** Der Service Worker macht aus 502–504 die Seite „Keine Verbindung – prüfe deine
   Internetverbindung“, `ServerWatch` wertet sie als „nicht erreichbar“. Eine Wartungsseite mit 503 würde verdeckt und
   wie ein Netzproblem aussehen. Die Wartungs-Spec muss das lösen (z. B. eigenes Kennzeichen, das der Service Worker

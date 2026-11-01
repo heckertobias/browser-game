@@ -7,6 +7,19 @@ export interface DrawablePlayer {
   color: number;
   x: number;
   y: number;
+  /** Verbindung verloren, Figur wartet noch (AK-20). */
+  away?: boolean;
+}
+
+const AWAY_ALPHA = 0.5;
+
+/** Grauwert gleicher Helligkeit (Rec. 601) für wartende Figuren (AK-20). */
+export function desaturate(rgb: number): number {
+  const r = (rgb >> 16) & 0xff;
+  const g = (rgb >> 8) & 0xff;
+  const b = rgb & 0xff;
+  const l = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+  return (l << 16) | (l << 8) | l;
 }
 
 const BACKGROUND = "#1d2b1f";
@@ -82,11 +95,13 @@ export function render(
     if (!isVisible(player, origin, viewport, CULL_MARGIN)) continue;
     const left = Math.round(player.x - PLAYER_SIZE / 2);
     const top = Math.round(player.y - PLAYER_SIZE / 2);
-    ctx.fillStyle = toCssColor(player.color);
+    ctx.globalAlpha = player.away ? AWAY_ALPHA : 1;
+    ctx.fillStyle = toCssColor(player.away ? desaturate(player.color) : player.color);
     ctx.fillRect(left, top, PLAYER_SIZE, PLAYER_SIZE);
     ctx.fillStyle = "#ffffff";
     ctx.fillText(player.name, Math.round(player.x), top - 2);
   }
+  ctx.globalAlpha = 1;
   if (letterbox) ctx.restore();
 }
 

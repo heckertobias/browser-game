@@ -19,18 +19,19 @@ public class EmailTests
     private static readonly Account Tobias = new() { UserName = "Tobias" };
 
     [Fact] // AK-2
-    public async Task Confirmation_mail_is_german_and_contains_link()
+    public async Task Registration_mail_is_german_and_contains_link()
     {
         var sender = new Captured();
 
-        await sender.SendConfirmationLinkAsync(Tobias, "t@example.org", "https://game.test/Account/ConfirmEmail?code=a&b=1");
+        await sender.SendRegistrationLinkAsync("t@example.org", "de", "https://game.test/Account/CompleteRegistration?code=a&b=1", 30);
 
         var mail = Assert.Single(sender.Mails);
         Assert.Equal("t@example.org", mail.To);
-        Assert.Contains("bestätige", mail.Subject, StringComparison.Ordinal);
-        Assert.Contains("Hallo Tobias", mail.Text, StringComparison.Ordinal);
-        Assert.Contains("https://game.test/Account/ConfirmEmail?code=a&b=1", mail.Text, StringComparison.Ordinal);
-        Assert.Contains("<a href=\"https://game.test/Account/ConfirmEmail?code=a&amp;b=1\">", mail.Html, StringComparison.Ordinal);
+        Assert.Contains("Registrierung", mail.Subject, StringComparison.Ordinal);
+        Assert.StartsWith("Hallo,", mail.Text, StringComparison.Ordinal);
+        Assert.Contains("https://game.test/Account/CompleteRegistration?code=a&b=1", mail.Text, StringComparison.Ordinal);
+        Assert.Contains("30 Minuten", mail.Text, StringComparison.Ordinal);
+        Assert.Contains("<a href=\"https://game.test/Account/CompleteRegistration?code=a&amp;b=1\">", mail.Html, StringComparison.Ordinal);
     }
 
     [Fact] // AK-14
@@ -48,7 +49,7 @@ public class EmailTests
     {
         var sender = new Captured();
 
-        await sender.SendConfirmationLinkAsync(new Account { UserName = "<b>x</b>" }, "t@example.org", "https://game.test/c");
+        await sender.SendPasswordResetLinkAsync(new Account { UserName = "<b>x</b>" }, "t@example.org", "https://game.test/c");
 
         Assert.DoesNotContain("<b>", Assert.Single(sender.Mails).Html, StringComparison.Ordinal);
     }

@@ -45,8 +45,17 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
 
     private string WebRoot => Path.Combine(_root, "wwwroot");
 
-    /// <summary>Verbindungszeichenfolge dieser Factory; bleibt gleich, damit ein zweiter Server dieselbe DB nutzen kann.</summary>
-    public string ConnectionString { get; } = TestDatabase.NewConnectionString("bg-test");
+    /// <summary>Verbindungszeichenfolge dieser Factory; ein zweiter Server bekommt sie per init und nutzt so dieselbe DB (003 AK-19).</summary>
+    public string ConnectionString { get; init; } = TestDatabase.NewConnectionString("bg-test");
+
+    /// <summary>Nachlauf getrennter Figuren in Sekunden (003 AK-20); Tests, die darin reconnecten, setzen mehr.</summary>
+    public string LingerSeconds { get; init; } = "0.5";
+
+    /// <summary>Speicher-Takt der Positionen in Sekunden (003 AK-19); ohne Angabe gilt der Standard (5 s).</summary>
+    public string? PositionSaveIntervalSeconds { get; init; }
+
+    /// <summary>Datenbank beim Entsorgen behalten, damit ein zweiter Server sie weiter nutzt (Neustart, 003 AK-19).</summary>
+    public bool KeepDatabase { get; init; }
 
     /// <summary>Statt echter Mails: alle Mails, die der Server verschicken würde.</summary>
     public CapturingEmailSender Mails { get; } = new();
@@ -58,6 +67,13 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
         builder.UseSetting("ConnectionStrings:Game", ConnectionString);
         // Im Testserver kommen alle Anfragen von derselben „IP“ – Limit hoch, damit Tests sich nicht gegenseitig bremsen.
         builder.UseSetting("RateLimiting:AuthRequestsPerMinute", "1000");
+        // Verkürzter Nachlauf (003 AK-20), damit Tests nicht 20 s warten.
+        builder.UseSetting("Game:LingerSeconds", LingerSeconds);
+        if (PositionSaveIntervalSeconds is not null)
+        {
+            builder.UseSetting("Game:PositionSaveIntervalSeconds", PositionSaveIntervalSeconds);
+        }
+
         builder.ConfigureTestServices(services => services.AddSingleton<GameEmailSender>(Mails));
     }
 
@@ -74,6 +90,9 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
     {
         base.Dispose(disposing);
         Directory.Delete(_root, recursive: true);
-        TestDatabase.Drop(ConnectionString);
+        if (!KeepDatabase)
+        {
+            TestDatabase.Drop(ConnectionString);
+        }
     }
 }

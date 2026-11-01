@@ -20,7 +20,7 @@ public sealed class LocalizedErrorsTests(GameServerFactory factory) : IClassFixt
     {
         using var client = EnglishClient();
 
-        var (_, html) = await AccountTestFlows.RegisterAsync(client, AccountTestFlows.UniqueEmail(), "Ab1");
+        var (_, html) = await AccountTestFlows.RegisterAsync(factory, client, AccountTestFlows.UniqueEmail(), "Ab1");
         var text = WebUtility.HtmlDecode(html);
 
         Assert.Contains("The name may only contain the letters A–Z", text, StringComparison.Ordinal);
@@ -32,7 +32,7 @@ public sealed class LocalizedErrorsTests(GameServerFactory factory) : IClassFixt
     {
         using var client = EnglishClient();
 
-        var (_, html) = await AccountTestFlows.RegisterAsync(client, AccountTestFlows.UniqueEmail(), "Al");
+        var (_, html) = await AccountTestFlows.RegisterAsync(factory, client, AccountTestFlows.UniqueEmail(), "Al");
 
         Assert.Contains("The name must be 3 to 16 characters long.", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
@@ -42,7 +42,7 @@ public sealed class LocalizedErrorsTests(GameServerFactory factory) : IClassFixt
     {
         using var client = EnglishClient();
 
-        var (_, html) = await AccountTestFlows.RegisterAsync(client, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName(), "kurz");
+        var (_, html) = await AccountTestFlows.RegisterAsync(factory, client, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName(), "kurz");
         var text = WebUtility.HtmlDecode(html);
 
         Assert.Contains("The password must be at least 10 characters long.", text, StringComparison.Ordinal);
@@ -55,7 +55,7 @@ public sealed class LocalizedErrorsTests(GameServerFactory factory) : IClassFixt
         using var client = EnglishClient();
         var first = await AccountTestFlows.CreateConfirmedAccountAsync(factory);
 
-        var (_, html) = await AccountTestFlows.RegisterAsync(client, AccountTestFlows.UniqueEmail(), first.Name);
+        var (_, html) = await AccountTestFlows.RegisterAsync(factory, client, AccountTestFlows.UniqueEmail(), first.Name);
         var text = WebUtility.HtmlDecode(html);
 
         Assert.Contains("is already taken", text, StringComparison.Ordinal);
@@ -68,12 +68,12 @@ public sealed class LocalizedErrorsTests(GameServerFactory factory) : IClassFixt
         using var client = EnglishClient();
         var existing = await AccountTestFlows.CreateConfirmedAccountAsync(factory);
         using var other = EnglishClient();
-        var (_, forNew) = await AccountTestFlows.RegisterAsync(other, AccountTestFlows.UniqueEmail(), AccountTestFlows.UniqueName());
+        var (_, forNew) = await AccountTestFlows.RequestRegistrationAsync(other, AccountTestFlows.UniqueEmail());
 
-        var (_, html) = await AccountTestFlows.RegisterAsync(client, existing.Email, AccountTestFlows.UniqueName());
+        var (_, html) = await AccountTestFlows.RequestRegistrationAsync(client, existing.Email);
 
-        Assert.Contains("/Account/ResendConfirmation", forNew, StringComparison.Ordinal);
-        Assert.Contains("/Account/ResendConfirmation", html, StringComparison.Ordinal);
+        Assert.Contains("Almost done!", WebUtility.HtmlDecode(forNew), StringComparison.Ordinal);
+        Assert.Contains("Almost done!", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
         Assert.DoesNotContain("Registration did not work", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
         Assert.Single(factory.Mails.To(existing.Email));
     }
@@ -85,7 +85,7 @@ public sealed class LocalizedErrorsTests(GameServerFactory factory) : IClassFixt
         var email = AccountTestFlows.UniqueEmail();
         var name = AccountTestFlows.UniqueName();
 
-        await AccountTestFlows.RegisterAsync(client, email, name.ToUpperInvariant());
+        await AccountTestFlows.RegisterAsync(factory, client, email, name.ToUpperInvariant());
 
         await using var scope = factory.Services.CreateAsyncScope();
         var account = await scope.ServiceProvider.GetRequiredService<UserManager<Account>>().FindByEmailAsync(email);

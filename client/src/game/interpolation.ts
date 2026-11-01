@@ -4,6 +4,7 @@ export interface RemotePlayer {
   color: number;
   x: number;
   y: number;
+  away?: boolean;
 }
 
 interface TimedSnapshot {

@@ -1,5 +1,7 @@
 # Beispiel: Betrieb hinter nginx-proxy (externes Docker-Netz "proxy"). Ausrollen liegt außerhalb des Repos (ADR 0012).
-# Kein Dienst veröffentlicht einen Port: Erreichbar sind beide nur über den Proxy (Forwarded-Header werden vertraut).
+# Kein Dienst veröffentlicht einen Port: Erreichbar sind beide nur über den Proxy. Das ist Pflicht, denn
+# ASPNETCORE_FORWARDEDHEADERS_ENABLED glaubt den X-Forwarded-*-Headern jedes Absenders.
+# Alle Variablen: README, Abschnitt „Konfiguration“. Mail (SMTP) wird im Admin unter „SMTP“ eingerichtet, nicht hier.
 # In der .env des Projekts (keine internen Namen im Repo):
 #   GAME_VERSION=0.3.0                                  # auszurollende Version
 #   VIRTUAL_HOST=browsergame.example.internal           # Spiel
@@ -24,6 +26,7 @@ services:
       Passkeys__ServerDomain: ${VIRTUAL_HOST}
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       Database__Provider: Sqlite
+      ConnectionStrings__Game: Data Source=/data/game.db
       Database__BackupPath: /data/backup/game.db
 
   browsergame-admin:
@@ -45,9 +48,11 @@ services:
       Passkeys__ServerDomain: ${ADMIN_VIRTUAL_HOST}
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
       Database__Provider: Sqlite
+      ConnectionStrings__Game: Data Source=/data/game.db
 
 volumes:
-  # Gemeinsame SQLite-Datenbank von Spiel und Admin (ADR 0006). Ins Backup aufnehmen.
+  # Gemeinsame SQLite-Datenbank von Spiel und Admin (ADR 0006), samt Data-Protection-Schlüsseln.
+  # Ins Backup gehört /data/backup/game.db (konsistente Kopie des Spiels, täglich 03:50 Ortszeit).
   data:
 
 networks:

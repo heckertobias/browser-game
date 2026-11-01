@@ -19,14 +19,14 @@ const en = {
   unsupported: "This browser does not support passkeys. Please use a current browser.",
   noneSelected: "No passkey selected.",
   createFailed: "The passkey could not be created (cancelled or not allowed).",
-  getFailed: "Signing in with a passkey was cancelled or failed.",
+  getFailed: "The passkey was not confirmed (cancelled or failed).",
 } as const;
 
 const de: Record<keyof typeof en, string> = {
   unsupported: "Dieser Browser unterstützt keine Passkeys. Bitte nutze einen aktuellen Browser.",
   noneSelected: "Kein Passkey ausgewählt.",
   createFailed: "Der Passkey konnte nicht angelegt werden (abgebrochen oder nicht erlaubt).",
-  getFailed: "Die Anmeldung mit Passkey wurde abgebrochen oder ist fehlgeschlagen.",
+  getFailed: "Der Passkey wurde nicht bestätigt (abgebrochen oder fehlgeschlagen).",
 };
 
 type Binary = ArrayBuffer | ArrayBufferView;

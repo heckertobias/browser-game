@@ -10,10 +10,10 @@ namespace BrowserGame.Server.Tests;
 public sealed partial class LanguageSelectionTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static readonly string[] German =
-        ["Bitte E-Mail angeben.", "Bitte einen Spielernamen angeben.", "Bitte Passwort angeben.", "Bitte das Passwort wiederholen."];
+        ["Bitte E-Mail angeben."];
 
     private static readonly string[] English =
-        ["Please enter your email address.", "Please enter a player name.", "Please enter your password.", "Please repeat the password."];
+        ["Please enter your email address."];
 
     private FormClient Client(string? acceptLanguage, string? cookie = null)
     {

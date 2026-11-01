@@ -30,57 +30,32 @@ public sealed class MailLanguageTests(GameServerFactory factory) : IClassFixture
         return account;
     }
 
-    [Fact] // AK-9
-    public async Task Registration_in_english_sends_english_confirmation()
-    {
-        using var client = ClientWith("en");
-        var email = AccountTestFlows.UniqueEmail();
-        var name = AccountTestFlows.UniqueName();
-
-        await AccountTestFlows.RegisterAsync(client, email, name);
-
-        var mail = Assert.Single(factory.Mails.To(email));
-        Assert.Equal("Please confirm your email address", mail.Subject);
-        Assert.StartsWith($"Hello {name[..1].ToUpperInvariant()}{name[1..].ToLowerInvariant()},", mail.Text, StringComparison.Ordinal);
-        var (_, html) = await client.GetAsync(AccountTestFlows.LinkFromMail(mail.Text));
-        Assert.Contains("Your email address is confirmed.", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
-    }
-
-    [Fact] // AK-9
-    public async Task Registration_in_german_sends_german_confirmation()
-    {
-        using var client = ClientWith("de");
-        var email = AccountTestFlows.UniqueEmail();
-
-        await AccountTestFlows.RegisterAsync(client, email, AccountTestFlows.UniqueName());
-
-        var mail = Assert.Single(factory.Mails.To(email));
-        Assert.Equal("Bitte bestätige deine E-Mail-Adresse", mail.Subject);
-        Assert.StartsWith("Hallo ", mail.Text, StringComparison.Ordinal);
-    }
-
     [Theory] // AK-9
-    [InlineData("en", "de", null, "Please confirm your email address")]
-    [InlineData("de", "en", null, "Bitte bestätige deine E-Mail-Adresse")]
-    [InlineData("de", "de", "en", "Bitte bestätige deine E-Mail-Adresse")]
-    public async Task Resend_uses_account_language_not_request_language(string accountLanguage, string acceptLanguage, string? cookieLanguage, string subject)
+    [InlineData("en", "Complete your sign-up", "Hello,", "The link is valid for 30 minutes.")]
+    [InlineData("de", "Registrierung abschließen", "Hallo,", "Der Link ist 30 Minuten gültig.")]
+    public async Task Registration_mail_uses_the_request_language(string acceptLanguage, string subject, string start, string lifetime)
     {
         using var client = ClientWith(acceptLanguage);
-        if (cookieLanguage is not null)
-        {
-            await client.PostAsync("/", "/Language", new Dictionary<string, string> { ["Language"] = cookieLanguage, ["ReturnUrl"] = "/" });
-        }
+        var email = AccountTestFlows.UniqueEmail();
 
-        var account = await CreateAccountAsync(accountLanguage, confirmed: false);
+        await AccountTestFlows.RequestRegistrationAsync(client, email);
 
-        var (_, html) = await client.PostAsync("/Account/ResendConfirmation", "/Account/ResendConfirmation", new Dictionary<string, string> { ["Email"] = account.Email });
+        var mail = Assert.Single(factory.Mails.To(email));
+        Assert.Equal(subject, mail.Subject);
+        Assert.StartsWith(start, mail.Text, StringComparison.Ordinal);
+        Assert.Contains(lifetime, mail.Text, StringComparison.Ordinal);
+    }
 
-        if (cookieLanguage is not null)
-        {
-            Assert.Contains($"<html lang=\"{cookieLanguage}\"", html, StringComparison.Ordinal);
-        }
+    [Fact] // AK-9
+    public async Task Registration_mail_follows_the_culture_cookie()
+    {
+        using var client = ClientWith("de");
+        await client.PostAsync("/", "/Language", new Dictionary<string, string> { ["Language"] = "en", ["ReturnUrl"] = "/" });
+        var email = AccountTestFlows.UniqueEmail();
 
-        Assert.Equal(subject, Assert.Single(factory.Mails.To(account.Email)).Subject);
+        await AccountTestFlows.RequestRegistrationAsync(client, email);
+
+        Assert.Equal("Complete your sign-up", Assert.Single(factory.Mails.To(email)).Subject);
     }
 
     [Theory] // AK-9
@@ -91,7 +66,7 @@ public sealed class MailLanguageTests(GameServerFactory factory) : IClassFixture
         using var client = ClientWith(registeringLanguage);
         var owner = await CreateAccountAsync(ownerLanguage);
 
-        await AccountTestFlows.RegisterAsync(client, owner.Email, AccountTestFlows.UniqueName());
+        await AccountTestFlows.RequestRegistrationAsync(client, owner.Email);
 
         var mail = Assert.Single(factory.Mails.To(owner.Email));
         Assert.Equal(subject, mail.Subject);
@@ -111,11 +86,11 @@ public sealed class MailLanguageTests(GameServerFactory factory) : IClassFixture
             factory.Services.GetRequiredService<SmtpMailer>(), factory.Services.GetRequiredService<IWebHostEnvironment>(), NullLogger<PlayerEmailSender>.Instance);
         var account = new Account { UserName = "Tobias", Language = "en" };
 
-        await sender.SendConfirmationLinkAsync(account, "t@example.org", "https://game.test/c");
+        await sender.SendPasswordResetLinkAsync(account, "t@example.org", "https://game.test/c");
 
         using var raw = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(Assert.Single(server.Messages)));
         var message = await MimeMessage.LoadAsync(raw, TestContext.Current.CancellationToken);
-        Assert.Equal("Please confirm your email address", message.Subject);
+        Assert.Equal("Reset your password", message.Subject);
         Assert.Contains("<div lang=\"en\">", message.HtmlBody, StringComparison.Ordinal);
     }
 }

@@ -61,7 +61,7 @@ public sealed class AccountLanguageTests(GameServerFactory factory) : IClassFixt
         using var client = ClientWith(acceptLanguage);
         var email = AccountTestFlows.UniqueEmail();
 
-        await AccountTestFlows.RegisterAsync(client, email, AccountTestFlows.UniqueName());
+        await AccountTestFlows.RegisterAsync(factory, client, email, AccountTestFlows.UniqueName());
 
         Assert.Equal(expected, await StoredLanguageAsync(email));
     }
@@ -73,7 +73,7 @@ public sealed class AccountLanguageTests(GameServerFactory factory) : IClassFixt
         await SwitchAsync(client, "en");
         var email = AccountTestFlows.UniqueEmail();
 
-        await AccountTestFlows.RegisterAsync(client, email, AccountTestFlows.UniqueName());
+        await AccountTestFlows.RegisterAsync(factory, client, email, AccountTestFlows.UniqueName());
 
         Assert.Equal("en", await StoredLanguageAsync(email));
     }
@@ -85,16 +85,12 @@ public sealed class AccountLanguageTests(GameServerFactory factory) : IClassFixt
     {
         var owner = await CreateAccountAsync(ownerLanguage);
         using var client = ClientWith(clientLanguage);
-        var name = AccountTestFlows.UniqueName();
 
-        var (response, html) = await AccountTestFlows.RegisterAsync(client, owner.Email, name);
+        var (response, html) = await AccountTestFlows.RequestRegistrationAsync(client, owner.Email);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         AssertPage(html, clientLanguage, expectedText);
         Assert.Equal(ownerLanguage, await StoredLanguageAsync(owner.Email));
-        await using var scope = factory.Services.CreateAsyncScope();
-        var users = scope.ServiceProvider.GetRequiredService<UserManager<Account>>();
-        Assert.Null(await users.FindByNameAsync(name));
         Assert.Single(factory.Mails.To(owner.Email));
     }
 
@@ -200,14 +196,25 @@ public sealed class AccountLanguageTests(GameServerFactory factory) : IClassFixt
     {
         using var first = ClientWith("en");
         var email = AccountTestFlows.UniqueEmail();
-        await AccountTestFlows.RegisterAsync(first, email, AccountTestFlows.UniqueName());
-        var link = AccountTestFlows.LinkFromMail(Assert.Single(factory.Mails.To(email)).Text);
-        await first.GetAsync(link);
+        await AccountTestFlows.RegisterAsync(factory, first, email, AccountTestFlows.UniqueName());
         using var second = ClientWith("de");
 
         var (login, _) = await AccountTestFlows.LoginAsync(second, email);
 
         Assert.Equal(HttpStatusCode.Redirect, login.StatusCode);
         AssertPage((await second.GetAsync("/")).Html, "en", "Signed in as");
+    }
+
+    [Fact] // AK-6, AK-7
+    public async Task Completing_registration_sets_the_culture_cookie()
+    {
+        using var client = ClientWith("en");
+        var email = AccountTestFlows.UniqueEmail();
+
+        var (response, _) = await AccountTestFlows.RegisterAsync(factory, client, email, AccountTestFlows.UniqueName());
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("c=en|uic=en", CultureCookieValue(response));
+        Assert.Equal("en", await StoredLanguageAsync(email));
     }
 }

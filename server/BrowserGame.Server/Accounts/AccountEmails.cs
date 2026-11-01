@@ -4,13 +4,15 @@ using Microsoft.AspNetCore.Identity;
 namespace BrowserGame.Server.Accounts;
 
 /// <summary>Erzeugt Token und Link und verschickt die passende Mail (AK-2, AK-3, AK-14).</summary>
-public sealed class AccountEmails(UserManager<Account> users, GameEmailSender mail, AccountLinks links)
+public sealed class AccountEmails(UserManager<Account> users, GameEmailSender mail, AccountLinks links, RegistrationLinks registrationLinks)
 {
-    public async Task SendConfirmationAsync(Account account)
+    /// <summary>Link zu Schritt 2 (003 AK-2); <paramref name="language"/> ist die Sprache der Anfrage.</summary>
+    public Task SendRegistrationLinkAsync(string email, string language)
     {
-        var token = AccountLinks.EncodeToken(await users.GenerateEmailConfirmationTokenAsync(account));
-        var link = links.Absolute($"/Account/ConfirmEmail?userId={Uri.EscapeDataString(account.Id)}&code={token}");
-        await mail.SendConfirmationLinkAsync(account, account.Email!, link);
+        var minutes = registrationLinks.LifetimeMinutes;
+        var code = registrationLinks.CreateCode(email, TimeSpan.FromMinutes(minutes));
+        var link = links.Absolute($"/Account/CompleteRegistration?code={Uri.EscapeDataString(code)}");
+        return mail.SendRegistrationLinkAsync(email, language, link, minutes);
     }
 
     public async Task SendPasswordResetAsync(Account account)

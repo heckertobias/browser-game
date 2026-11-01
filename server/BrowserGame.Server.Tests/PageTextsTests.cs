@@ -12,7 +12,6 @@ public sealed class PageTextsTests
         ["Common.SignIn"] = "Anmelden",
         ["Common.Register"] = "Registrieren",
         ["Common.Email"] = "E-Mail",
-        ["Common.ResendConfirmation"] = "Bestätigungsmail erneut senden",
         ["Index.Tagline"] = "Eine Fantasy-Welt im Browser. Kein Download – einfach loslaufen.",
         ["Index.Play"] = "Spielen",
         ["Index.SignedInAs"] = "Angemeldet als {0}",
@@ -26,15 +25,8 @@ public sealed class PageTextsTests
         ["Register.ConfirmPasswordLabel"] = "Passwort wiederholen",
         ["Register.HaveAccount"] = "Schon einen Account? Anmelden",
         ["Register.PasswordMismatch"] = "Die Passwörter stimmen nicht überein.",
-        ["Register.Sent"] = "Fast geschafft! Wir haben dir eine Mail geschickt. Klicke auf den Link darin, um deine E-Mail-Adresse zu bestätigen.",
-        ["Register.NoMail"] = "Keine Mail bekommen? Erneut senden",
-        ["ConfirmEmail.Title"] = "E-Mail bestätigen",
-        ["ConfirmEmail.Confirmed"] = "Deine E-Mail-Adresse ist bestätigt.",
-        ["ConfirmEmail.PlayNow"] = "Jetzt spielen",
-        ["ConfirmEmail.Invalid"] = "Der Link ist ungültig oder abgelaufen.",
-        ["ResendConfirmation.Title"] = "Bestätigungsmail",
-        ["ResendConfirmation.Sent"] = "Falls es zu dieser Adresse einen noch nicht bestätigten Account gibt, haben wir dir eine neue Mail geschickt.",
-        ["ResendConfirmation.Submit"] = "Mail senden",
+        ["Register.Sent"] = "Fast geschafft! Wir haben dir eine Mail mit einem Link geschickt. Über den Link wählst du deinen Spielernamen und legst ein Passwort oder einen Passkey fest. Der Link ist {0} Minuten gültig.",
+        ["Register.NoMail"] = "Keine Mail bekommen? Erneut registrieren",
     };
 
     [Fact] // AK-10
