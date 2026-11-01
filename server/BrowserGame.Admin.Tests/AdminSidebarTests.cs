@@ -193,7 +193,7 @@ public sealed partial class AdminSidebarTests
         Assert.Contains($"aria-label=\"{Text("Layout.Navigation")}\"", text, StringComparison.Ordinal);
     }
 
-    [Fact] // 005 AK-4 (bis T4 über _Layout)
+    [Fact] // 005 AK-4
     public async Task Anonymous_pages_have_no_sidebar()
     {
         await using var factory = new AdminFactory();

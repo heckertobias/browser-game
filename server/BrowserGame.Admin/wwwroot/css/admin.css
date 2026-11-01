@@ -28,3 +28,9 @@
     height: 100%;
   }
 }
+
+/* Ohne Anmeldung (_LayoutPlain): schmale Karte, mittig. */
+.admin-plain-card {
+  width: 100%;
+  max-width: 28rem;
+}
