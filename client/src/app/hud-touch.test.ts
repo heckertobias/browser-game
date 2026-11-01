@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import indexHtml from "../index.html?raw";
+import indexHtml from "../../index.html?raw";
 import { App } from "./App";
 
 /** Öffnendes Tag des Elements mit diesem data-testid. */
