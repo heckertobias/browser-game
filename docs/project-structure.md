@@ -40,8 +40,8 @@ client/
   vite.passkeys.config.ts    Feste Bundles für die Razor-Seiten: passkeys.js und language.js
                              (Einträge: features/accounts/api/passkeys.ts, features/localization/language.ts)
   eslint.config.js           inkl. Importgrenzen zwischen Features (siehe unten)
-  package.json               Skripte: dev/test/lint/build; build:landing & build:admin mit
-                             src/styles/landing.css bzw. src/styles/admin.css als Tailwind-Eingabe
+  package.json               Skripte: dev/test/lint/build; build:landing mit src/styles/landing.css als
+                             Tailwind-Eingabe; build:admin kopiert Bootstrap (scripts/admin-lib.mjs)
   src/
     app/                     main.tsx, App.tsx — Bootstrapping und Komposition
     features/
@@ -57,7 +57,7 @@ client/
       pwa/
         services/            pwa.ts (Service-Worker), update.ts (Server-Watch), reload.ts, version.ts
         pages/               offline.ts — Einstieg der Offline-Seite
-    styles/                  global.css (Spiel+Offline), landing.css, admin.css (Tailwind-Eingaben)
+    styles/                  global.css (Spiel+Offline), landing.css (Tailwind-Eingaben)
     generated/               Protobuf-Ausgabe von `buf generate` (nicht editieren)
     vite-env.d.ts            Ambient-Typen (bleibt auf src-Ebene)
 ```
@@ -70,7 +70,7 @@ Regeln:
 - **Importgrenzen** prüft ESLint (`no-restricted-imports`, `npm run lint`): Features importieren nie aus `app/`,
   `app/` importiert Features. Zwischen Features ist nur erlaubt, was die Tabelle unter
   [Abhängigkeitsrichtung](#abhängigkeitsrichtung) nennt. Neue Abhängigkeit = Tabelle und `eslint.config.js` anpassen.
-- **Tailwind-Quellen:** `landing.css` und `admin.css` scannen nur `**/*.cshtml` der Razor-Ordner, kein C#.
+- **Tailwind-Quellen:** `landing.css` scannt nur `**/*.cshtml` des Spielservers, kein C#. Das Admin nutzt Bootstrap ohne Tailwind (ADR 0007).
 - **Spielnahe Features** (Chat, Kampf, Gegner, Slash-Commands …) kommen als Unterordner `features/game/<sub>/`, nicht als
   eigenes Top-Level-Feature. Bestehender Code wird nicht künstlich in Subs aufgeteilt.
 
@@ -107,7 +107,7 @@ server/
         Resources/           Texts.cs + Texts(.de).resx  (ResourcesPath="" – siehe ADR 0013)
       Pwa/Application/       ServiceWorkerScript (+ service-worker.js, Endpoint /sw.js), PwaCaching
     Properties/, wwwroot/    launchSettings, gebaute Client-Ausgaben (manifest, icons, play/, css/)
-  BrowserGame.Admin/         Eigener Admin-Dienst, eigene Pages/; Auth/ (Totp, Invites, Audit)
+  BrowserGame.Admin/         Eigener Admin-Dienst, eigene Pages/; Auth/ (Totp, Invites, Audit); wwwroot/lib/ (Bootstrap, gebaut)
   BrowserGame.Server.Tests/  Features/{Accounts,Game,Localization,Pwa}, Hosting/, Data/ (Tests von BrowserGame.Data) und TestSupport/
   BrowserGame.Admin.Tests/   Admin-Tests (bindet gemeinsame Helper aus Server.Tests/TestSupport/)
 ```

@@ -5,7 +5,7 @@ Gehört zu: [plan.md](plan.md)
 Reihenfolge: Build → Sprache → Layout → Seiten → SMTP → Tests → Betrieb.
 
 ## Build
-- [ ] **T1** (AK-5): `bootstrap` und `bootstrap-icons` per npm (gepinnt); `build:admin` kopiert sie nach
+- [x] **T1** (AK-5): `bootstrap` und `bootstrap-icons` per npm (gepinnt); `build:admin` kopiert sie nach
   `Admin/wwwroot/lib/` (gitignored); `client/src/styles/admin.css` und das Kopieren der Admin-Pages im Dockerfile entfernen.
 
 ## Sprache
