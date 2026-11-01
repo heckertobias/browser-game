@@ -5,7 +5,9 @@ Gehört zu: [spec.md](spec.md) · Entscheidung: [ADR 0007](../../docs/decisions/
 
 ## Überblick
 
-Nur `BrowserGame.Admin` (Razor Pages) und der CSS-Build im `client/` ändern sich. Spiel, Startseite, Datenbank und
+Es ändern sich `BrowserGame.Admin` (Razor Pages, Texte, SMTP-Seite), der CSS-Build im `client/` und in
+`BrowserGame.Data` die Fehlertexte von `SmtpMailer` (englisch, resx) und `SmtpSettingsStore.SaveAsync` (ohne
+Benutzername kein Passwort, AK-18). Spiel, Startseite, Datenbankschema und
 Verträge bleiben unberührt.
 
 ## Verträge
@@ -70,6 +72,58 @@ Inhaltlich unverändert, nur Markup:
   Wiederherstellungscodes als Monospace-Liste.
 - `data-testid`-Attribute bleiben erhalten.
 
+## Sprache (AK-14)
+
+Gleicher Mechanismus wie im Spiel ([ADR 0008](../../docs/decisions/0008-lokalisierung.md)), nur mit einer Sprache:
+
+- **Ressourcen:** `server/BrowserGame.Admin/Resources/AdminTexts.cs` (Markertyp, wie `Texts` im Spiel) +
+  `AdminTexts.resx` (neutral = Englisch). Keine `.de.resx`. Eine deutsche Fassung ist später `AdminTexts.de.resx` plus
+  Eintrag in der Liste der Sprachen – ohne Umbau.
+- **Kultur:** `AddLocalization(o => o.ResourcesPath = "")`; `UseRequestLocalization` fest auf `en` (eine Kultur,
+  keine Provider – Browser und Culture-Cookie des Spiels ändern nichts). Ersetzt das heutige feste `de`.
+- **Views:** `_ViewImports` injiziert `IStringLocalizer<AdminTexts> T`; Texte im Markup nur über `T["…"]`.
+  `<html lang>` kommt aus `CultureInfo.CurrentUICulture` – damit wählt `passkeys.js` die englischen Fehlertexte.
+- **PageModels:** Meldungen, Fehler (`AddModelError`) und Mails über `IStringLocalizer<AdminTexts>`.
+- **Validierung:** `AddDataAnnotationsLocalization` mit `AdminTexts` (wie `PagesSetup` im Spiel); `ErrorMessage` ist ein
+  Schlüssel, z. B. `Validation.HostRequired`.
+- **Identity-Fehler:** `LocalizedIdentityErrorDescriber` liefert mit `en` schon Englisch (neutrale `IdentityErrors.resx`).
+- **Mailserver-Fehler:** Die Texte in `SmtpMailer` (`MailResult.Error`) stehen heute deutsch im Code. Sie wandern nach
+  `BrowserGame.Data/Resources/MailErrors.resx` (neutral = Englisch), Zugriff wie `LocalizedIdentityErrorDescriber`
+  über `ResourceManager` und `CurrentUICulture`. Das Spiel loggt sie nur; dort ändert sich nur die Sprache im Log.
+- **Mails aus dem Admin:** Einladung und Testmail (Betreff, Text, HTML) aus `AdminTexts`.
+- **Protokoll:** Neue Einträge (`Action`, `Details`) werden englisch geschrieben. Bestehende Einträge bleiben, wie sie
+  gespeichert sind – das Protokoll ist ein Nachweis, keine Übersetzung.
+- **Bestehende Tests** prüfen heute deutsche Texte. Sie werden nur in den erwarteten Texten auf Englisch umgestellt,
+  Abläufe und Prüfungen bleiben. `AdminLanguageTests` prüft künftig: fest Englisch, auch mit `Accept-Language: de` und
+  Culture-Cookie `de`.
+
+## SMTP-Passwort (AK-15–AK-18)
+
+Heute: Die Testmail nutzt die Werte im Formular (004 AK-9). Danach leert die Seite das Passwortfeld; wer dann speichert,
+schickt ein leeres Passwort, und der Store behält still das alte (`SaveAsync`: leer = unverändert).
+
+- **Getestetes Passwort mitnehmen (AK-15):** Nach einer **erfolgreichen** Testmail mit eingetipptem Passwort gibt die
+  Seite ein verstecktes Feld `TestedPassword` zurück: das Passwort, verschlüsselt mit Data Protection
+  (`ToTimeLimitedDataProtector`, eigener Purpose `Admin.Smtp.TestedPassword`, 30 Minuten gültig). Klartext geht nie zurück
+  an den Browser (004 AK-8). Unter dem Passwortfeld steht dann: „The tested password will be saved.“
+- **Speichern:** Vorrang hat ein eingetipptes Passwort. Sonst gilt ein gültiges `TestedPassword`. Ist das Token
+  abgelaufen oder ungültig, speichert die Seite nichts und meldet am Feld `Input.Password`, das Passwort erneut
+  einzugeben. Ohne beides bleibt das gespeicherte Passwort (004 AK-8).
+- **Status sichtbar (AK-16, AK-18):** Am Passwortfeld steht immer der gespeicherte Stand (`badge`):
+  „stored“ / „not stored“, ohne Benutzername „no login“. Ist ein Benutzername gespeichert, aber kein Passwort, zeigt die
+  Seite einen Hinweis (`alert-warning`): die Anmeldung am Mailserver wird scheitern. Ohne Benutzername kein Hinweis.
+- **Ohne Anmeldung (AK-18):** `SmtpMailer` meldet sich schon heute nur mit Benutzername an. Neu: `SmtpSettingsStore.SaveAsync`
+  entfernt das gespeicherte Passwort, wenn der Benutzername leer ist (statt es still zu behalten); das Protokoll nennt
+  dann `Password` als geändertes Feld. Das Passwortfeld bleibt bedienbar; ohne Benutzername wird ein eingegebenes
+  Passwort nicht gespeichert, die Seite sagt das am Feld (`form-text`).
+- **Testmail mit gespeichertem Stand (AK-17):** Zweiter Button im Abschnitt „Test“, Handler `TestSaved`, nur sichtbar,
+  wenn Einstellungen gespeichert sind. Er nutzt die Instanzmethode `SmtpMailer.SendAsync(to, …)`, die die Einstellungen
+  aus dem Store lädt – denselben Weg wie `PlayerEmailSender` im Spiel. Formularwerte und deren Validierung spielen dafür
+  keine Rolle (nur der Empfänger wird geprüft); die Eingaben im Formular bleiben stehen. Protokoll wie bei der Testmail,
+  mit dem Zusatz „saved settings“.
+- Die Formular-Testmail (004 AK-9) bleibt; ihre Beschriftung sagt klar „with form values“, der zweite Button
+  „with saved settings“.
+
 ## Tests & AK-Abdeckung
 
 | AK | Prüfung |
@@ -84,7 +138,12 @@ Inhaltlich unverändert, nur Markup:
 | 8 | Integration: Speichern → `alert-success` mit „Gespeichert.“ |
 | 9 | Integration: Admins/Audit in `table-responsive`; **manuell** auf dem Handy |
 | 10–12 | **manuell**: System hell/dunkel, Umschalter, Neuladen, Abmelden, kein Aufblitzen bei „Dunkel“; Integration: `theme.js` wird im `<head>` vor dem CSS geladen und ist ohne Inline-Skript |
-| 13 | alle bestehenden Admin-Tests bleiben grün (ggf. Selektoren anpassen, Abläufe nicht) |
+| 13 | alle bestehenden Admin-Tests bleiben grün (Selektoren und erwartete Texte anpassen, Abläufe nicht) |
+| 14 | Integration: Seiten mit `Accept-Language: de` und Culture-Cookie `de` sind englisch (`lang="en"`, Texte); Einladungs- und Testmail englisch (`FakeSmtpServer`); Validierungs- und Mailserver-Fehler englisch |
+| 15 | Integration: Testmail mit neuem Passwort → Speichern mit leerem Feld → Store hat das neue Passwort; abgelaufenes oder manipuliertes Token → nichts gespeichert, Fehler an `Input.Password`; HTML enthält das Passwort nie im Klartext |
+| 16 | Integration: Benutzername ohne Passwort gespeichert → „not stored“ + `alert-warning`; mit Passwort → „stored“, kein Hinweis |
+| 18 | Unit (`SmtpSettingsStoreTests`): leerer Benutzername entfernt ein gespeichertes Passwort; Integration: ohne Benutzername → „no login“, kein `alert-warning`, Testmail an `FakeSmtpServer` ohne `AUTH` |
+| 17 | Integration: gespeicherte Einstellungen, abweichende Formularwerte → `TestSaved` schickt über den gespeicherten Server (`FakeSmtpServer`), nicht über den im Formular; ohne gespeicherte Einstellungen kein Button |
 
 Zusätzlich: Statische Dateien (`/lib/bootstrap/…`, `/js/theme.js`, Icon-Font) liefern 200 im gebauten Image
 (Smoke-Test im CI-`docker`-Job bzw. manuell nach dem Release).
@@ -92,4 +151,5 @@ Zusätzlich: Statische Dateien (`/lib/bootstrap/…`, `/js/theme.js`, Icon-Font)
 ## Constitution-Check
 
 - Keine neuen Laufzeitdienste, keine CDN-Abhängigkeit, CSP unverändert.
+- Lokalisierung ohne neue Abhängigkeit, nach ADR 0008. Data Protection ist schon im Einsatz (SMTP-Passwort im Store).
 - Abweichung von ADR 0001 („daisyUI für alle UIs“) → ADR 0007.
