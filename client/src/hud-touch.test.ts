@@ -21,6 +21,12 @@ function viewportContent(html: string): string[] {
   return content.split(",").map((part) => part.trim());
 }
 
+function metaContent(html: string, name: string): string {
+  const content = new RegExp(`<meta\\s+name="${name}"\\s+content="([^"]*)"`).exec(html)?.[1];
+  if (content === undefined) throw new Error(`Meta ${name} fehlt`);
+  return content;
+}
+
 describe("HUD auf dem Handy (003 T13a)", () => {
   const markup = renderToStaticMarkup(createElement(App));
 
@@ -39,6 +45,25 @@ describe("HUD auf dem Handy (003 T13a)", () => {
   it("verhindert automatisches Zoomen beim Drehen (007 AK-5, AK-6)", () => {
     expect(viewportContent(indexHtml)).toEqual(
       expect.arrayContaining(["width=device-width", "initial-scale=1", "maximum-scale=1", "viewport-fit=cover", "user-scalable=no"]),
+    );
+  });
+});
+
+describe("Statusleiste auf dem iPhone (003 T13b)", () => {
+  const markup = renderToStaticMarkup(createElement(App));
+
+  it("legt die Ansicht unter die Statusleiste, auch nach dem Drehen (007 AK-5, AK-10)", () => {
+    expect(metaContent(indexHtml, "apple-mobile-web-app-status-bar-style")).toBe("black-translucent");
+  });
+
+  it("hält die HUD-Zeile von Statusleiste und Aussparung fern (007 AK-6)", () => {
+    const row = classes(/<div[^>]*top-\[max\(0\.5rem,env\(safe-area-inset-top\)\)\][^>]*>/.exec(markup)?.[0] ?? "");
+    expect(row).toEqual(
+      expect.arrayContaining([
+        "top-[max(0.5rem,env(safe-area-inset-top))]",
+        "left-[max(0.5rem,env(safe-area-inset-left))]",
+        "right-[max(0.5rem,env(safe-area-inset-right))]",
+      ]),
     );
   });
 });

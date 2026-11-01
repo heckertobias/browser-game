@@ -54,6 +54,10 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung → CI/Betrieb.
   _Seit 006: Texte aus `client/src/i18n.ts` (Schlüssel fürs Overlay sind angelegt); kein Sprachumschalter im Spiel._
   - [x] **T13a** (007 AK-5, AK-6, AK-8): Fix aus dem RC-Test auf dem iPhone – nach dem Drehen lässt sich „Mein Account“
     nicht mehr antippen; die Spielansicht samt HUD lässt sich verschieben statt fest zu stehen.
+  - [x] **T13b** (007 AK-5, AK-6, AK-10): Fix aus dem RC-Test auf dem iPhone – nach dem Drehen liegt die Tippfläche
+    von „Mein Account“ um die Höhe der Statusleiste über dem Button. iOS-Statusleiste `black-translucent` in
+    `client/index.html` und `_Layout`; Spiel und Spieler-Seiten halten per `env(safe-area-inset-*)` Abstand zur
+    Statusleiste. Behebt das der RC-Test nicht: als bekannten Fehler aufnehmen (HUD wird ohnehin neu gebaut).
 
 ## Tests / Prüfung
 - [x] **T14**: Integrationstests laut Abdeckungstabelle (Test-Mailsender, verkürzter Linger), lauffähig gegen

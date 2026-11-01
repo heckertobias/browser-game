@@ -5,7 +5,7 @@
 <html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="dark">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>@ViewData["Title"]@(isHome ? "" : " – " + T["Common.GameName"])</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#000000" />
@@ -14,10 +14,10 @@
     <meta name="apple-mobile-web-app-title" content="@T["Common.GameName"]" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="min-h-dvh bg-base-200 flex items-center justify-center p-2 sm:p-4">
+<body class="min-h-dvh bg-base-200 flex items-center justify-center pt-[max(0.5rem,env(safe-area-inset-top))] pr-[max(0.5rem,env(safe-area-inset-right))] pb-[max(0.5rem,env(safe-area-inset-bottom))] pl-[max(0.5rem,env(safe-area-inset-left))] sm:pt-[max(1rem,env(safe-area-inset-top))] sm:pr-[max(1rem,env(safe-area-inset-right))] sm:pb-[max(1rem,env(safe-area-inset-bottom))] sm:pl-[max(1rem,env(safe-area-inset-left))]">
     <main class="card bg-base-100 shadow-xl w-full max-w-md border-4 border-base-content/20 rounded-none">
         <div class="card-body gap-4">
             <div class="flex items-center gap-2">

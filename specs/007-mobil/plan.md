@@ -31,7 +31,9 @@ Service Worker  Seitenaufrufe gehen ans Netz; schlägt das fehl → Offline-Seit
    ein Zehntel (hart: 400 Weltpixel), weniger nur bei niedriger Auflösung.
 2. **Zielwert 360, Obergrenze 400.** 16:9-Vollbild (720/1080/1440/2160) zeigt exakt 640×360 wie bisher.
 3. **`display: standalone`** (Statusleiste sichtbar, keine Browserleiste; iOS kennt `fullscreen` nicht), iOS-Statusleiste
-   `black`.
+   `black-translucent` (003 T13b): Mit `black` beginnt die Ansicht unter der Statusleiste, im Querformat bei 0; nach
+   dem Zurückdrehen behält iOS den Versatz für Tipps, „Mein Account“ reagiert dann über dem Button. Seiten halten per
+   `env(safe-area-inset-*)` Abstand zur Statusleiste.
 4. **Offline-Seite auch bei 502–504** (Proxy erreicht den Server nicht, z. B. während eines Deploys).
 5. **Zoom auf `/play` gesperrt** (`user-scalable=no`, `touch-action: none`); die Spieler-Seiten bleiben zoombar.
 6. **Platzhalter-Icon und Name `Browser Game`**, ersetzen, sobald es Grafik bzw. einen Namen gibt.
@@ -181,7 +183,7 @@ nach ADR 0010 abdecken (siehe dort) – ohne die Bildschirmgröße vom Client zu
   <meta name="apple-mobile-web-app-title" content="Browser Game" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   ```
   Im Layout `content` von Titel aus `T["Common.GameName"]` (ADR 0008: kein Text im Markup).
 
@@ -271,14 +273,15 @@ Spiel. Der Service Worker reicht Seitenaufrufe nur durch (Weiterleitungen bei Na
 iOS gibt Homescreen-Apps einen eigenen Cookie-Speicher – dort meldet man sich ggf. einmal in der App an.
 
 ### Spieler-Seiten am Handy (AK-9, `_Layout.cshtml` und Seiten)
-- `body`: `min-h-dvh` statt `min-h-screen` (iOS-100vh), `p-2 sm:p-4`.
+- `body`: `min-h-dvh` statt `min-h-screen` (iOS-100vh), Abstand `p-2 sm:p-4`, je Seite mindestens
+  `env(safe-area-inset-*)` (003 T13b, Statusleiste `black-translucent`).
 - `h1`: `text-2xl sm:text-3xl break-words hyphens-auto` – „BESTÄTIGUNGSMAIL“ in `text-3xl` mono mit
   `tracking-widest` ist breiter als ein 390-px-Handy.
 - Sprachumschalter `btn-xs` → `btn-sm`; `Index`: `btn-sm` → `btn`; Linklisten `gap-1` → `gap-3`.
 - Eingabefelder: daisyUI 5 setzt bei Fokus auf Touch-Geräten 16 px (kein iOS-Zoom); `w-full` und `autocomplete` sind
   schon da.
-- Viewport-Meta bleibt `width=device-width, initial-scale=1` (zoombar, ohne `viewport-fit=cover` – Safari hält Inhalt
-  aus Aussparungen heraus).
+- Viewport-Meta `width=device-width, initial-scale=1, viewport-fit=cover` (zoombar). `viewport-fit=cover` ist nötig,
+  damit die Insets in der Homescreen-App greifen und Inhalt nicht unter der Uhr liegt (003 T13b).
 
 ## Client
 

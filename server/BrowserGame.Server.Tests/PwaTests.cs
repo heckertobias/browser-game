@@ -103,10 +103,24 @@ public sealed partial class PwaTests(GameServerFactory factory) : IClassFixture<
             "name=\"apple-mobile-web-app-title\" content=\"Browser Game\"",
             "name=\"mobile-web-app-capable\" content=\"yes\"",
             "name=\"apple-mobile-web-app-capable\" content=\"yes\"",
-            "name=\"apple-mobile-web-app-status-bar-style\" content=\"black\"",
+            "name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\"",
         ];
         foreach (var tag in tags)
             Assert.Contains(tag, html, StringComparison.Ordinal);
+    }
+
+    [Theory] // AK-6, AK-10
+    [InlineData("/")]
+    [InlineData("/Account/Login")]
+    public async Task Pages_keep_clear_of_status_bar(string path)
+    {
+        var html = await factory.CreateClient().GetStringAsync(new Uri(path, UriKind.Relative), TestContext.Current.CancellationToken);
+
+        Assert.Contains("name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\"", html, StringComparison.Ordinal);
+        var body = Regex.Match(html, "<body[^>]*>").Value;
+        Assert.NotEmpty(body);
+        foreach (var side in new[] { "top", "right", "bottom", "left" })
+            Assert.Contains($"max(0.5rem,env(safe-area-inset-{side}))", body, StringComparison.Ordinal);
     }
 
     [GeneratedRegex("/play/assets/[A-Za-z0-9._-]+")]
