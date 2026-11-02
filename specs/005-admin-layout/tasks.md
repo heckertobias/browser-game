@@ -32,7 +32,7 @@ Reihenfolge: Build → Sprache → Layout → Seiten → SMTP → Tests → Betr
   Hinweis.
 
 ## Tests
-- [ ] **T10**: Integrationstests laut Abdeckungstabelle; bestehende Admin-Tests grün (gegen SQLite und PostgreSQL).
+- [x] **T10**: Integrationstests laut Abdeckungstabelle; bestehende Admin-Tests grün (gegen SQLite und PostgreSQL).
 
 ## Betrieb
 - [ ] **T11**: Release; manuelle Prüfung in der Testumgebung (AK-3, AK-6, AK-9–12,

@@ -202,6 +202,29 @@ jobs:
           tags: browser-game-${{ matrix.target }}:scan-amd64
           cache-from: type=gha,scope=${{ matrix.target }}
           cache-to: type=gha,mode=max,scope=${{ matrix.target }}
+      # Statische Dateien im gebauten Admin-Image (005): Bootstrap, Icons inkl. Font, eigenes JS und CSS.
+      - name: Smoke-Test statische Dateien (Admin)
+        if: matrix.target == 'admin'
+        run: |
+          docker run --detach --name admin-smoke --publish 127.0.0.1:8080:8080 \
+            --env App__PublicUrl=http://localhost:8080 browser-game-admin:scan-amd64
+          curl --fail --silent --show-error --output /dev/null \
+            --retry 30 --retry-delay 1 --retry-all-errors http://127.0.0.1:8080/health
+          for path in \
+            /lib/bootstrap/bootstrap.min.css \
+            /lib/bootstrap/bootstrap.bundle.min.js \
+            /lib/bootstrap-icons/bootstrap-icons.min.css \
+            /lib/bootstrap-icons/fonts/bootstrap-icons.woff2 \
+            /lib/bootstrap-icons/fonts/bootstrap-icons.woff \
+            /js/theme.js \
+            /js/passkeys.js \
+            /css/admin.css; do
+            curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:8080${path}" \
+              || { echo "::error::${path} fehlt im Admin-Image"; exit 1; }
+          done
+      - name: Logs des Admin-Containers
+        if: failure() && matrix.target == 'admin'
+        run: docker logs admin-smoke || true
       - name: Trivy-Scan amd64
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
