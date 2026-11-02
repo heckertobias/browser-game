@@ -1,6 +1,6 @@
 # 011 – Chat
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [003 – Accounts & gespeicherte Position](../003-accounts/spec.md) (Spielername, nur Angemeldete) ·
 [007 – Handy hochkant, Sichtfeld ohne Ränder, Web-App](../007-mobil/spec.md) (HUD am Handy) ·
