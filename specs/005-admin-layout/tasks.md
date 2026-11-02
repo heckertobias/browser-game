@@ -35,5 +35,5 @@ Reihenfolge: Build → Sprache → Layout → Seiten → SMTP → Tests → Betr
 - [x] **T10**: Integrationstests laut Abdeckungstabelle; bestehende Admin-Tests grün (gegen SQLite und PostgreSQL).
 
 ## Betrieb
-- [ ] **T11**: Release; manuelle Prüfung in der Testumgebung (AK-3, AK-6, AK-9–12,
+- [x] **T11**: Release; manuelle Prüfung in der Testumgebung (AK-3, AK-6, AK-9–12,
   Handy). Danach alle AKs abhaken und Spec-Status auf `umgesetzt`.

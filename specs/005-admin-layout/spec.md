@@ -1,6 +1,6 @@
 # 005 – Sachliches Layout fürs Admin-Interface
 
-**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Baut auf: [004 – Admin-Interface & SMTP-Einstellungen](../004-admin/spec.md)
 
