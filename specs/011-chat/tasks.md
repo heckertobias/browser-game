@@ -37,7 +37,7 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
 
 ## Tests / Prüfung
 - [ ] **T12**: Integrationstests (WS) laut Abdeckungstabelle mit Fake-Uhr, gegen SQLite und PostgreSQL.
-- [ ] **T13**: Hinweis im Plan von 002 (sobald es ihn gibt): Esc öffnet das Menü nicht, solange ein Eingabefeld den
+- [x] **T13**: Hinweis im Plan von 002 (sobald es ihn gibt): Esc öffnet das Menü nicht, solange ein Eingabefeld den
   Fokus hat.
 - [ ] **T14**: Manuelle Prüfung in der Testumgebung:
   - zwei Geräte (Laptop + Handy) chatten
