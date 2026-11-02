@@ -1,3 +1,4 @@
+using System.Net;
 using BrowserGame.Admin.Auth;
 
 namespace BrowserGame.Admin.Tests;
@@ -22,7 +23,7 @@ public sealed class AdminAccountTests
         var admin = await AdminTestFlows.RedeemWithPasswordAsync(factory, AdminTestFlows.SetupTokenFromLog(factory), "Tobias", "admin@example.org");
 
         var (_, html) = await admin.Client.PostAsync("/Account", "/Account?handler=RecoveryCodes", new Dictionary<string, string>());
-        Assert.Contains("die alten gelten ab sofort nicht mehr", html, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Account.RecoveryCodesShown"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
 
         using var client = factory.CreateFormClient();
         await AdminTestFlows.LoginPasswordAsync(client, admin.Email);
@@ -38,7 +39,7 @@ public sealed class AdminAccountTests
 
         var (_, html) = await admin.Client.GetAsync("/Account");
 
-        Assert.Contains("Noch kein Passkey", html, StringComparison.Ordinal);
-        Assert.Contains("Neue Wiederherstellungscodes", html, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Account.NoPasskey"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Account.NewRecoveryCodes"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 }

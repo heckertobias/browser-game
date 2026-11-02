@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.RegularExpressions;
+using BrowserGame.Data;
 
 namespace BrowserGame.Admin.Tests;
 
@@ -69,6 +70,45 @@ public sealed partial class AdminPagesTests
         var (_, html) = await admin.Client.GetAsync("/Admins");
 
         AssertLabelAboveFieldAndHintBelow(html, "InviteEmail", expectHint: true);
+    }
+
+    [Fact] // 005 AK-6 (Optik manuell)
+    public async Task Smtp_form_has_labels_above_fields_and_hints_below()
+    {
+        await using var factory = new AdminFactory();
+        await using var smtp = new FakeSmtpServer();
+        var admin = await AdminTestFlows.RedeemWithPasswordAsync(factory, AdminTestFlows.SetupTokenFromLog(factory), "Tobias", "admin@example.org");
+
+        var (_, html) = await admin.Client.GetAsync("/Smtp");
+        AssertSmtpForm(html, passwordHint: false);
+
+        var form = new Dictionary<string, string>
+        {
+            ["Input.Host"] = "127.0.0.1",
+            ["Input.Port"] = smtp.Port.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["Input.Security"] = nameof(SmtpSecurity.None),
+            ["Input.Username"] = smtp.Username,
+            ["Input.Password"] = smtp.Password,
+            ["Input.FromAddress"] = "noreply@example.net",
+            ["Input.FromName"] = "Browser Game",
+        };
+        var (_, saved) = await admin.Client.PostAsync("/Smtp", "/Smtp?handler=Save", form);
+        AssertSmtpForm(saved, passwordHint: true);
+    }
+
+    private static void AssertSmtpForm(string html, bool passwordHint)
+    {
+        foreach (var name in new[] { "Input.Host", "Input.Port", "TestRecipient" })
+        {
+            AssertLabelAboveFieldAndHintBelow(html, name, expectHint: true);
+        }
+
+        foreach (var name in new[] { "Input.Security", "Input.Username", "Input.FromAddress", "Input.FromName" })
+        {
+            AssertLabelAboveFieldAndHintBelow(html, name, expectHint: false);
+        }
+
+        AssertLabelAboveFieldAndHintBelow(html, "Input.Password", expectHint: passwordHint);
     }
 
     internal static void AssertLabelAboveFieldAndHintBelow(string html, string name, bool expectHint)

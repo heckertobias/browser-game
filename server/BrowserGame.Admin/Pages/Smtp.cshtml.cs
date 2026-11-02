@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using BrowserGame.Admin.Auth;
+using BrowserGame.Admin.Resources;
 using BrowserGame.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Localization;
 
 namespace BrowserGame.Admin.Pages;
 
@@ -12,7 +14,8 @@ namespace BrowserGame.Admin.Pages;
 /// speichern – so lässt sich ausprobieren, bevor etwas live geht; die Eingaben bleiben dabei erhalten.
 /// </summary>
 public sealed partial class SmtpModel(
-    SmtpSettingsStore store, AuditLog audit, UserManager<AdminUser> users, ILogger<SmtpModel> logger) : PageModel
+    SmtpSettingsStore store, AuditLog audit, UserManager<AdminUser> users, ILogger<SmtpModel> logger,
+    IStringLocalizer<AdminTexts> t) : PageModel
 {
     /// <summary>Ports zum Abholen von Mails (IMAP/POP3) – zum Versenden ungeeignet.</summary>
     private static readonly Dictionary<int, string> RetrievalPorts = new() { [993] = "IMAP", [143] = "IMAP", [995] = "POP3", [110] = "POP3" };
@@ -80,10 +83,10 @@ public sealed partial class SmtpModel(
         var changed = await store.SaveAsync(ToSettings(Input.Password));
         if (changed.Count > 0)
         {
-            await audit.WriteAsync(User.Identity!.Name!, "SMTP-Einstellungen geändert", $"Felder: {string.Join(", ", changed)}");
+            await audit.WriteAsync(User.Identity!.Name!, t["AuditEntry.SmtpChanged"], t["AuditEntry.SmtpChangedFields", string.Join(", ", changed)]);
         }
 
-        Message = changed.Count > 0 ? "Gespeichert." : "Keine Änderungen.";
+        Message = changed.Count > 0 ? t["Smtp.Saved"] : t["Smtp.NoChanges"];
         return await PageAsync();
     }
 
@@ -92,7 +95,7 @@ public sealed partial class SmtpModel(
     {
         if (string.IsNullOrWhiteSpace(TestRecipient) || !new EmailAddressAttribute().IsValid(TestRecipient))
         {
-            ModelState.AddModelError(nameof(TestRecipient), "Bitte eine gültige Empfänger-Adresse für die Testmail angeben.");
+            ModelState.AddModelError(nameof(TestRecipient), t["Smtp.Error.RecipientInvalid"]);
         }
 
         if (!Validate())
@@ -101,21 +104,21 @@ public sealed partial class SmtpModel(
         }
 
         var password = string.IsNullOrEmpty(Input.Password) ? (await store.GetAsync())?.Password : Input.Password;
-        var result = await SmtpMailer.SendAsync(ToSettings(password), TestRecipient!, "Testmail vom Browser-Game-Admin",
-            "Wenn du diese Mail liest, funktioniert der Mailversand mit diesen Einstellungen.", cancellationToken: HttpContext.RequestAborted);
+        var result = await SmtpMailer.SendAsync(ToSettings(password), TestRecipient!, t["Mail.Test.Subject"],
+            t["Mail.Test.Body"], cancellationToken: HttpContext.RequestAborted);
 
         if (result.Status == MailStatus.Sent)
         {
-            Message = $"Testmail an {TestRecipient} verschickt – diese Einstellungen funktionieren. Speichern nicht vergessen.";
+            Message = t["Smtp.TestSent", TestRecipient!];
         }
         else
         {
-            ModelState.AddModelError("", result.Error ?? "Testmail fehlgeschlagen.");
+            ModelState.AddModelError("", result.Error ?? t["Smtp.TestFailed"].Value);
             LogTestFailed(Input.Host, Input.Port, Input.Security, result.Detail);
         }
 
-        await audit.WriteAsync(User.Identity!.Name!, "Testmail gesendet",
-            result.Status == MailStatus.Sent ? $"an {TestRecipient}" : $"an {TestRecipient}, fehlgeschlagen: {result.Error}");
+        await audit.WriteAsync(User.Identity!.Name!, t["AuditEntry.TestMailSent"],
+            result.Status == MailStatus.Sent ? t["AuditEntry.To", TestRecipient!] : t["AuditEntry.ToFailed", TestRecipient!, result.Error ?? ""]);
         return await PageAsync();
     }
 
@@ -125,12 +128,12 @@ public sealed partial class SmtpModel(
         Input.Host = Input.Host.Trim();
         if (Input.Host.Contains(':', StringComparison.Ordinal) || Input.Host.Contains('/', StringComparison.Ordinal) || Input.Host.Contains(' ', StringComparison.Ordinal))
         {
-            ModelState.AddModelError("Input.Host", "Beim Server nur den Namen eintragen, z. B. „mx.mailhost.example“ – ohne Port, ohne https://. Der Port gehört ins Feld „Port“.");
+            ModelState.AddModelError("Input.Host", t["Smtp.Error.HostWithPort"]);
         }
 
         if (RetrievalPorts.TryGetValue(Input.Port, out var protocol))
         {
-            ModelState.AddModelError("Input.Port", $"Port {Input.Port} ist {protocol} (Mails abholen). Zum Versenden: 465 mit SSL/TLS oder 587 mit STARTTLS.");
+            ModelState.AddModelError("Input.Port", t["Smtp.Error.RetrievalPort", Input.Port, protocol]);
         }
 
         return ModelState.IsValid;

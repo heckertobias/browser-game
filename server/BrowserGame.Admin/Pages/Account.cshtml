@@ -1,57 +1,70 @@
 @page
 @model AccountModel
 @{
-    ViewData["Title"] = "Mein Account";
+    ViewData["Title"] = T["Layout.Account"].Value;
 }
 <partial name="_Errors" />
 <partial name="_Message" model="new PageMessage(MessageKind.Success, Model.Message)" />
 
-<h2 class="font-mono uppercase">Passkeys</h2>
-@if (Model.Passkeys.Count == 0)
-{
-    <p>Noch kein Passkey.</p>
-}
-<ul class="flex flex-col gap-2">
-    @foreach (var passkey in Model.Passkeys)
-    {
-        <li class="flex items-center justify-between gap-2 border-2 border-base-content/20 p-2">
-            <span>@passkey.Label</span>
-            <form method="post" asp-page-handler="RemovePasskey">
-                <input type="hidden" name="PasskeyId" value="@passkey.Id" />
-                <button type="submit" class="btn btn-sm btn-ghost rounded-none">Entfernen</button>
-            </form>
-        </li>
-    }
-</ul>
-<form method="post" asp-page-handler="AddPasskey" data-passkey="create" class="flex flex-col gap-2">
-    <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
-    <input type="hidden" name="Credential" />
-    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase w-fit">Passkey hinzufügen</button>
-    <p class="text-error text-sm" data-passkey-error hidden></p>
-</form>
-
-<h2 class="font-mono uppercase">Passwort &amp; Authenticator</h2>
-@if (Model.HasPassword && Model.TwoFactorEnabled)
-{
-    <p>Passwort mit Authenticator-App ist eingerichtet.</p>
-    <form method="post" asp-page-handler="RecoveryCodes">
-        <button type="submit" class="btn rounded-none font-mono uppercase">Neue Wiederherstellungscodes</button>
-    </form>
-    @if (Model.NewRecoveryCodes.Count > 0)
-    {
-        <p>Deine neuen Codes – die alten gelten ab sofort nicht mehr. Sie werden nicht noch einmal angezeigt.</p>
-        <ul class="grid grid-cols-2 gap-1 font-mono" data-testid="recovery-codes">
-            @foreach (var code in Model.NewRecoveryCodes)
+<div class="admin-narrow d-flex flex-column gap-4">
+    <section class="card" aria-labelledby="account-passkeys">
+        <h2 id="account-passkeys" class="card-header h6">@T["Account.Passkeys"]</h2>
+        <div class="card-body">
+            @if (Model.Passkeys.Count == 0)
             {
-                <li>@code</li>
+                <p class="text-body-secondary">@T["Account.NoPasskey"]</p>
             }
-        </ul>
-    }
-}
-else
-{
-    <p>Kein Passwort eingerichtet – du meldest dich nur mit Passkey an.</p>
-}
+            else
+            {
+                <ul class="list-group mb-3" data-testid="passkeys">
+                    @foreach (var passkey in Model.Passkeys)
+                    {
+                        <li class="list-group-item d-flex align-items-center justify-content-between gap-2">
+                            <span>@passkey.Label</span>
+                            <form method="post" asp-page-handler="RemovePasskey">
+                                <input type="hidden" name="PasskeyId" value="@passkey.Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">@T["Common.Remove"]</button>
+                            </form>
+                        </li>
+                    }
+                </ul>
+            }
+            <form method="post" asp-page-handler="AddPasskey" data-passkey="create">
+                <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
+                <input type="hidden" name="Credential" />
+                <button type="submit" class="btn btn-primary">@T["Account.AddPasskey"]</button>
+                <p class="text-danger small mt-2 mb-0" data-passkey-error hidden></p>
+            </form>
+        </div>
+    </section>
+
+    <section class="card" aria-labelledby="account-password">
+        <h2 id="account-password" class="card-header h6">@T["Account.PasswordHeading"]</h2>
+        <div class="card-body">
+            @if (Model.HasPassword && Model.TwoFactorEnabled)
+            {
+                <p>@T["Account.PasswordActive"]</p>
+                <form method="post" asp-page-handler="RecoveryCodes">
+                    <button type="submit" class="btn btn-outline-secondary">@T["Account.NewRecoveryCodes"]</button>
+                </form>
+                @if (Model.NewRecoveryCodes.Count > 0)
+                {
+                    <p class="mt-3">@T["Account.RecoveryCodesShown"]</p>
+                    <ul class="list-unstyled font-monospace mb-0" data-testid="recovery-codes">
+                        @foreach (var code in Model.NewRecoveryCodes)
+                        {
+                            <li>@code</li>
+                        }
+                    </ul>
+                }
+            }
+            else
+            {
+                <p class="mb-0">@T["Account.NoPassword"]</p>
+            }
+        </div>
+    </section>
+</div>
 
 @section Scripts {
     <script type="module" src="~/js/passkeys.js" asp-append-version="true"></script>
