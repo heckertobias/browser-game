@@ -1,16 +1,19 @@
 using System.ComponentModel.DataAnnotations;
 using BrowserGame.Admin.Auth;
+using BrowserGame.Admin.Resources;
 using BrowserGame.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace BrowserGame.Admin.Pages;
 
 /// <summary>Admins einladen und entfernen (004 AK-4e, AK-4f, AK-12).</summary>
 public sealed class AdminsModel(
-    UserManager<AdminUser> users, AdminCredentials credentials, AdminInvites invites, SmtpMailer mailer, AuditLog audit) : PageModel
+    UserManager<AdminUser> users, AdminCredentials credentials, AdminInvites invites, SmtpMailer mailer, AuditLog audit,
+    IStringLocalizer<AdminTexts> t) : PageModel
 {
     public sealed record AdminRow(string Id, string Name, string Email, bool Active, bool IsMe);
 
@@ -41,23 +44,21 @@ public sealed class AdminsModel(
         var me = User.Identity!.Name!;
         var (_, link) = await invites.CreateAsync(me, InviteEmail);
         InviteLink = link;
-        Message = "Einladung erstellt. Der Link ist 48 Stunden gültig und funktioniert nur einmal.";
+        var hours = AdminInvites.Lifetime.TotalHours;
+        Message = t["Admins.InviteCreated", hours];
 
         if (!string.IsNullOrWhiteSpace(InviteEmail))
         {
-            var result = await mailer.SendAsync(InviteEmail, "Einladung als Admin für Browser Game",
-                $"Hallo,\n\n{me} lädt dich als Admin für Browser Game ein. Über diesen Link richtest du deinen Zugang ein:\n{link}\n\n"
-                + "Der Link ist 48 Stunden gültig und funktioniert nur einmal.",
-                MailHtml.FromText(
-                    $"Hallo,\n\n{me} lädt dich als Admin für Browser Game ein. Über diesen Link richtest du deinen Zugang ein:\n{link}\n\n"
-                    + "Der Link ist 48 Stunden gültig und funktioniert nur einmal.", link),
+            var text = t["Mail.Invite.Body", me, link, hours].Value;
+            var result = await mailer.SendAsync(InviteEmail, t["Mail.Invite.Subject"], text, MailHtml.FromText(text, link),
                 HttpContext.RequestAborted);
-            Message += result.Status == MailStatus.Sent
-                ? $" Mail an {InviteEmail} verschickt."
-                : $" Mail nicht verschickt ({result.Error}) – gib den Link selbst weiter.";
+            Message += " " + (result.Status == MailStatus.Sent
+                ? t["Admins.InviteMailed", InviteEmail]
+                : t["Admins.InviteMailFailed", result.Error ?? ""]).Value;
         }
 
-        await audit.WriteAsync(me, "Admin eingeladen", string.IsNullOrWhiteSpace(InviteEmail) ? "Link" : $"an {InviteEmail}");
+        await audit.WriteAsync(me, t["AuditEntry.AdminInvited"],
+            string.IsNullOrWhiteSpace(InviteEmail) ? t["AuditEntry.InviteLinkOnly"] : t["AuditEntry.To", InviteEmail]);
         await LoadAsync();
         return Page();
     }
@@ -74,17 +75,17 @@ public sealed class AdminsModel(
 
         if (target.Id == users.GetUserId(User))
         {
-            ModelState.AddModelError("", "Du kannst dich nicht selbst entfernen.");
+            ModelState.AddModelError("", t["Admins.CannotRemoveSelf"]);
         }
         else if (await credentials.IsActiveAsync(target) && (await credentials.ActiveAdminIdsAsync()).Count <= 1)
         {
-            ModelState.AddModelError("", "Der letzte Admin kann nicht entfernt werden.");
+            ModelState.AddModelError("", t["Admins.CannotRemoveLast"]);
         }
         else
         {
             await users.DeleteAsync(target);
-            await audit.WriteAsync(User.Identity!.Name!, "Admin entfernt", target.UserName);
-            Message = $"{target.UserName} wurde entfernt.";
+            await audit.WriteAsync(User.Identity!.Name!, t["AuditEntry.AdminRemoved"], target.UserName);
+            Message = t["Admins.Removed", target.UserName!];
         }
 
         await LoadAsync();

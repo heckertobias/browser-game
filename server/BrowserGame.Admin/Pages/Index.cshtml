@@ -1,10 +1,16 @@
 @page
 @{
-    ViewData["Title"] = "Übersicht";
+    ViewData["Title"] = T["Nav.Overview"].Value;
 }
-<p>Willkommen im Admin-Interface.</p>
-<ul class="menu bg-base-200 rounded-none font-mono">
-    <li><a href="/Smtp">SMTP-Einstellungen</a></li>
-    <li><a href="/Admins">Admins verwalten</a></li>
-    <li><a href="/Audit">Protokoll</a></li>
-</ul>
+<p>@T["Index.Welcome"]</p>
+<div class="list-group admin-narrow" data-testid="overview-links">
+    <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="@Url.Page("/Smtp")">
+        <i class="bi bi-envelope" aria-hidden="true"></i>@T["Nav.Smtp"]
+    </a>
+    <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="@Url.Page("/Admins")">
+        <i class="bi bi-people" aria-hidden="true"></i>@T["Nav.Admins"]
+    </a>
+    <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="@Url.Page("/Audit")">
+        <i class="bi bi-journal-text" aria-hidden="true"></i>@T["Nav.Audit"]
+    </a>
+</div>

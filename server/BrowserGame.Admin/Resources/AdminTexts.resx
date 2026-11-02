@@ -26,4 +26,39 @@
   <data name="Theme.Light" xml:space="preserve"><value>Light</value></data>
   <data name="Theme.Dark" xml:space="preserve"><value>Dark</value></data>
   <data name="Theme.System" xml:space="preserve"><value>System</value></data>
+  <data name="Common.Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="Index.Welcome" xml:space="preserve"><value>Welcome to the admin interface.</value></data>
+  <data name="Admins.InviteLink" xml:space="preserve"><value>Invitation link to pass on</value></data>
+  <data name="Admins.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Admins.Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Admins.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Admins.Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Admins.You" xml:space="preserve"><value>you</value></data>
+  <data name="Admins.StatusActive" xml:space="preserve"><value>set up</value></data>
+  <data name="Admins.StatusPending" xml:space="preserve"><value>setup pending</value></data>
+  <data name="Admins.InviteHeading" xml:space="preserve"><value>Invite a new admin</value></data>
+  <data name="Admins.InviteEmail" xml:space="preserve"><value>Email (optional)</value></data>
+  <data name="Admins.InviteEmailHint" xml:space="preserve"><value>Without an email you only get the link to pass on.</value></data>
+  <data name="Admins.Invite" xml:space="preserve"><value>Invite</value></data>
+  <data name="Admins.InviteCreated" xml:space="preserve"><value>Invitation created. The link is valid for {0} hours and works only once.</value></data>
+  <data name="Admins.InviteMailed" xml:space="preserve"><value>Email sent to {0}.</value></data>
+  <data name="Admins.InviteMailFailed" xml:space="preserve"><value>Email not sent ({0}) – pass on the link yourself.</value></data>
+  <data name="Admins.CannotRemoveSelf" xml:space="preserve"><value>You cannot remove yourself.</value></data>
+  <data name="Admins.CannotRemoveLast" xml:space="preserve"><value>The last admin cannot be removed.</value></data>
+  <data name="Admins.Removed" xml:space="preserve"><value>{0} was removed.</value></data>
+  <data name="Mail.Invite.Subject" xml:space="preserve"><value>Admin invitation for Browser Game</value></data>
+  <data name="Mail.Invite.Body" xml:space="preserve"><value>Hello,&#10;&#10;{0} invites you to be an admin for Browser Game. Use this link to set up your access:&#10;{1}&#10;&#10;The link is valid for {2} hours and works only once.</value></data>
+  <data name="Audit.Empty" xml:space="preserve"><value>No entries yet.</value></data>
+  <data name="Audit.Time" xml:space="preserve"><value>Time</value></data>
+  <data name="Audit.Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="Audit.Action" xml:space="preserve"><value>Action</value></data>
+  <data name="Audit.Details" xml:space="preserve"><value>Details</value></data>
+  <data name="Audit.Limit" xml:space="preserve"><value>Showing the latest {0} entries.</value></data>
+  <data name="AuditEntry.AdminInvited" xml:space="preserve"><value>Admin invited</value></data>
+  <data name="AuditEntry.InviteLinkOnly" xml:space="preserve"><value>link only</value></data>
+  <data name="AuditEntry.To" xml:space="preserve"><value>to {0}</value></data>
+  <data name="AuditEntry.AdminRemoved" xml:space="preserve"><value>Admin removed</value></data>
+  <data name="AuditEntry.FirstAdminSetUp" xml:space="preserve"><value>First admin set up</value></data>
+  <data name="AuditEntry.InviteRedeemed" xml:space="preserve"><value>Invitation redeemed</value></data>
+  <data name="AuditEntry.InvitedBy" xml:space="preserve"><value>invited by {0}</value></data>
 </root>

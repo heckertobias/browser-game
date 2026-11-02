@@ -22,7 +22,7 @@ public sealed class AdminAuthTests
         Assert.Equal(10, admin.RecoveryCodes.Count);
         var (home, html) = await admin.Client.GetAsync("/");
         Assert.Equal(HttpStatusCode.OK, home.StatusCode);
-        Assert.Contains("Übersicht", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Nav.Overview"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 
     [Fact] // AK-1: Link ist einmalig

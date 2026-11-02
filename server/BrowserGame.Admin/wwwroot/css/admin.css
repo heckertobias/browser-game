@@ -39,3 +39,8 @@
 .validation-summary-errors ul {
   margin-bottom: 0;
 }
+
+/* Formulare und Listen lesbar schmal; Tabellen nutzen die volle Breite (005 AK-6, AK-9). */
+.admin-narrow {
+  max-width: 48rem;
+}

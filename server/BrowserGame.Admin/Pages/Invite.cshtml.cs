@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using BrowserGame.Admin.Auth;
+using BrowserGame.Admin.Resources;
 using BrowserGame.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Localization;
 
 namespace BrowserGame.Admin.Pages;
 
@@ -24,7 +26,7 @@ public enum InviteStep
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
 public sealed partial class InviteModel(
     AdminInvites invites, AdminDbContext db, UserManager<AdminUser> users, SignInManager<AdminUser> signIn, AuditLog audit,
-    ILogger<InviteModel> logger) : PageModel
+    ILogger<InviteModel> logger, IStringLocalizer<AdminTexts> t) : PageModel
 {
     [BindProperty(SupportsGet = true)]
     public string? Token { get; set; }
@@ -175,8 +177,9 @@ public sealed partial class InviteModel(
     private async Task CompleteAsync(AdminInvite invite, AdminUser user)
     {
         await invites.MarkUsedAsync(invite);
-        await audit.WriteAsync(user.UserName!, invite.CreatedBy == AdminInvite.SetupCreator ? "Erster Admin eingerichtet" : "Einladung eingelöst",
-            invite.CreatedBy == AdminInvite.SetupCreator ? null : $"eingeladen von {invite.CreatedBy}");
+        var setup = invite.CreatedBy == AdminInvite.SetupCreator;
+        await audit.WriteAsync(user.UserName!, setup ? t["AuditEntry.FirstAdminSetUp"] : t["AuditEntry.InviteRedeemed"],
+            setup ? null : t["AuditEntry.InvitedBy", invite.CreatedBy].Value);
         await signIn.SignInAsync(user, isPersistent: false);
     }
 
