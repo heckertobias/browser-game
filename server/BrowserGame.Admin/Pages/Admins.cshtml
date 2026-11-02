@@ -1,49 +1,70 @@
 @page
 @model AdminsModel
 @{
-    ViewData["Title"] = "Admins";
+    ViewData["Title"] = T["Nav.Admins"].Value;
 }
 <partial name="_Errors" />
-@if (Model.Message is not null)
-{
-    <div class="alert alert-success rounded-none">@Model.Message</div>
-}
+<partial name="_Message" model="new PageMessage(MessageKind.Success, Model.Message)" />
 @if (Model.InviteLink is not null)
 {
-    <label class="flex flex-col gap-1">
-        <span class="label-text">Einladungslink zum Weitergeben</span>
-        <input readonly value="@Model.InviteLink" class="input input-bordered w-full rounded-none font-mono text-sm" data-testid="invite-link" />
-    </label>
+    <div class="admin-narrow mb-4">
+        <label for="invite-link" class="form-label">@T["Admins.InviteLink"]</label>
+        <input id="invite-link" readonly value="@Model.InviteLink" class="form-control font-monospace" data-testid="invite-link" />
+    </div>
 }
 
-<table class="table">
-    <thead><tr><th>Name</th><th>E-Mail</th><th>Status</th><th></th></tr></thead>
-    <tbody>
-        @foreach (var admin in Model.Admins)
-        {
+<div class="table-responsive mb-4">
+    <table class="table table-hover align-middle" data-testid="admins-table">
+        <thead>
             <tr>
-                <td>@admin.Name @(admin.IsMe ? "(du)" : "")</td>
-                <td>@admin.Email</td>
-                <td>@(admin.Active ? "eingerichtet" : "Einrichtung offen")</td>
-                <td>
-                    @if (!admin.IsMe)
-                    {
-                        <form method="post" asp-page-handler="Remove">
-                            <input type="hidden" name="RemoveId" value="@admin.Id" />
-                            <button type="submit" class="btn btn-sm btn-ghost rounded-none">Entfernen</button>
-                        </form>
-                    }
-                </td>
+                <th scope="col">@T["Admins.Name"]</th>
+                <th scope="col">@T["Admins.Email"]</th>
+                <th scope="col">@T["Admins.Status"]</th>
+                <th scope="col"><span class="visually-hidden">@T["Admins.Actions"]</span></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var admin in Model.Admins)
+            {
+                <tr>
+                    <td>
+                        @admin.Name
+                        @if (admin.IsMe)
+                        {
+                            <span class="badge text-bg-secondary ms-1">@T["Admins.You"]</span>
+                        }
+                    </td>
+                    <td>@admin.Email</td>
+                    <td>
+                        @if (admin.Active)
+                        {
+                            <span class="badge text-bg-success">@T["Admins.StatusActive"]</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-warning">@T["Admins.StatusPending"]</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        @if (!admin.IsMe)
+                        {
+                            <form method="post" asp-page-handler="Remove">
+                                <input type="hidden" name="RemoveId" value="@admin.Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">@T["Common.Remove"]</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
-<div class="divider font-mono text-xs">Neuen Admin einladen</div>
-<form method="post" asp-page-handler="Invite" class="flex flex-col gap-3 sm:flex-row sm:items-end">
-    <label class="flex flex-col gap-1 grow">
-        <span class="label-text">E-Mail (optional – sonst nur Link)</span>
-        <input asp-for="InviteEmail" type="email" class="input input-bordered w-full rounded-none" />
-    </label>
-    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Einladen</button>
+<h2 class="h5">@T["Admins.InviteHeading"]</h2>
+<form method="post" asp-page-handler="Invite" class="admin-narrow">
+    <label asp-for="InviteEmail" class="form-label">@T["Admins.InviteEmail"]</label>
+    <input asp-for="InviteEmail" type="email" class="form-control" aria-describedby="invite-email-hint" />
+    <span asp-validation-for="InviteEmail" class="invalid-feedback"></span>
+    <div id="invite-email-hint" class="form-text">@T["Admins.InviteEmailHint"]</div>
+    <button type="submit" class="btn btn-primary mt-3">@T["Admins.Invite"]</button>
 </form>

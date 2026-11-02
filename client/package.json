@@ -15,7 +15,7 @@
     "test": "npm run gen && vitest run",
     "typecheck": "npm run gen && tsc --noEmit",
     "lint": "npm run gen && eslint .",
-    "build:admin": "tailwindcss -i src/styles/admin.css -o ../server/BrowserGame.Admin/wwwroot/css/site.css --minify",
+    "build:admin": "node scripts/admin-lib.mjs",
     "build:passkeys": "vite build -c vite.passkeys.config.ts && mkdir -p ../server/BrowserGame.Admin/wwwroot/js && cp ../server/BrowserGame.Server/wwwroot/js/passkeys.js ../server/BrowserGame.Admin/wwwroot/js/passkeys.js"
   },
   "dependencies": {
@@ -32,6 +32,8 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "bootstrap": "5.3.8",
+    "bootstrap-icons": "1.13.2",
     "daisyui": "5.7.50",
     "eslint": "10.13.0",
     "eslint-plugin-react-hooks": "7.1.1",

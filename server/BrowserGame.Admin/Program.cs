@@ -1,4 +1,5 @@
 using BrowserGame.Admin.Auth;
+using BrowserGame.Admin.Resources;
 using BrowserGame.Data;
 
 if (await WebDefaults.TryRunHealthProbeAsync(args) is { } exitCode)
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 var databaseProvider = builder.Services.AddGameDatabase(builder.Configuration);
 builder.Services.AddAdminDatabase(builder.Configuration);
 builder.AddAdminAuth();
+builder.Services.AddLocalization(o => o.ResourcesPath = "");
 builder.Services.AddRazorPages(options =>
 {
     // Alles nur angemeldet (004 AK-3) – außer Anmeldung und Einladung.
@@ -18,7 +20,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/Login");
     options.Conventions.AllowAnonymousToPage("/LoginTwoFactor");
     options.Conventions.AllowAnonymousToPage("/Invite");
-});
+}).AddDataAnnotationsLocalization(o => o.DataAnnotationLocalizerProvider = (_, f) => f.Create(typeof(AdminTexts)));
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
@@ -33,10 +35,11 @@ await using (var scope = app.Services.CreateAsyncScope())
 }
 
 app.UseSecurityHeaders();
-// Bis 005 fest Deutsch (006): eine Sprache, kein Provider – Browser und Cookie ändern nichts.
+// Fest Englisch (005 AK-14): eine Sprache, kein Provider – Browser und Culture-Cookie des Spiels ändern nichts.
+// Eine weitere Sprache: AdminTexts.<sprache>.resx und hier eintragen (006).
 app.UseRequestLocalization(o =>
 {
-    o.SetDefaultCulture("de").AddSupportedCultures("de").AddSupportedUICultures("de");
+    o.SetDefaultCulture("en").AddSupportedCultures("en").AddSupportedUICultures("en");
     o.RequestCultureProviders.Clear();
 });
 app.UseStaticFiles();

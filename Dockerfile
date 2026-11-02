@@ -6,7 +6,7 @@
 # Multi-Arch (amd64, arm64) als Cross-Build: Build-Stages laufen auf der Build-Plattform,
 # nur die Laufzeit-Images sind zielspezifisch und enthalten kein RUN – keine Emulation nötig.
 
-# 1) Client bauen: Spiel-Client, CSS für Startseite und Admin, passkeys.js und language.js (landen in den wwwroot-Ordnern)
+# 1) Client bauen: Spiel-Client, CSS der Startseite, Bootstrap fürs Admin, passkeys.js und language.js (landen in den wwwroot-Ordnern)
 FROM --platform=$BUILDPLATFORM node:24-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS client
 WORKDIR /src
 COPY buf.yaml buf.gen.yaml ./
@@ -14,9 +14,8 @@ COPY contracts/ contracts/
 COPY client/package.json client/package-lock.json client/.npmrc client/
 RUN cd client && npm ci
 COPY client/ client/
-# Tailwind scannt die Razor-Seiten von Spiel und Admin.
+# Tailwind scannt die Razor-Seiten der Startseite.
 COPY server/BrowserGame.Server/Features/ server/BrowserGame.Server/Features/
-COPY server/BrowserGame.Admin/Pages/ server/BrowserGame.Admin/Pages/
 # Version im Spiel (007 AK-15): Release-Tag bzw. kurzer Commit-Hash aus der CI; ohne Argument leer → "dev".
 # Erst hier, damit npm ci im Cache bleibt.
 ARG APP_VERSION

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="NotConfigured" xml:space="preserve"><value>Sending mail is not set up yet.</value></data>
+  <data name="AuthenticationFailed" xml:space="preserve"><value>Login to the mail server failed – check username and password.</value></data>
+  <data name="CertificateNameMismatch" xml:space="preserve"><value>The mail server’s certificate is valid for “{0}”, not for “{1}” – enter that name as the server.</value></data>
+  <data name="CertificateNameSeparator" xml:space="preserve"><value>”, “</value></data>
+  <data name="SslHandshakeFailed" xml:space="preserve"><value>Secure connection to the mail server failed – check encryption and port (465 = SSL/TLS, 587 = STARTTLS).</value></data>
+  <data name="Unreachable" xml:space="preserve"><value>Mail server not reachable – check server and port.</value></data>
+  <data name="Rejected" xml:space="preserve"><value>The mail server rejected the mail: {0}</value></data>
+  <data name="UnexpectedResponse" xml:space="preserve"><value>Unexpected response from the mail server – check server, port and encryption.</value></data>
+  <data name="InvalidAddress" xml:space="preserve"><value>Invalid sender or recipient address.</value></data>
+  <data name="TimedOut" xml:space="preserve"><value>The mail server timed out.</value></data>
+  <data name="ConnectionLost" xml:space="preserve"><value>Connection to the mail server was lost – check server, port and encryption.</value></data>
+  <data name="InvalidSettings" xml:space="preserve"><value>Invalid settings – enter only the name as the server (no port, no https://).</value></data>
+</root>

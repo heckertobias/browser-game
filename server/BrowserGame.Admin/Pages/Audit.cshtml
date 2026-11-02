@@ -1,27 +1,36 @@
 @page
 @model AuditModel
 @{
-    ViewData["Title"] = "Protokoll";
+    ViewData["Title"] = T["Nav.Audit"].Value;
 }
 @if (Model.Entries.Count == 0)
 {
-    <p>Noch keine Einträge.</p>
+    <p class="text-body-secondary" data-testid="audit-empty">@T["Audit.Empty"]</p>
 }
 else
 {
-    <table class="table table-sm">
-        <thead><tr><th>Zeit</th><th>Admin</th><th>Aktion</th><th>Details</th></tr></thead>
-        <tbody>
-            @foreach (var entry in Model.Entries)
-            {
+    <div class="table-responsive">
+        <table class="table table-hover align-middle" data-testid="audit-table">
+            <thead>
                 <tr>
-                    <td class="font-mono whitespace-nowrap">@entry.At.LocalDateTime.ToString("dd.MM.yyyy HH:mm:ss")</td>
-                    <td>@entry.Admin</td>
-                    <td>@entry.Action</td>
-                    <td>@entry.Details</td>
+                    <th scope="col">@T["Audit.Time"]</th>
+                    <th scope="col">@T["Audit.Admin"]</th>
+                    <th scope="col">@T["Audit.Action"]</th>
+                    <th scope="col">@T["Audit.Details"]</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-    <p class="text-sm opacity-70">Angezeigt werden die letzten @AuditModel.Limit Einträge.</p>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.Entries)
+                {
+                    <tr>
+                        <td class="font-monospace text-nowrap">@entry.At.LocalDateTime.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)</td>
+                        <td>@entry.Admin</td>
+                        <td>@entry.Action</td>
+                        <td>@entry.Details</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="form-text">@(T["Audit.Limit", AuditModel.Limit])</p>
 }

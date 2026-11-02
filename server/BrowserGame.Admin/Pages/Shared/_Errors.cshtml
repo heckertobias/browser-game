@@ -1,5 +1,5 @@
-@* Fehlerkasten nur bei Fehlern – die Validierungszusammenfassung rendert sonst eine leere Liste (sichtbarer roter Balken). *@
+@* Fehler ohne Feld oben über dem Formular (005 AK-7); Feldfehler stehen am Feld (asp-validation-for). Nur bei Fehlern. *@
 @if (!ViewContext.ViewData.ModelState.IsValid)
 {
-    <div asp-validation-summary="All" class="alert alert-error rounded-none" role="alert"></div>
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" data-testid="errors"></div>
 }

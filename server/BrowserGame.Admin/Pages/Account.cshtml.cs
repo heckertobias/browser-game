@@ -1,15 +1,19 @@
+using System.Globalization;
 using BrowserGame.Admin.Auth;
+using BrowserGame.Admin.Resources;
 using BrowserGame.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Localization;
 
 namespace BrowserGame.Admin.Pages;
 
 /// <summary>Eigene Anmeldearten verwalten: Passkeys, Wiederherstellungscodes (004 AK-4b, AK-4c). Mindestens eine bleibt.</summary>
 public sealed partial class AccountModel(
-    UserManager<AdminUser> users, SignInManager<AdminUser> signIn, AuditLog audit, ILogger<AccountModel> logger) : PageModel
+    UserManager<AdminUser> users, SignInManager<AdminUser> signIn, AuditLog audit, ILogger<AccountModel> logger,
+    IStringLocalizer<AdminTexts> t) : PageModel
 {
     public sealed record PasskeyRow(string Id, string Label);
 
@@ -39,15 +43,15 @@ public sealed partial class AccountModel(
         var attestation = string.IsNullOrEmpty(Credential) ? null : await signIn.PerformPasskeyAttestationAsync(Credential);
         if (attestation is not { Succeeded: true })
         {
-            var reason = attestation?.Failure?.Message ?? "kein Passkey übermittelt";
+            var reason = attestation?.Failure?.Message ?? t["Common.NoPasskeySent"].Value;
             LogPasskeyFailed(reason);
-            ModelState.AddModelError("", $"Der Passkey konnte nicht angelegt werden ({reason}).");
+            ModelState.AddModelError("", t["Account.PasskeyFailed", reason]);
             return await ShowAsync();
         }
 
         await users.AddOrUpdatePasskeyAsync(user, attestation.Passkey);
-        await audit.WriteAsync(user.UserName!, "Passkey hinzugefügt");
-        Message = "Passkey hinzugefügt.";
+        await audit.WriteAsync(user.UserName!, t["AuditEntry.PasskeyAdded"]);
+        Message = t["Account.PasskeyAdded"];
         return await ShowAsync();
     }
 
@@ -63,13 +67,13 @@ public sealed partial class AccountModel(
 
         if (!AdminCredentials.IsActive(await users.HasPasswordAsync(user), user.TwoFactorEnabled, passkeys.Count - 1))
         {
-            ModelState.AddModelError("", "Das ist deine letzte Anmeldeart – lege erst einen weiteren Passkey an.");
+            ModelState.AddModelError("", t["Account.LastCredential"]);
             return await ShowAsync();
         }
 
         await users.RemovePasskeyAsync(user, target.CredentialId);
-        await audit.WriteAsync(user.UserName!, "Passkey entfernt");
-        Message = "Passkey entfernt.";
+        await audit.WriteAsync(user.UserName!, t["AuditEntry.PasskeyRemoved"]);
+        Message = t["Account.PasskeyRemoved"];
         return await ShowAsync();
     }
 
@@ -82,7 +86,7 @@ public sealed partial class AccountModel(
         }
 
         NewRecoveryCodes = [.. await users.GenerateNewTwoFactorRecoveryCodesAsync(user, 10) ?? []];
-        await audit.WriteAsync(user.UserName!, "Wiederherstellungscodes erneuert");
+        await audit.WriteAsync(user.UserName!, t["AuditEntry.RecoveryCodesRenewed"]);
         return await ShowAsync();
     }
 
@@ -98,7 +102,7 @@ public sealed partial class AccountModel(
         HasPassword = await users.HasPasswordAsync(user);
         TwoFactorEnabled = user.TwoFactorEnabled;
         Passkeys = [.. (await users.GetPasskeysAsync(user)).Select(p =>
-            new PasskeyRow(WebEncoders.Base64UrlEncode(p.CredentialId), p.Name ?? $"Passkey vom {p.CreatedAt.LocalDateTime:dd.MM.yyyy HH:mm}"))];
+            new PasskeyRow(WebEncoders.Base64UrlEncode(p.CredentialId), p.Name ?? t["Account.PasskeyFallbackName", p.CreatedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)].Value))];
         PasskeyOptions = await signIn.MakePasskeyCreationOptionsAsync(new PasskeyUserEntity
         {
             Id = user.Id,

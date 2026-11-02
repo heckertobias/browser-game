@@ -15,10 +15,12 @@ public sealed class InvitePasskeyTests
     }
 
     [Theory]
-    [InlineData("", "kein Passkey übermittelt")]
-    [InlineData("{\"id\":\"x\",\"type\":\"public-key\",\"response\":{}}", "Der Passkey konnte nicht angelegt werden (")]
-    public async Task Failed_passkey_shows_reason_without_required_field_noise(string credential, string expected)
+    [InlineData("", "Common.NoPasskeySent")]
+    [InlineData("{\"id\":\"x\",\"type\":\"public-key\",\"response\":{}}", null)]
+    public async Task Failed_passkey_shows_reason_without_required_field_noise(string credential, string? reasonKey)
     {
+        var template = ExpectedText.Get("Invite.PasskeyFailed");
+        var expected = reasonKey is null ? template[..template.IndexOf("{0}", StringComparison.Ordinal)] : ExpectedText.Format("Invite.PasskeyFailed", ExpectedText.Get(reasonKey));
         await using var factory = new AdminFactory();
         var (client, token, chooseMethod) = await UpToChooseMethodAsync(factory);
 
@@ -30,7 +32,7 @@ public sealed class InvitePasskeyTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains(expected, text, StringComparison.Ordinal);
         Assert.DoesNotContain("field is required", text, StringComparison.Ordinal);
-        Assert.Contains("Passkey anlegen", text, StringComparison.Ordinal); // man kann es direkt erneut versuchen
+        Assert.Contains(ExpectedText.Get("Invite.CreatePasskey"), text, StringComparison.Ordinal); // man kann es direkt erneut versuchen
         Assert.Contains(factory.Logs.Messages, m => m.StartsWith("Passkey bei der Einrichtung abgelehnt", StringComparison.Ordinal));
     }
 
@@ -44,7 +46,7 @@ public sealed class InvitePasskeyTests
             new Dictionary<string, string> { ["Token"] = token, ["Password"] = AdminTestFlows.Password, ["ConfirmPassword"] = AdminTestFlows.Password },
             FormClient.AntiforgeryToken(chooseMethod));
 
-        Assert.Contains("Authenticator-App", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Invite.TotpIntro"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
         Assert.DoesNotContain("field is required", html, StringComparison.Ordinal);
     }
 }

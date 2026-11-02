@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <PropertyGroup>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
   <!-- Admin-Interface als eigener Dienst (ADR 0006). -->
   <ItemGroup>
     <ProjectReference Include="..\BrowserGame.Data\BrowserGame.Data.csproj" />

@@ -1,83 +1,97 @@
 @page
 @model InviteModel
 @{
-    ViewData["Title"] = "Admin einrichten";
+    ViewData["Title"] = T["Invite.Title"].Value;
+    Layout = "_LayoutPlain";
 }
 <partial name="_Errors" />
 
 @switch (Model.Step)
 {
     case InviteStep.Invalid:
-        <p>Dieser Link ist ungültig, abgelaufen oder wurde schon benutzt.</p>
+        <p class="mb-0">@T["Invite.Invalid"]</p>
         break;
 
     case InviteStep.Details:
-        <form method="post" asp-page-handler="Details" class="flex flex-col gap-3">
+        <form method="post" asp-page-handler="Details">
             <input type="hidden" asp-for="Token" />
-            <label class="flex flex-col gap-1">
-                <span class="label-text">Name</span>
-                <input asp-for="Name" autocomplete="username" class="input input-bordered w-full rounded-none" required />
-            </label>
-            <label class="flex flex-col gap-1">
-                <span class="label-text">E-Mail</span>
-                <input asp-for="Email" type="email" autocomplete="email" class="input input-bordered w-full rounded-none" required />
-            </label>
-            <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Weiter</button>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">@T["Invite.Name"]</label>
+                <input asp-for="Name" autocomplete="username" class="form-control" required />
+                <span asp-validation-for="Name" class="invalid-feedback"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">@T["Common.Email"]</label>
+                <input asp-for="Email" type="email" autocomplete="email" class="form-control" required />
+                <span asp-validation-for="Email" class="invalid-feedback"></span>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">@T["Common.Continue"]</button>
         </form>
         break;
 
     case InviteStep.ChooseMethod:
-        <p>Wie möchtest du dich künftig anmelden?</p>
-        <form method="post" asp-page-handler="Passkey" data-passkey="create" class="flex flex-col gap-2">
+        <p>@T["Invite.ChooseMethod"]</p>
+        <form method="post" asp-page-handler="Passkey" data-passkey="create">
             <input type="hidden" asp-for="Token" />
             <script type="application/json" data-passkey-options>@Html.Raw(BrowserGame.Data.WebDefaults.JsonForHtmlScript(Model.PasskeyOptions))</script>
             <input type="hidden" name="Credential" />
-            <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Passkey anlegen (empfohlen)</button>
-            <p class="text-error text-sm" data-passkey-error hidden></p>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-key me-2" aria-hidden="true"></i>@T["Invite.CreatePasskey"]
+            </button>
+            <p class="text-danger small mt-2 mb-0" data-passkey-error hidden></p>
         </form>
-        <div class="divider font-mono text-xs">oder Passwort + Authenticator-App</div>
-        <form method="post" asp-page-handler="Password" class="flex flex-col gap-3">
+        <div class="d-flex align-items-center gap-2 my-4 text-body-secondary small">
+            <hr class="flex-grow-1 m-0" />
+            <span>@T["Invite.OrPassword"]</span>
+            <hr class="flex-grow-1 m-0" />
+        </div>
+        <form method="post" asp-page-handler="Password">
             <input type="hidden" asp-for="Token" />
-            <label class="flex flex-col gap-1">
-                <span class="label-text">Passwort (mindestens 12 Zeichen)</span>
-                <input asp-for="Password" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
-            </label>
-            <label class="flex flex-col gap-1">
-                <span class="label-text">Passwort wiederholen</span>
-                <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="input input-bordered w-full rounded-none" />
-            </label>
-            <button type="submit" class="btn rounded-none font-mono uppercase">Weiter zur Authenticator-App</button>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">@T["Common.Password"]</label>
+                <input asp-for="Password" type="password" autocomplete="new-password" class="form-control" aria-describedby="invite-password-hint" />
+                <span asp-validation-for="Password" class="invalid-feedback"></span>
+                <div id="invite-password-hint" class="form-text">@(T["Invite.PasswordHint", Model.MinPasswordLength])</div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label">@T["Invite.ConfirmPassword"]</label>
+                <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="invalid-feedback"></span>
+            </div>
+            <button type="submit" class="btn btn-outline-secondary w-100">@T["Invite.ContinueToApp"]</button>
         </form>
         break;
 
     case InviteStep.Totp:
-        <p>Scanne den QR-Code mit deiner Authenticator-App (oder gib den Schlüssel ein) und bestätige mit dem angezeigten Code.</p>
-        <div class="bg-white p-2 w-fit">@Html.Raw(Model.TotpQrSvg)</div>
-        <p class="font-mono text-sm break-all">@Model.TotpKey</p>
-        <form method="post" asp-page-handler="Totp" class="flex flex-col gap-3">
+        <p>@T["Invite.TotpIntro"]</p>
+        <div class="d-inline-block bg-white p-2 rounded mb-3" data-testid="totp-qr">@Html.Raw(Model.TotpQrSvg)</div>
+        <div class="small text-body-secondary">@T["Invite.TotpKey"]</div>
+        <p class="font-monospace text-break" data-testid="totp-key">@Model.TotpKey</p>
+        <form method="post" asp-page-handler="Totp">
             <input type="hidden" asp-for="Token" />
-            <label class="flex flex-col gap-1">
-                <span class="label-text">Code aus der App</span>
-                <input asp-for="Code" autocomplete="one-time-code" inputmode="numeric" class="input input-bordered w-full rounded-none font-mono" />
-            </label>
-            <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Bestätigen</button>
+            <div class="mb-3">
+                <label asp-for="Code" class="form-label">@T["Invite.Code"]</label>
+                <input asp-for="Code" autocomplete="one-time-code" inputmode="numeric" class="form-control font-monospace" />
+                <span asp-validation-for="Code" class="invalid-feedback"></span>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">@T["Invite.Confirm"]</button>
         </form>
         break;
 
     case InviteStep.Done:
-        <div class="alert alert-success rounded-none">Fertig – du bist als Admin angemeldet.</div>
+        <partial name="_Message" model='new PageMessage(MessageKind.Success, T["Invite.Done"].Value)' />
         @if (Model.RecoveryCodes.Count > 0)
         {
-            <p><strong>Wiederherstellungscodes:</strong> Bewahre sie sicher auf (z. B. im Passwortmanager). Jeder Code
-                funktioniert nur einmal, falls du keinen Zugriff auf die Authenticator-App hast. Sie werden nicht noch einmal angezeigt.</p>
-            <ul class="grid grid-cols-2 gap-1 font-mono" data-testid="recovery-codes">
+            <h2 class="h6">@T["Invite.RecoveryCodes"]</h2>
+            <p>@T["Invite.RecoveryCodesHint"]</p>
+            <ul class="list-unstyled font-monospace mb-4" data-testid="recovery-codes">
                 @foreach (var code in Model.RecoveryCodes)
                 {
                     <li>@code</li>
                 }
             </ul>
         }
-        <a href="/" class="btn btn-primary rounded-none font-mono uppercase">Zur Übersicht</a>
+        <a href="/" class="btn btn-primary w-100">@T["Invite.ToOverview"]</a>
         break;
 }
 

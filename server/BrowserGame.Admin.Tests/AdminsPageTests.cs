@@ -29,9 +29,10 @@ public sealed partial class AdminsPageTests
         var (_, list) = await first.Client.GetAsync("/Admins");
         Assert.Contains("Zweiter", list, StringComparison.Ordinal);
         var (_, audit) = await second.Client.GetAsync("/Audit");
-        Assert.Contains("Admin eingeladen", audit, StringComparison.Ordinal);
-        Assert.Contains("Einladung eingel", audit, StringComparison.Ordinal);
-        Assert.Contains("eingeladen von Tobias", audit, StringComparison.Ordinal);
+        var auditText = WebUtility.HtmlDecode(audit);
+        Assert.Contains(ExpectedText.Get("AuditEntry.AdminInvited"), auditText, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("AuditEntry.InviteRedeemed"), auditText, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Format("AuditEntry.InvitedBy", "Tobias"), auditText, StringComparison.Ordinal);
     }
 
     [Fact] // AK-4e: mit E-Mail und eingerichtetem SMTP geht der Link auch per Mail raus
@@ -49,7 +50,7 @@ public sealed partial class AdminsPageTests
 
         var (_, html) = await first.Client.PostAsync("/Admins", "/Admins?handler=Invite", new Dictionary<string, string> { ["InviteEmail"] = "neu@example.org" });
 
-        Assert.Contains("Mail an neu@example.org verschickt", html, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Format("Admins.InviteMailed", "neu@example.org"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
         Assert.Contains("/Invite?token=", Assert.Single(smtp.Messages), StringComparison.Ordinal);
     }
 
@@ -69,10 +70,10 @@ public sealed partial class AdminsPageTests
         }
 
         var (_, self) = await first.Client.PostAsync("/Admins", "/Admins?handler=Remove", new Dictionary<string, string> { ["RemoveId"] = firstId });
-        Assert.Contains("nicht selbst entfernen", self, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Admins.CannotRemoveSelf"), WebUtility.HtmlDecode(self), StringComparison.Ordinal);
 
         var (_, removed) = await first.Client.PostAsync("/Admins", "/Admins?handler=Remove", new Dictionary<string, string> { ["RemoveId"] = secondId });
-        Assert.Contains("Zweiter wurde entfernt", removed, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Format("Admins.Removed", "Zweiter"), WebUtility.HtmlDecode(removed), StringComparison.Ordinal);
 
         using var client = factory.CreateFormClient();
         var (login, _) = await AdminTestFlows.LoginPasswordAsync(client, second.Email);

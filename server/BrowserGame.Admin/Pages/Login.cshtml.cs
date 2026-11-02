@@ -1,25 +1,25 @@
 using System.ComponentModel.DataAnnotations;
 using BrowserGame.Admin.Auth;
+using BrowserGame.Admin.Resources;
 using BrowserGame.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Localization;
 
 namespace BrowserGame.Admin.Pages;
 
 /// <summary>Anmeldung per Passkey oder Passwort (danach Pflicht-2FA) – 004 AK-2, AK-4, AK-4b.</summary>
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
-public sealed class LoginModel(SignInManager<AdminUser> signIn, UserManager<AdminUser> users) : PageModel
+public sealed class LoginModel(SignInManager<AdminUser> signIn, UserManager<AdminUser> users, IStringLocalizer<AdminTexts> t) : PageModel
 {
-    internal const string GenericError = "Anmeldung fehlgeschlagen. Nach mehreren Fehlversuchen ist die Anmeldung kurz gesperrt.";
-
     [BindProperty]
-    [Required(ErrorMessage = "Bitte E-Mail angeben.")]
+    [Required(ErrorMessage = "Validation.EmailRequired")]
     public string Email { get; set; } = "";
 
     [BindProperty]
-    [Required(ErrorMessage = "Bitte Passwort angeben.")]
+    [Required(ErrorMessage = "Validation.PasswordRequired")]
     public string Password { get; set; } = "";
 
     [BindProperty]
@@ -46,7 +46,7 @@ public sealed class LoginModel(SignInManager<AdminUser> signIn, UserManager<Admi
             }
         }
 
-        ModelState.AddModelError("", GenericError);
+        ModelState.AddModelError("", t["Login.Failed"]);
         await OnGetAsync();
         return Page();
     }
@@ -63,7 +63,7 @@ public sealed class LoginModel(SignInManager<AdminUser> signIn, UserManager<Admi
         }
 
         ModelState.Clear();
-        ModelState.AddModelError("", "Anmeldung mit Passkey fehlgeschlagen.");
+        ModelState.AddModelError("", t["Login.PasskeyFailed"]);
         await OnGetAsync();
         return Page();
     }

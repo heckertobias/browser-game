@@ -1,34 +1,99 @@
+@{
+    var currentPage = ViewContext.RouteData.Values["page"] as string;
+    (string Page, string Icon, string Text)[] sections =
+    [
+        ("/Index", "bi-house", "Nav.Overview"),
+        ("/Smtp", "bi-envelope", "Nav.Smtp"),
+        ("/Admins", "bi-people", "Nav.Admins"),
+        ("/Audit", "bi-journal-text", "Nav.Audit"),
+    ];
+    var accountActive = currentPage == "/Account";
+}
 <!DOCTYPE html>
-<html lang="de" data-theme="dark">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex, nofollow" />
-    <title>@ViewData["Title"] – Admin</title>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <partial name="_Head" />
 </head>
-<body class="min-h-screen bg-base-200">
-    <header class="navbar bg-base-100 border-b-4 border-base-content/20 px-4">
-        <a href="/" class="font-mono uppercase tracking-widest text-lg">Browser Game · Admin</a>
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            <nav class="ml-auto flex gap-1 font-mono text-sm">
-                <a class="btn btn-ghost btn-sm rounded-none" href="/Smtp">SMTP</a>
-                <a class="btn btn-ghost btn-sm rounded-none" href="/Admins">Admins</a>
-                <a class="btn btn-ghost btn-sm rounded-none" href="/Audit">Protokoll</a>
-                <a class="btn btn-ghost btn-sm rounded-none" href="/Account">@User.Identity.Name</a>
-                <form method="post" action="/Logout"><button class="btn btn-ghost btn-sm rounded-none" type="submit">Abmelden</button></form>
-            </nav>
-        }
+<body>
+    <header class="navbar border-bottom bg-body-tertiary px-3 d-lg-none">
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#admin-sidebar"
+                aria-controls="admin-sidebar" aria-label="@T["Layout.OpenMenu"]">
+            <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+        <a class="navbar-brand me-0" href="/">@T["Layout.Brand"]</a>
     </header>
-    <main class="mx-auto max-w-3xl p-4">
-        <section class="card bg-base-100 border-4 border-base-content/20 rounded-none">
-            <div class="card-body gap-4">
-                <h1 class="card-title text-2xl font-mono uppercase tracking-widest">@ViewData["Title"]</h1>
-                @RenderBody()
+    <div class="admin-shell">
+        <div class="admin-sidebar">
+            <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="admin-sidebar" aria-labelledby="admin-sidebar-title">
+                <div class="offcanvas-header border-bottom">
+                    <span class="offcanvas-title h5" id="admin-sidebar-title">@T["Layout.Brand"]</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#admin-sidebar"
+                            aria-label="@T["Layout.CloseMenu"]"></button>
+                </div>
+                <div class="offcanvas-body d-flex flex-column gap-3 p-3">
+                    <a class="d-none d-lg-block fs-5 fw-semibold link-body-emphasis text-decoration-none" href="/">@T["Layout.Brand"]</a>
+                    <nav aria-label="@T["Layout.Navigation"]" data-testid="sidebar-nav">
+                        <ul class="nav nav-pills flex-column gap-1">
+                            @foreach (var entry in sections)
+                            {
+                                var active = entry.Page == currentPage;
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center gap-2 @(active ? "active" : "link-body-emphasis")"
+                                       href="@Url.Page(entry.Page)" aria-current="@(active ? "page" : null)">
+                                        <i class="bi @entry.Icon" aria-hidden="true"></i>@T[entry.Text]
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                    <div class="mt-auto border-top pt-3 d-flex flex-column gap-2">
+                        <ul class="nav nav-pills flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-2 @(accountActive ? "active" : "link-body-emphasis")"
+                                   href="@Url.Page("/Account")" title="@T["Layout.Account"]" aria-current="@(accountActive ? "page" : null)"
+                                   data-testid="sidebar-account">
+                                    <i class="bi bi-person-circle" aria-hidden="true"></i>@User.Identity?.Name
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="dropup" data-testid="theme-switch">
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 dropdown-toggle d-flex align-items-center justify-content-center gap-2"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-circle-half" aria-hidden="true"></i>@T["Theme.Label"]
+                            </button>
+                            <ul class="dropdown-menu w-100">
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center gap-2" data-theme-value="light" aria-pressed="false">
+                                        <i class="bi bi-sun" aria-hidden="true"></i>@T["Theme.Light"]
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center gap-2" data-theme-value="dark" aria-pressed="false">
+                                        <i class="bi bi-moon-stars" aria-hidden="true"></i>@T["Theme.Dark"]
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center gap-2" data-theme-value="auto" aria-pressed="false">
+                                        <i class="bi bi-circle-half" aria-hidden="true"></i>@T["Theme.System"]
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <form method="post" asp-page="/Logout" data-testid="sidebar-logout">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+                                <i class="bi bi-box-arrow-right" aria-hidden="true"></i>@T["Layout.SignOut"]
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </section>
-    </main>
+        </div>
+        <main class="admin-main p-3 p-lg-4">
+            <h1 class="h3 mb-4">@ViewData["Title"]</h1>
+            @RenderBody()
+        </main>
+    </div>
+    <script src="~/lib/bootstrap/bootstrap.bundle.min.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

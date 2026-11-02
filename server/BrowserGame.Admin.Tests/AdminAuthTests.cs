@@ -22,7 +22,7 @@ public sealed class AdminAuthTests
         Assert.Equal(10, admin.RecoveryCodes.Count);
         var (home, html) = await admin.Client.GetAsync("/");
         Assert.Equal(HttpStatusCode.OK, home.StatusCode);
-        Assert.Contains("Übersicht", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Nav.Overview"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 
     [Fact] // AK-1: Link ist einmalig
@@ -35,7 +35,7 @@ public sealed class AdminAuthTests
         using var other = factory.CreateFormClient();
         var (_, html) = await other.GetAsync($"/Invite?token={token}");
 
-        Assert.Contains("ungültig, abgelaufen oder wurde schon benutzt", html, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Invite.Invalid"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 
     [Fact] // AK-1: Ein neuer Start ohne eingerichteten Admin erzeugt einen neuen Link, der alte wird ungültig
@@ -50,7 +50,7 @@ public sealed class AdminAuthTests
 
         Assert.NotEqual(first, second);
         using var client = factory.CreateFormClient();
-        Assert.Contains("ungültig", (await client.GetAsync($"/Invite?token={first}")).Html, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Invite.Invalid"), WebUtility.HtmlDecode((await client.GetAsync($"/Invite?token={first}")).Html), StringComparison.Ordinal);
     }
 
     [Fact] // AK-3
@@ -78,7 +78,7 @@ public sealed class AdminAuthTests
 
         var (wrong, wrongHtml) = await AdminTestFlows.LoginCodeAsync(client, "000000");
         Assert.Equal(HttpStatusCode.OK, wrong.StatusCode);
-        Assert.Contains("Der Code stimmt nicht", wrongHtml, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("LoginTwoFactor.CodeWrong"), WebUtility.HtmlDecode(wrongHtml), StringComparison.Ordinal);
 
         var (right, _) = await AdminTestFlows.LoginCodeAsync(client, Totp.Code(admin.TotpKey));
         Assert.Equal("/", right.Headers.Location?.OriginalString);
@@ -100,7 +100,7 @@ public sealed class AdminAuthTests
         await AdminTestFlows.LoginPasswordAsync(second, admin.Email);
         var (again, html) = await AdminTestFlows.LoginCodeAsync(second, code, recovery: true);
         Assert.Equal(HttpStatusCode.OK, again.StatusCode);
-        Assert.Contains("Der Code stimmt nicht", html, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("LoginTwoFactor.CodeWrong"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 
     [Fact] // AK-2: Spieler-Accounts gelten im Admin nicht
@@ -121,7 +121,7 @@ public sealed class AdminAuthTests
         var (response, html) = await AdminTestFlows.LoginPasswordAsync(client, "spieler@example.org");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Anmeldung fehlgeschlagen", html, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Login.Failed"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 
     [Fact] // AK-4d: höchstens 8 Stunden, nicht verlängernd

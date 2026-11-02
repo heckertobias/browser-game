@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Validation.EmailRequired" xml:space="preserve"><value>Please enter your email address.</value></data>
+  <data name="Validation.PasswordRequired" xml:space="preserve"><value>Please enter your password.</value></data>
+  <data name="Validation.CodeRequired" xml:space="preserve"><value>Please enter the code.</value></data>
+  <data name="Validation.EmailInvalid" xml:space="preserve"><value>That is not a valid email address.</value></data>
+  <data name="Validation.HostRequired" xml:space="preserve"><value>Please enter the server.</value></data>
+  <data name="Validation.PortRange" xml:space="preserve"><value>The port must be between 1 and 65535.</value></data>
+  <data name="Validation.FromAddressRequired" xml:space="preserve"><value>Please enter the sender address.</value></data>
+  <data name="Validation.FromAddressInvalid" xml:space="preserve"><value>That is not a valid sender address.</value></data>
+  <data name="Layout.Brand" xml:space="preserve"><value>Browser Game Admin</value></data>
+  <data name="Layout.Navigation" xml:space="preserve"><value>Admin sections</value></data>
+  <data name="Layout.OpenMenu" xml:space="preserve"><value>Open menu</value></data>
+  <data name="Layout.CloseMenu" xml:space="preserve"><value>Close menu</value></data>
+  <data name="Layout.Account" xml:space="preserve"><value>Your account</value></data>
+  <data name="Layout.SignOut" xml:space="preserve"><value>Sign out</value></data>
+  <data name="Nav.Overview" xml:space="preserve"><value>Overview</value></data>
+  <data name="Nav.Smtp" xml:space="preserve"><value>SMTP settings</value></data>
+  <data name="Nav.Admins" xml:space="preserve"><value>Admins</value></data>
+  <data name="Nav.Audit" xml:space="preserve"><value>Audit log</value></data>
+  <data name="Theme.Label" xml:space="preserve"><value>Color theme</value></data>
+  <data name="Theme.Light" xml:space="preserve"><value>Light</value></data>
+  <data name="Theme.Dark" xml:space="preserve"><value>Dark</value></data>
+  <data name="Theme.System" xml:space="preserve"><value>System</value></data>
+  <data name="Common.Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="Index.Welcome" xml:space="preserve"><value>Welcome to the admin interface.</value></data>
+  <data name="Admins.InviteLink" xml:space="preserve"><value>Invitation link to pass on</value></data>
+  <data name="Admins.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Admins.Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Admins.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Admins.Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Admins.You" xml:space="preserve"><value>you</value></data>
+  <data name="Admins.StatusActive" xml:space="preserve"><value>set up</value></data>
+  <data name="Admins.StatusPending" xml:space="preserve"><value>setup pending</value></data>
+  <data name="Admins.InviteHeading" xml:space="preserve"><value>Invite a new admin</value></data>
+  <data name="Admins.InviteEmail" xml:space="preserve"><value>Email (optional)</value></data>
+  <data name="Admins.InviteEmailHint" xml:space="preserve"><value>Without an email you only get the link to pass on.</value></data>
+  <data name="Admins.Invite" xml:space="preserve"><value>Invite</value></data>
+  <data name="Admins.InviteCreated" xml:space="preserve"><value>Invitation created. The link is valid for {0} hours and works only once.</value></data>
+  <data name="Admins.InviteMailed" xml:space="preserve"><value>Email sent to {0}.</value></data>
+  <data name="Admins.InviteMailFailed" xml:space="preserve"><value>Email not sent ({0}) – pass on the link yourself.</value></data>
+  <data name="Admins.CannotRemoveSelf" xml:space="preserve"><value>You cannot remove yourself.</value></data>
+  <data name="Admins.CannotRemoveLast" xml:space="preserve"><value>The last admin cannot be removed.</value></data>
+  <data name="Admins.Removed" xml:space="preserve"><value>{0} was removed.</value></data>
+  <data name="Mail.Invite.Subject" xml:space="preserve"><value>Admin invitation for Browser Game</value></data>
+  <data name="Mail.Invite.Body" xml:space="preserve"><value>Hello,&#10;&#10;{0} invites you to be an admin for Browser Game. Use this link to set up your access:&#10;{1}&#10;&#10;The link is valid for {2} hours and works only once.</value></data>
+  <data name="Audit.Empty" xml:space="preserve"><value>No entries yet.</value></data>
+  <data name="Audit.Time" xml:space="preserve"><value>Time</value></data>
+  <data name="Audit.Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="Audit.Action" xml:space="preserve"><value>Action</value></data>
+  <data name="Audit.Details" xml:space="preserve"><value>Details</value></data>
+  <data name="Audit.Limit" xml:space="preserve"><value>Showing the latest {0} entries.</value></data>
+  <data name="AuditEntry.AdminInvited" xml:space="preserve"><value>Admin invited</value></data>
+  <data name="AuditEntry.InviteLinkOnly" xml:space="preserve"><value>link only</value></data>
+  <data name="AuditEntry.To" xml:space="preserve"><value>to {0}</value></data>
+  <data name="AuditEntry.AdminRemoved" xml:space="preserve"><value>Admin removed</value></data>
+  <data name="AuditEntry.FirstAdminSetUp" xml:space="preserve"><value>First admin set up</value></data>
+  <data name="AuditEntry.InviteRedeemed" xml:space="preserve"><value>Invitation redeemed</value></data>
+  <data name="AuditEntry.InvitedBy" xml:space="preserve"><value>invited by {0}</value></data>
+  <data name="Smtp.NotSaved" xml:space="preserve"><value>Not saved yet – the game is not sending any emails right now.</value></data>
+  <data name="Smtp.Connection" xml:space="preserve"><value>Connection</value></data>
+  <data name="Smtp.Host" xml:space="preserve"><value>Server</value></data>
+  <data name="Smtp.HostHint" xml:space="preserve"><value>Only the name, e.g. mx.mailhost.example.</value></data>
+  <data name="Smtp.Port" xml:space="preserve"><value>Port</value></data>
+  <data name="Smtp.PortHint" xml:space="preserve"><value>465 = SSL/TLS, 587 = STARTTLS.</value></data>
+  <data name="Smtp.Security" xml:space="preserve"><value>Encryption</value></data>
+  <data name="Smtp.Security.SslOnConnect" xml:space="preserve"><value>SSL/TLS (usually port 465)</value></data>
+  <data name="Smtp.Security.StartTls" xml:space="preserve"><value>STARTTLS (usually port 587)</value></data>
+  <data name="Smtp.Security.Auto" xml:space="preserve"><value>Automatic</value></data>
+  <data name="Smtp.Security.None" xml:space="preserve"><value>None (test servers only)</value></data>
+  <data name="Smtp.Username" xml:space="preserve"><value>Username</value></data>
+  <data name="Smtp.Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Smtp.PasswordSet" xml:space="preserve"><value>Leave empty to keep it.</value></data>
+  <data name="Smtp.FromAddress" xml:space="preserve"><value>Sender address</value></data>
+  <data name="Smtp.FromName" xml:space="preserve"><value>Sender name</value></data>
+  <data name="Smtp.FromNamePlaceholder" xml:space="preserve"><value>Browser Game</value></data>
+  <data name="Smtp.TestHeading" xml:space="preserve"><value>Test email</value></data>
+  <data name="Smtp.TestRecipient" xml:space="preserve"><value>Send test email to</value></data>
+  <data name="Smtp.TestHint" xml:space="preserve"><value>“With form values” uses the values in the form without saving them; an empty password field uses the tested or the stored password. “With saved settings” uses exactly what the game uses.</value></data>
+  <data name="Smtp.SendTest" xml:space="preserve"><value>Send test email with form values</value></data>
+  <data name="Smtp.Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Smtp.Saved" xml:space="preserve"><value>Saved.</value></data>
+  <data name="Smtp.NoChanges" xml:space="preserve"><value>No changes.</value></data>
+  <data name="Smtp.TestSent" xml:space="preserve"><value>Test email sent to {0} – these settings work. Don’t forget to save.</value></data>
+  <data name="Smtp.TestFailed" xml:space="preserve"><value>Test email failed.</value></data>
+  <data name="Smtp.Error.RecipientInvalid" xml:space="preserve"><value>Please enter a valid recipient address for the test email.</value></data>
+  <data name="Smtp.Error.HostWithPort" xml:space="preserve"><value>Enter only the server name, e.g. “mx.mailhost.example” – no port, no https://. The port goes into the “Port” field.</value></data>
+  <data name="Smtp.Error.RetrievalPort" xml:space="preserve"><value>Port {0} is {1} (for fetching mail). For sending use 465 with SSL/TLS or 587 with STARTTLS.</value></data>
+  <data name="Smtp.PasswordStatus.Stored" xml:space="preserve"><value>Password stored</value></data>
+  <data name="Smtp.PasswordStatus.NotStored" xml:space="preserve"><value>No password stored</value></data>
+  <data name="Smtp.PasswordStatus.NoLogin" xml:space="preserve"><value>No login</value></data>
+  <data name="Smtp.NoLoginHint" xml:space="preserve"><value>Without a username, emails are sent without signing in to the mail server, and no password is saved.</value></data>
+  <data name="Smtp.TestedPasswordWillBeSaved" xml:space="preserve"><value>The tested password will be saved.</value></data>
+  <data name="Smtp.PasswordMissing" xml:space="preserve"><value>A username is saved, but no password. Signing in to the mail server will fail – enter the password and save.</value></data>
+  <data name="Smtp.Error.TestedPasswordInvalid" xml:space="preserve"><value>The tested password is no longer valid (it expires after 30 minutes). Please enter the password again.</value></data>
+  <data name="Smtp.SendTestSaved" xml:space="preserve"><value>Send test email with saved settings</value></data>
+  <data name="Smtp.TestSavedSent" xml:space="preserve"><value>Test email sent to {0} with the saved settings.</value></data>
+  <data name="AuditEntry.TestMailSavedSent" xml:space="preserve"><value>Test email sent (saved settings)</value></data>
+  <data name="Mail.Test.Subject" xml:space="preserve"><value>Test email from Browser Game Admin</value></data>
+  <data name="Mail.Test.Body" xml:space="preserve"><value>If you are reading this email, sending mail with these settings works.</value></data>
+  <data name="AuditEntry.SmtpChanged" xml:space="preserve"><value>SMTP settings changed</value></data>
+  <data name="AuditEntry.SmtpChangedFields" xml:space="preserve"><value>Fields: {0}</value></data>
+  <data name="AuditEntry.TestMailSent" xml:space="preserve"><value>Test email sent</value></data>
+  <data name="AuditEntry.ToFailed" xml:space="preserve"><value>to {0}, failed: {1}</value></data>
+  <data name="AuditEntry.PasskeyAdded" xml:space="preserve"><value>Passkey added</value></data>
+  <data name="AuditEntry.PasskeyRemoved" xml:space="preserve"><value>Passkey removed</value></data>
+  <data name="AuditEntry.RecoveryCodesRenewed" xml:space="preserve"><value>Recovery codes renewed</value></data>
+  <data name="Account.Passkeys" xml:space="preserve"><value>Passkeys</value></data>
+  <data name="Account.NoPasskey" xml:space="preserve"><value>No passkey yet.</value></data>
+  <data name="Account.AddPasskey" xml:space="preserve"><value>Add passkey</value></data>
+  <data name="Account.PasswordHeading" xml:space="preserve"><value>Password &amp; authenticator</value></data>
+  <data name="Account.PasswordActive" xml:space="preserve"><value>Password with authenticator app is set up.</value></data>
+  <data name="Account.NewRecoveryCodes" xml:space="preserve"><value>New recovery codes</value></data>
+  <data name="Account.RecoveryCodesShown" xml:space="preserve"><value>Your new codes – the old ones no longer work. They will not be shown again.</value></data>
+  <data name="Account.NoPassword" xml:space="preserve"><value>No password set up – you sign in with a passkey only.</value></data>
+  <data name="Account.PasskeyAdded" xml:space="preserve"><value>Passkey added.</value></data>
+  <data name="Account.PasskeyRemoved" xml:space="preserve"><value>Passkey removed.</value></data>
+  <data name="Account.PasskeyFailed" xml:space="preserve"><value>The passkey could not be added ({0}).</value></data>
+  <data name="Account.LastCredential" xml:space="preserve"><value>This is your last sign-in method – add another passkey first.</value></data>
+  <data name="Account.PasskeyFallbackName" xml:space="preserve"><value>Passkey from {0}</value></data>
+  <data name="Common.Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Common.Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Common.Continue" xml:space="preserve"><value>Continue</value></data>
+  <data name="Common.NoPasskeySent" xml:space="preserve"><value>no passkey received</value></data>
+  <data name="Login.Title" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Login.WithPasskey" xml:space="preserve"><value>Sign in with passkey</value></data>
+  <data name="Login.OrPassword" xml:space="preserve"><value>or with password</value></data>
+  <data name="Login.Failed" xml:space="preserve"><value>Sign-in failed. After several failed attempts, sign-in is locked for a short time.</value></data>
+  <data name="Login.PasskeyFailed" xml:space="preserve"><value>Sign-in with passkey failed.</value></data>
+  <data name="LoginTwoFactor.Title" xml:space="preserve"><value>Second factor</value></data>
+  <data name="LoginTwoFactor.Code" xml:space="preserve"><value>Code</value></data>
+  <data name="LoginTwoFactor.CodeHint" xml:space="preserve"><value>Enter the code from your authenticator app – or one of your recovery codes.</value></data>
+  <data name="LoginTwoFactor.IsRecoveryCode" xml:space="preserve"><value>This is a recovery code</value></data>
+  <data name="LoginTwoFactor.SignIn" xml:space="preserve"><value>Sign in</value></data>
+  <data name="LoginTwoFactor.CodeWrong" xml:space="preserve"><value>The code is not correct. After several failed attempts, sign-in is locked for a short time.</value></data>
+  <data name="Invite.Title" xml:space="preserve"><value>Set up admin access</value></data>
+  <data name="Invite.Invalid" xml:space="preserve"><value>This link is invalid, has expired or has already been used.</value></data>
+  <data name="Invite.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Invite.NameRequired" xml:space="preserve"><value>Please enter your name.</value></data>
+  <data name="Invite.ChooseMethod" xml:space="preserve"><value>How do you want to sign in from now on?</value></data>
+  <data name="Invite.CreatePasskey" xml:space="preserve"><value>Create passkey (recommended)</value></data>
+  <data name="Invite.OrPassword" xml:space="preserve"><value>or password + authenticator app</value></data>
+  <data name="Invite.PasswordHint" xml:space="preserve"><value>At least {0} characters.</value></data>
+  <data name="Invite.ConfirmPassword" xml:space="preserve"><value>Repeat password</value></data>
+  <data name="Invite.ContinueToApp" xml:space="preserve"><value>Continue to authenticator app</value></data>
+  <data name="Invite.PasswordMismatch" xml:space="preserve"><value>The passwords do not match.</value></data>
+  <data name="Invite.PasskeyFailed" xml:space="preserve"><value>The passkey could not be created ({0}). Please try again.</value></data>
+  <data name="Invite.TotpIntro" xml:space="preserve"><value>Scan the QR code with your authenticator app (or enter the key) and confirm with the code it shows.</value></data>
+  <data name="Invite.TotpKey" xml:space="preserve"><value>Key for manual entry</value></data>
+  <data name="Invite.Code" xml:space="preserve"><value>Code from the app</value></data>
+  <data name="Invite.Confirm" xml:space="preserve"><value>Confirm</value></data>
+  <data name="Invite.CodeWrong" xml:space="preserve"><value>The code is not correct. Check the time on your device and try again.</value></data>
+  <data name="Invite.Done" xml:space="preserve"><value>Done – you are signed in as an admin.</value></data>
+  <data name="Invite.RecoveryCodes" xml:space="preserve"><value>Recovery codes</value></data>
+  <data name="Invite.RecoveryCodesHint" xml:space="preserve"><value>Keep them safe (e.g. in your password manager). Each code works once if you cannot use your authenticator app. They will not be shown again.</value></data>
+  <data name="Invite.ToOverview" xml:space="preserve"><value>Go to overview</value></data>
+</root>

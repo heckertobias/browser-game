@@ -21,7 +21,10 @@ public enum SmtpSecurity
     None,
 }
 
-/// <summary>Zugang zum Mailserver. <see cref="Password"/> ist beim Lesen entschlüsselt, beim Speichern bedeutet leer „unverändert“.</summary>
+/// <summary>
+/// Zugang zum Mailserver. <see cref="Password"/> ist beim Lesen entschlüsselt, beim Speichern bedeutet leer „unverändert“;
+/// ohne <see cref="Username"/> wird kein Passwort gespeichert (keine Anmeldung, 005 AK-18).
+/// </summary>
 public sealed record SmtpSettings(
     string Host,
     int Port,
@@ -55,11 +58,15 @@ public sealed class SmtpSettingsStore(GameDbContext db, IDataProtectionProvider 
         return new SmtpSettings(stored.Host, stored.Port, stored.Security, stored.Username, password, stored.FromAddress, stored.FromName);
     }
 
-    /// <summary>Speichert die Einstellungen; ist <c>Password</c> leer, bleibt das gespeicherte erhalten. Liefert die geänderten Felder (fürs Protokoll, ohne Werte).</summary>
+    /// <summary>
+    /// Speichert die Einstellungen; ist <c>Password</c> leer, bleibt das gespeicherte erhalten. Ohne Benutzername wird kein
+    /// Passwort gespeichert und ein vorhandenes entfernt (005 AK-18). Liefert die geänderten Felder (fürs Protokoll, ohne Werte).
+    /// </summary>
     public async Task<IReadOnlyList<string>> SaveAsync(SmtpSettings settings, CancellationToken cancellationToken = default)
     {
         var current = await GetAsync(cancellationToken);
-        var password = settings.HasPassword ? settings.Password : current?.Password;
+        var password = string.IsNullOrWhiteSpace(settings.Username) ? null
+            : settings.HasPassword ? settings.Password : current?.Password;
 
         var changed = new List<string>();
         void Compare<T>(string field, T? before, T? after)

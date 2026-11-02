@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using BrowserGame.Data;
 using BrowserGame.Server.Tests;
@@ -32,21 +33,21 @@ public sealed class SmtpPageTests
         var admin = await AdminTestFlows.RedeemWithPasswordAsync(factory, AdminTestFlows.SetupTokenFromLog(factory), "Tobias", "admin@example.org");
 
         var (_, saved) = await admin.Client.PostAsync("/Smtp", "/Smtp?handler=Save", Form(smtp, smtp.Password));
-        Assert.Contains("Gespeichert.", saved, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Smtp.Saved"), WebUtility.HtmlDecode(saved), StringComparison.Ordinal);
         Assert.DoesNotContain(smtp.Password, saved, StringComparison.Ordinal); // AK-8: nie wieder angezeigt
-        Assert.Contains("gesetzt", WebUtility.HtmlDecode(saved), StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Get("Smtp.PasswordSet"), WebUtility.HtmlDecode(saved), StringComparison.Ordinal);
 
         var (_, page) = await admin.Client.GetAsync("/Smtp");
         Assert.DoesNotContain(smtp.Password, page, StringComparison.Ordinal);
 
         var (_, tested) = await admin.Client.PostAsync("/Smtp", "/Smtp?handler=Test", WithRecipient(Form(smtp, password: null)));
-        Assert.Contains("Testmail an t@example.org verschickt", tested, StringComparison.Ordinal);
-        Assert.Contains("Subject: Testmail", Assert.Single(smtp.Messages), StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Format("Smtp.TestSent", "t@example.org"), WebUtility.HtmlDecode(tested), StringComparison.Ordinal);
+        Assert.Contains($"Subject: {ExpectedText.Get("Mail.Test.Subject")}", Assert.Single(smtp.Messages), StringComparison.Ordinal);
 
         await using var scope = factory.Services.CreateAsyncScope();
         var entries = await scope.ServiceProvider.GetRequiredService<AdminDbContext>().AuditEntries.Select(e => e.Action + "|" + e.Details).ToListAsync(TestContext.Current.CancellationToken);
-        Assert.Contains(entries, e => e.StartsWith("SMTP-Einstellungen geändert|Felder: Host", StringComparison.Ordinal));
-        Assert.Contains(entries, e => e.StartsWith("Testmail gesendet|an t@example.org", StringComparison.Ordinal));
+        Assert.Contains(entries, e => e.StartsWith($"{ExpectedText.Get("AuditEntry.SmtpChanged")}|{ExpectedText.Format("AuditEntry.SmtpChangedFields", "Host")}", StringComparison.Ordinal));
+        Assert.Contains(entries, e => e.StartsWith($"{ExpectedText.Get("AuditEntry.TestMailSent")}|{ExpectedText.Format("AuditEntry.To", "t@example.org")}", StringComparison.Ordinal));
         Assert.DoesNotContain(entries, e => e.Contains(smtp.Password, StringComparison.Ordinal));
     }
 
@@ -65,7 +66,7 @@ public sealed class SmtpPageTests
     }
 
     [Fact] // AK-9: verständliche Fehlermeldung
-    public async Task Wrong_password_shows_german_error()
+    public async Task Wrong_password_shows_readable_error()
     {
         await using var factory = new AdminFactory();
         await using var smtp = new FakeSmtpServer();
@@ -73,7 +74,7 @@ public sealed class SmtpPageTests
 
         var (_, html) = await admin.Client.PostAsync("/Smtp", "/Smtp?handler=Test", WithRecipient(Form(smtp, "falsch")));
 
-        Assert.Contains("Anmeldung am Mailserver fehlgeschlagen", WebUtility.HtmlDecode(html), StringComparison.Ordinal);
+        Assert.Contains(MailErrors.ResourceManager.GetString(nameof(MailErrors.AuthenticationFailed), CultureInfo.InvariantCulture)!, WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 
     [Fact] // AK-3
@@ -96,7 +97,7 @@ public sealed class SmtpPageTests
 
         var (_, html) = await admin.Client.PostAsync("/Smtp", "/Smtp?handler=Test", WithRecipient(Form(smtp, smtp.Password)));
 
-        Assert.Contains("Testmail an t@example.org verschickt", html, StringComparison.Ordinal);
+        Assert.Contains(ExpectedText.Format("Smtp.TestSent", "t@example.org"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
         Assert.Single(smtp.Messages);
         Assert.Contains("value=\"noreply@example.net\"", html, StringComparison.Ordinal); // Eingabe noch da
         Assert.DoesNotContain(smtp.Password, html, StringComparison.Ordinal);               // Passwort nie zurück
@@ -105,11 +106,11 @@ public sealed class SmtpPageTests
     }
 
     [Theory] // Typische Verwechslungen werden verständlich abgefangen
-    [InlineData("mx.mailhost.example:993", 465, "ohne Port")]
-    [InlineData("https://mx.mailhost.example", 465, "ohne Port, ohne https://")]
-    [InlineData("mx.mailhost.example", 993, "Port 993 ist IMAP")]
-    [InlineData("mx.mailhost.example", 995, "Port 995 ist POP3")]
-    public async Task Common_mistakes_are_explained(string host, int port, string expected)
+    [InlineData("mx.mailhost.example:993", 465, "Smtp.Error.HostWithPort", null)]
+    [InlineData("https://mx.mailhost.example", 465, "Smtp.Error.HostWithPort", null)]
+    [InlineData("mx.mailhost.example", 993, "Smtp.Error.RetrievalPort", "IMAP")]
+    [InlineData("mx.mailhost.example", 995, "Smtp.Error.RetrievalPort", "POP3")]
+    public async Task Common_mistakes_are_explained(string host, int port, string key, string? protocol)
     {
         await using var factory = new AdminFactory();
         await using var smtp = new FakeSmtpServer();
@@ -120,8 +121,9 @@ public sealed class SmtpPageTests
 
         var (_, html) = await admin.Client.PostAsync("/Smtp", "/Smtp?handler=Save", form);
 
+        var expected = protocol is null ? ExpectedText.Get(key) : ExpectedText.Format(key, port, protocol);
         Assert.Contains(expected, WebUtility.HtmlDecode(html), StringComparison.Ordinal);
-        Assert.DoesNotContain("Gespeichert.", html, StringComparison.Ordinal);
+        Assert.DoesNotContain(ExpectedText.Get("Smtp.Saved"), WebUtility.HtmlDecode(html), StringComparison.Ordinal);
     }
 
     [Fact] // Empfänger ist mit der eigenen Admin-Adresse vorbelegt; ohne Fehler kein (leerer) Fehlerkasten
@@ -134,6 +136,6 @@ public sealed class SmtpPageTests
 
         Assert.Contains("value=\"admin@example.org\"", html, StringComparison.Ordinal);
         Assert.DoesNotContain("role=\"alert\"", html, StringComparison.Ordinal);
-        Assert.DoesNotContain("form-control", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("alert-danger", html, StringComparison.Ordinal);
     }
 }

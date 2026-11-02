@@ -82,7 +82,7 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 3 | [003 – Accounts & gespeicherte Position](003-accounts/spec.md) | umgesetzt | 004 |
 | 4 | [006 – Deutsch und Englisch](006-sprachen/spec.md) | umgesetzt | 001, 004, 003 bis T7 |
 | 5 | [007 – Handy hochkant, Sichtfeld ohne Ränder, Web-App](007-mobil/spec.md) | in arbeit | 001, 006 |
-| 6 | [005 – Sachliches Layout fürs Admin-Interface](005-admin-layout/spec.md) | bereit | 004 |
+| 6 | [005 – Sachliches Layout fürs Admin-Interface](005-admin-layout/spec.md) | umgesetzt | 004 |
 | 7 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | bereit | 003 |
 | 8 | [012 – HP & Mana](012-hp-mana/spec.md) | bereit | 001 |
 | 9 | [013 – Rudimentäres Kampfsystem](013-kampfsystem/spec.md) | bereit | 012 |
