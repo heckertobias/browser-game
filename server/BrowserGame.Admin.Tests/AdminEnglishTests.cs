@@ -87,9 +87,9 @@ public sealed partial class AdminEnglishTests
 
     // Bekannte Grenze: ein wörtlicher englischer Text, der zufällig einem resx-Wert gleicht, fällt nicht auf.
     // Ziel ist „nichts außerhalb der resx“.
-    private static readonly string[] TestData = ["admin@example.org", "t@example.org", "Tobias"];
+    private static readonly string[] TestData = ["admin@example.org", "kim@example.org", "t@example.org", "Tobias", "Kim"];
 
-    private static readonly Regex[] KnownTexts = [.. Values(AdminTexts.ResourceManager).Concat(Values(MailErrors.ResourceManager))
+    private static readonly Regex[] KnownTexts = [.. Values(AdminTexts.ResourceManager).Concat(Values(MailErrors.ResourceManager)).Concat(Values(LocalizedIdentityErrorDescriber.ResourceManager))
         .OrderByDescending(v => v.Length)
         .Select(ToPattern)];
 
@@ -118,6 +118,9 @@ public sealed partial class AdminEnglishTests
     [GeneratedRegex("""<ul\b[^>]*data-testid="recovery-codes".*?</ul>""", RegexOptions.Singleline)]
     private static partial Regex RecoveryCodeList();
 
+    [GeneratedRegex("""<p\b[^>]*data-testid="totp-key".*?</p>""", RegexOptions.Singleline)]
+    private static partial Regex TotpKeyParagraph();
+
     [GeneratedRegex("""\b(?:placeholder|title|aria-label|alt)="([^"]*)\x22""")]
     private static partial Regex TextAttribute();
 
@@ -130,7 +133,7 @@ public sealed partial class AdminEnglishTests
     private static void AssertOnlyKnownTexts(string step, string html)
     {
         var body = html[html.IndexOf("<body", StringComparison.Ordinal)..];
-        body = RecoveryCodeList().Replace(ScriptBlock().Replace(body, ""), "");
+        body = TotpKeyParagraph().Replace(RecoveryCodeList().Replace(ScriptBlock().Replace(body, ""), ""), "");
         var texts = TextAttribute().Matches(body).Select(m => m.Groups[1].Value)
             .Concat(Tag().Split(body))
             .Select(t => WebUtility.HtmlDecode(t).Trim())
@@ -155,7 +158,7 @@ public sealed partial class AdminEnglishTests
         }
     }
 
-    [Fact] // 005 AK-14, AK-13: T8 ergänzt Login, LoginTwoFactor und Invite
+    [Fact] // 005 AK-14, AK-13
     public async Task Signed_in_pages_show_only_texts_from_resources()
     {
         await using var factory = new AdminFactory();
@@ -212,5 +215,54 @@ public sealed partial class AdminEnglishTests
         {
             Assert.True(AdminTexts.ResourceManager.GetString(key, System.Globalization.CultureInfo.InvariantCulture) is not null, key);
         }
+    }
+
+    [Fact] // 005 AK-14, AK-13
+    public async Task Pages_without_sign_in_show_only_texts_from_resources()
+    {
+        await using var factory = new AdminFactory();
+        var admin = await AdminTestFlows.RedeemWithPasswordAsync(factory, AdminTestFlows.SetupTokenFromLog(factory), "Tobias", "admin@example.org");
+        var token = await AdminTestFlows.InviteTokenAsync(factory, "Tobias");
+        using var client = factory.CreateFormClient();
+        client.Http.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Language", "de-DE,de;q=0.9");
+        client.Http.DefaultRequestHeaders.TryAddWithoutValidation("Cookie", ".AspNetCore.Culture=c=de|uic=de");
+
+        AssertOnlyKnownTexts("GET /Login", (await client.GetAsync("/Login")).Html);
+        AssertOnlyKnownTexts("Login leer", (await AdminTestFlows.LoginPasswordAsync(client, "", "")).Html);
+        AssertOnlyKnownTexts("Login falsches Passwort", (await AdminTestFlows.LoginPasswordAsync(client, admin.Email, "falsches-passwort")).Html);
+        AssertOnlyKnownTexts("Login Passkey leer", (await client.PostAsync("/Login", "/Login?handler=Passkey", new Dictionary<string, string>())).Html);
+
+        await AdminTestFlows.LoginPasswordAsync(client, admin.Email);
+        AssertOnlyKnownTexts("GET /LoginTwoFactor", (await client.GetAsync("/LoginTwoFactor")).Html);
+        AssertOnlyKnownTexts("2FA leer", (await AdminTestFlows.LoginCodeAsync(client, "")).Html);
+        AssertOnlyKnownTexts("2FA falsch", (await AdminTestFlows.LoginCodeAsync(client, "000000")).Html);
+
+        using var invitee = factory.CreateFormClient();
+        invitee.Http.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Language", "de-DE,de;q=0.9");
+        invitee.Http.DefaultRequestHeaders.TryAddWithoutValidation("Cookie", ".AspNetCore.Culture=c=de|uic=de");
+        var invite = $"/Invite?token={token}";
+
+        AssertOnlyKnownTexts("Invite ungültig", (await invitee.GetAsync("/Invite?token=ungueltig")).Html);
+        AssertOnlyKnownTexts("Invite Details", (await invitee.GetAsync(invite)).Html);
+        AssertOnlyKnownTexts("Details ohne Name", (await invitee.PostAsync(invite, "/Invite?handler=Details",
+            new Dictionary<string, string> { ["Token"] = token, ["Name"] = "", ["Email"] = "kim@example.org" })).Html);
+        AssertOnlyKnownTexts("Details gültig", (await invitee.PostAsync(invite, "/Invite?handler=Details",
+            new Dictionary<string, string> { ["Token"] = token, ["Name"] = "Kim", ["Email"] = "kim@example.org" })).Html);
+        AssertOnlyKnownTexts("Passwort abweichend", (await invitee.PostAsync(invite, "/Invite?handler=Password",
+            new Dictionary<string, string> { ["Token"] = token, ["Password"] = AdminTestFlows.Password, ["ConfirmPassword"] = "anders" })).Html);
+        AssertOnlyKnownTexts("Passwort kurz", (await invitee.PostAsync(invite, "/Invite?handler=Password",
+            new Dictionary<string, string> { ["Token"] = token, ["Password"] = "kurz", ["ConfirmPassword"] = "kurz" })).Html);
+        // Nur leer: ein ungültiges Credential liefert einen englischen Identity-Text, der nicht in der resx steht.
+        AssertOnlyKnownTexts("Passkey leer", (await invitee.PostAsync(invite, "/Invite?handler=Passkey",
+            new Dictionary<string, string> { ["Token"] = token, ["Credential"] = "" })).Html);
+
+        var (_, totp) = await invitee.PostAsync(invite, "/Invite?handler=Password",
+            new Dictionary<string, string> { ["Token"] = token, ["Password"] = AdminTestFlows.Password, ["ConfirmPassword"] = AdminTestFlows.Password });
+        AssertOnlyKnownTexts("Totp", totp);
+        var key = Regex.Match(totp, """data-testid="totp-key"[^>]*>([a-z0-9 ]+)</p>""").Groups[1].Value.Replace(" ", "", StringComparison.Ordinal);
+        AssertOnlyKnownTexts("Totp falsch", (await invitee.PostAsync(invite, "/Invite?handler=Totp",
+            new Dictionary<string, string> { ["Token"] = token, ["Code"] = "000000" })).Html);
+        AssertOnlyKnownTexts("Fertig", (await invitee.PostAsync(invite, "/Invite?handler=Totp",
+            new Dictionary<string, string> { ["Token"] = token, ["Code"] = Totp.Code(key) })).Html);
     }
 }

@@ -110,7 +110,42 @@
   <data name="Account.PasskeyAdded" xml:space="preserve"><value>Passkey added.</value></data>
   <data name="Account.PasskeyRemoved" xml:space="preserve"><value>Passkey removed.</value></data>
   <data name="Account.PasskeyFailed" xml:space="preserve"><value>The passkey could not be added ({0}).</value></data>
-  <data name="Account.NoPasskeySent" xml:space="preserve"><value>no passkey received</value></data>
   <data name="Account.LastCredential" xml:space="preserve"><value>This is your last sign-in method – add another passkey first.</value></data>
   <data name="Account.PasskeyFallbackName" xml:space="preserve"><value>Passkey from {0}</value></data>
+  <data name="Common.Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Common.Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Common.Continue" xml:space="preserve"><value>Continue</value></data>
+  <data name="Common.NoPasskeySent" xml:space="preserve"><value>no passkey received</value></data>
+  <data name="Login.Title" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Login.WithPasskey" xml:space="preserve"><value>Sign in with passkey</value></data>
+  <data name="Login.OrPassword" xml:space="preserve"><value>or with password</value></data>
+  <data name="Login.Failed" xml:space="preserve"><value>Sign-in failed. After several failed attempts, sign-in is locked for a short time.</value></data>
+  <data name="Login.PasskeyFailed" xml:space="preserve"><value>Sign-in with passkey failed.</value></data>
+  <data name="LoginTwoFactor.Title" xml:space="preserve"><value>Second factor</value></data>
+  <data name="LoginTwoFactor.Code" xml:space="preserve"><value>Code</value></data>
+  <data name="LoginTwoFactor.CodeHint" xml:space="preserve"><value>Enter the code from your authenticator app – or one of your recovery codes.</value></data>
+  <data name="LoginTwoFactor.IsRecoveryCode" xml:space="preserve"><value>This is a recovery code</value></data>
+  <data name="LoginTwoFactor.SignIn" xml:space="preserve"><value>Sign in</value></data>
+  <data name="LoginTwoFactor.CodeWrong" xml:space="preserve"><value>The code is not correct. After several failed attempts, sign-in is locked for a short time.</value></data>
+  <data name="Invite.Title" xml:space="preserve"><value>Set up admin access</value></data>
+  <data name="Invite.Invalid" xml:space="preserve"><value>This link is invalid, has expired or has already been used.</value></data>
+  <data name="Invite.Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Invite.NameRequired" xml:space="preserve"><value>Please enter your name.</value></data>
+  <data name="Invite.ChooseMethod" xml:space="preserve"><value>How do you want to sign in from now on?</value></data>
+  <data name="Invite.CreatePasskey" xml:space="preserve"><value>Create passkey (recommended)</value></data>
+  <data name="Invite.OrPassword" xml:space="preserve"><value>or password + authenticator app</value></data>
+  <data name="Invite.PasswordHint" xml:space="preserve"><value>At least {0} characters.</value></data>
+  <data name="Invite.ConfirmPassword" xml:space="preserve"><value>Repeat password</value></data>
+  <data name="Invite.ContinueToApp" xml:space="preserve"><value>Continue to authenticator app</value></data>
+  <data name="Invite.PasswordMismatch" xml:space="preserve"><value>The passwords do not match.</value></data>
+  <data name="Invite.PasskeyFailed" xml:space="preserve"><value>The passkey could not be created ({0}). Please try again.</value></data>
+  <data name="Invite.TotpIntro" xml:space="preserve"><value>Scan the QR code with your authenticator app (or enter the key) and confirm with the code it shows.</value></data>
+  <data name="Invite.TotpKey" xml:space="preserve"><value>Key for manual entry</value></data>
+  <data name="Invite.Code" xml:space="preserve"><value>Code from the app</value></data>
+  <data name="Invite.Confirm" xml:space="preserve"><value>Confirm</value></data>
+  <data name="Invite.CodeWrong" xml:space="preserve"><value>The code is not correct. Check the time on your device and try again.</value></data>
+  <data name="Invite.Done" xml:space="preserve"><value>Done – you are signed in as an admin.</value></data>
+  <data name="Invite.RecoveryCodes" xml:space="preserve"><value>Recovery codes</value></data>
+  <data name="Invite.RecoveryCodesHint" xml:space="preserve"><value>Keep them safe (e.g. in your password manager). Each code works once if you cannot use your authenticator app. They will not be shown again.</value></data>
+  <data name="Invite.ToOverview" xml:space="preserve"><value>Go to overview</value></data>
 </root>

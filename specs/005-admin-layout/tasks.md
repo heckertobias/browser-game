@@ -22,7 +22,7 @@ Reihenfolge: Build → Sprache → Layout → Seiten → SMTP → Tests → Betr
 ## Seiten
 - [x] **T7** (AK-6, AK-7, AK-9, AK-13, AK-14): Index, Smtp, Admins, Audit, Account auf Bootstrap und Englisch umstellen
   (inkl. Einladungs- und Testmail, Protokolleinträge).
-- [ ] **T8** (AK-6, AK-13, AK-14): Login, LoginTwoFactor, Invite auf Bootstrap und Englisch umstellen.
+- [x] **T8** (AK-6, AK-13, AK-14): Login, LoginTwoFactor, Invite auf Bootstrap und Englisch umstellen.
 
 ## SMTP
 - [ ] **T9** (AK-15, AK-16, AK-17): `TestedPassword` (zeitbegrenzt geschützt) nach erfolgreicher Testmail und beim

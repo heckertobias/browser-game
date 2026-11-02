@@ -79,7 +79,7 @@ public static partial class AdminTestFlows
     [GeneratedRegex(@"token=([A-Za-z0-9_\-]+)")]
     private static partial Regex TokenPattern();
 
-    [GeneratedRegex("<p class=\"font-mono text-sm break-all\">([a-z0-9 ]+)</p>")]
+    [GeneratedRegex("""<p\b[^>]*\bdata-testid="totp-key"[^>]*>([a-z0-9 ]+)</p>""")]
     private static partial Regex TotpKeyPattern();
 
     [GeneratedRegex(@"<li>([A-Za-z0-9\-]+)</li>")]

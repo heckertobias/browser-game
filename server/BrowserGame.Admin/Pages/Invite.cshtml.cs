@@ -50,6 +50,8 @@ public sealed partial class InviteModel(
     [BindProperty]
     public string? Credential { get; set; }
 
+    public int MinPasswordLength => users.Options.Password.RequiredLength;
+
     public InviteStep Step { get; private set; } = InviteStep.Invalid;
 
     public string PasskeyOptions { get; private set; } = "{}";
@@ -72,9 +74,21 @@ public sealed partial class InviteModel(
         if (invite.PendingUserId is null)
         {
             var user = new AdminUser { UserName = Name?.Trim(), Email = (invite.Email ?? Email)?.Trim() };
-            if (string.IsNullOrWhiteSpace(user.UserName) || string.IsNullOrWhiteSpace(user.Email))
+            var missing = false;
+            if (string.IsNullOrWhiteSpace(user.UserName))
             {
-                ModelState.AddModelError("", "Bitte Name und E-Mail angeben.");
+                ModelState.AddModelError(nameof(Name), t["Invite.NameRequired"]);
+                missing = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                ModelState.AddModelError(nameof(Email), t["Validation.EmailRequired"]);
+                missing = true;
+            }
+
+            if (missing)
+            {
                 return await ShowAsync(InviteStep.Details);
             }
 
@@ -103,9 +117,15 @@ public sealed partial class InviteModel(
             return await ShowAsync();
         }
 
-        if (string.IsNullOrEmpty(Password) || Password != ConfirmPassword)
+        if (string.IsNullOrEmpty(Password))
         {
-            ModelState.AddModelError("", "Die Passwörter stimmen nicht überein.");
+            ModelState.AddModelError(nameof(Password), t["Validation.PasswordRequired"]);
+            return await ShowAsync(InviteStep.ChooseMethod);
+        }
+
+        if (Password != ConfirmPassword)
+        {
+            ModelState.AddModelError(nameof(ConfirmPassword), t["Invite.PasswordMismatch"]);
             return await ShowAsync(InviteStep.ChooseMethod);
         }
 
@@ -116,7 +136,7 @@ public sealed partial class InviteModel(
             {
                 foreach (var error in added.Errors)
                 {
-                    ModelState.AddModelError("", error.Description);
+                    ModelState.AddModelError(nameof(Password), error.Description);
                 }
 
                 return await ShowAsync(InviteStep.ChooseMethod);
@@ -137,7 +157,7 @@ public sealed partial class InviteModel(
         var code = (Code ?? "").Replace(" ", "", StringComparison.Ordinal);
         if (!await users.VerifyTwoFactorTokenAsync(pending.User, users.Options.Tokens.AuthenticatorTokenProvider, code))
         {
-            ModelState.AddModelError("", "Der Code stimmt nicht. Prüfe die Uhrzeit deines Geräts und versuche es erneut.");
+            ModelState.AddModelError(nameof(Code), t["Invite.CodeWrong"]);
             return await ShowAsync(InviteStep.Totp);
         }
 
@@ -159,9 +179,9 @@ public sealed partial class InviteModel(
         var attestation = string.IsNullOrEmpty(Credential) ? null : await signIn.PerformPasskeyAttestationAsync(Credential);
         if (attestation is not { Succeeded: true })
         {
-            var reason = attestation?.Failure?.Message ?? "kein Passkey übermittelt";
+            var reason = attestation?.Failure?.Message ?? t["Common.NoPasskeySent"].Value;
             LogPasskeyFailed(reason);
-            ModelState.AddModelError("", $"Der Passkey konnte nicht angelegt werden ({reason}). Bitte versuche es erneut.");
+            ModelState.AddModelError("", t["Invite.PasskeyFailed", reason]);
             return await ShowAsync(InviteStep.ChooseMethod);
         }
 

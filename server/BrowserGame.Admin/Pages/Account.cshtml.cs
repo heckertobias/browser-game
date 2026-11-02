@@ -43,7 +43,7 @@ public sealed partial class AccountModel(
         var attestation = string.IsNullOrEmpty(Credential) ? null : await signIn.PerformPasskeyAttestationAsync(Credential);
         if (attestation is not { Succeeded: true })
         {
-            var reason = attestation?.Failure?.Message ?? t["Account.NoPasskeySent"].Value;
+            var reason = attestation?.Failure?.Message ?? t["Common.NoPasskeySent"].Value;
             LogPasskeyFailed(reason);
             ModelState.AddModelError("", t["Account.PasskeyFailed", reason]);
             return await ShowAsync();

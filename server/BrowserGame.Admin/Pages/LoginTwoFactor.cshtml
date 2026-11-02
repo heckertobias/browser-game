@@ -1,21 +1,20 @@
 @page
 @model LoginTwoFactorModel
 @{
-    ViewData["Title"] = "Zweiter Faktor";
+    ViewData["Title"] = T["LoginTwoFactor.Title"].Value;
     Layout = "_LayoutPlain";
 }
 <partial name="_Errors" />
-<p>Gib den Code aus deiner Authenticator-App ein – oder einen deiner Wiederherstellungscodes.</p>
-<form method="post" class="flex flex-col gap-3">
-    <label class="flex flex-col gap-1">
-        <span class="label-text">Code</span>
-        <input asp-for="Code" autocomplete="one-time-code" inputmode="text" class="input input-bordered w-full rounded-none font-mono" />
+<form method="post">
+    <div class="mb-3">
+        <label asp-for="Code" class="form-label">@T["LoginTwoFactor.Code"]</label>
+        <input asp-for="Code" autocomplete="one-time-code" inputmode="text" class="form-control font-monospace" aria-describedby="two-factor-code-hint" />
         <span asp-validation-for="Code" class="invalid-feedback"></span>
-    </label>
-    <label class="label cursor-pointer justify-start gap-2">
-        <input asp-for="IsRecoveryCode" type="checkbox" class="checkbox rounded-none" />
-        <span class="label-text">Das ist ein Wiederherstellungscode</span>
-        <span asp-validation-for="IsRecoveryCode" class="invalid-feedback"></span>
-    </label>
-    <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">Anmelden</button>
+        <div id="two-factor-code-hint" class="form-text">@T["LoginTwoFactor.CodeHint"]</div>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="IsRecoveryCode" type="checkbox" class="form-check-input" />
+        <label asp-for="IsRecoveryCode" class="form-check-label">@T["LoginTwoFactor.IsRecoveryCode"]</label>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">@T["LoginTwoFactor.SignIn"]</button>
 </form>

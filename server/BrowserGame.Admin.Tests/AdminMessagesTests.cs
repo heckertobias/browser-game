@@ -192,8 +192,7 @@ public sealed partial class AdminMessagesTests
         AssertErrorAtField(main, "Code");
         var expected = AdminTexts.ResourceManager.GetString("Validation.CodeRequired", CultureInfo.InvariantCulture);
         Assert.Equal(expected, Feedback(main, "Code").Text);
-        // Die Seite meldet zusätzlich einen allgemeinen Fehler im Kasten; der Feldfehler steht dort nicht doppelt.
-        Assert.DoesNotContain(expected!, Assert.Single(Alerts(main, "alert-danger")).Text, StringComparison.Ordinal);
+        Assert.Empty(Alerts(main, "alert-danger"));
     }
 
     [Fact] // 005 AK-7
@@ -279,4 +278,66 @@ public sealed partial class AdminMessagesTests
 
     [GeneratedRegex("<[^>]+>")]
     private static partial Regex AnyTag();
+
+    [Fact] // 005 AK-13
+    public async Task Wrong_second_factor_code_stands_in_the_box()
+    {
+        await using var factory = new AdminFactory();
+        var admin = await SignedInAsync(factory);
+        using var client = factory.CreateFormClient();
+        await AdminTestFlows.LoginPasswordAsync(client, admin.Email);
+
+        var (_, html) = await AdminTestFlows.LoginCodeAsync(client, "000000");
+        var main = MainContent(html);
+
+        var box = Assert.Single(Alerts(main, "alert-danger"));
+        Assert.Contains(ExpectedText.Get("LoginTwoFactor.CodeWrong"), box.Text, StringComparison.Ordinal);
+        AssertNoErrorAtField(main, "Code");
+    }
+
+    [Fact] // 005 AK-7
+    public async Task Invite_errors_with_a_field_are_marked_at_the_field()
+    {
+        await using var factory = new AdminFactory();
+        var token = await AdminTestFlows.InviteTokenAsync(factory);
+        var invite = $"/Invite?token={token}";
+        using var client = factory.CreateFormClient();
+
+        var (_, noName) = await client.PostAsync(invite, "/Invite?handler=Details",
+            new Dictionary<string, string> { ["Token"] = token, ["Name"] = "", ["Email"] = "kim@example.org" });
+        var main = MainContent(noName);
+        AssertErrorAtField(main, "Name");
+        Assert.Equal(ExpectedText.Get("Invite.NameRequired"), Feedback(main, "Name").Text);
+        AssertNoErrorAtField(main, "Email");
+        Assert.Empty(Alerts(main, "alert-danger"));
+
+        await client.PostAsync(invite, "/Invite?handler=Details",
+            new Dictionary<string, string> { ["Token"] = token, ["Name"] = "Kim", ["Email"] = "kim@example.org" });
+
+        var (_, mismatch) = await client.PostAsync(invite, "/Invite?handler=Password",
+            new Dictionary<string, string> { ["Token"] = token, ["Password"] = AdminTestFlows.Password, ["ConfirmPassword"] = "anders-als-vorher" });
+        main = MainContent(mismatch);
+        AssertErrorAtField(main, "ConfirmPassword");
+        Assert.Equal(ExpectedText.Get("Invite.PasswordMismatch"), Feedback(main, "ConfirmPassword").Text);
+        Assert.Empty(Alerts(main, "alert-danger"));
+
+        var (_, tooShort) = await client.PostAsync(invite, "/Invite?handler=Password",
+            new Dictionary<string, string> { ["Token"] = token, ["Password"] = "kurz", ["ConfirmPassword"] = "kurz" });
+        main = MainContent(tooShort);
+        AssertErrorAtField(main, "Password");
+        Assert.Empty(Alerts(main, "alert-danger"));
+
+        await client.PostAsync(invite, "/Invite?handler=Password",
+            new Dictionary<string, string> { ["Token"] = token, ["Password"] = AdminTestFlows.Password, ["ConfirmPassword"] = AdminTestFlows.Password });
+        var (_, wrongCode) = await client.PostAsync(invite, "/Invite?handler=Totp",
+            new Dictionary<string, string> { ["Token"] = token, ["Code"] = "000000" });
+        main = MainContent(wrongCode);
+        AssertErrorAtField(main, "Code");
+        Assert.Equal(ExpectedText.Get("Invite.CodeWrong"), Feedback(main, "Code").Text);
+        Assert.Empty(Alerts(main, "alert-danger"));
+
+        var (_, passkey) = await client.PostAsync(invite, "/Invite?handler=Passkey",
+            new Dictionary<string, string> { ["Token"] = token });
+        Assert.Single(Alerts(MainContent(passkey), "alert-danger"));
+    }
 }

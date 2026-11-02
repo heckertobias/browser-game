@@ -142,4 +142,108 @@ public sealed partial class AdminPagesTests
             Assert.True(hint.Index < next.Index, name);
         }
     }
+
+    [GeneratedRegex("""<p\b[^>]*\bdata-testid="totp-key"[^>]*>([a-z0-9 ]+)</p>""")]
+    private static partial Regex TotpKey();
+
+    private static readonly string[] TailwindLeftovers = ["input-bordered", "label-text", "rounded-none", "text-error", "divider", "flex-col", "font-mono"];
+
+    private static void AssertNoTailwindLeftovers(string html)
+    {
+        var body = html[html.IndexOf("<body", StringComparison.Ordinal)..];
+        var classes = ClassAttribute().Matches(body).SelectMany(m => m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)).ToHashSet();
+        foreach (var token in TailwindLeftovers)
+        {
+            Assert.DoesNotContain(token, classes);
+        }
+    }
+
+    [Fact] // 005 AK-6 (Optik manuell in T11)
+    public async Task Sign_in_and_setup_forms_have_labels_above_fields_and_hints_below()
+    {
+        await using var factory = new AdminFactory();
+        var admin = await AdminTestFlows.RedeemWithPasswordAsync(factory, AdminTestFlows.SetupTokenFromLog(factory), "Tobias", "admin@example.org");
+        using var client = factory.CreateFormClient();
+
+        var (_, login) = await client.GetAsync("/Login");
+        AssertLabelAboveFieldAndHintBelow(login, "Email", expectHint: false);
+        AssertLabelAboveFieldAndHintBelow(login, "Password", expectHint: false);
+        AssertNoTailwindLeftovers(login);
+
+        await AdminTestFlows.LoginPasswordAsync(client, admin.Email);
+        var (_, twoFactor) = await client.GetAsync("/LoginTwoFactor");
+        AssertLabelAboveFieldAndHintBelow(twoFactor, "Code", expectHint: true);
+        AssertNoTailwindLeftovers(twoFactor);
+
+        var token = await AdminTestFlows.InviteTokenAsync(factory);
+        var invite = $"/Invite?token={token}";
+        using var inviteClient = factory.CreateFormClient();
+        var (_, details) = await inviteClient.GetAsync(invite);
+        AssertLabelAboveFieldAndHintBelow(details, "Name", expectHint: false);
+        AssertLabelAboveFieldAndHintBelow(details, "Email", expectHint: false);
+        AssertNoTailwindLeftovers(details);
+
+        var (_, chooseMethod) = await inviteClient.PostAsync(invite, "/Invite?handler=Details",
+            new Dictionary<string, string> { ["Token"] = token, ["Name"] = "Kim", ["Email"] = "kim@example.org" });
+        AssertLabelAboveFieldAndHintBelow(chooseMethod, "Password", expectHint: true);
+        AssertLabelAboveFieldAndHintBelow(chooseMethod, "ConfirmPassword", expectHint: false);
+        AssertNoTailwindLeftovers(chooseMethod);
+
+        var (_, totp) = await inviteClient.PostAsync(invite, "/Invite?handler=Password",
+            new Dictionary<string, string> { ["Token"] = token, ["Password"] = AdminTestFlows.Password, ["ConfirmPassword"] = AdminTestFlows.Password });
+        AssertLabelAboveFieldAndHintBelow(totp, "Code", expectHint: false);
+        AssertNoTailwindLeftovers(totp);
+    }
+
+    [Fact] // 005 AK-6, AK-13
+    public async Task Totp_qr_code_stays_on_white_and_recovery_codes_are_a_monospace_list()
+    {
+        await using var factory = new AdminFactory();
+        var token = AdminTestFlows.SetupTokenFromLog(factory);
+        var invite = $"/Invite?token={token}";
+        using var client = factory.CreateFormClient();
+
+        await client.PostAsync(invite, "/Invite?handler=Details",
+            new Dictionary<string, string> { ["Token"] = token, ["Name"] = "Tobias", ["Email"] = "admin@example.org" });
+        var (_, totp) = await client.PostAsync(invite, "/Invite?handler=Password",
+            new Dictionary<string, string> { ["Token"] = token, ["Password"] = AdminTestFlows.Password, ["ConfirmPassword"] = AdminTestFlows.Password });
+
+        var qr = Regex.Match(totp, """<div\b[^>]*\bdata-testid="totp-qr"[^>]*>""");
+        Assert.True(qr.Success);
+        Assert.True(HasClass(qr.Value, "bg-white"));
+        var qrEnd = totp.IndexOf("</div>", qr.Index, StringComparison.Ordinal);
+        Assert.Contains("<svg", totp[qr.Index..qrEnd], StringComparison.Ordinal);
+
+        var keyMatch = TotpKey().Match(totp);
+        Assert.True(keyMatch.Success);
+        var keyTag = keyMatch.Value[..(keyMatch.Value.IndexOf('>', StringComparison.Ordinal) + 1)];
+        Assert.True(HasClass(keyTag, "font-monospace"));
+        Assert.DoesNotContain(" style=\"", totp, StringComparison.Ordinal);
+        Assert.DoesNotContain("<style", totp, StringComparison.Ordinal);
+
+        var key = keyMatch.Groups[1].Value.Replace(" ", "", StringComparison.Ordinal);
+        var (_, done) = await client.PostAsync(invite, "/Invite?handler=Totp",
+            new Dictionary<string, string> { ["Token"] = token, ["Code"] = Totp.Code(key) });
+
+        AssertRecoveryList(done);
+        Assert.Contains("data-testid=\"message\"", done, StringComparison.Ordinal);
+        Assert.Contains("alert-success", done, StringComparison.Ordinal);
+        Assert.Contains("<a href=\"/\"", done, StringComparison.Ordinal);
+
+        var (_, account) = await client.PostAsync("/Account", "/Account?handler=RecoveryCodes", new Dictionary<string, string>());
+        AssertRecoveryList(account, expectedCodes: null);
+    }
+
+    private static void AssertRecoveryList(string html, int? expectedCodes = 10)
+    {
+        var list = Regex.Match(html, """<ul\b[^>]*\bdata-testid="recovery-codes"[^>]*>.*?</ul>""", RegexOptions.Singleline);
+        Assert.True(list.Success);
+        var startTag = list.Value[..(list.Value.IndexOf('>', StringComparison.Ordinal) + 1)];
+        Assert.True(HasClass(startTag, "font-monospace"));
+        if (expectedCodes is { } count)
+        {
+            Assert.True(HasClass(startTag, "list-unstyled"));
+            Assert.Equal(count, Regex.Count(list.Value, "<li>[^<]+</li>"));
+        }
+    }
 }
