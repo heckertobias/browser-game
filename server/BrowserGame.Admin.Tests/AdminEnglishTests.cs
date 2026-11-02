@@ -202,6 +202,33 @@ public sealed partial class AdminEnglishTests
         AssertOnlyKnownTexts("GET /Audit", (await client.GetAsync("/Audit")).Html);
     }
 
+    [Fact] // 005 AK-14, AK-15–AK-17
+    public async Task Smtp_password_states_show_only_texts_from_resources()
+    {
+        await using var factory = new AdminFactory();
+        await using var smtp = new FakeSmtpServer();
+        var admin = await AdminTestFlows.RedeemWithPasswordAsync(factory, AdminTestFlows.SetupTokenFromLog(factory), "Tobias", "admin@example.org");
+        admin.Client.Http.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Language", "de-DE,de;q=0.9");
+        admin.Client.Http.DefaultRequestHeaders.TryAddWithoutValidation("Cookie", ".AspNetCore.Culture=c=de|uic=de");
+        var client = admin.Client;
+
+        AssertOnlyKnownTexts("Benutzer ohne Passwort", (await client.PostAsync("/Smtp", "/Smtp?handler=Save", ValidSmtpForm(smtp, null))).Html);
+        AssertOnlyKnownTexts("GET mit Hinweis", (await client.GetAsync("/Smtp")).Html);
+        AssertOnlyKnownTexts("TestSaved fehlgeschlagen", (await client.PostAsync("/Smtp", "/Smtp?handler=TestSaved", ValidSmtpForm(smtp, null))).Html);
+        AssertOnlyKnownTexts("Test mit getestetem Passwort", (await client.PostAsync("/Smtp", "/Smtp?handler=Test", ValidSmtpForm(smtp, smtp.Password))).Html);
+
+        var invalidToken = ValidSmtpForm(smtp, null);
+        invalidToken["TestedPassword"] = "kein-token";
+        AssertOnlyKnownTexts("Token ungültig", (await client.PostAsync("/Smtp", "/Smtp?handler=Save", invalidToken)).Html);
+        AssertOnlyKnownTexts("Save mit Passwort", (await client.PostAsync("/Smtp", "/Smtp?handler=Save", ValidSmtpForm(smtp, smtp.Password))).Html);
+        AssertOnlyKnownTexts("TestSaved erfolgreich", (await client.PostAsync("/Smtp", "/Smtp?handler=TestSaved", ValidSmtpForm(smtp, null))).Html);
+
+        var badRecipient = ValidSmtpForm(smtp, null);
+        badRecipient["TestRecipient"] = "kein-mail";
+        AssertOnlyKnownTexts("TestSaved Empfänger ungültig", (await client.PostAsync("/Smtp", "/Smtp?handler=TestSaved", badRecipient)).Html);
+        AssertOnlyKnownTexts("Protokoll mit TestSaved", (await client.GetAsync("/Audit")).Html);
+    }
+
     [Fact] // 005 AK-14
     public void Page_models_use_only_existing_text_keys()
     {

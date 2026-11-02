@@ -74,14 +74,14 @@
   <data name="Smtp.Security.None" xml:space="preserve"><value>None (test servers only)</value></data>
   <data name="Smtp.Username" xml:space="preserve"><value>Username</value></data>
   <data name="Smtp.Password" xml:space="preserve"><value>Password</value></data>
-  <data name="Smtp.PasswordSet" xml:space="preserve"><value>A password is stored – leave empty to keep it.</value></data>
+  <data name="Smtp.PasswordSet" xml:space="preserve"><value>Leave empty to keep it.</value></data>
   <data name="Smtp.FromAddress" xml:space="preserve"><value>Sender address</value></data>
   <data name="Smtp.FromName" xml:space="preserve"><value>Sender name</value></data>
   <data name="Smtp.FromNamePlaceholder" xml:space="preserve"><value>Browser Game</value></data>
-  <data name="Smtp.TestHeading" xml:space="preserve"><value>Test before you save</value></data>
+  <data name="Smtp.TestHeading" xml:space="preserve"><value>Test email</value></data>
   <data name="Smtp.TestRecipient" xml:space="preserve"><value>Send test email to</value></data>
-  <data name="Smtp.TestHint" xml:space="preserve"><value>The test email uses the values in the form (not saved). An empty password field uses the stored password.</value></data>
-  <data name="Smtp.SendTest" xml:space="preserve"><value>Send test email</value></data>
+  <data name="Smtp.TestHint" xml:space="preserve"><value>“With form values” uses the values in the form without saving them; an empty password field uses the tested or the stored password. “With saved settings” uses exactly what the game uses.</value></data>
+  <data name="Smtp.SendTest" xml:space="preserve"><value>Send test email with form values</value></data>
   <data name="Smtp.Save" xml:space="preserve"><value>Save</value></data>
   <data name="Smtp.Saved" xml:space="preserve"><value>Saved.</value></data>
   <data name="Smtp.NoChanges" xml:space="preserve"><value>No changes.</value></data>
@@ -90,6 +90,14 @@
   <data name="Smtp.Error.RecipientInvalid" xml:space="preserve"><value>Please enter a valid recipient address for the test email.</value></data>
   <data name="Smtp.Error.HostWithPort" xml:space="preserve"><value>Enter only the server name, e.g. “mx.mailhost.example” – no port, no https://. The port goes into the “Port” field.</value></data>
   <data name="Smtp.Error.RetrievalPort" xml:space="preserve"><value>Port {0} is {1} (for fetching mail). For sending use 465 with SSL/TLS or 587 with STARTTLS.</value></data>
+  <data name="Smtp.PasswordStatus.Stored" xml:space="preserve"><value>Password stored</value></data>
+  <data name="Smtp.PasswordStatus.NotStored" xml:space="preserve"><value>No password stored</value></data>
+  <data name="Smtp.TestedPasswordWillBeSaved" xml:space="preserve"><value>The tested password will be saved.</value></data>
+  <data name="Smtp.PasswordMissing" xml:space="preserve"><value>A username is saved, but no password. Signing in to the mail server will fail – enter the password and save.</value></data>
+  <data name="Smtp.Error.TestedPasswordInvalid" xml:space="preserve"><value>The tested password is no longer valid (it expires after 30 minutes). Please enter the password again.</value></data>
+  <data name="Smtp.SendTestSaved" xml:space="preserve"><value>Send test email with saved settings</value></data>
+  <data name="Smtp.TestSavedSent" xml:space="preserve"><value>Test email sent to {0} with the saved settings.</value></data>
+  <data name="AuditEntry.TestMailSavedSent" xml:space="preserve"><value>Test email sent (saved settings)</value></data>
   <data name="Mail.Test.Subject" xml:space="preserve"><value>Test email from Browser Game Admin</value></data>
   <data name="Mail.Test.Body" xml:space="preserve"><value>If you are reading this email, sending mail with these settings works.</value></data>
   <data name="AuditEntry.SmtpChanged" xml:space="preserve"><value>SMTP settings changed</value></data>

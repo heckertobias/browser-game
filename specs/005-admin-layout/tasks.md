@@ -25,7 +25,7 @@ Reihenfolge: Build → Sprache → Layout → Seiten → SMTP → Tests → Betr
 - [x] **T8** (AK-6, AK-13, AK-14): Login, LoginTwoFactor, Invite auf Bootstrap und Englisch umstellen.
 
 ## SMTP
-- [ ] **T9** (AK-15, AK-16, AK-17): `TestedPassword` (zeitbegrenzt geschützt) nach erfolgreicher Testmail und beim
+- [x] **T9** (AK-15, AK-16, AK-17): `TestedPassword` (zeitbegrenzt geschützt) nach erfolgreicher Testmail und beim
   Speichern; Passwort-Status und Hinweis bei Benutzername ohne Passwort; Handler `TestSaved` über `SmtpMailer` mit
   gespeichertem Stand.
 - [ ] **T9b** (AK-18): `SmtpSettingsStore.SaveAsync` entfernt das Passwort ohne Benutzername; Status „no login“, kein

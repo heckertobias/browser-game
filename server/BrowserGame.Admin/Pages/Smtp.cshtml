@@ -10,8 +10,16 @@
 {
     <partial name="_Message" model='new PageMessage(MessageKind.Warning, T["Smtp.NotSaved"].Value)' />
 }
+@if (Model.PasswordMissing)
+{
+    <partial name="_Message" model='new PageMessage(MessageKind.Warning, T["Smtp.PasswordMissing"].Value)' />
+}
 
 <form method="post" class="admin-narrow d-flex flex-column gap-4">
+    @if (Model.TestedPassword is not null)
+    {
+        <input type="hidden" name="TestedPassword" value="@Model.TestedPassword" data-testid="tested-password" />
+    }
     <div class="card">
         <h2 class="card-header h6">@T["Smtp.Connection"]</h2>
         <div class="card-body">
@@ -45,12 +53,27 @@
                 </div>
                 <div class="col-md-6">
                     <label asp-for="Input.Password" class="form-label">@T["Smtp.Password"]</label>
-                    <input asp-for="Input.Password" type="password" autocomplete="new-password" value="" class="form-control" aria-describedby="@(Model.PasswordSet ? "smtp-password-hint" : null)" />
+                    <input asp-for="Input.Password" type="password" autocomplete="new-password" value="" class="form-control" aria-describedby="smtp-password-hint" />
                     <span asp-validation-for="Input.Password" class="invalid-feedback"></span>
-                    @if (Model.PasswordSet)
-                    {
-                        <div id="smtp-password-hint" class="form-text">@T["Smtp.PasswordSet"]</div>
-                    }
+                    <div id="smtp-password-hint" class="form-text">
+                        @switch (Model.PasswordStatus)
+                        {
+                            case SmtpPasswordStatus.Stored:
+                                <span class="badge text-bg-success" data-testid="password-status" data-status="Stored">@T["Smtp.PasswordStatus.Stored"]</span>
+                                break;
+                            default:
+                                <span class="badge text-bg-secondary" data-testid="password-status" data-status="NotStored">@T["Smtp.PasswordStatus.NotStored"]</span>
+                                break;
+                        }
+                        @if (Model.TestedPassword is not null)
+                        {
+                            <span data-testid="tested-password-hint">@T["Smtp.TestedPasswordWillBeSaved"]</span>
+                        }
+                        else if (Model.PasswordStatus == SmtpPasswordStatus.Stored)
+                        {
+                            <span>@T["Smtp.PasswordSet"]</span>
+                        }
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="Input.FromAddress" class="form-label">@T["Smtp.FromAddress"]</label>
@@ -75,6 +98,10 @@
             <div id="smtp-test-hint" class="form-text">@T["Smtp.TestHint"]</div>
             <div class="d-flex flex-wrap gap-2 mt-3">
                 <button type="submit" asp-page-handler="Test" class="btn btn-outline-secondary">@T["Smtp.SendTest"]</button>
+                @if (Model.Configured)
+                {
+                    <button type="submit" asp-page-handler="TestSaved" formnovalidate class="btn btn-outline-secondary" data-testid="test-saved">@T["Smtp.SendTestSaved"]</button>
+                }
             </div>
         </div>
     </div>
