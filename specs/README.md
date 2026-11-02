@@ -83,14 +83,14 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 4 | [006 – Deutsch und Englisch](006-sprachen/spec.md) | umgesetzt | 001, 004, 003 bis T7 |
 | 5 | [007 – Handy hochkant, Sichtfeld ohne Ränder, Web-App](007-mobil/spec.md) | in arbeit | 001, 006 |
 | 6 | [005 – Sachliches Layout fürs Admin-Interface](005-admin-layout/spec.md) | umgesetzt | 004 |
-| 7 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | bereit | 003 |
-| 8 | [012 – HP & Mana](012-hp-mana/spec.md) | bereit | 001 |
-| 9 | [013 – Rudimentäres Kampfsystem](013-kampfsystem/spec.md) | bereit | 012 |
-| 10 | [016 – Blickrichtung](016-blickrichtung/spec.md) | bereit | 001 |
-| 11 | [014 – Gegner (erstes Ziel, das HP hat und zurückwirkt)](014-gegner/spec.md) | bereit | 012, 013, 015, 016 |
+| 7 | [011 – Chat](011-chat/spec.md) | bereit | 003, 007 (Code auf `main`, nur die Android-Prüfung fehlt) |
+| 8 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | bereit | 003 |
+| 9 | [012 – HP & Mana](012-hp-mana/spec.md) | bereit | 001 |
+| 10 | [013 – Rudimentäres Kampfsystem](013-kampfsystem/spec.md) | bereit | 012 |
+| 11 | [016 – Blickrichtung](016-blickrichtung/spec.md) | bereit | 001 |
+| 12 | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | bereit | 011, 012, 003 |
+| 13 | [014 – Gegner (erstes Ziel, das HP hat und zurückwirkt)](014-gegner/spec.md) | bereit | 012, 013, 015, 016 |
 | später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |
-| später | [011 – Chat](011-chat/spec.md) | bereit | 003, 007 |
-| später | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | bereit | 011, 012, 003 |
 | später | [008 – Push-Benachrichtigungen](008-push/spec.md) | entwurf | 007, Haus |
 | nach Release | [009 – Wechsel auf .NET 11](009-dotnet-11/spec.md) | entwurf | .NET 11 GA + 7 Tage |
 | nach Release | [010 – Wechsel auf .NET 12](010-dotnet-12/spec.md) | entwurf | 009, .NET 12 GA + 7 Tage |
