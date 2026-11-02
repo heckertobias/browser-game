@@ -6,7 +6,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
 
 ## Verträge
-- [ ] **T1** (AK-2, AK-10, AK-13, AK-15): `game.proto` um `SendChat`, `ChatHistory`, `ChatMessage` und
+- [x] **T1** (AK-2, AK-10, AK-13, AK-15): `game.proto` um `SendChat`, `ChatHistory`, `ChatMessage` und
   `ChatRejected` erweitern; `buf lint` und `buf breaking` gegen `main` müssen grün sein.
 
 ## Server – Daten
