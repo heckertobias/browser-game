@@ -77,6 +77,25 @@ public sealed class SmtpMailerTests(GameServerFactory factory) : IClassFixture<G
         Assert.Contains("Subject: Zwei", Assert.Single(second.Messages), StringComparison.Ordinal);
     }
 
+    [Fact] // 005 AK-18: ohne Benutzername keine Anmeldung
+    public async Task Without_username_the_game_sends_without_signing_in()
+    {
+        await using var server = new FakeSmtpServer();
+        var mailer = factory.Services.GetRequiredService<SmtpMailer>();
+        var ct = TestContext.Current.CancellationToken;
+
+        await SaveAsync(For(server));
+        await mailer.SendAsync("t@example.org", "Mit", "Hallo", cancellationToken: ct);
+        Assert.Equal(1, server.AuthAttempts);
+
+        await SaveAsync(For(server) with { Username = null });
+        var result = await mailer.SendAsync("t@example.org", "Ohne", "Hallo", cancellationToken: ct);
+
+        Assert.Equal(MailResult.Sent, result);
+        Assert.Equal(2, server.Messages.Count);
+        Assert.Equal(1, server.AuthAttempts);
+    }
+
     private async Task SaveAsync(SmtpSettings settings)
     {
         await using var scope = factory.Services.CreateAsyncScope();

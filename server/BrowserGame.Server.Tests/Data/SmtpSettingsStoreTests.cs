@@ -68,4 +68,56 @@ public sealed class SmtpSettingsStoreTests(GameServerFactory factory) : IClassFi
 
         Assert.Equal("geheim-123", loaded?.Password);
     }
+
+    [Fact] // 005 AK-18
+    public async Task Empty_username_removes_the_stored_password()
+    {
+        await WithStoreAsync((store, _) => store.SaveAsync(Settings));
+
+        var changed = await WithStoreAsync((store, _) => store.SaveAsync(Settings with { Username = null, Password = "" }));
+        var loaded = await WithStoreAsync((store, _) => store.GetAsync());
+
+        Assert.Null(loaded!.Password);
+        Assert.False(loaded.HasPassword);
+        Assert.Null(loaded.Username);
+        Assert.Equal(["Username", "Password"], changed);
+    }
+
+    [Theory] // 005 AK-18
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    public async Task Password_without_username_is_not_stored(string? username)
+    {
+        await WithStoreAsync((store, _) => store.SaveAsync(Settings));
+
+        var changed = await WithStoreAsync((store, _) => store.SaveAsync(Settings with { Username = username, Password = "neu-456" }));
+        var loaded = await WithStoreAsync((store, _) => store.GetAsync());
+        var raw = await WithStoreAsync((_, db) => db.Settings.AsNoTracking().SingleAsync(s => s.Key == SmtpSettingsStore.Key));
+
+        Assert.Null(loaded!.Password);
+        Assert.Contains("Password", changed);
+        Assert.Contains("\"ProtectedPassword\":null", raw.Value, StringComparison.Ordinal);
+    }
+
+    [Fact] // 005 AK-18
+    public async Task Username_brings_the_password_rule_back()
+    {
+        await WithStoreAsync((store, _) => store.SaveAsync(Settings with { Username = null }));
+
+        await WithStoreAsync((store, _) => store.SaveAsync(Settings with { Password = "neu-456" }));
+        var loaded = await WithStoreAsync((store, _) => store.GetAsync());
+
+        Assert.Equal("neu-456", loaded!.Password);
+    }
+
+    [Fact] // 005 AK-18
+    public async Task Password_typed_without_username_is_not_a_change()
+    {
+        await WithStoreAsync((store, _) => store.SaveAsync(Settings with { Username = null }));
+
+        var changed = await WithStoreAsync((store, _) => store.SaveAsync(Settings with { Username = null, Password = "neu-456" }));
+
+        Assert.Empty(changed);
+    }
 }

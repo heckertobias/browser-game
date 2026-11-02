@@ -229,6 +229,25 @@ public sealed partial class AdminEnglishTests
         AssertOnlyKnownTexts("Protokoll mit TestSaved", (await client.GetAsync("/Audit")).Html);
     }
 
+    [Fact] // 005 AK-14, AK-18
+    public async Task Smtp_no_login_state_shows_only_texts_from_resources()
+    {
+        await using var factory = new AdminFactory();
+        await using var smtp = new FakeSmtpServer();
+        var admin = await AdminTestFlows.RedeemWithPasswordAsync(factory, AdminTestFlows.SetupTokenFromLog(factory), "Tobias", "admin@example.org");
+        admin.Client.Http.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Language", "de-DE,de;q=0.9");
+        admin.Client.Http.DefaultRequestHeaders.TryAddWithoutValidation("Cookie", ".AspNetCore.Culture=c=de|uic=de");
+        var client = admin.Client;
+        var noLogin = ValidSmtpForm(smtp, "egal-123");
+        noLogin["Input.Username"] = "";
+
+        AssertOnlyKnownTexts("Save ohne Benutzer", (await client.PostAsync("/Smtp", "/Smtp?handler=Save", noLogin)).Html);
+        AssertOnlyKnownTexts("GET ohne Benutzer", (await client.GetAsync("/Smtp")).Html);
+        AssertOnlyKnownTexts("Test ohne Benutzer", (await client.PostAsync("/Smtp", "/Smtp?handler=Test", noLogin)).Html);
+        AssertOnlyKnownTexts("TestSaved ohne Benutzer", (await client.PostAsync("/Smtp", "/Smtp?handler=TestSaved", noLogin)).Html);
+        AssertOnlyKnownTexts("Protokoll ohne Benutzer", (await client.GetAsync("/Audit")).Html);
+    }
+
     [Fact] // 005 AK-14
     public void Page_models_use_only_existing_text_keys()
     {

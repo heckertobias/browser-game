@@ -12,15 +12,18 @@ using Microsoft.Extensions.Localization;
 
 namespace BrowserGame.Admin.Pages;
 
-/// <summary>Gespeicherter Stand des SMTP-Passworts, wie ihn die Seite zeigt (005 AK-16).</summary>
+/// <summary>Gespeicherter Stand des SMTP-Passworts, wie ihn die Seite zeigt (005 AK-16, AK-18).</summary>
 public enum SmtpPasswordStatus
 {
     NotStored,
     Stored,
+
+    /// <summary>Kein Benutzername gespeichert: Mails gehen ohne Anmeldung, ein Passwort wird nicht gespeichert.</summary>
+    NoLogin,
 }
 
 /// <summary>
-/// SMTP-Einstellungen pflegen und testen (004 AK-7–AK-10, AK-12; 005 AK-15–AK-17). Die Formular-Testmail nutzt die Werte
+/// SMTP-Einstellungen pflegen und testen (004 AK-7–AK-10, AK-12; 005 AK-15–AK-18). Die Formular-Testmail nutzt die Werte
 /// im Formular, ohne zu speichern; nach Erfolg trägt die Seite das getestete Passwort geschützt und zeitbegrenzt bis zum
 /// Speichern mit. Die Testmail mit gespeichertem Stand geht über <see cref="SmtpMailer"/> wie die Mails des Spiels.
 /// </summary>
@@ -208,18 +211,25 @@ public sealed partial class SmtpModel(
     }
 
     /// <summary>
-    /// Neues Passwort: eingetippt vor getestet (005 AK-15); <c>null</c> = keins, das gespeicherte gilt.
+    /// Neues Passwort: eingetippt vor getestet (005 AK-15); <c>null</c> = keins, das gespeicherte gilt. Ohne Benutzername
+    /// zählt weder Eingabe noch getestetes Passwort (keine Anmeldung, 005 AK-18).
     /// <c>false</c>, wenn das getestete Passwort abgelaufen oder ungültig ist – dann Fehler am Passwortfeld.
     /// </summary>
     private bool TryGetNewPassword(out string? password)
     {
+        password = null;
+        if (string.IsNullOrWhiteSpace(Input.Username))
+        {
+            TestedPassword = null;
+            return true;
+        }
+
         if (!string.IsNullOrEmpty(Input.Password))
         {
             password = Input.Password;
             return true;
         }
 
-        password = null;
         if (string.IsNullOrEmpty(TestedPassword))
         {
             return true;
@@ -276,7 +286,10 @@ public sealed partial class SmtpModel(
     {
         var current = await store.GetAsync();
         Configured = current is not null;
-        PasswordStatus = current?.HasPassword == true ? SmtpPasswordStatus.Stored : SmtpPasswordStatus.NotStored;
+        PasswordStatus = current is null ? SmtpPasswordStatus.NotStored
+            : string.IsNullOrWhiteSpace(current.Username) ? SmtpPasswordStatus.NoLogin
+            : current.HasPassword ? SmtpPasswordStatus.Stored
+            : SmtpPasswordStatus.NotStored;
         PasswordMissing = !string.IsNullOrEmpty(current?.Username) && current?.HasPassword != true;
     }
 

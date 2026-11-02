@@ -61,6 +61,10 @@
                             case SmtpPasswordStatus.Stored:
                                 <span class="badge text-bg-success" data-testid="password-status" data-status="Stored">@T["Smtp.PasswordStatus.Stored"]</span>
                                 break;
+                            case SmtpPasswordStatus.NoLogin:
+                                <span class="badge text-bg-info" data-testid="password-status" data-status="NoLogin">@T["Smtp.PasswordStatus.NoLogin"]</span>
+                                <span data-testid="no-login-hint">@T["Smtp.NoLoginHint"]</span>
+                                break;
                             default:
                                 <span class="badge text-bg-secondary" data-testid="password-status" data-status="NotStored">@T["Smtp.PasswordStatus.NotStored"]</span>
                                 break;

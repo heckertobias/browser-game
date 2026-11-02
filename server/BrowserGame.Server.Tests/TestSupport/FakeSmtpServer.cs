@@ -11,6 +11,7 @@ public sealed class FakeSmtpServer : IAsyncDisposable
     private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
     private readonly CancellationTokenSource _stop = new();
     private readonly Task _accepting;
+    private int _authAttempts;
 
     public FakeSmtpServer(string username = "game@example.net", string password = "geheim-123")
     {
@@ -24,6 +25,9 @@ public sealed class FakeSmtpServer : IAsyncDisposable
     public string Password { get; }
     public int Port => ((IPEndPoint)_listener.LocalEndpoint).Port;
     public ConcurrentQueue<string> Messages { get; } = new();
+
+    /// <summary>Anzahl empfangener AUTH-Befehle (erfolgreich oder nicht).</summary>
+    public int AuthAttempts => Volatile.Read(ref _authAttempts);
 
     private async Task AcceptAsync()
     {
@@ -57,6 +61,7 @@ public sealed class FakeSmtpServer : IAsyncDisposable
                     await writer.WriteLineAsync("250 AUTH PLAIN");
                     break;
                 case "AUTH":
+                    Interlocked.Increment(ref _authAttempts);
                     var payload = line.Split(' ').ElementAtOrDefault(2);
                     if (payload is null)
                     {
