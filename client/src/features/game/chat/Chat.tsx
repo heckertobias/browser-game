@@ -5,21 +5,23 @@ import type { ChatHandlers } from "@/features/game/network/net";
 import { language, t } from "@/features/localization/i18n";
 import {
   CHAT_FLUSH_MS,
+  CHAT_KEYBOARD_VAR,
   CHAT_MAX_LENGTH,
   CHAT_MAX_LINES,
   CHAT_TOO_FAST_HINT_MS,
   MessageBatcher,
+  blocksEnterInField,
   chatReducer,
   chatStorage,
   deviceDefaultCollapsed,
   deviceHasCoarsePointer,
   formatTime,
   handleChatEnter,
-  ignoresEnterInField,
   initialChatState,
   isAtBottom,
   isComposingKey,
   leaveFocus,
+  liftWhileFocused,
   loadCollapsed,
   saveCollapsed,
   submitChat,
@@ -30,9 +32,10 @@ import {
 
 const TIME_FORMAT = timeFormatter(language);
 
+// --chat-keyboard: Die Tastatur ersetzt Rand und Safe Area, sie addiert sich nicht.
 // max-sm: Auf schmalen Schirmen wäre sonst die Versionsanzeige unten rechts im Weg.
 const CHAT_ROOT =
-  "pointer-events-auto absolute bottom-[max(0.5rem,env(safe-area-inset-bottom))] left-[max(0.5rem,env(safe-area-inset-left))] max-sm:bottom-[calc(max(0.5rem,env(safe-area-inset-bottom))+1.25rem)] normal-case";
+  "pointer-events-auto absolute bottom-[max(0.5rem,env(safe-area-inset-bottom),var(--chat-keyboard,0px))] left-[max(0.5rem,env(safe-area-inset-left))] max-sm:bottom-[max(calc(max(0.5rem,env(safe-area-inset-bottom))+1.25rem),var(--chat-keyboard,0px))] normal-case";
 const CHAT_PANEL =
   "flex h-1/3 min-h-40 w-[min(24rem,calc(100%-max(0.5rem,env(safe-area-inset-left))-max(0.5rem,env(safe-area-inset-right))))] flex-col bg-black/50";
 
@@ -60,6 +63,7 @@ export interface ChatViewProps {
   state: ChatState;
   listRef: RefObject<HTMLOListElement | null>;
   inputRef: RefObject<HTMLInputElement | null>;
+  rootRef?: RefObject<HTMLDivElement | null>;
   onListScroll: () => void;
   onCollapsedChange: (collapsed: boolean) => void;
   onDraft: (text: string) => void;
@@ -67,7 +71,7 @@ export interface ChatViewProps {
   onInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
 }
 
-export function ChatView({ state, listRef, inputRef, onListScroll, onCollapsedChange, onDraft, onSubmit, onInputKeyDown }: ChatViewProps) {
+export function ChatView({ state, listRef, inputRef, rootRef, onListScroll, onCollapsedChange, onDraft, onSubmit, onInputKeyDown }: ChatViewProps) {
   if (state.collapsed) {
     return (
       <div className={CHAT_ROOT} data-testid="chat">
@@ -86,7 +90,7 @@ export function ChatView({ state, listRef, inputRef, onListScroll, onCollapsedCh
     );
   }
   return (
-    <div className={`${CHAT_ROOT} ${CHAT_PANEL}`} data-testid="chat">
+    <div ref={rootRef} className={`${CHAT_ROOT} ${CHAT_PANEL}`} data-testid="chat">
       <div className="flex justify-end">
         <button
           type="button"
@@ -94,12 +98,13 @@ export function ChatView({ state, listRef, inputRef, onListScroll, onCollapsedCh
           aria-label={t.chatCollapse}
           title={t.chatCollapse}
           className="btn btn-ghost btn-xs rounded-none font-mono pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+          onMouseDown={(e) => { e.preventDefault(); }}
           onClick={() => { onCollapsedChange(true); }}
         >
           −
         </button>
       </div>
-      <ol ref={listRef} data-testid="chat-list" onScroll={onListScroll} className="min-h-0 flex-1 list-none overflow-y-auto px-2">
+      <ol ref={listRef} data-testid="chat-list" onScroll={onListScroll} className="min-h-0 flex-1 list-none overflow-y-auto overscroll-contain touch-pan-y px-2">
         {state.lines.map((line) => <ChatRow key={line.id} line={line} />)}
       </ol>
       {state.tooFast && <p role="status" data-testid="chat-too-fast" className="px-2 text-warning">{t.chatTooFast}</p>}
@@ -114,8 +119,9 @@ export function ChatView({ state, listRef, inputRef, onListScroll, onCollapsedCh
           ref={inputRef}
           type="text"
           data-testid="chat-input"
-          className="input min-h-11 min-w-0 flex-1 rounded-none bg-black/30 text-base"
+          className="input min-h-11 min-w-0 flex-1 rounded-none bg-black/30 text-base select-text"
           maxLength={CHAT_MAX_LENGTH}
+          enterKeyHint="send"
           autoComplete="off"
           placeholder={t.chatPlaceholder}
           aria-label={t.chatPlaceholder}
@@ -136,6 +142,7 @@ export const Chat = memo(function Chat({ ref, sendChat, inGame }: ChatProps) {
   const [state, dispatch] = useReducer(chatReducer, null, () => initialChatState(loadCollapsed(chatStorage(), deviceDefaultCollapsed)));
   const listRef = useRef<HTMLOListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
   const tooFastTimer = useRef<number | undefined>(undefined);
   const [batcher] = useState(
@@ -187,6 +194,21 @@ export const Chat = memo(function Chat({ ref, sendChat, inGame }: ChatProps) {
     return () => { observer.disconnect(); };
   }, [collapsed, scrollToEndIfStuck]);
 
+  // Das Feld gibt es nur aufgeklappt. Einklappen nimmt es weg, oft ohne blur.
+  useEffect(() => {
+    const input = inputRef.current;
+    const root = rootRef.current;
+    if (!input || !root) return;
+    return liftWhileFocused(input, document.activeElement === input, window, (insetPx) => {
+      root.style.setProperty(CHAT_KEYBOARD_VAR, `${String(insetPx)}px`);
+    });
+  }, [collapsed]);
+
+  // Das Overlay liegt über dem Chat; die offene Tastatur verdeckte sonst seinen Knopf (007 AK-16, AK-17).
+  useEffect(() => {
+    if (!inGame) inputRef.current?.blur();
+  }, [inGame]);
+
   const setCollapsed = useCallback((value: boolean) => {
     if (!value) stickToBottom.current = true;
     saveCollapsed(chatStorage(), value);
@@ -225,7 +247,7 @@ export const Chat = memo(function Chat({ ref, sendChat, inGame }: ChatProps) {
       if (isComposingKey(e.nativeEvent)) return;
       dispatch({ type: "cancel" });
       e.currentTarget.blur();
-    } else if (e.key === "Enter" && ignoresEnterInField(e.nativeEvent)) {
+    } else if (e.key === "Enter" && blocksEnterInField(e.nativeEvent, deviceHasCoarsePointer())) {
       e.preventDefault();
     }
   };
@@ -235,6 +257,7 @@ export const Chat = memo(function Chat({ ref, sendChat, inGame }: ChatProps) {
       state={state}
       listRef={listRef}
       inputRef={inputRef}
+      rootRef={rootRef}
       onListScroll={onListScroll}
       onCollapsedChange={setCollapsed}
       onDraft={(text) => { dispatch({ type: "draft", text }); }}

@@ -195,12 +195,18 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
   - Ein Druck, der auf dem Canvas das Halten startet, nimmt einem Eingabefeld den Fokus (`blur()`), der Text bleibt.
     `preventDefault` auf `pointerdown` verhindert den Fokuswechsel sonst.
 - **Handy (AK-7):**
-  - Viewport-Meta um `interactive-widget=resizes-content` ergänzen (Android/Chrome: das Layout schrumpft mit der
-    Tastatur).
-  - iPhone/Safari ignoriert das. Dort hebt der Chat sich, solange das Feld den Fokus hat, um
-    `innerHeight − visualViewport.height − visualViewport.offsetTop` an (Listener auf `visualViewport` `resize`/`scroll`).
+  - Viewport-Meta um `interactive-widget=resizes-visual` ergänzen (Chrome-Standard seit 108). Das Layout und damit das
+    Canvas bleiben bei offener Tastatur gleich. `resizes-content` würde das Canvas quer auf etwa 5:1 schrumpfen: `k` fiele
+    von 3 auf 2 oder 1, dazu schwarze Balken (007 AK-4).
+  - Android und iPhone nutzen denselben Weg: Solange das Feld den Fokus hat, sitzt der Chat mindestens
+    `innerHeight − visualViewport.height − visualViewport.offsetTop` über dem unteren Rand (Listener auf `visualViewport`
+    `resize`/`scroll`). Diese Höhe ersetzt Rand und Safe Area, sie addiert sich nicht.
   - Seit 007 haben `html, body` `user-select: none` und `touch-action: none`. Das Eingabefeld bekommt
-    `user-select: text`, die Liste `touch-action: pan-y`.
+    `user-select: text`, die Liste `touch-action: pan-y` und `overscroll-behavior: contain`.
+  - Abgeschickt wird nur über das Formular. Mit Touch verwirft das Feld nur gehaltenes Enter: „Senden“ der
+    Bildschirmtastatur kann mit `keyCode` 229 oder während der Komposition kommen.
+  - Bei Verbindungsende und `Kicked` verlässt das Feld den Fokus, damit die Tastatur den Overlay-Knopf nicht verdeckt. Der
+    Text bleibt.
 - **`i18n.ts`:** neue Schlüssel `chatPlaceholder`, `chatSend`, `chatOpen`, `chatCollapse`, `chatTooFast`, `chatUnread`
   (de/en).
 
@@ -216,7 +222,7 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 | 4c | `defaultCollapsed` | Vitest: Tabelle hochkant/quer × Touch/Maus |
 | 5 | globales Enter, Enter/Esc im Feld | **manuell** (Tastatur) |
 | 6 | `isEditableTarget`, Reset bei `focusin`, `stopPropagation` bei Esc | Vitest: `InputTracker` ignoriert Tasten bei fokussiertem Feld, Reset bei Fokus |
-| 7 | `enterKeyHint`, `interactive-widget`, `visualViewport` | **manuell:** Android/Chrome und iPhone/Safari, hochkant und quer |
+| 7 | `enterKeyHint`, `interactive-widget`, `visualViewport` | Vitest: `keyboardInset`, `liftWhileFocused`, `blocksEnterInField`, Markup, Viewport-Meta; **manuell:** Android/Chrome und iPhone/Safari, hochkant und quer |
 | 8 | Client schickt nichts; `ChatRules.Normalize` → `null` | Unit: leer, nur Leerzeichen, nur Zeilenumbrüche; Integration: leerer `SendChat` → niemand bekommt etwas |
 | 9 | `maxLength`; Server prüft Länge | Unit: 200 ok, 201 → `null` |
 | 10 | Verteilen an alle Verbindungen im Tick; eigene Warteschlange „Muss ankommen“ mit Vorrang vor Snapshots | Integration (WS): drei Spieler, einer schreibt → alle drei (inkl. Absender) bekommen sie innerhalb 1 s; `GameLoop`-Test ohne Sendeschleife: 100 Spieler am Tempolimit, als Stoß und verteilt über hängende Clients → keine Chat-Nachricht geht verloren. Über Sockets lässt sich ein hängender Client nicht nachstellen. |
@@ -246,7 +252,7 @@ Integrationstests laufen wie in 003 gegen SQLite und PostgreSQL.
   Der Chat kommt also nach 007 und nach dem Rest von 003.
 - **Esc und Menü (002):** 002 ist noch nicht gebaut. Das Menü muss Esc ignorieren, wenn ein Eingabefeld den Fokus hat.
   Das gehört als Hinweis in den Plan von 002; der Chat stoppt Esc zusätzlich per `stopPropagation`.
-- **Bildschirmtastatur auf dem iPhone:** Das Verhalten von `visualViewport` ist je nach iOS-Version eigenwillig. Das
+- **Bildschirmtastatur:** Das Verhalten von `visualViewport` ist je nach Browser und iOS-Version eigenwillig. Das
   geht nur manuell zu prüfen; im schlimmsten Fall liegt die Eingabe kurz verdeckt, bis man scrollt.
 - **Trennen hängender Clients:** Antwortet ein Client nicht mehr, trennt ihn schon der WebSocket-Keep-Alive
   (`Program.cs`: 10 s Intervall, 10 s Timeout), unabhängig vom Chat. Die Grenze von 1024 Einträgen ist das Sicherheitsnetz

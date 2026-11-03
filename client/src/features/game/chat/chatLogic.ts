@@ -7,6 +7,7 @@ export const CHAT_FLUSH_MS = 100;
 export const CHAT_TOO_FAST_HINT_MS = 4000;
 export const CHAT_COLLAPSED_KEY = "bg.chat.collapsed";
 const AT_BOTTOM_TOLERANCE_PX = 8;
+export const CHAT_KEYBOARD_VAR = "--chat-keyboard";
 
 /** Ohne `timeZone`: Ortszeit. `hourCycle`: sonst zeigt `en` „02:05 PM“ statt Stunden:Minuten (AK-2). */
 export function timeFormatter(language: string, timeZone?: string): Intl.DateTimeFormat {
@@ -128,6 +129,50 @@ export function isComposingKey(e: Pick<KeyboardEvent, "isComposing" | "keyCode">
 /** Enter im Feld ohne Absenden: IME bestätigt nur; gehaltenes Enter schickte sonst einen Entwurf ab. */
 export function ignoresEnterInField(e: Pick<KeyboardEvent, "repeat" | "isComposing" | "keyCode">): boolean {
   return e.repeat || isComposingKey(e);
+}
+
+/** Touch: Der Browser entscheidet. „Senden“ kommt teils mit `keyCode` 229 oder während der Komposition; reines IME-Bestätigen sendet dort von selbst nicht (AK-7). */
+export function blocksEnterInField(e: Parameters<typeof ignoresEnterInField>[0], isCoarsePointer: boolean): boolean {
+  return isCoarsePointer ? e.repeat : ignoresEnterInField(e);
+}
+
+/** Vom unteren Rand des Layout-Viewports verdeckte Höhe in CSS-Pixeln. `offsetTop`: Was der Browser selbst verschiebt, zählt nicht doppelt. */
+export function keyboardInset(innerHeight: number, viewport: Pick<VisualViewport, "height" | "offsetTop">): number {
+  return Math.max(0, Math.round(innerHeight - viewport.height - viewport.offsetTop));
+}
+
+export interface KeyboardWindow {
+  readonly innerHeight: number;
+  readonly visualViewport: (EventTarget & Pick<VisualViewport, "height" | "offsetTop">) | null;
+}
+
+/** Meldet die verdeckte Höhe, solange das Feld den Fokus hat; danach 0. Die Rückgabe entfernt alle Listener. */
+export function liftWhileFocused(field: EventTarget, focused: boolean, win: KeyboardWindow, apply: (insetPx: number) => void): () => void {
+  const fieldListeners = new AbortController();
+  let viewportListeners: AbortController | null = null;
+  const start = () => {
+    const viewport = win.visualViewport;
+    if (!viewport || viewportListeners) return;
+    const listeners = new AbortController();
+    viewportListeners = listeners;
+    const update = () => { apply(keyboardInset(win.innerHeight, viewport)); };
+    viewport.addEventListener("resize", update, { signal: listeners.signal });
+    viewport.addEventListener("scroll", update, { signal: listeners.signal });
+    update();
+  };
+  const end = () => {
+    if (!viewportListeners) return;
+    viewportListeners.abort();
+    viewportListeners = null;
+    apply(0);
+  };
+  field.addEventListener("focus", start, { signal: fieldListeners.signal });
+  field.addEventListener("blur", end, { signal: fieldListeners.signal });
+  if (focused) start();
+  return () => {
+    fieldListeners.abort();
+    end();
+  };
 }
 
 export interface ChatLine {
