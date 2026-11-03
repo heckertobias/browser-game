@@ -100,7 +100,7 @@ server/
         Domain/              World (Spieler, Eingaben), PlayerColors
         Infrastructure/      PositionStore (Persistenz der Positionen)
         Presentation/        GameEndpoint (WebSocket /ws), GameAccess (Origin-Prüfung)
-        Chat/Domain/         ChatRules (Text), ChatRateLimiter (Tempo)
+        Chat/Domain/         ChatRules (Text), ChatRateLimiter (Tempo), ChatHistory (Verlauf)
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)
         Application/         GameLanguages, LanguageCookie, LanguageOnlyCultureProvider

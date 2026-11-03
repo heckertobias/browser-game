@@ -16,7 +16,7 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
 ## Server – Regeln
 - [x] **T3** (AK-8, AK-9, AK-12, AK-13): `ChatRules.Normalize` und `ChatRateLimiter` mit Unit-Tests;
   Konstanten in `GameSettings`.
-- [ ] **T4** (AK-15–17): `ChatHistory` (Ringpuffer, `Recent(now)`, `RemoveAccount`) mit Unit-Tests.
+- [x] **T4** (AK-15–17): `ChatHistory` (Ringpuffer, `Recent(now)`, `RemoveAccount`) mit Unit-Tests.
 
 ## Server – Spiel
 - [ ] **T5** (AK-10, AK-11, AK-13): `SendChat` im `GameEndpoint` → Chat-Channel der Verbindung; im `GameLoop`

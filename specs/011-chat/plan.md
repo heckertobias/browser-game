@@ -102,9 +102,10 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
   Abgelaufene Einträge des Aufrufers fliegen beim Aufruf raus; inaktive Accounts werden höchstens einmal je Fenster
   entfernt, damit der Speicher nicht dauerhaft wächst und die Kosten bei vielen Schreibern klein bleiben.
 - Die Grenzwerte kommen als Parameter: Domain greift nicht auf `GameSettings` zu, T5 übergibt die Konstanten.
-- `ChatHistory`: Ringpuffer der letzten 50 Nachrichten (mit `AccountId` und `SentAt`).
-  `Recent(now)` liefert die jüngsten bis zu 50, die höchstens 24 h alt sind (AK-15, AK-16);
-  `RemoveAccount(accountId)` entfernt alle Nachrichten eines Accounts (AK-17).
+- `ChatHistory(capacity, maxAge)`: Ringpuffer der letzten 50 Nachrichten als `ChatHistoryEntry(AccountId, SenderName,
+  Text, SentAt)`. `Recent(now)` liefert die jüngsten bis zu 50, die jünger als 24 h sind (AK-15, AK-16); genau 24 h
+  alt fällt heraus, wie bei der Abfrage im `ChatStore`. `RemoveAccount(accountId)` entfernt alle Nachrichten eines
+  Accounts (AK-17).
 - Konstanten in `GameSettings`: `ChatMaxLength = 200`, `ChatHistoryCount = 50`, `ChatHistoryHours = 24`,
   `ChatRateLimitCount = 5`, `ChatRateLimitSeconds = 10`.
 
@@ -226,3 +227,9 @@ Integrationstests laufen wie in 003 gegen SQLite und PostgreSQL.
   geht nur manuell zu prüfen; im schlimmsten Fall liegt die Eingabe kurz verdeckt, bis man scrollt.
 - **Outbox-Kapazität:** Die Erhöhung von 8 auf 32 lässt einen langsamen Client etwas mehr alte Snapshots puffern.
   Unkritisch, weil der Client nur den neuesten auswertet.
+- **Account löschen und Verlauf:** Nach `RemoveAccount` wird nicht aus der Datenbank nachgeladen. Der Verlauf zeigt
+  dann vorübergehend weniger als 50 Nachrichten, bis neue nachrücken oder der Server neu startet.
+- **Account löschen und `ChatStore` (T6, T7):** Eine Nachricht, die beim Löschen noch auf das Schreiben wartet, läuft in
+  die FK-Verletzung. Der `ChatStore` MUSS das so behandeln, dass nur die Einträge des gelöschten Accounts verloren
+  gehen. `RemoveChatOf` MUSS im Tick-Thread nach `ForceLeave` laufen, damit danach nichts mehr vom Account in den
+  Verlauf kommt.
