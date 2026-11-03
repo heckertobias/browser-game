@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Kicked_Reason } from "@/generated/browsergame/v1/game_pb";
+import { Chat, type ChatFeed } from "@/features/game/chat/Chat";
 import { Game, type ConnectionStatus } from "@/features/game/engine/game";
 import type { KickReason } from "@/features/game/network/net";
 import { t } from "@/features/localization/i18n";
@@ -37,6 +38,9 @@ const browserWatchDeps = (): ServerWatchDeps => ({
 
 export function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const chatRef = useRef<ChatFeed>(null);
+  const gameRef = useRef<Game | null>(null);
+  const sendChat = useCallback((text: string) => gameRef.current?.sendChat(text) ?? false, []);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [name, setName] = useState<string | null>(null);
   const [kicked, setKicked] = useState<KickReason | null>(null);
@@ -49,19 +53,25 @@ export function App() {
     if (!canvas) return;
     const game = new Game(canvas, {
       onStatus: setStatus,
-      onWelcome: setName,
+      onWelcome: (welcomeName) => {
+        setName(welcomeName);
+        chatRef.current?.onWelcome();
+      },
       onKicked: (reason) => {
         setKicked(reason);
         if (reason === Kicked_Reason.SIGNED_OUT) window.location.replace(LOGIN_URL);
       },
       onCoordinates: setCoordinates,
-      // Chat.tsx folgt in 011 T10.
-      onChatHistory: () => {},
-      onChatMessage: () => {},
-      onChatRejected: () => {},
+      onChatHistory: (messages) => { chatRef.current?.onChatHistory(messages); },
+      onChatMessage: (message) => { chatRef.current?.onChatMessage(message); },
+      onChatRejected: (reason) => { chatRef.current?.onChatRejected(reason); },
     });
+    gameRef.current = game;
     game.start();
-    return () => { game.stop(); };
+    return () => {
+      game.stop();
+      gameRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -94,6 +104,7 @@ export function App() {
           )}
           <a href="/Account/Manage" draggable={false} className="btn min-h-11 rounded-none font-mono uppercase pointer-events-auto ml-auto" data-testid="account">{t.myAccount}</a>
         </div>
+        <Chat ref={chatRef} sendChat={sendChat} inGame={status === "connected"} />
         {status === "disconnected" && (
           <div className={OVERLAY}>
             {update && <p role="status" className="max-w-xs normal-case">{t.updateAvailable}</p>}

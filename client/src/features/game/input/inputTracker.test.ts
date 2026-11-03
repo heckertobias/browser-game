@@ -151,7 +151,7 @@ describe("InputTracker beim Tippen (011 AK-6)", () => {
     expect(direction()).toEqual(UP);
   });
 
-  it("hängt alle Listener ans signal", () => {
+  it("hängt keydown und pointerdown ans signal", () => {
     const blur = vi.fn();
     fakeFieldFocus(blur);
     tracker.dispose();

@@ -31,7 +31,7 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
   `sendChat` mit Rückgabe, ob gesendet; leere Pflicht-Handler in `App.tsx` bis T10.
 - [x] **T9** (AK-6): `input.ts` – Tasten bei fokussiertem Eingabefeld ignorieren, Reset bei `focusin`, Canvas-Druck nimmt dem Feld den
   Fokus; Vitest.
-- [ ] **T10** (AK-1–5, AK-8, AK-9, AK-12, AK-13): `features/game/chat/Chat.tsx` mit Liste, Eingabe, Einklappen, Ungelesen-Punkt,
+- [x] **T10** (AK-1–5, AK-8, AK-9, AK-12, AK-13): `features/game/chat/Chat.tsx` mit Liste, Eingabe, Einklappen, Ungelesen-Punkt,
   Hinweis „zu schnell“; reine Funktionen `formatTime`, `isAtBottom`, `defaultCollapsed`, Speichern in
   `localStorage` mit Vitest; i18n-Schlüssel de/en.
 - [ ] **T11** (AK-7): Handy – `enterKeyHint`, `interactive-widget=resizes-content`, Anheben per `visualViewport`,
@@ -45,6 +45,7 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
   - zwei Geräte (Laptop + Handy) chatten
   - AK-1, AK-3, AK-4, AK-5 am Monitor
   - AK-4c und AK-7 am Handy hochkant und quer (Android/Chrome und iPhone/Safari)
+  - Nach dem Senden: am PC steuern WASD sofort wieder, am Handy bleibt die Tastatur offen
   - AK-6: W halten, Enter: Figur stoppt; WASD im Feld bewegen nicht; Esc öffnet kein Menü
   - Feld fokussiert, Canvas drücken: Fokus weg, Tastatur zu, Text bleibt, WASD wirken wieder (auch iPhone/Safari)
   - Flugmodus am Handy: Der Server trennt nach etwa 20 s (Keep-Alive), danach „Neu verbinden“ und der Verlauf kommt wieder

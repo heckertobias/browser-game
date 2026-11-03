@@ -174,14 +174,17 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
     gilt `defaultCollapsed(isPortrait, isCoarsePointer)` → eingeklappt nur hochkant mit Touch (AK-4c).
   - Eingabe: `<input maxLength={200} enterKeyHint="send">` (AK-9). Enter oder der Senden-Button schicken ab, wenn
     `text.trim()` nicht leer ist (AK-8), und leeren das Feld, wenn `sendChat` `true` liefert. Bei `false` (Verbindung
-    nicht offen) bleibt der Text im Feld. Esc leert das Feld, verlässt es und ruft
+    nicht offen) bleibt der Text im Feld. Nach dem Senden verlässt das Feld mit feinem Zeiger (Maus und Tastatur) den Fokus,
+    damit WASD sofort wieder steuern; mit Touch bleibt der Fokus im Feld und die Tastatur offen. Enter auf ein leeres Feld sendet nichts; mit feinem Zeiger
+    verlässt das Feld den Fokus, mit Touch bleibt er. Esc leert das Feld, verlässt es und ruft
     `stopPropagation()` auf, damit ein späteres Menü (002) nicht aufgeht (AK-6).
   - Globales Enter (außerhalb eines Eingabefelds) klappt den Chat bei Bedarf auf und setzt den Fokus ins Feld (AK-5).
   - `ChatRejected(TOO_FAST)` → kurzer Hinweis über dem Eingabefeld („Du schreibst zu schnell“), verschwindet nach ein
     paar Sekunden. Der Chat merkt sich den zuletzt gesendeten Text. Kommt `ChatRejected` und ist das Feld noch leer, setzt er ihn wieder ein,
     damit er nicht verloren geht (AK-13). Hat der Spieler schon weitergetippt, bleibt die neue Eingabe.
-  - Höchstens 200 Nachrichten im Client-Speicher; ältere fallen weg.
-  - Uhrzeit mit `Intl.DateTimeFormat(language, { hour: "2-digit", minute: "2-digit" })` aus `sent_at_unix_ms`
+  - Höchstens 200 Nachrichten im Client-Speicher; ältere fallen weg. Eingehende Nachrichten werden höchstens alle 100 ms
+    gebündelt übernommen.
+  - Uhrzeit mit `Intl.DateTimeFormat(language, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })` aus `sent_at_unix_ms`
     (Ortszeit, AK-2).
 - **`input.ts`:**
   - Tastendrücke zählen nicht, solange ein Eingabefeld den Fokus hat (`isEditableTarget(e.target)`).
@@ -218,7 +221,7 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 | 9 | `maxLength`; Server prüft Länge | Unit: 200 ok, 201 → `null` |
 | 10 | Verteilen an alle Verbindungen im Tick; eigene Warteschlange „Muss ankommen“ mit Vorrang vor Snapshots | Integration (WS): drei Spieler, einer schreibt → alle drei (inkl. Absender) bekommen sie innerhalb 1 s; `GameLoop`-Test ohne Sendeschleife: 100 Spieler am Tempolimit, als Stoß und verteilt über hängende Clients → keine Chat-Nachricht geht verloren. Über Sockets lässt sich ein hängender Client nicht nachstellen. |
 | 11 | Ein Tick-Thread entscheidet die Reihenfolge | Integration (WS): zwei Spieler senden abwechselnd je 5 → beide sehen identische Reihenfolge |
-| 12 | Text bleibt Text | Unit: `<b>` und Links bleiben unverändert; Vitest/React: Inhalt als Textknoten (`textContent`), kein Element |
+| 12 | Text bleibt Text | Unit: `<b>` und Links bleiben unverändert; Vitest/React: `renderToStaticMarkup`: Inhalt escaped, kein Element |
 | 13 | `ChatRateLimiter`, `ChatRejected` | Unit: 5 ok, 6. abgelehnt, nach 10 s wieder ok, Abgelehntes zählt nicht; Integration: 6. Nachricht → nur Absender bekommt `ChatRejected`, kein Broadcast |
 | 14 | `/ws` nur angemeldet (003 T10) | Integration aus 003 (anonym → 401); Chat hat keinen eigenen Zugang |
 | 15 | `ChatHistory` nach `Welcome`, Laden beim Start | Unit: `Recent` (max. 50, älteste zuerst); Integration: 60 Nachrichten, neuer Spieler bekommt die letzten 50; neuer Server auf derselben DB → Historie da |

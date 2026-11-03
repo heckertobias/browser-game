@@ -52,6 +52,7 @@ client/
         input/               input.ts, wakeLock.ts
         render/              render.ts, viewport.ts, hud.ts
         network/             net.ts (WebSocket + Protobuf)
+        chat/                Chat.tsx (Chatfenster), chatLogic.ts (reine Logik)
       accounts/api/          passkeys.ts — WebAuthn-Flow der Spielerseiten
       localization/          i18n.ts (Texte, Sprache) · language.ts (bestätigt bei Formularverlust)
       pwa/
