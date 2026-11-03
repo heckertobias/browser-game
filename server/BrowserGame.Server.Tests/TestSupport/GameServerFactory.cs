@@ -57,6 +57,9 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
     /// <summary>Datenbank beim Entsorgen behalten, damit ein zweiter Server sie weiter nutzt (Neustart, 003 AK-19).</summary>
     public bool KeepDatabase { get; init; }
 
+    /// <summary>Zusätzliche Dienste für diesen Server, z. B. ein Ersatz, der gezielt scheitert.</summary>
+    public Action<IServiceCollection>? TestServices { get; init; }
+
     /// <summary>Statt echter Mails: alle Mails, die der Server verschicken würde.</summary>
     public CapturingEmailSender Mails { get; } = new();
 
@@ -74,7 +77,11 @@ public sealed class GameServerFactory : WebApplicationFactory<Program>
             builder.UseSetting("Game:PositionSaveIntervalSeconds", PositionSaveIntervalSeconds);
         }
 
-        builder.ConfigureTestServices(services => services.AddSingleton<GameEmailSender>(Mails));
+        builder.ConfigureTestServices(services =>
+        {
+            services.AddSingleton<GameEmailSender>(Mails);
+            TestServices?.Invoke(services);
+        });
     }
 
     /// <summary>Formular-Client mit eigenem Cookie-Speicher, ohne automatische Weiterleitungen.</summary>

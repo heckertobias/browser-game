@@ -533,7 +533,7 @@ public sealed class ChatStoreTests : IAsyncLifetime
         var store = NewStore(game, saveIntervalSeconds: 3600);
         var connection = game.Join("a", "Anna", null);
         await store.StartAsync(Ct);
-        // Der erste Durchlauf ist durch; der nächste käme erst in einer Sekunde, also schreibt nur das Stoppen.
+        // Der erste Durchlauf ist durch; der nächste käme erst in einer Stunde, also schreibt nur das Stoppen.
         await Task.Delay(100, Ct);
 
         Assert.True(connection.Chat.Writer.TryWrite("letzter-tick"));

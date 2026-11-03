@@ -35,7 +35,7 @@ internal sealed class PlayerConnection(string playerId, string name, (double X, 
 /// </summary>
 public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null) : BackgroundService
 {
-    private enum ChangeKind { Join, Leave, ForceLeave, ForceLeaveWithoutSave, ChatHistoryLoaded }
+    private enum ChangeKind { Join, Leave, ForceLeave, ForceLeaveWithoutSave, ChatHistoryLoaded, RemoveChat }
 
     private readonly record struct Change(ChangeKind Kind, string PlayerId, PlayerConnection? Connection, IReadOnlyList<ChatHistoryEntry>? ChatHistory = null);
 
@@ -46,6 +46,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     private readonly TimeProvider _time = time ?? TimeProvider.System;
     private readonly ChatRateLimiter _chatLimiter = new(GameSettings.ChatRateLimitCount, TimeSpan.FromSeconds(GameSettings.ChatRateLimitSeconds));
     private readonly ChatHistory _chatHistory = new(GameSettings.ChatHistoryCount, TimeSpan.FromHours(GameSettings.ChatHistoryHours));
+    // Gelöschte Accounts (011 AK-17). Nur der Tick-Thread; wächst nur mit Löschungen und endet mit dem Neustart.
+    private readonly HashSet<string> _chatRemoved = [];
     private readonly Dictionary<string, PlayerConnection> _connections = [];
     private readonly World _world = new(GameSettings.Speed, GameSettings.TickRateHz, new Random());
     private readonly uint _lingerTicks = GameSettings.ToTicks(configuration.GetValue(GameSettings.LingerSecondsKey, GameSettings.LingerSeconds));
@@ -95,6 +97,13 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     /// </summary>
     public void ForceLeave(string accountId, bool savePosition) =>
         _changes.Writer.TryWrite(new Change(savePosition ? ChangeKind.ForceLeave : ChangeKind.ForceLeaveWithoutSave, accountId, null));
+
+    /// <summary>
+    /// Account gelöscht: Seine Nachrichten verlassen den Verlauf, von ihm wird nichts mehr angenommen (011 AK-17). Nach
+    /// <see cref="ForceLeave"/> aufrufen. Warten ist nicht nötig: Ein späterer Beitritt steht im selben Channel dahinter.
+    /// </summary>
+    public void RemoveChatOf(string accountId) =>
+        _changes.Writer.TryWrite(new Change(ChangeKind.RemoveChat, accountId, null));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -224,6 +233,11 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                     }
 
                     break;
+
+                case ChangeKind.RemoveChat:
+                    _chatHistory.RemoveAccount(change.PlayerId);
+                    _chatRemoved.Add(change.PlayerId);
+                    break;
             }
         }
     }
@@ -294,6 +308,12 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
 
     private void HandleChat(PlayerConnection sender, string rawText, DateTimeOffset now)
     {
+        // Verbindung, die dem Löschen zuvorkam und erst danach beigetreten ist.
+        if (_chatRemoved.Contains(sender.PlayerId))
+        {
+            return;
+        }
+
         if (ChatRules.Normalize(rawText, GameSettings.ChatMaxLength) is not { } text)
         {
             return;

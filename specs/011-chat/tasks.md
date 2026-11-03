@@ -24,7 +24,7 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
   zuerst, von Snapshots nur der neueste, Trennen ab 1024 Einträgen); `TimeProvider` im `GameLoop` nutzen.
 - [x] **T6** (AK-15, AK-16): `ChatHistory.Add` im Angenommen-Zweig; `ChatStore` (gebündeltes Schreiben, Laden der Historie beim Start, Aufräumen beim Start
   und stündlich); `ChatHistory` nach `Welcome` senden; `GameEndpoint` endet bei `ApplicationStopping`.
-- [ ] **T7** (AK-17): `GameLoop.RemoveChatOf(accountId)`, Aufruf aus der `Delete`-Seite (003 T9).
+- [x] **T7** (AK-17): `GameLoop.RemoveChatOf(accountId)`, Aufruf aus der `Delete`-Seite (003 T9).
 
 ## Client
 - [ ] **T8** (AK-10, AK-13, AK-15): `net.ts` und `game.ts` – Chat-Nachrichten empfangen und weiterreichen,

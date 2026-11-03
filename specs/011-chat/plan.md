@@ -135,8 +135,10 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
     Client leert seine Liste bei `Welcome`.
   - Beim Start lädt der `ChatStore` die Historie einmal und übergibt sie dem `GameLoop`, bevor dieser tickt und der Server
     Verbindungen annimmt (AK-15 nach Neustart). Schlägt das fehl, startet der Server ohne alten Verlauf.
-  - `RemoveChatOf(accountId)`: über den Membership-Channel in den Tick-Thread, dort `ChatHistory.RemoveAccount`
-    (AK-17). Wird von der `Delete`-Seite aus 003 T9 aufgerufen, zusammen mit `ForceLeave`.
+  - `RemoveChatOf(accountId)`: über den Membership-Channel in den Tick-Thread, dort `ChatHistory.RemoveAccount`; danach
+    nimmt der `GameLoop` von diesem Account nichts mehr an (AK-17). Die `Delete`-Seite aus 003 T9 ruft nach erfolgreichem
+    Löschen in der Datenbank erst `ForceLeave`, dann `RemoveChatOf` auf. Sie wartet nicht auf den Tick: Ein späterer
+    `Join` steht im selben Channel dahinter.
   - Text, der mit `/` beginnt, ist in 011 ganz normaler Text. Slash-Commands (eigene Spec) setzen später genau hier
     an, bevor eine Nachricht verteilt wird.
 - `ChatStore` in `Features/Game/Chat/Infrastructure/` (`BackgroundService`, Muster wie `PositionStore` aus 003).
@@ -250,7 +252,10 @@ Integrationstests laufen wie in 003 gegen SQLite und PostgreSQL.
 - **Account löschen und `ChatStore` (T6, T7):** Eine Nachricht, die beim Löschen noch auf das Schreiben wartet, läuft in
   die FK-Verletzung. Der `ChatStore` MUSS das so behandeln, dass nur die Einträge des gelöschten Accounts verloren
   gehen. `RemoveChatOf` MUSS im Tick-Thread nach `ForceLeave` laufen, damit danach nichts mehr vom Account in den
-  Verlauf kommt.
+  Verlauf kommt. Scheitert das Löschen in der Datenbank, bleiben Verbindung und Verlauf unberührt. Eine Verbindung, die
+  die Anmeldeprüfung vor dem Löschen bestanden hat und erst danach beitritt, kann nichts mehr schreiben, liest aber bis zum
+  Trennen mit, und ihre Figur bleibt bis dahin. Das Zeitfenster ist klein, das berührt AK-14 und wird bewusst nicht weiter
+  abgefangen.
 - **Herunterfahren mit offenen WebSockets:** Kestrel wartet sonst bis zum Shutdown-Timeout auf offene Sockets, danach
   schreibt kein Store mehr. `GameEndpoint` endet deshalb bei `ApplicationStopping` (auch für 003 AK-19). Hängt die
   Datenbank beim Stoppen, geht das Ausstehende verloren.
