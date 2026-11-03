@@ -12,7 +12,7 @@ internal static class GameEndpoint
 {
     public static async Task HandleAsync(
         HttpContext context, GameLoop game, UserManager<Account> users, GameDbContext db,
-        IConfiguration configuration, IWebHostEnvironment environment)
+        IConfiguration configuration, IWebHostEnvironment environment, IHostApplicationLifetime lifetime)
     {
         if (!context.WebSockets.IsWebSocketRequest)
         {
@@ -45,7 +45,10 @@ internal static class GameEndpoint
         var saved = await db.PlayerPositions.AsNoTracking().FirstOrDefaultAsync(p => p.AccountId == account.Id, context.RequestAborted);
 
         using var socket = await context.WebSockets.AcceptWebSocketAsync();
-        var aborted = context.RequestAborted;
+        // Auch beim Herunterfahren enden: Kestrel wartet sonst bis zum Shutdown-Timeout auf offene WebSockets, und die Stores
+        // (003 AK-19, 011 AK-15) kämen nicht mehr zum Schreiben.
+        using var stopping = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, lifetime.ApplicationStopping);
+        var aborted = stopping.Token;
         var connection = game.Join(account.Id, name, saved is null ? null : (saved.X, saved.Y), () => AbortConnection(context));
 
         using var receiving = CancellationTokenSource.CreateLinkedTokenSource(aborted);

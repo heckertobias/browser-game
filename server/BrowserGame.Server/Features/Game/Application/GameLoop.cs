@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using BrowserGame.Contracts.V1;
 using Google.Protobuf;
+using ProtoChatHistory = BrowserGame.Contracts.V1.ChatHistory;
 
 namespace BrowserGame.Server.Features.Game;
 
@@ -34,9 +35,9 @@ internal sealed class PlayerConnection(string playerId, string name, (double X, 
 /// </summary>
 public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null) : BackgroundService
 {
-    private enum ChangeKind { Join, Leave, ForceLeave, ForceLeaveWithoutSave }
+    private enum ChangeKind { Join, Leave, ForceLeave, ForceLeaveWithoutSave, ChatHistoryLoaded }
 
-    private readonly record struct Change(ChangeKind Kind, string PlayerId, PlayerConnection? Connection);
+    private readonly record struct Change(ChangeKind Kind, string PlayerId, PlayerConnection? Connection, IReadOnlyList<ChatHistoryEntry>? ChatHistory = null);
 
     private readonly Channel<Change> _changes = Channel.CreateUnbounded<Change>();
     private static readonly byte[] ChatTooFast =
@@ -44,6 +45,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
 
     private readonly TimeProvider _time = time ?? TimeProvider.System;
     private readonly ChatRateLimiter _chatLimiter = new(GameSettings.ChatRateLimitCount, TimeSpan.FromSeconds(GameSettings.ChatRateLimitSeconds));
+    private readonly ChatHistory _chatHistory = new(GameSettings.ChatHistoryCount, TimeSpan.FromHours(GameSettings.ChatHistoryHours));
     private readonly Dictionary<string, PlayerConnection> _connections = [];
     private readonly World _world = new(GameSettings.Speed, GameSettings.TickRateHz, new Random());
     private readonly uint _lingerTicks = GameSettings.ToTicks(configuration.GetValue(GameSettings.LingerSecondsKey, GameSettings.LingerSeconds));
@@ -59,6 +61,16 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
 
     /// <summary>Zu speichernde Positionen für den <see cref="PositionStore"/>; wird beim Herunterfahren geschlossen.</summary>
     internal ChannelReader<IReadOnlyList<PositionToSave>> PositionBatches => _positionBatches.Reader;
+
+    /// <summary>Angenommene Chat-Nachrichten für den <see cref="ChatStore"/> (011 AK-15).</summary>
+    internal ChatSaveQueue ChatToSave { get; } = new(GameSettings.ChatSaveQueueCapacity);
+
+    /// <summary>
+    /// Verlauf aus der Datenbank übernehmen, älteste zuerst (011 AK-15). Nur beim Start, bevor der GameLoop tickt: Er wird im
+    /// Tick-Thread vor allen späteren Beitritten eingetragen.
+    /// </summary>
+    internal void LoadChatHistory(IReadOnlyList<ChatHistoryEntry> messages) =>
+        _changes.Writer.TryWrite(new Change(ChangeKind.ChatHistoryLoaded, "", null, messages));
 
     internal PlayerConnection Join(string accountId, string name, (double X, double Y)? savedPosition, Action? abort = null)
     {
@@ -171,6 +183,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                     var joined = AddOrTakeOver(change.Connection!);
                     var welcome = new Welcome { PlayerId = joined.Id, Name = joined.Name, Speed = (float)_world.Speed, TickRateHz = (uint)_world.TickRateHz };
                     change.Connection!.Outbox.SendRequired(new ServerMessage { Welcome = welcome }.ToByteArray());
+                    SendChatHistory(change.Connection);
                     LogJoined(joined.Id, joined.Name, _connections.Count);
                     break;
 
@@ -200,6 +213,14 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                         }
 
                         LogLeft(player.Id, _connections.Count);
+                    }
+
+                    break;
+
+                case ChangeKind.ChatHistoryLoaded:
+                    foreach (var entry in change.ChatHistory!)
+                    {
+                        _chatHistory.Add(entry);
                     }
 
                     break;
@@ -240,6 +261,25 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         connection.Outbox.Close(new ServerMessage { Kicked = new Kicked { Reason = reason } }.ToByteArray());
     }
 
+    /// <summary>Direkt nach Welcome, in derselben Warteschlange (011 AK-15). Ohne Verlauf geht nichts raus; der Client leert seine Liste bei Welcome.</summary>
+    private void SendChatHistory(PlayerConnection connection)
+    {
+        var recent = _chatHistory.Recent(_time.GetUtcNow());
+        if (recent.Count == 0)
+        {
+            return;
+        }
+
+        var history = new ProtoChatHistory();
+        history.Messages.AddRange(recent.Select(entry => new ChatMessage
+        {
+            SenderName = entry.SenderName,
+            Text = entry.Text,
+            SentAtUnixMs = entry.SentAt.ToUnixTimeMilliseconds(),
+        }));
+        connection.Outbox.SendRequired(new ServerMessage { ChatHistory = history }.ToByteArray());
+    }
+
     private void ProcessChat()
     {
         var now = _time.GetUtcNow();
@@ -265,9 +305,14 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             return;
         }
 
+        var senderName = _world.GetPlayer(sender.PlayerId)?.Name ?? sender.Name;
+        var entry = new ChatHistoryEntry(sender.PlayerId, senderName, text, now);
+        _chatHistory.Add(entry);
+        ChatToSave.Add(entry);
+
         var message = new ChatMessage
         {
-            SenderName = _world.GetPlayer(sender.PlayerId)?.Name ?? sender.Name,
+            SenderName = senderName,
             Text = text,
             SentAtUnixMs = now.ToUnixTimeMilliseconds(),
         };

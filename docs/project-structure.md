@@ -101,6 +101,8 @@ server/
         Infrastructure/      PositionStore (Persistenz der Positionen)
         Presentation/        GameEndpoint (WebSocket /ws), GameAccess (Origin-Prüfung)
         Chat/Domain/         ChatRules (Text), ChatRateLimiter (Tempo), ChatHistory (Verlauf)
+        Chat/Application/    ChatSaveQueue (Warteschlange Tick-Thread → ChatStore)
+        Chat/Infrastructure/ ChatStore (Verlauf laden, gebündelt schreiben, aufräumen)
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)
         Application/         GameLanguages, LanguageCookie, LanguageOnlyCultureProvider

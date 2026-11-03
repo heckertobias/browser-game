@@ -131,8 +131,10 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
     - Erreicht ein Client die Grenze, liest er nicht mehr. Der Server trennt die Verbindung ohne `Kicked` (`Kicked` käme nicht
       an). Der Client zeigt „Verbindung weg“ mit Neu-Verbinden (007 AK-16), die Figur wartet (003 AK-20, AK-21), der Verlauf
       kommt beim Neuverbinden (AK-15).
-  - Beim Beitritt nach `Welcome` sofort `ChatHistory` aus `Recent(now)` schicken (AK-15).
-  - Beim Start lädt der `GameLoop` die Historie einmal aus dem `ChatStore` (AK-15 nach Neustart).
+  - Beim Beitritt nach `Welcome` sofort `ChatHistory` aus `Recent(now)` schicken, wenn sie nicht leer ist (AK-15). Der
+    Client leert seine Liste bei `Welcome`.
+  - Beim Start lädt der `ChatStore` die Historie einmal und übergibt sie dem `GameLoop`, bevor dieser tickt und der Server
+    Verbindungen annimmt (AK-15 nach Neustart). Schlägt das fehl, startet der Server ohne alten Verlauf.
   - `RemoveChatOf(accountId)`: über den Membership-Channel in den Tick-Thread, dort `ChatHistory.RemoveAccount`
     (AK-17). Wird von der `Delete`-Seite aus 003 T9 aufgerufen, zusammen mit `ForceLeave`.
   - Text, der mit `/` beginnt, ist in 011 ganz normaler Text. Slash-Commands (eigene Spec) setzen später genau hier
@@ -140,17 +142,20 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 - `ChatStore` in `Features/Game/Chat/Infrastructure/` (`BackgroundService`, Muster wie `PositionStore` aus 003).
   Typen, die `GameLoop` mit ihm austauscht (Channel-Einträge, geladene Historie), liegen in Application oder Domain,
   nicht in Infrastructure (`docs/project-structure.md`):
-  - Schreiben: Der Tick-Thread legt angenommene Nachrichten in einen Channel; der Dienst schreibt sie gebündelt
-    (spätestens jede Sekunde), beim Herunterfahren alles Ausstehende.
+  - Schreiben: Der Tick-Thread legt angenommene Nachrichten in einen begrenzten Channel (15 000, die ältesten fallen weg;
+    blockiert nie); der Dienst schreibt sie gebündelt (spätestens jede Sekunde), beim Herunterfahren alles Ausstehende.
+    Nach einem Fehler bleibt der Stapel und wird wiederholt, nach 5 Minuten aufgegeben.
   - `LoadRecentAsync(now)`: jüngste 50 mit `SentAt > now − 24 h`, mit Spielername.
-  - Aufräumen: beim Start und dann stündlich `DELETE … WHERE SentAt < now − 24 h` (AK-16). Dazwischen sorgen
+  - Aufräumen: beim Start und dann stündlich `DELETE … WHERE SentAt < now − 24 h` in Stapeln von 10 000 Zeilen je Sekunde,
+    damit andere Schreiber nicht warten (AK-16). Dazwischen sorgen
     `Recent(now)` und die Abfrage dafür, dass nichts Älteres ausgeliefert wird.
 - `TimeProvider` ist schon registriert (`DatabaseSetup`). `GameLoop` bekommt ihn als optionalen Konstruktor-Parameter; Tests
   setzen eine eigene kleine Fake-Uhr ein (keine neue Abhängigkeit).
 
 ## Client
 
-- **`net.ts`:** `chatHistory`, `chatMessage`, `chatRejected` an neue Handler weiterreichen; `sendChat(text)`.
+- **`net.ts`:** `chatHistory`, `chatMessage`, `chatRejected` an neue Handler weiterreichen; `sendChat(text)`. Bei
+  `Welcome` die Chatliste leeren: Ohne Verlauf kommt keine `ChatHistory`.
 - **`game.ts`:** reicht die Chat-Ereignisse über `GameEvents` an React weiter (`onChatHistory`, `onChatMessage`,
   `onChatRejected`) und bietet `sendChat(text)`.
 - **`features/game/chat/Chat.tsx`** (HUD-Ebene aus 007, unten links, Safe Areas):
@@ -246,3 +251,10 @@ Integrationstests laufen wie in 003 gegen SQLite und PostgreSQL.
   die FK-Verletzung. Der `ChatStore` MUSS das so behandeln, dass nur die Einträge des gelöschten Accounts verloren
   gehen. `RemoveChatOf` MUSS im Tick-Thread nach `ForceLeave` laufen, damit danach nichts mehr vom Account in den
   Verlauf kommt.
+- **Herunterfahren mit offenen WebSockets:** Kestrel wartet sonst bis zum Shutdown-Timeout auf offene Sockets, danach
+  schreibt kein Store mehr. `GameEndpoint` endet deshalb bei `ApplicationStopping` (auch für 003 AK-19). Hängt die
+  Datenbank beim Stoppen, geht das Ausstehende verloren.
+- **Uhr und Reihenfolge:** Springt die Serveruhr zurück, kann die Reihenfolge des Verlaufs nach einem Neustart von der
+  gesehenen abweichen. Bewusst nicht abgefangen.
+- **Doppelte Nachricht:** Reißt die Verbindung genau beim Commit ab, kann ein Stapel doppelt in die Datenbank kommen (nur
+  PostgreSQL über Netz). Bewusst nicht abgefangen.

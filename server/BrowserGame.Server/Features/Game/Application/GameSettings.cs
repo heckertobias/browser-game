@@ -55,4 +55,28 @@ internal static class GameSettings
     /// passt, und bei 50 Nachrichten/s übersteht ein Client etwa 20 s Hänger (011 AK-10). Darüber wird die Verbindung getrennt.
     /// </summary>
     public const int OutboxRequiredLimit = 1024;
+
+    /// <summary>In diesem Abstand schreibt der ChatStore wartende Nachrichten; so oft prüft er auch, ob Aufräumen fällig ist (011).</summary>
+    public const int ChatSaveIntervalSeconds = 1;
+
+    /// <summary>So viele Nachrichten schreibt der ChatStore höchstens in einer Transaktion (011).</summary>
+    public const int ChatSaveBatchSize = 500;
+
+    /// <summary>
+    /// So viele Nachrichten warten höchstens auf das Schreiben; bei der Auslegung von 50 Nachrichten/s reicht das für 5 Minuten
+    /// Datenbank-Ausfall. Darüber fallen die ältesten weg (011).
+    /// </summary>
+    public const int ChatSaveQueueCapacity = 15_000;
+
+    /// <summary>So lange versucht der ChatStore denselben Stapel, danach gibt er ihn auf (011).</summary>
+    public const int ChatSaveGiveUpMinutes = 5;
+
+    /// <summary>Abstand zwischen zwei Aufräum-Läufen des ChatStore (011 AK-16).</summary>
+    public const int ChatCleanupIntervalHours = 1;
+
+    /// <summary>
+    /// So viele Zeilen löscht der ChatStore je Durchlauf, also etwa je Sekunde. Der Regelfall (180.000 Zeilen je Stunde bei
+    /// 50 Nachrichten/s) dauert so 18 s, 1,8 Mio. Zeilen drei Minuten, ohne andere Schreiber lange zu blockieren (011 AK-16).
+    /// </summary>
+    public const int ChatCleanupBatchSize = 10_000;
 }
