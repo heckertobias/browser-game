@@ -19,9 +19,10 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
 - [x] **T4** (AK-15–17): `ChatHistory` (Ringpuffer, `Recent(now)`, `RemoveAccount`) mit Unit-Tests.
 
 ## Server – Spiel
-- [ ] **T5** (AK-10, AK-11, AK-13): `SendChat` im `GameEndpoint` → Chat-Channel der Verbindung; im `GameLoop`
-  prüfen, `ChatMessage` an alle bzw. `ChatRejected` an den Absender; Outbox-Kapazität 32; `TimeProvider` registrieren.
-- [ ] **T6** (AK-15, AK-16): `ChatStore` (gebündeltes Schreiben, Laden der Historie beim Start, Aufräumen beim Start
+- [x] **T5** (AK-10, AK-11, AK-13): `SendChat` im `GameEndpoint` → Chat-Channel der Verbindung; im `GameLoop`
+  prüfen, `ChatMessage` an alle bzw. `ChatRejected` an den Absender; `PlayerOutbox` mit zwei Warteschlangen („Muss ankommen“
+  zuerst, von Snapshots nur der neueste, Trennen ab 1024 Einträgen); `TimeProvider` im `GameLoop` nutzen.
+- [ ] **T6** (AK-15, AK-16): `ChatHistory.Add` im Angenommen-Zweig; `ChatStore` (gebündeltes Schreiben, Laden der Historie beim Start, Aufräumen beim Start
   und stündlich); `ChatHistory` nach `Welcome` senden.
 - [ ] **T7** (AK-17): `GameLoop.RemoveChatOf(accountId)`, Aufruf aus der `Delete`-Seite (003 T9).
 

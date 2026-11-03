@@ -5,7 +5,7 @@ using Google.Protobuf;
 namespace BrowserGame.Server.Features.Game;
 
 /// <summary>Verbindung eines Spielers zwischen WebSocket-Handler und Tick-Thread.</summary>
-internal sealed class PlayerConnection(string playerId, string name, (double X, double Y)? savedPosition)
+internal sealed class PlayerConnection(string playerId, string name, (double X, double Y)? savedPosition, Action? onOverflow = null)
 {
     public string PlayerId { get; } = playerId;
     public string Name { get; } = name;
@@ -17,25 +17,33 @@ internal sealed class PlayerConnection(string playerId, string name, (double X, 
     public Channel<MoveInput> Inbox { get; } = Channel.CreateBounded<MoveInput>(
         new BoundedChannelOptions(World.MaxQueuedInputs * 2) { FullMode = BoundedChannelFullMode.DropOldest, SingleReader = true, SingleWriter = true });
 
-    /// <summary>Serialisierte Server-Nachrichten; ein langsamer Client verpasst alte Snapshots statt den Tick zu bremsen.</summary>
-    public Channel<byte[]> Outbox { get; } = Channel.CreateBounded<byte[]>(
-        new BoundedChannelOptions(8) { FullMode = BoundedChannelFullMode.DropOldest, SingleReader = true });
+    /// <summary>Chat-Texte vom Client, noch ungeprüft (011); bei Flut fallen die ältesten weg.</summary>
+    public Channel<string> Chat { get; } = Channel.CreateBounded<string>(
+        new BoundedChannelOptions(GameSettings.ChatInboxCapacity) { FullMode = BoundedChannelFullMode.DropOldest, SingleReader = true, SingleWriter = true });
+
+    /// <summary>Serialisierte Server-Nachrichten; ein langsamer Client verpasst Snapshots statt den Tick zu bremsen.</summary>
+    public PlayerOutbox Outbox { get; } = new(GameSettings.OutboxRequiredLimit, onOverflow);
 
     /// <summary>Vom Server beendet (Kicked steht als letzte Nachricht in der Outbox); der Endpoint schließt dann den Socket.</summary>
     public bool WasKicked { get; set; }
 }
 
 /// <summary>
-/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, simulieren, Snapshots verschicken.
+/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, simulieren, Snapshots verschicken.
 /// Dazu Nachlauf getrennter Figuren, Übernahme und Rauswurf (003 AK-12, AK-20–22); Positionen an den PositionStore (AK-18, AK-19).
 /// </summary>
-public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration) : BackgroundService
+public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null) : BackgroundService
 {
     private enum ChangeKind { Join, Leave, ForceLeave, ForceLeaveWithoutSave }
 
     private readonly record struct Change(ChangeKind Kind, string PlayerId, PlayerConnection? Connection);
 
     private readonly Channel<Change> _changes = Channel.CreateUnbounded<Change>();
+    private static readonly byte[] ChatTooFast =
+        new ServerMessage { ChatRejected = new ChatRejected { Reason = ChatRejected.Types.Reason.TooFast } }.ToByteArray();
+
+    private readonly TimeProvider _time = time ?? TimeProvider.System;
+    private readonly ChatRateLimiter _chatLimiter = new(GameSettings.ChatRateLimitCount, TimeSpan.FromSeconds(GameSettings.ChatRateLimitSeconds));
     private readonly Dictionary<string, PlayerConnection> _connections = [];
     private readonly World _world = new(GameSettings.Speed, GameSettings.TickRateHz, new Random());
     private readonly uint _lingerTicks = GameSettings.ToTicks(configuration.GetValue(GameSettings.LingerSecondsKey, GameSettings.LingerSeconds));
@@ -52,16 +60,20 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     /// <summary>Zu speichernde Positionen für den <see cref="PositionStore"/>; wird beim Herunterfahren geschlossen.</summary>
     internal ChannelReader<IReadOnlyList<PositionToSave>> PositionBatches => _positionBatches.Reader;
 
-    internal PlayerConnection Join(string accountId, string name, (double X, double Y)? savedPosition)
+    internal PlayerConnection Join(string accountId, string name, (double X, double Y)? savedPosition, Action? abort = null)
     {
-        var connection = new PlayerConnection(accountId, name, savedPosition);
+        var connection = new PlayerConnection(accountId, name, savedPosition, () =>
+        {
+            LogStalled(accountId);
+            abort?.Invoke();
+        });
         _changes.Writer.TryWrite(new Change(ChangeKind.Join, accountId, connection));
         return connection;
     }
 
     internal void Leave(PlayerConnection connection)
     {
-        connection.Outbox.Writer.TryComplete();
+        connection.Outbox.Close();
         _changes.Writer.TryWrite(new Change(ChangeKind.Leave, connection.PlayerId, connection));
     }
 
@@ -141,6 +153,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             }
         }
 
+        ProcessChat();
+
         _world.Step();
         _tick++;
         BroadcastSnapshot();
@@ -156,7 +170,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                 case ChangeKind.Join:
                     var joined = AddOrTakeOver(change.Connection!);
                     var welcome = new Welcome { PlayerId = joined.Id, Name = joined.Name, Speed = (float)_world.Speed, TickRateHz = (uint)_world.TickRateHz };
-                    change.Connection!.Outbox.Writer.TryWrite(new ServerMessage { Welcome = welcome }.ToByteArray());
+                    change.Connection!.Outbox.SendRequired(new ServerMessage { Welcome = welcome }.ToByteArray());
                     LogJoined(joined.Id, joined.Name, _connections.Count);
                     break;
 
@@ -223,8 +237,47 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     private static void Kick(PlayerConnection connection, Kicked.Types.Reason reason)
     {
         connection.WasKicked = true;
-        connection.Outbox.Writer.TryWrite(new ServerMessage { Kicked = new Kicked { Reason = reason } }.ToByteArray());
-        connection.Outbox.Writer.TryComplete();
+        connection.Outbox.Close(new ServerMessage { Kicked = new Kicked { Reason = reason } }.ToByteArray());
+    }
+
+    private void ProcessChat()
+    {
+        var now = _time.GetUtcNow();
+        foreach (var connection in _connections.Values)
+        {
+            while (connection.Chat.Reader.TryRead(out var text))
+            {
+                HandleChat(connection, text, now);
+            }
+        }
+    }
+
+    private void HandleChat(PlayerConnection sender, string rawText, DateTimeOffset now)
+    {
+        if (ChatRules.Normalize(rawText, GameSettings.ChatMaxLength) is not { } text)
+        {
+            return;
+        }
+
+        if (!_chatLimiter.TryAccept(sender.PlayerId, now))
+        {
+            sender.Outbox.SendRequired(ChatTooFast);
+            return;
+        }
+
+        var message = new ChatMessage
+        {
+            SenderName = _world.GetPlayer(sender.PlayerId)?.Name ?? sender.Name,
+            Text = text,
+            SentAtUnixMs = now.ToUnixTimeMilliseconds(),
+        };
+
+        // Einmal serialisiert, alle Verbindungen teilen das Array; es wird nur gelesen.
+        var bytes = new ServerMessage { ChatMessage = message }.ToByteArray();
+        foreach (var connection in _connections.Values)
+        {
+            connection.Outbox.SendRequired(bytes);
+        }
     }
 
     private void BroadcastSnapshot()
@@ -237,7 +290,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         {
             var snapshot = new Snapshot { Tick = _tick, LastProcessedSeq = _world.GetPlayer(connection.PlayerId)?.LastProcessedSeq ?? 0 };
             snapshot.Players.AddRange(players);
-            connection.Outbox.Writer.TryWrite(new ServerMessage { Snapshot = snapshot }.ToByteArray());
+            connection.Outbox.OfferSnapshot(new ServerMessage { Snapshot = snapshot }.ToByteArray());
         }
     }
 
@@ -249,6 +302,9 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Spieler {PlayerId} getrennt, Figur wartet, {Count} online")]
     private partial void LogAway(string playerId, int count);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Spieler {PlayerId} liest nicht mehr, Verbindung wird getrennt")]
+    private partial void LogStalled(string playerId);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Spieler {PlayerId} auf anderem Gerät angemeldet, alte Verbindung beendet")]
     private partial void LogTakenOver(string playerId);

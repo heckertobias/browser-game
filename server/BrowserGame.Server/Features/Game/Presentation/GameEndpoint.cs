@@ -46,7 +46,7 @@ internal static class GameEndpoint
 
         using var socket = await context.WebSockets.AcceptWebSocketAsync();
         var aborted = context.RequestAborted;
-        var connection = game.Join(account.Id, name, saved is null ? null : (saved.X, saved.Y));
+        var connection = game.Join(account.Id, name, saved is null ? null : (saved.X, saved.Y), () => AbortConnection(context));
 
         using var receiving = CancellationTokenSource.CreateLinkedTokenSource(aborted);
         var sending = SendLoopAsync(socket, connection, receiving, aborted);
@@ -65,6 +65,18 @@ internal static class GameEndpoint
             {
                 // Client ist bereits weg.
             }
+        }
+    }
+
+    private static void AbortConnection(HttpContext context)
+    {
+        try
+        {
+            context.Abort();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Der Handler ist schon beendet; der Aufruf kommt vom Tick-Thread und darf ihn nicht abbrechen.
         }
     }
 
@@ -106,6 +118,10 @@ internal static class GameEndpoint
                 {
                     var input = message.Input;
                     connection.Inbox.Writer.TryWrite(new MoveInput(input.Seq, input.DirX, input.DirY));
+                }
+                else if (message.PayloadCase == ClientMessage.PayloadOneofCase.SendChat)
+                {
+                    connection.Chat.Writer.TryWrite(message.SendChat.Text);
                 }
             }
         }

@@ -96,7 +96,7 @@ server/
         Presentation/        Razor-Seiten (Account/…) - URLs bleiben /Account/…
       Game/
         GameSetup.cs         DI-Anmeldung (AddGame)
-        Application/         GameLoop (Hosted Service), GameSettings
+        Application/         GameLoop (Hosted Service), PlayerOutbox (Ausgang je Verbindung), GameSettings
         Domain/              World (Spieler, Eingaben), PlayerColors
         Infrastructure/      PositionStore (Persistenz der Positionen)
         Presentation/        GameEndpoint (WebSocket /ws), GameAccess (Origin-Prüfung)

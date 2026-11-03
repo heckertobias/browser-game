@@ -98,6 +98,11 @@ public static class GameSockets
             new ClientMessage { Input = new Input { Seq = seq, DirX = dirX, DirY = dirY } }.ToByteArray(),
             WebSocketMessageType.Binary, true, ct);
 
+    public static Task SendChatAsync(WebSocket socket, string text, CancellationToken ct) =>
+        socket.SendAsync(
+            new ClientMessage { SendChat = new SendChat { Text = text } }.ToByteArray(),
+            WebSocketMessageType.Binary, true, ct);
+
     public static async Task SendInputsAsync(WebSocket socket, float dirX, float dirY, CancellationToken ct)
     {
         uint seq = 0;

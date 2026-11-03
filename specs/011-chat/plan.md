@@ -119,12 +119,18 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
     - Abgelehnt wegen Tempo → `ChatRejected(TOO_FAST)` nur an den Absender.
     - Angenommen → `ChatMessage` mit Spielername aus der `World`, Serverzeit, an **alle** Verbindungen (auch den
       Absender, AK-10); in `ChatHistory` aufnehmen; an `ChatStore` zum Speichern übergeben.
-    - Chat-Nachrichten gehen in dieselbe Outbox wie Snapshots. Die Outbox verwirft bei Überlauf die ältesten
-      Einträge; damit Chat nicht hinter Snapshots verloren geht, wird ihre Kapazität von 8 auf 32 erhöht. Ein Client,
-      der so weit hinterherhängt, ist ohnehin praktisch getrennt.
-    - Auslegung: bis etwa 100 gleichzeitige Spieler. Eine Nachricht wird einmal serialisiert, nicht je Empfänger. Ein
-      Integrationstest sichert ab, dass bei dieser Größe am Tempolimit keine Chat-Nachricht in der Outbox verloren
-      geht (AK-10).
+    - Jede Verbindung hat auf demselben WebSocket zwei Warteschlangen (`PlayerOutbox`), genau eine Sendeschleife liest:
+      - „Muss ankommen“: `Welcome`, `ChatHistory`, `ChatMessage`, `ChatRejected`, `Kicked`, künftig `AttackRejected` (013)
+        und `CommandRejected` (015). FIFO, geht immer zuerst raus, wird im Normalbetrieb nie verworfen.
+      - „Darf ausfallen“: Snapshots. Nur der neueste wartet (ein Platz): Jeder enthält den ganzen Stand, und der Client stempelt
+        beim Eintreffen, aufgestaute hätten keinen Nutzen.
+      - Beide Teile hängen an einem Lock, damit kein Snapshot `Welcome` überholt. `Kicked` schließt die Warteschlange in einem
+        Schritt, danach geht kein Snapshot mehr raus.
+    - Auslegung: bis etwa 100 gleichzeitige Spieler. Eine Nachricht wird einmal serialisiert, nicht je Empfänger. Grenze für
+      „Muss ankommen“: 1024 Einträge, das fasst den Stoß aller Spieler (500) und etwa 20 s Hänger bei 50 Nachrichten/s.
+    - Erreicht ein Client die Grenze, liest er nicht mehr. Der Server trennt die Verbindung ohne `Kicked` (`Kicked` käme nicht
+      an). Der Client zeigt „Verbindung weg“ mit Neu-Verbinden (007 AK-16), die Figur wartet (003 AK-20, AK-21), der Verlauf
+      kommt beim Neuverbinden (AK-15).
   - Beim Beitritt nach `Welcome` sofort `ChatHistory` aus `Recent(now)` schicken (AK-15).
   - Beim Start lädt der `GameLoop` die Historie einmal aus dem `ChatStore` (AK-15 nach Neustart).
   - `RemoveChatOf(accountId)`: über den Membership-Channel in den Tick-Thread, dort `ChatHistory.RemoveAccount`
@@ -139,8 +145,8 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
   - `LoadRecentAsync(now)`: jüngste 50 mit `SentAt > now − 24 h`, mit Spielername.
   - Aufräumen: beim Start und dann stündlich `DELETE … WHERE SentAt < now − 24 h` (AK-16). Dazwischen sorgen
     `Recent(now)` und die Abfrage dafür, dass nichts Älteres ausgeliefert wird.
-- `TimeProvider.System` wird registriert; Tests ersetzen ihn durch eine eigene kleine Fake-Uhr (keine neue
-  Abhängigkeit).
+- `TimeProvider` ist schon registriert (`DatabaseSetup`). `GameLoop` bekommt ihn als optionalen Konstruktor-Parameter; Tests
+  setzen eine eigene kleine Fake-Uhr ein (keine neue Abhängigkeit).
 
 ## Client
 
@@ -196,7 +202,7 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 | 7 | `enterKeyHint`, `interactive-widget`, `visualViewport` | **manuell:** Android/Chrome und iPhone/Safari, hochkant und quer |
 | 8 | Client schickt nichts; `ChatRules.Normalize` → `null` | Unit: leer, nur Leerzeichen, nur Zeilenumbrüche; Integration: leerer `SendChat` → niemand bekommt etwas |
 | 9 | `maxLength`; Server prüft Länge | Unit: 200 ok, 201 → `null` |
-| 10 | Verteilen an alle Verbindungen im Tick | Integration (WS): drei Spieler, einer schreibt → alle drei (inkl. Absender) bekommen sie innerhalb 1 s; etwa 100 Spieler am Tempolimit → in der Outbox geht keine Chat-Nachricht verloren |
+| 10 | Verteilen an alle Verbindungen im Tick; eigene Warteschlange „Muss ankommen“ mit Vorrang vor Snapshots | Integration (WS): drei Spieler, einer schreibt → alle drei (inkl. Absender) bekommen sie innerhalb 1 s; `GameLoop`-Test ohne Sendeschleife: 100 Spieler am Tempolimit, als Stoß und verteilt über hängende Clients → keine Chat-Nachricht geht verloren. Über Sockets lässt sich ein hängender Client nicht nachstellen. |
 | 11 | Ein Tick-Thread entscheidet die Reihenfolge | Integration (WS): zwei Spieler senden abwechselnd je 5 → beide sehen identische Reihenfolge |
 | 12 | Text bleibt Text | Unit: `<b>` und Links bleiben unverändert; Vitest/React: Inhalt als Textknoten (`textContent`), kein Element |
 | 13 | `ChatRateLimiter`, `ChatRejected` | Unit: 5 ok, 6. abgelehnt, nach 10 s wieder ok, Abgelehntes zählt nicht; Integration: 6. Nachricht → nur Absender bekommt `ChatRejected`, kein Broadcast |
@@ -225,8 +231,15 @@ Integrationstests laufen wie in 003 gegen SQLite und PostgreSQL.
   Das gehört als Hinweis in den Plan von 002; der Chat stoppt Esc zusätzlich per `stopPropagation`.
 - **Bildschirmtastatur auf dem iPhone:** Das Verhalten von `visualViewport` ist je nach iOS-Version eigenwillig. Das
   geht nur manuell zu prüfen; im schlimmsten Fall liegt die Eingabe kurz verdeckt, bis man scrollt.
-- **Outbox-Kapazität:** Die Erhöhung von 8 auf 32 lässt einen langsamen Client etwas mehr alte Snapshots puffern.
-  Unkritisch, weil der Client nur den neuesten auswertet.
+- **Trennen hängender Clients:** Antwortet ein Client nicht mehr, trennt ihn schon der WebSocket-Keep-Alive
+  (`Program.cs`: 10 s Intervall, 10 s Timeout), unabhängig vom Chat. Die Grenze von 1024 Einträgen ist das Sicherheitsnetz
+  für Clients, die noch antworten, aber zu langsam lesen. Beides trennt die ganze Verbindung; danach reicht ein Tipp
+  (007 AK-16). `Abort` am echten Kestrel ist nicht automatisch getestet, weil sich ein hängender Client im TestHost nicht
+  nachstellen lässt.
+- **Snapshots bei langsamem Client:** Snapshots fallen aus, ein Client sieht dann weniger Zwischenstände. Dahinter puffern
+  Kestrel und TCP weiter (64 KB entsprechen bei 100 Spielern etwa 9 Snapshots). Das bleibt außerhalb der Warteschlangen.
+- **Nachricht kurz vor dem Gehen:** Eine Nachricht, die höchstens einen Tick (50 ms) vor `Leave` oder Übernahme eintrifft, geht
+  verloren, wie Eingaben auch.
 - **Account löschen und Verlauf:** Nach `RemoveAccount` wird nicht aus der Datenbank nachgeladen. Der Verlauf zeigt
   dann vorübergehend weniger als 50 Nachrichten, bis neue nachrücken oder der Server neu startet.
 - **Account löschen und `ChatStore` (T6, T7):** Eine Nachricht, die beim Löschen noch auf das Schreiben wartet, läuft in

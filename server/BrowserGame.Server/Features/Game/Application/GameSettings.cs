@@ -43,4 +43,16 @@ internal static class GameSettings
 
     /// <summary>Länge des Zeitfensters für <see cref="ChatRateLimitCount"/> (011 AK-13).</summary>
     public const int ChatRateLimitSeconds = 10;
+
+    /// <summary>
+    /// Kapazität des Chat-Channels je Verbindung. Der Tick leert ihn; über dem Tempolimit (<see cref="ChatRateLimitCount"/>),
+    /// sodass nur eine Flut die ältesten Einträge verliert (011 AK-13).
+    /// </summary>
+    public const int ChatInboxCapacity = 8;
+
+    /// <summary>
+    /// So viele Pflichtnachrichten warten je Verbindung höchstens. Auslegung 100 Spieler am Tempolimit: Ein Stoß von 500 Nachrichten
+    /// passt, und bei 50 Nachrichten/s übersteht ein Client etwa 20 s Hänger (011 AK-10). Darüber wird die Verbindung getrennt.
+    /// </summary>
+    public const int OutboxRequiredLimit = 1024;
 }
