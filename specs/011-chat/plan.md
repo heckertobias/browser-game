@@ -81,6 +81,8 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 ### Daten (`BrowserGame.Data`)
 - `ChatMessageEntry` (`Id` long, Autoincrement · `AccountId` FK → `Account`, **Cascade-Delete** · `Text` max. 200 ·
   `SentAt` `DateTimeOffset`), Index auf `SentAt`.
+- `SentAt` wird auf beiden Providern per Konverter als Unix-Millisekunden gespeichert (`INTEGER`/`bigint`): EF Core
+  übersetzt unter SQLite keine Vergleiche und keine Sortierung auf `DateTimeOffset`.
 - `DbSet<ChatMessageEntry> ChatMessages` im `GameDbContext`, Migration `AddChatMessages` für beide Provider
   (`scripts/add-migration.sh AddChatMessages`).
 - Der Absendername wird nicht gespeichert, sondern beim Laden über `Account.UserName` gelesen (Namen sind nicht

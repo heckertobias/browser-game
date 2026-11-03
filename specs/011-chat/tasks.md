@@ -10,7 +10,7 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
   `ChatRejected` erweitern; `buf lint` und `buf breaking` gegen `main` müssen grün sein.
 
 ## Server – Daten
-- [ ] **T2** (AK-15–17): `ChatMessageEntry` mit FK auf `Account` (Cascade), Index auf `SentAt`;
+- [x] **T2** (AK-15–17): `ChatMessageEntry` mit FK auf `Account` (Cascade), Index auf `SentAt`;
   Migration `AddChatMessages` für beide Provider (`scripts/add-migration.sh AddChatMessages`).
 
 ## Server – Regeln
