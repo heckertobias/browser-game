@@ -28,4 +28,19 @@ internal static class GameSettings
 
     /// <summary>Größere Client-Nachrichten trennen die Verbindung.</summary>
     public const int MaxClientMessageBytes = 1024;
+
+    /// <summary>Höchstlänge einer Chatnachricht in UTF-16-Einheiten (011 AK-9).</summary>
+    public const int ChatMaxLength = 200;
+
+    /// <summary>So viele Nachrichten enthält der Chat-Verlauf höchstens (011 AK-15).</summary>
+    public const int ChatHistoryCount = 50;
+
+    /// <summary>So lange bleibt eine Chatnachricht sichtbar (011 AK-15, AK-16).</summary>
+    public const int ChatHistoryHours = 24;
+
+    /// <summary>So viele Chatnachrichten nimmt der Server je Account im Zeitfenster an (011 AK-13).</summary>
+    public const int ChatRateLimitCount = 5;
+
+    /// <summary>Länge des Zeitfensters für <see cref="ChatRateLimitCount"/> (011 AK-13).</summary>
+    public const int ChatRateLimitSeconds = 10;
 }

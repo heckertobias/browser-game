@@ -89,13 +89,19 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
   änderbar, 003).
 
 ### Regeln (`Features/Game/Chat/Domain/`, reine Logik ohne Netzwerk und DB)
-- `ChatRules.Normalize(string) → string?`:
-  - Steuerzeichen (`char.IsControl`, also auch Zeilenumbrüche) werden zu Leerzeichen, dann trimmen.
-  - Leer → `null` (AK-8); länger als 200 UTF-16-Einheiten → `null` (AK-9).
-- `ChatRateLimiter`: pro **Account** (nicht pro Verbindung, sonst hilft Neuladen) die Zeitpunkte der letzten
-  angenommenen Nachrichten. `TryAccept(accountId, now)` nimmt an, solange in den letzten 10 s weniger als 5 angenommen
-  wurden (AK-13). Abgelehnte zählen nicht mit; nach Ablauf des Fensters geht es von selbst wieder.
-  Zeitpunkt kommt als Parameter (testbar ohne Uhr). Einträge älter als 10 s fliegen beim nächsten Aufruf raus.
+- `ChatRules.Normalize(string, maxLength) → string?`:
+  - Steuerzeichen (`char.IsControl`, also auch Zeilenumbrüche) sowie U+2028 und U+2029 werden zu Leerzeichen, dann
+    trimmen. Eine Nachricht kann so keine zusätzliche Chatzeile vortäuschen.
+  - Leer → `null` (AK-8); länger als `maxLength` UTF-16-Einheiten → `null` (AK-9). Die Länge zählt nach dem Trimmen.
+  - Nachrichten nur aus unsichtbaren Zeichen (z. B. U+200B) bleiben erlaubt: AK-8 nennt nur Leerzeichen, Moderation
+    ist Out of Scope.
+- `ChatRateLimiter(limit, window)`: pro **Account** (nicht pro Verbindung, sonst hilft Neuladen) die Zeitpunkte der
+  letzten angenommenen Nachrichten. `TryAccept(accountId, now)` nimmt an, solange im Fenster `(now − window, now]`
+  weniger als `limit` angenommen wurden (AK-13); bei genau 10 s Abstand ist also wieder frei. Abgelehnte zählen nicht
+  mit; nach Ablauf des Fensters geht es von selbst wieder. Zeitpunkt kommt als Parameter (testbar ohne Uhr).
+  Abgelaufene Einträge des Aufrufers fliegen beim Aufruf raus; inaktive Accounts werden höchstens einmal je Fenster
+  entfernt, damit der Speicher nicht dauerhaft wächst und die Kosten bei vielen Schreibern klein bleiben.
+- Die Grenzwerte kommen als Parameter: Domain greift nicht auf `GameSettings` zu, T5 übergibt die Konstanten.
 - `ChatHistory`: Ringpuffer der letzten 50 Nachrichten (mit `AccountId` und `SentAt`).
   `Recent(now)` liefert die jüngsten bis zu 50, die höchstens 24 h alt sind (AK-15, AK-16);
   `RemoveAccount(accountId)` entfernt alle Nachrichten eines Accounts (AK-17).
@@ -115,6 +121,9 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
     - Chat-Nachrichten gehen in dieselbe Outbox wie Snapshots. Die Outbox verwirft bei Überlauf die ältesten
       Einträge; damit Chat nicht hinter Snapshots verloren geht, wird ihre Kapazität von 8 auf 32 erhöht. Ein Client,
       der so weit hinterherhängt, ist ohnehin praktisch getrennt.
+    - Auslegung: bis etwa 100 gleichzeitige Spieler. Eine Nachricht wird einmal serialisiert, nicht je Empfänger. Ein
+      Integrationstest sichert ab, dass bei dieser Größe am Tempolimit keine Chat-Nachricht in der Outbox verloren
+      geht (AK-10).
   - Beim Beitritt nach `Welcome` sofort `ChatHistory` aus `Recent(now)` schicken (AK-15).
   - Beim Start lädt der `GameLoop` die Historie einmal aus dem `ChatStore` (AK-15 nach Neustart).
   - `RemoveChatOf(accountId)`: über den Membership-Channel in den Tick-Thread, dort `ChatHistory.RemoveAccount`
@@ -186,7 +195,7 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 | 7 | `enterKeyHint`, `interactive-widget`, `visualViewport` | **manuell:** Android/Chrome und iPhone/Safari, hochkant und quer |
 | 8 | Client schickt nichts; `ChatRules.Normalize` → `null` | Unit: leer, nur Leerzeichen, nur Zeilenumbrüche; Integration: leerer `SendChat` → niemand bekommt etwas |
 | 9 | `maxLength`; Server prüft Länge | Unit: 200 ok, 201 → `null` |
-| 10 | Verteilen an alle Verbindungen im Tick | Integration (WS): drei Spieler, einer schreibt → alle drei (inkl. Absender) bekommen sie innerhalb 1 s |
+| 10 | Verteilen an alle Verbindungen im Tick | Integration (WS): drei Spieler, einer schreibt → alle drei (inkl. Absender) bekommen sie innerhalb 1 s; etwa 100 Spieler am Tempolimit → in der Outbox geht keine Chat-Nachricht verloren |
 | 11 | Ein Tick-Thread entscheidet die Reihenfolge | Integration (WS): zwei Spieler senden abwechselnd je 5 → beide sehen identische Reihenfolge |
 | 12 | Text bleibt Text | Unit: `<b>` und Links bleiben unverändert; Vitest/React: Inhalt als Textknoten (`textContent`), kein Element |
 | 13 | `ChatRateLimiter`, `ChatRejected` | Unit: 5 ok, 6. abgelehnt, nach 10 s wieder ok, Abgelehntes zählt nicht; Integration: 6. Nachricht → nur Absender bekommt `ChatRejected`, kein Broadcast |
