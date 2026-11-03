@@ -156,11 +156,13 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
 
 ## Client
 
-- **`net.ts`:** `chatHistory`, `chatMessage`, `chatRejected` an neue Handler weiterreichen; `sendChat(text)`. Bei
-  `Welcome` die Chatliste leeren: Ohne Verlauf kommt keine `ChatHistory`.
+- **`net.ts`:** `chatHistory`, `chatMessage`, `chatRejected` an neue Handler weiterreichen. `sendChat(text)` liefert `true`,
+  wenn die Nachricht an den offenen Socket ging, sonst `false` (nichts gesendet, keine Ausnahme).
 - **`game.ts`:** reicht die Chat-Ereignisse über `GameEvents` an React weiter (`onChatHistory`, `onChatMessage`,
-  `onChatRejected`) und bietet `sendChat(text)`.
+  `onChatRejected`) und bietet `sendChat(text)` mit derselben Rückgabe. `net.ts` und `game.ts` halten keine Chatliste.
 - **`features/game/chat/Chat.tsx`** (HUD-Ebene aus 007, unten links, Safe Areas):
+  - Die Liste liegt hier. `GameEvents.onWelcome` leert sie (ohne Verlauf kommt keine `ChatHistory`), `onChatHistory` setzt den
+    Verlauf, `onChatMessage` hängt an. Bei `Kicked` und Verbindungsende bleibt sie stehen.
   - Halbtransparenter Kasten (`bg-black/50`), Breite `min(24rem, 100% − Ränder)`, Höhe etwa ein Drittel des
     Fensters (AK-1). Liste mit Zeilen `HH:MM Name: Text`, neueste unten (AK-2).
   - Text nur als React-Textknoten, nie `dangerouslySetInnerHTML`, kein Link-Erkennen (AK-12).
@@ -171,11 +173,13 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
     (AK-4). Der Zustand liegt in `localStorage` (`bg.chat.collapsed`, pro Gerät, AK-4b). Ist nichts gespeichert,
     gilt `defaultCollapsed(isPortrait, isCoarsePointer)` → eingeklappt nur hochkant mit Touch (AK-4c).
   - Eingabe: `<input maxLength={200} enterKeyHint="send">` (AK-9). Enter oder der Senden-Button schicken ab, wenn
-    `text.trim()` nicht leer ist (AK-8), und leeren das Feld. Esc leert das Feld, verlässt es und ruft
+    `text.trim()` nicht leer ist (AK-8), und leeren das Feld, wenn `sendChat` `true` liefert. Bei `false` (Verbindung
+    nicht offen) bleibt der Text im Feld. Esc leert das Feld, verlässt es und ruft
     `stopPropagation()` auf, damit ein späteres Menü (002) nicht aufgeht (AK-6).
   - Globales Enter (außerhalb eines Eingabefelds) klappt den Chat bei Bedarf auf und setzt den Fokus ins Feld (AK-5).
   - `ChatRejected(TOO_FAST)` → kurzer Hinweis über dem Eingabefeld („Du schreibst zu schnell“), verschwindet nach ein
-    paar Sekunden. Der Text bleibt im Feld, damit er nicht verloren geht (AK-13).
+    paar Sekunden. Der Chat merkt sich den zuletzt gesendeten Text. Kommt `ChatRejected` und ist das Feld noch leer, setzt er ihn wieder ein,
+    damit er nicht verloren geht (AK-13). Hat der Spieler schon weitergetippt, bleibt die neue Eingabe.
   - Höchstens 200 Nachrichten im Client-Speicher; ältere fallen weg.
   - Uhrzeit mit `Intl.DateTimeFormat(language, { hour: "2-digit", minute: "2-digit" })` aus `sent_at_unix_ms`
     (Ortszeit, AK-2).

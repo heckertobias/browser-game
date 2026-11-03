@@ -1,8 +1,10 @@
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import {
+  ChatRejected_Reason,
   ClientMessageSchema,
   Kicked_Reason,
   ServerMessageSchema,
+  type ChatMessage,
   type Snapshot,
   type Welcome,
 } from "@/generated/browsergame/v1/game_pb";
@@ -11,6 +13,9 @@ import type { PendingInput } from "@/features/game/state/prediction";
 /** Gründe, bei denen der Server die Verbindung bewusst beendet (AK-12, AK-22). */
 export type KickReason = Kicked_Reason.SIGNED_IN_ELSEWHERE | Kicked_Reason.SIGNED_OUT;
 
+/** Gründe, aus denen der Server eine Chatnachricht ablehnt (AK-13). */
+export type ChatRejectReason = ChatRejected_Reason.TOO_FAST;
+
 export interface ConnectionHandlers {
   onWelcome(welcome: Welcome): void;
   onSnapshot(snapshot: Snapshot): void;
@@ -18,8 +23,16 @@ export interface ConnectionHandlers {
   onClose(): void;
 }
 
+export interface ChatHandlers {
+  onChatHistory(messages: readonly ChatMessage[]): void;
+  onChatMessage(message: ChatMessage): void;
+  onChatRejected(reason: ChatRejectReason): void;
+}
+
 export interface GameConnection {
   sendInput(input: PendingInput): void;
+  /** Schickt den Text unverändert. `false`: Verbindung nicht offen, nichts gesendet. `true` ist keine Zustellbestätigung. */
+  sendChat(text: string): boolean;
   close(): void;
 }
 
@@ -33,7 +46,7 @@ export interface Receiver {
 }
 
 /** Leitet Server-Nachrichten weiter. Nach Kicked meldet das folgende Schließen kein onClose. */
-export function createReceiver(handlers: ConnectionHandlers): Receiver {
+export function createReceiver(handlers: ConnectionHandlers & Partial<ChatHandlers>): Receiver {
   let kicked = false;
   return {
     message(data) {
@@ -53,6 +66,17 @@ export function createReceiver(handlers: ConnectionHandlers): Receiver {
           }
           break;
         }
+        case "chatHistory":
+          handlers.onChatHistory?.(message.payload.value.messages);
+          break;
+        case "chatMessage":
+          handlers.onChatMessage?.(message.payload.value);
+          break;
+        case "chatRejected": {
+          const { reason } = message.payload.value;
+          if (reason === ChatRejected_Reason.TOO_FAST) handlers.onChatRejected?.(reason);
+          break;
+        }
         case undefined:
           break;
       }
@@ -63,7 +87,7 @@ export function createReceiver(handlers: ConnectionHandlers): Receiver {
   };
 }
 
-export function connect(url: string, handlers: ConnectionHandlers): GameConnection {
+export function connect(url: string, handlers: ConnectionHandlers & ChatHandlers): GameConnection {
   const socket = new WebSocket(url);
   socket.binaryType = "arraybuffer";
 
@@ -78,6 +102,12 @@ export function connect(url: string, handlers: ConnectionHandlers): GameConnecti
       if (socket.readyState !== WebSocket.OPEN) return;
       const message = create(ClientMessageSchema, { payload: { case: "input", value: input } });
       socket.send(toBinary(ClientMessageSchema, message));
+    },
+    sendChat(text) {
+      if (socket.readyState !== WebSocket.OPEN) return false;
+      const message = create(ClientMessageSchema, { payload: { case: "sendChat", value: { text } } });
+      socket.send(toBinary(ClientMessageSchema, message));
+      return true;
     },
     close() {
       socket.close();

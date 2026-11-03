@@ -55,6 +55,10 @@ export function App() {
         if (reason === Kicked_Reason.SIGNED_OUT) window.location.replace(LOGIN_URL);
       },
       onCoordinates: setCoordinates,
+      // Chat.tsx folgt in 011 T10.
+      onChatHistory: () => {},
+      onChatMessage: () => {},
+      onChatRejected: () => {},
     });
     game.start();
     return () => { game.stop(); };

@@ -27,8 +27,8 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
 - [x] **T7** (AK-17): `GameLoop.RemoveChatOf(accountId)`, Aufruf aus der `Delete`-Seite (003 T9).
 
 ## Client
-- [ ] **T8** (AK-10, AK-13, AK-15): `net.ts` und `game.ts` – Chat-Nachrichten empfangen und weiterreichen,
-  `sendChat`.
+- [x] **T8** (AK-10, AK-13, AK-15): `net.ts` und `game.ts` – Chat-Nachrichten empfangen und weiterreichen,
+  `sendChat` mit Rückgabe, ob gesendet; leere Pflicht-Handler in `App.tsx` bis T10.
 - [ ] **T9** (AK-6): `input.ts` – Tasten bei fokussiertem Eingabefeld ignorieren, Reset bei `focusin`; Vitest.
 - [ ] **T10** (AK-1–5, AK-8, AK-9, AK-12, AK-13): `features/game/chat/Chat.tsx` mit Liste, Eingabe, Einklappen, Ungelesen-Punkt,
   Hinweis „zu schnell“; reine Funktionen `formatTime`, `isAtBottom`, `defaultCollapsed`, Speichern in
