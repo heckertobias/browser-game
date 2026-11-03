@@ -64,8 +64,8 @@ jobs:
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: "1"
       DOTNET_NOLOGO: "1"
-      # Jeder Test-Host belegt sonst inotify-Instanzen; das Limit auf dem Runner ist 128.
-      DOTNET_hostBuilder__reloadConfigOnChange: "false"
+      # Jeder Test-Host belegt sonst inotify-Instanzen (Konfiguration, asp-append-version); das Limit auf dem Runner ist 128.
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -99,8 +99,8 @@ jobs:
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: "1"
       DOTNET_NOLOGO: "1"
-      # Jeder Test-Host belegt sonst inotify-Instanzen; das Limit auf dem Runner ist 128.
-      DOTNET_hostBuilder__reloadConfigOnChange: "false"
+      # Jeder Test-Host belegt sonst inotify-Instanzen (Konfiguration, asp-append-version); das Limit auf dem Runner ist 128.
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
       TEST_DB_PROVIDER: Postgres
       TEST_POSTGRES: Host=localhost;Port=5432;Username=test;Password=test
     steps:
