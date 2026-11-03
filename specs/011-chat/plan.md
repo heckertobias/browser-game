@@ -187,7 +187,10 @@ Server prüft nur zur Sicherheit. Ein eigener Ablehnungsgrund lohnt sich dafür 
   - Tastendrücke zählen nicht, solange ein Eingabefeld den Fokus hat (`isEditableTarget(e.target)`).
   - Beim Fokussieren eines Eingabefelds (`focusin`) werden gedrückte Tasten gelöscht, damit die Figur stehen bleibt
     (AK-6).
-  - Der gehaltene Zeiger auf dem Canvas ist davon unberührt.
+  - Der gehaltene Zeiger auf dem Canvas ist davon unberührt: Er ist eine bewusste Geste und endet beim Loslassen; AK-6
+    meint die Tasten.
+  - Ein Druck, der auf dem Canvas das Halten startet, nimmt einem Eingabefeld den Fokus (`blur()`), der Text bleibt.
+    `preventDefault` auf `pointerdown` verhindert den Fokuswechsel sonst.
 - **Handy (AK-7):**
   - Viewport-Meta um `interactive-widget=resizes-content` ergänzen (Android/Chrome: das Layout schrumpft mit der
     Tastatur).

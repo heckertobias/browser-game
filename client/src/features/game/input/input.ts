@@ -83,6 +83,14 @@ export class PointerHold {
   }
 }
 
+const EDITABLE_TAGS: ReadonlySet<string> = new Set(["INPUT", "TEXTAREA", "SELECT"]);
+
+/** Hier tippt der Spieler: Tasten steuern dann nicht die Figur (011 AK-6). Ohne instanceof, damit ohne DOM testbar. */
+export function isEditableTarget(target: EventTarget | null): boolean {
+  const element = target as Partial<HTMLElement> | null;
+  return element?.isContentEditable === true || EDITABLE_TAGS.has(element?.tagName ?? "");
+}
+
 /** Hält gedrückte Tasten und den gedrückten Zeiger (Maus und Touch einheitlich über Pointer Events). */
 export class InputTracker {
   private readonly pressedKeys = new Set<string>();
@@ -94,13 +102,18 @@ export class InputTracker {
     private readonly bindings: KeyBindings = DEFAULT_BINDINGS,
   ) {
     const signal = this.abort.signal;
-    window.addEventListener("keydown", (e) => { this.pressedKeys.add(e.code); }, { signal });
+    window.addEventListener("keydown", (e) => { if (!isEditableTarget(e.target)) this.pressedKeys.add(e.code); }, { signal });
     window.addEventListener("keyup", (e) => { this.pressedKeys.delete(e.code); }, { signal });
+    // Nur die Tasten, nicht reset(): ein gehaltener Zeiger läuft weiter.
+    window.addEventListener("focusin", (e) => { if (isEditableTarget(e.target)) this.pressedKeys.clear(); }, { signal });
     window.addEventListener("blur", () => { this.reset(); }, { signal });
     document.addEventListener("visibilitychange", () => { if (document.hidden) this.reset(); }, { signal });
 
     canvas.addEventListener("pointerdown", (e) => {
       if (!this.hold.down(e)) return;
+      // preventDefault unten verhindert auch den Fokuswechsel; das Feld behielte den Fokus und die Tasten blieben tot.
+      const active = document.activeElement;
+      if (isEditableTarget(active)) (active as HTMLElement).blur();
       canvas.setPointerCapture(e.pointerId);
       e.preventDefault();
     }, { signal });
