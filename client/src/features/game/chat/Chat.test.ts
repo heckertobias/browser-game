@@ -9,6 +9,8 @@ import { chatReducer, formatTime, initialChatState, submitChat, timeFormatter, t
 
 const msg = (text: string, senderName = "A", sentAtUnixMs = 1n) => create(ChatMessageSchema, { senderName, text, sentAtUnixMs });
 const noop = () => {};
+/** Wie React den Text im Markup schreibt (z. B. Apostroph als &#x27;). */
+const escaped = (text: string) => renderToStaticMarkup(createElement("span", null, text)).replace(/^<span>|<\/span>$/g, "");
 
 function view(state: ChatState): string {
   const props: ChatViewProps = {
@@ -72,13 +74,13 @@ describe("ChatView", () => {
     expect(markup).not.toContain('data-testid="chat-open"');
     const input = /<input[^>]*>/.exec(markup)?.[0] ?? "";
     expect(input).toContain('maxLength="200"');
-    expect(input).toContain(`placeholder="${t.chatPlaceholder}"`);
+    expect(input).toContain(`placeholder="${escaped(t.chatPlaceholder)}"`);
   });
 
   it("zeigt eingeklappt nur den Öffnen-Knopf (AK-4)", () => {
     const markup = view(collapsed());
     expect(markup).toContain('data-testid="chat-open"');
-    expect(markup).toContain(t.chatOpen);
+    expect(markup).toContain(escaped(t.chatOpen));
     expect(markup).not.toContain('data-testid="chat-list"');
     expect(markup).not.toContain('data-testid="chat-input"');
     expect(markup).not.toContain('data-testid="chat-unread"');
@@ -87,14 +89,14 @@ describe("ChatView", () => {
   it("zeigt den Punkt bei Ungelesenem (AK-4)", () => {
     const markup = view(run(collapsed(), { type: "messages", messages: [msg("a")] }));
     expect(markup).toContain('data-testid="chat-unread"');
-    expect(markup).toContain(`aria-label="${t.chatUnread}"`);
+    expect(markup).toContain(`aria-label="${escaped(t.chatUnread)}"`);
   });
 
   it("zeigt den Hinweis nur bei tooFast (AK-13)", () => {
     expect(view(open())).not.toContain('data-testid="chat-too-fast"');
     const markup = view(run(open(), { type: "rejected" }));
     expect(markup).toContain('data-testid="chat-too-fast"');
-    expect(markup).toContain(t.chatTooFast);
+    expect(markup).toContain(escaped(t.chatTooFast));
   });
 
   it("zeigt den wieder eingesetzten Text samt Hinweis (AK-13)", () => {
