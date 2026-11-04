@@ -87,6 +87,33 @@ namespace BrowserGame.Data.Migrations.Sqlite
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("BrowserGame.Data.ChatMessageEntry", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("SentAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("SentAt");
+
+                    b.ToTable("ChatMessages");
+                });
+
             modelBuilder.Entity("BrowserGame.Data.PlayerPosition", b =>
                 {
                     b.Property<string>("AccountId")
@@ -287,6 +314,15 @@ namespace BrowserGame.Data.Migrations.Sqlite
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("BrowserGame.Data.ChatMessageEntry", b =>
+                {
+                    b.HasOne("BrowserGame.Data.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BrowserGame.Data.PlayerPosition", b =>

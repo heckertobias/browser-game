@@ -4,7 +4,7 @@ import { INTERPOLATION_DELAY_MS } from "@/features/game/core/constants";
 import { InputTracker } from "@/features/game/input/input";
 import { formatCoordinates } from "@/features/game/render/hud";
 import { SnapshotBuffer } from "@/features/game/state/interpolation";
-import { connect, gameSocketUrl, type GameConnection, type KickReason } from "@/features/game/network/net";
+import { connect, gameSocketUrl, type ChatHandlers, type GameConnection, type KickReason } from "@/features/game/network/net";
 import { Predictor } from "@/features/game/state/prediction";
 import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "@/features/game/render/render";
 import type { Vec } from "@/features/game/core/vector";
@@ -13,7 +13,7 @@ import { ScreenWakeLock } from "@/features/game/input/wakeLock";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "kicked";
 
-export interface GameEvents {
+export interface GameEvents extends ChatHandlers {
   onStatus(status: ConnectionStatus): void;
   onWelcome(name: string): void;
   onKicked(reason: KickReason): void;
@@ -65,6 +65,9 @@ export class Game {
         this.events.onStatus("kicked");
       },
       onClose: () => { this.events.onStatus("disconnected"); },
+      onChatHistory: (messages) => { this.events.onChatHistory(messages); },
+      onChatMessage: (message) => { this.events.onChatMessage(message); },
+      onChatRejected: (reason) => { this.events.onChatRejected(reason); },
     });
     this.lastFrame = performance.now();
     this.frameHandle = requestAnimationFrame(this.frame);
@@ -76,6 +79,11 @@ export class Game {
     this.connection?.close();
     this.input.dispose();
     this.wakeLock.stop();
+  }
+
+  /** `false`: nichts gesendet (Verbindung nicht offen), der Text bleibt beim Aufrufer. */
+  sendChat(text: string): boolean {
+    return this.connection?.sendChat(text) ?? false;
   }
 
   private handleWelcome(welcome: Welcome): void {

@@ -15,7 +15,7 @@ namespace BrowserGame.Server.Features.Accounts.Presentation.Account;
 
 /// <summary>
 /// Eigenen Account löschen, bestätigt mit Passwort oder Passkey (003 AK-16). Falsche Passwörter zählen zur Sperre (AK-10).
-/// Position, Passkeys und Logins fallen per Cascade mit; der Name wird wieder frei.
+/// Position, Passkeys, Logins und Chat-Nachrichten fallen per Cascade mit; der Name wird wieder frei.
 /// </summary>
 [Authorize]
 [EnableRateLimiting(WebDefaults.AuthRateLimitPolicy)]
@@ -102,14 +102,16 @@ public sealed class DeleteModel(
 
     private async Task<IActionResult> DeleteAndSignOutAsync(PlayerAccount user)
     {
-        // Position nicht speichern: Der Account wird gleich gelöscht (FK, AK-16).
-        game.ForceLeave(user.Id, savePosition: false);
+        // Erst die Datenbank: Scheitert sie, bleiben Verbindung und Verlauf unberührt.
         var result = await users.DeleteAsync(user);
         if (!result.Succeeded)
         {
             throw new InvalidOperationException("Account konnte nicht gelöscht werden: " + string.Join("; ", result.Errors.Select(e => e.Description)));
         }
 
+        // In dieser Reihenfolge: Nach ForceLeave kommt vom Account nichts mehr in den Verlauf (011 AK-17).
+        game.ForceLeave(user.Id, savePosition: false);
+        game.RemoveChatOf(user.Id);
         await signIn.SignOutAsync();
         Deleted = true;
         return Page();

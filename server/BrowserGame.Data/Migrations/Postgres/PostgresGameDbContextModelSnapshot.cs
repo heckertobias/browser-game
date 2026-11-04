@@ -92,6 +92,35 @@ namespace BrowserGame.Data.Migrations.Postgres
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("BrowserGame.Data.ChatMessageEntry", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("SentAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("SentAt");
+
+                    b.ToTable("ChatMessages");
+                });
+
             modelBuilder.Entity("BrowserGame.Data.PlayerPosition", b =>
                 {
                     b.Property<string>("AccountId")
@@ -298,6 +327,15 @@ namespace BrowserGame.Data.Migrations.Postgres
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("BrowserGame.Data.ChatMessageEntry", b =>
+                {
+                    b.HasOne("BrowserGame.Data.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BrowserGame.Data.PlayerPosition", b =>

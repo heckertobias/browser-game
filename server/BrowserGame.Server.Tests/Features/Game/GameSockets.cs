@@ -76,10 +76,14 @@ public static class GameSockets
         (await ReceiveUntilAsync(socket, m => m.PayloadCase == ServerMessage.PayloadOneofCase.Snapshot && predicate(m.Snapshot), ct)).Snapshot;
 
     /// <summary>Liest Nachrichten, bis eine passt; spätestens nach 2 s schlägt der Test fehl.</summary>
-    public static async Task<ServerMessage> ReceiveUntilAsync(WebSocket socket, Func<ServerMessage, bool> predicate, CancellationToken ct)
+    public static Task<ServerMessage> ReceiveUntilAsync(WebSocket socket, Func<ServerMessage, bool> predicate, CancellationToken ct) =>
+        ReceiveUntilAsync(socket, predicate, TimeSpan.FromSeconds(2), ct);
+
+    /// <summary>Liest Nachrichten, bis eine passt; spätestens nach <paramref name="limit"/> schlägt der Test fehl.</summary>
+    public static async Task<ServerMessage> ReceiveUntilAsync(WebSocket socket, Func<ServerMessage, bool> predicate, TimeSpan limit, CancellationToken ct)
     {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        timeout.CancelAfter(TimeSpan.FromSeconds(2));
+        timeout.CancelAfter(limit);
         var buffer = new byte[64 * 1024];
         while (true)
         {
@@ -96,6 +100,11 @@ public static class GameSockets
     public static Task SendInputAsync(WebSocket socket, uint seq, float dirX, float dirY, CancellationToken ct) =>
         socket.SendAsync(
             new ClientMessage { Input = new Input { Seq = seq, DirX = dirX, DirY = dirY } }.ToByteArray(),
+            WebSocketMessageType.Binary, true, ct);
+
+    public static Task SendChatAsync(WebSocket socket, string text, CancellationToken ct) =>
+        socket.SendAsync(
+            new ClientMessage { SendChat = new SendChat { Text = text } }.ToByteArray(),
             WebSocketMessageType.Binary, true, ct);
 
     public static async Task SendInputsAsync(WebSocket socket, float dirX, float dirY, CancellationToken ct)

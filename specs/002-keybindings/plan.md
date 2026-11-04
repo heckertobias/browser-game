@@ -47,7 +47,8 @@ HTTP-API (OpenAPI, Antiforgery, zweiter Auth-Weg) lohnt sich für einen einzigen
    und „Zurück zum Spiel“. Ein GET meldet weiterhin nicht ab (kein CSRF über Links).
 9. **Speichern sofort.** Jede Änderung wird sofort lokal wirksam (AK-5) und sofort geschickt. Kein „Übernehmen“-Button.
 10. **Esc, solange ein Eingabefeld den Fokus hat, öffnet das Menü nicht** (Vorgabe aus 011, T13 dort). Das Menü prüft
-    `isEditableTarget(e.target)`; der Chat ruft zusätzlich `stopPropagation()` auf.
+    `isEditableTarget(e.target)`; der Chat ruft zusätzlich `stopPropagation()` auf. Esc mit `e.repeat` wird ignoriert
+    (weder öffnen noch schließen): Wird Esc im Chat gehalten, kommt die Wiederholung sonst außerhalb des Felds an.
 
 ## Verträge
 
@@ -163,7 +164,7 @@ message Welcome {
 - Overlay (`bg-black/60`, Safe Areas wie die bestehenden Overlays), das Spiel bleibt dahinter sichtbar (AK-4b).
 - Einträge als echte `<button>`/`<a>` (Tab/Enter/Leertaste, Fokus beim Öffnen auf „Weiterspielen“): Weiterspielen,
   Tastenbelegung, Mein Account (`/Account/Manage`), Abmelden (`/Account/Logout`) (AK-3).
-- Globaler `keydown`-Listener für Esc in `App.tsx`: öffnet/schließt (AK-1). Ignoriert, wenn `isEditableTarget(e.target)`.
+- Globaler `keydown`-Listener für Esc in `App.tsx`: öffnet/schließt (AK-1). Ignoriert, wenn `isEditableTarget(e.target)` oder `e.repeat`.
   In der Tastenbelegung während des Aufnehmens bricht Esc nur das Aufnehmen ab.
 - HUD: Button „Menü“ oben rechts an der Stelle von „Mein Account“ (AK-2), `min-h-11` wie bisher.
 
@@ -183,7 +184,7 @@ Neue Schlüssel (de/en): `menu`, `menuContinue`, `menuKeyBindings`, `menuSignOut
 
 | AK | Wie erfüllt | Wie getestet |
 |---|---|---|
-| 1 | Esc-Listener in `App.tsx` | Vitest: `menuKeyAction` (Esc → toggle, Esc in Eingabefeld → nichts, Esc beim Aufnehmen → abbrechen); **manuell** |
+| 1 | Esc-Listener in `App.tsx` | Vitest: `menuKeyAction` (Esc → toggle, Esc in Eingabefeld → nichts, Esc mit `repeat` → nichts, Esc beim Aufnehmen → abbrechen); **manuell** |
 | 2 | HUD-Button „Menü“ | **manuell:** Handy hochkant/quer |
 | 3 | `Menu.tsx` | Vitest/React: Einträge vorhanden; **manuell:** Abmelden über Bestätigungsseite; Integration: `GET /Account/Logout` angemeldet → 200 mit Formular, meldet nicht ab |
 | 4 | `InputTracker.setSuspended` | Vitest: pausiert → `direction()` = 0 trotz gedrückter Taste/gehaltenem Zeiger, gedrückte Tasten gelöscht |

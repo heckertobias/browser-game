@@ -52,6 +52,7 @@ client/
         input/               input.ts, wakeLock.ts
         render/              render.ts, viewport.ts, hud.ts
         network/             net.ts (WebSocket + Protobuf)
+        chat/                Chat.tsx (Chatfenster), chatLogic.ts (reine Logik)
       accounts/api/          passkeys.ts — WebAuthn-Flow der Spielerseiten
       localization/          i18n.ts (Texte, Sprache) · language.ts (bestätigt bei Formularverlust)
       pwa/
@@ -96,10 +97,13 @@ server/
         Presentation/        Razor-Seiten (Account/…) - URLs bleiben /Account/…
       Game/
         GameSetup.cs         DI-Anmeldung (AddGame)
-        Application/         GameLoop (Hosted Service), GameSettings
+        Application/         GameLoop (Hosted Service), PlayerOutbox (Ausgang je Verbindung), GameSettings
         Domain/              World (Spieler, Eingaben), PlayerColors
         Infrastructure/      PositionStore (Persistenz der Positionen)
         Presentation/        GameEndpoint (WebSocket /ws), GameAccess (Origin-Prüfung)
+        Chat/Domain/         ChatRules (Text), ChatRateLimiter (Tempo), ChatHistory (Verlauf)
+        Chat/Application/    ChatSaveQueue (Warteschlange Tick-Thread → ChatStore)
+        Chat/Infrastructure/ ChatStore (Verlauf laden, gebündelt schreiben, aufräumen)
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)
         Application/         GameLanguages, LanguageCookie, LanguageOnlyCultureProvider

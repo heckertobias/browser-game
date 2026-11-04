@@ -24,6 +24,15 @@ public sealed class PlayerPosition
     public DateTimeOffset UpdatedAt { get; set; }
 }
 
+/// <summary>Chatnachricht (011). Der Absendername wird nicht gespeichert, sondern über den Account gelesen.</summary>
+public sealed class ChatMessageEntry
+{
+    public long Id { get; init; }
+    public required string AccountId { get; init; }
+    public required string Text { get; init; }
+    public DateTimeOffset SentAt { get; init; }
+}
+
 /// <summary>
 /// Gemeinsames Modell für alle Datenbanken (ADR 0004). Die abgeleiteten Kontexte existieren nur,
 /// damit jeder Provider seinen eigenen Migrationssatz bekommt.
@@ -31,6 +40,8 @@ public sealed class PlayerPosition
 public abstract class GameDbContext(DbContextOptions options) : IdentityDbContext<Account>(options), IDataProtectionKeyContext
 {
     public DbSet<PlayerPosition> PlayerPositions => Set<PlayerPosition>();
+
+    public DbSet<ChatMessageEntry> ChatMessages => Set<ChatMessageEntry>();
 
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
@@ -52,6 +63,17 @@ public abstract class GameDbContext(DbContextOptions options) : IdentityDbContex
         {
             position.HasKey(p => p.AccountId);
             position.HasOne<Account>().WithOne().HasForeignKey<PlayerPosition>(p => p.AccountId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ChatMessageEntry>(message =>
+        {
+            message.Property(m => m.Text).HasMaxLength(200);
+            // SQLite kann DateTimeOffset in EF Core weder vergleichen noch sortieren. Als Unix-Millisekunden geht beides überall.
+            message.Property(m => m.SentAt).HasConversion(
+                sentAt => sentAt.ToUnixTimeMilliseconds(),
+                unixMs => DateTimeOffset.FromUnixTimeMilliseconds(unixMs));
+            message.HasIndex(m => m.SentAt);
+            message.HasOne<Account>().WithMany().HasForeignKey(m => m.AccountId).OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<Setting>().HasKey(s => s.Key);
