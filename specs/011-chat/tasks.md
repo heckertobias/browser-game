@@ -39,12 +39,13 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
   Verbindungsende.
 
 ## Tests / Prüfung
-- [ ] **T12**: Integrationstests (WS) laut Abdeckungstabelle mit Fake-Uhr, gegen SQLite und PostgreSQL.
+- [x] **T12**: Integrationstests (WS) laut Abdeckungstabelle mit Fake-Uhr, gegen SQLite und PostgreSQL.
 - [x] **T13**: Hinweis im Plan von 002 (sobald es ihn gibt): Esc öffnet das Menü nicht, solange ein Eingabefeld den
   Fokus hat.
 - [ ] **T14**: Manuelle Prüfung in der Testumgebung:
   - zwei Geräte (Laptop + Handy) chatten
   - AK-1, AK-3, AK-4, AK-5 am Monitor
+  - AK-1 am Handy quer
   - AK-4c und AK-7 am Handy hochkant und quer (Android/Chrome und iPhone/Safari)
   - Nach dem Senden und nach dem Einklappen: am PC steuern WASD sofort wieder; nach dem Senden am Handy bleibt die Tastatur offen
   - AK-6: W halten, Enter: Figur stoppt; WASD im Feld bewegen nicht; Esc öffnet kein Menü
