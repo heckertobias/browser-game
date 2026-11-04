@@ -70,4 +70,7 @@ Erst beginnen, wenn 003 T9 und T10 umgesetzt sind (siehe Plan, „Risiken“).
     - Verbindung trennen bei offener Tastatur: Tastatur geht zu, „Neu verbinden“ ist sichtbar und tippbar, auch quer.
     - Bildschirm bleibt an, solange die Tastatur offen ist (Wake Lock).
 
+  Stand: Auf `0.7.0-rc.1` mit Laptop und iPhone abgenommen, Code gemergt. Android/Chrome steht noch aus, bis dahin bleibt
+  T14 offen.
+
   Danach alle AKs abhaken, Spec-Status auf `umgesetzt`, Roadmap aktualisieren.
