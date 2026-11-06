@@ -66,6 +66,24 @@ internal static class KeyBindingRules
     public static byte[]? ToStored(KeyBindings bindings) =>
         bindings.Bindings.Count == 0 ? null : KnownFieldsParser.ParseFrom(bindings.ToByteArray()).ToByteArray();
 
+    /// <summary>Belegung aus <c>Account.KeyBindings</c>: <c>null</c> oder kaputte Bytes → leer (Standard des Clients).</summary>
+    public static KeyBindings FromStored(byte[]? stored)
+    {
+        if (stored is null)
+        {
+            return new KeyBindings();
+        }
+
+        try
+        {
+            return KeyBindings.Parser.ParseFrom(stored);
+        }
+        catch (InvalidProtocolBufferException)
+        {
+            return new KeyBindings();
+        }
+    }
+
     private static bool IsWellFormed(string code) =>
         code.Length is >= 1 and <= MaxCodeLength && code.All(char.IsAsciiLetterOrDigit);
 }

@@ -6,13 +6,17 @@ using ProtoChatHistory = BrowserGame.Contracts.V1.ChatHistory;
 namespace BrowserGame.Server.Features.Game;
 
 /// <summary>Verbindung eines Spielers zwischen WebSocket-Handler und Tick-Thread.</summary>
-internal sealed class PlayerConnection(string playerId, string name, (double X, double Y)? savedPosition, System.Action? onOverflow = null)
+internal sealed class PlayerConnection(
+    string playerId, string name, (double X, double Y)? savedPosition, System.Action? onOverflow = null, KeyBindings? keyBindings = null)
 {
     public string PlayerId { get; } = playerId;
     public string Name { get; } = name;
 
     /// <summary>Zuletzt gespeicherte Position; ohne sie startet die Figur am Startpunkt (AK-17, AK-18).</summary>
     public (double X, double Y)? SavedPosition { get; } = savedPosition;
+
+    /// <summary>Gespeicherte Tastenbelegung des Accounts für Welcome (002 AK-9); leer = Standard des Clients (AK-10).</summary>
+    public KeyBindings KeyBindings { get; } = keyBindings ?? new KeyBindings();
 
     /// <summary>Eingaben vom Client; bei Flut fallen die ältesten weg.</summary>
     public Channel<MoveInput> Inbox { get; } = Channel.CreateBounded<MoveInput>(
@@ -74,13 +78,14 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     internal void LoadChatHistory(IReadOnlyList<ChatHistoryEntry> messages) =>
         _changes.Writer.TryWrite(new Change(ChangeKind.ChatHistoryLoaded, "", null, messages));
 
-    internal PlayerConnection Join(string accountId, string name, (double X, double Y)? savedPosition, System.Action? abort = null)
+    internal PlayerConnection Join(
+        string accountId, string name, (double X, double Y)? savedPosition, System.Action? abort = null, KeyBindings? keyBindings = null)
     {
         var connection = new PlayerConnection(accountId, name, savedPosition, () =>
         {
             LogStalled(accountId);
             abort?.Invoke();
-        });
+        }, keyBindings);
         _changes.Writer.TryWrite(new Change(ChangeKind.Join, accountId, connection));
         return connection;
     }
@@ -190,7 +195,14 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             {
                 case ChangeKind.Join:
                     var joined = AddOrTakeOver(change.Connection!);
-                    var welcome = new Welcome { PlayerId = joined.Id, Name = joined.Name, Speed = (float)_world.Speed, TickRateHz = (uint)_world.TickRateHz };
+                    var welcome = new Welcome
+                    {
+                        PlayerId = joined.Id,
+                        Name = joined.Name,
+                        Speed = (float)_world.Speed,
+                        TickRateHz = (uint)_world.TickRateHz,
+                        KeyBindings = change.Connection!.KeyBindings,
+                    };
                     change.Connection!.Outbox.SendRequired(new ServerMessage { Welcome = welcome }.ToByteArray());
                     SendChatHistory(change.Connection);
                     LogJoined(joined.Id, joined.Name, _connections.Count);

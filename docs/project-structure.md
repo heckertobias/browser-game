@@ -105,6 +105,7 @@ server/
         Chat/Application/    ChatSaveQueue (Warteschlange Tick-Thread → ChatStore)
         Chat/Infrastructure/ ChatStore (Verlauf laden, gebündelt schreiben, aufräumen)
         KeyBindings/Domain/  KeyBindingRules (Tastenbelegung prüfen, 002)
+        KeyBindings/Infrastructure/ KeyBindingStore (Belegung am Account speichern, 002)
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)
         Application/         GameLanguages, LanguageCookie, LanguageOnlyCultureProvider
