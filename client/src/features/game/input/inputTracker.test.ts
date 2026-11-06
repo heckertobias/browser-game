@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InputTracker, isEditableTarget } from "./input";
+import { DEFAULT_BINDINGS } from "./bindings";
+import { Action } from "@/generated/browsergame/v1/game_pb";
 
 const element = (props: Partial<HTMLElement>) => props as unknown as EventTarget;
 const FIELD = element({ tagName: "INPUT" });
@@ -210,5 +212,91 @@ describe("InputTracker: Fenster und Tab bleiben (007)", () => {
     keydown("KeyW", BODY);
     fakeDocument.dispatchEvent(new Event("visibilitychange"));
     expect(direction()).toEqual(UP);
+  });
+});
+
+describe("InputTracker: Belegung (002 AK-5, AK-6)", () => {
+  const upOn = (...codes: string[]) => new Map(DEFAULT_BINDINGS).set(Action.MOVE_UP, codes);
+
+  it("steuert mit der neuen Taste, die alte wirkt nicht mehr", () => {
+    tracker.setBindings(upOn("ArrowUp"));
+    keydown("KeyW", BODY);
+    expect(direction()).toEqual(STILL);
+    keyup("KeyW", BODY);
+    keydown("ArrowUp", BODY);
+    expect(direction()).toEqual(UP);
+  });
+
+  it("wirkt sofort, auch für eine schon gedrückte Taste", () => {
+    keydown("ArrowUp", BODY);
+    expect(direction()).toEqual(STILL);
+    tracker.setBindings(upOn("ArrowUp"));
+    expect(direction()).toEqual(UP);
+  });
+
+  it.each(["KeyW", "ArrowUp"])("beide Tasten einer Aktion steuern: %s", (code) => {
+    tracker.setBindings(upOn("KeyW", "ArrowUp"));
+    keydown(code, BODY);
+    expect(direction()).toEqual(UP);
+  });
+});
+
+describe("InputTracker: Menü offen (002 AK-4)", () => {
+  it("hält die Figur an, obwohl eine Taste gedrückt ist", () => {
+    keydown("KeyW", BODY);
+    tracker.setSuspended(true);
+    expect(direction()).toEqual(STILL);
+  });
+
+  it("hält die Figur an, obwohl der Zeiger gehalten wird", () => {
+    pointerdown();
+    tracker.setSuspended(true);
+    expect(direction()).toEqual(STILL);
+  });
+
+  it("ignoriert Tasten, die bei offenem Menü gedrückt werden, auch nach dem Schließen", () => {
+    tracker.setSuspended(true);
+    keydown("KeyW", BODY);
+    expect(direction()).toEqual(STILL);
+    tracker.setSuspended(false);
+    expect(direction()).toEqual(STILL);
+  });
+
+  it("startet bei offenem Menü kein Halten und nimmt keinem Feld den Fokus", () => {
+    const blur = vi.fn();
+    fakeFieldFocus(blur);
+    tracker.setSuspended(true);
+    const e = pointerdown();
+    expect(e.defaultPrevented).toBe(false);
+    expect(canvas.setPointerCapture).not.toHaveBeenCalled();
+    expect(blur).not.toHaveBeenCalled();
+    tracker.setSuspended(false);
+    expect(direction()).toEqual(STILL);
+  });
+
+  it("löscht beim Öffnen gedrückte Tasten und gehaltenen Zeiger", () => {
+    keydown("KeyW", BODY);
+    pointerdown();
+    tracker.setSuspended(true);
+    tracker.setSuspended(false);
+    expect(direction()).toEqual(STILL);
+  });
+
+  it("nimmt eine über das Schließen gehaltene Taste mit ihrer Wiederholung wieder an", () => {
+    keydown("KeyW", BODY);
+    tracker.setSuspended(true);
+    tracker.setSuspended(false);
+    keydown("KeyW", BODY, true);
+    expect(direction()).toEqual(UP);
+  });
+
+  it("steuert nach dem Schließen wieder mit Tasten und Zeiger", () => {
+    tracker.setSuspended(true);
+    tracker.setSuspended(false);
+    keydown("KeyW", BODY);
+    expect(direction()).toEqual(UP);
+    keyup("KeyW", BODY);
+    pointerdown();
+    expect(direction()).toEqual(TOWARDS_POINTER);
   });
 });
