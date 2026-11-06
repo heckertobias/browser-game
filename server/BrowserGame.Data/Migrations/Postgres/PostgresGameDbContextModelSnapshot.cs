@@ -41,6 +41,10 @@ namespace BrowserGame.Data.Migrations.Postgres
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<byte[]>("KeyBindings")
+                        .HasMaxLength(512)
+                        .HasColumnType("bytea");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasMaxLength(8)
