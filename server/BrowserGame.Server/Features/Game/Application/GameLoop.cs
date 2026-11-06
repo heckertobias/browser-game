@@ -6,7 +6,7 @@ using ProtoChatHistory = BrowserGame.Contracts.V1.ChatHistory;
 namespace BrowserGame.Server.Features.Game;
 
 /// <summary>Verbindung eines Spielers zwischen WebSocket-Handler und Tick-Thread.</summary>
-internal sealed class PlayerConnection(string playerId, string name, (double X, double Y)? savedPosition, Action? onOverflow = null)
+internal sealed class PlayerConnection(string playerId, string name, (double X, double Y)? savedPosition, System.Action? onOverflow = null)
 {
     public string PlayerId { get; } = playerId;
     public string Name { get; } = name;
@@ -74,7 +74,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     internal void LoadChatHistory(IReadOnlyList<ChatHistoryEntry> messages) =>
         _changes.Writer.TryWrite(new Change(ChangeKind.ChatHistoryLoaded, "", null, messages));
 
-    internal PlayerConnection Join(string accountId, string name, (double X, double Y)? savedPosition, Action? abort = null)
+    internal PlayerConnection Join(string accountId, string name, (double X, double Y)? savedPosition, System.Action? abort = null)
     {
         var connection = new PlayerConnection(accountId, name, savedPosition, () =>
         {

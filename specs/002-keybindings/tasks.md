@@ -5,7 +5,7 @@ Gehört zu: [plan.md](plan.md)
 Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task bringt seine Tests mit.
 
 ## Verträge
-- [ ] **T1** (AK-5, AK-9, AK-10): `game.proto` um `Action`, `KeyBinding`, `KeyBindings`, `SaveKeyBindings`
+- [x] **T1** (AK-5, AK-9, AK-10): `game.proto` um `Action`, `KeyBinding`, `KeyBindings`, `SaveKeyBindings`
   (`ClientMessage` Feld 3) und `Welcome.key_bindings` (Feld 5) erweitern; `buf lint` und `buf breaking` grün.
 
 ## Server
