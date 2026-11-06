@@ -17,7 +17,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
   Integrationstest (GET meldet nicht ab).
 
 ## Client
-- [ ] **T6** (AK-5–8, AK-10, AK-11): `bindings.ts` (`DEFAULT_BINDINGS`, `fromProto`, `toProto`, `assign`,
+- [x] **T6** (AK-5–8, AK-10, AK-11): `bindings.ts` (`DEFAULT_BINDINGS`, `fromProto`, `toProto`, `assign`,
   `assignOverwriting`, `clear`, `canClear`, `keyLabel`) mit Vitest.
 - [ ] **T7** (AK-4, AK-5, AK-6): `InputTracker.setBindings` und `setSuspended`; `activeActions` auf `Bindings`; Vitest.
 - [ ] **T8** (AK-9): `net.ts`/`game.ts`: Belegung aus `Welcome` übernehmen, `saveKeyBindings`, `setMenuOpen`,

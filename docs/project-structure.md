@@ -49,7 +49,7 @@ client/
         core/                constants.ts, vector.ts — Basis, von allen Unterordnern genutzt
         engine/              game.ts (Orchestrierung)
         state/               prediction.ts, interpolation.ts (Client-Vorschau des Serverstands)
-        input/               input.ts, wakeLock.ts
+        input/               input.ts, bindings.ts, wakeLock.ts
         render/              render.ts, viewport.ts, hud.ts
         network/             net.ts (WebSocket + Protobuf)
         chat/                Chat.tsx (Chatfenster), chatLogic.ts (reine Logik)
