@@ -24,7 +24,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
   `GameEvents.onKeyBindings`.
 - [x] **T9** (AK-1–4b): `Menu.tsx`, HUD-Button „Menü“ statt „Mein Account“, Esc-Listener (nicht in Eingabefeldern);
   `menuKeyAction` mit Vitest; i18n de/en.
-- [ ] **T10** (AK-5–8, AK-10, AK-11): `KeyBindings.tsx` (Aufnehmen, Konflikt-Rückfrage, Hinweise, „×“, Standard);
+- [x] **T10** (AK-5–8, AK-10, AK-11): `KeyBindings.tsx` (Aufnehmen, Konflikt-Rückfrage, Hinweise, „×“, Standard);
   i18n de/en.
 
 ## Tests / Prüfung

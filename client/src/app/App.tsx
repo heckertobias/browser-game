@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Kicked_Reason } from "@/generated/browsergame/v1/game_pb";
 import { Chat, type ChatFeed } from "@/features/game/chat/Chat";
 import { Game, type ConnectionStatus } from "@/features/game/engine/game";
+import type { Bindings } from "@/features/game/input/bindings";
+import { KeyBindings } from "@/features/game/menu/KeyBindings";
 import { Menu } from "@/features/game/menu/Menu";
 import { menuKeyAction } from "@/features/game/menu/menuLogic";
 import type { KickReason } from "@/features/game/network/net";
@@ -43,12 +45,14 @@ export function App() {
   const chatRef = useRef<ChatFeed>(null);
   const gameRef = useRef<Game | null>(null);
   const sendChat = useCallback((text: string) => gameRef.current?.sendChat(text) ?? false, []);
+  const saveKeyBindings = useCallback((bindings: Bindings) => { gameRef.current?.saveKeyBindings(bindings); }, []);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [name, setName] = useState<string | null>(null);
   const [kicked, setKicked] = useState<KickReason | null>(null);
   const [coordinates, setCoordinates] = useState<string | null>(null);
   const [update, setUpdate] = useState(false);
   const [reload, setReload] = useState<"idle" | "pending" | "stuck">("idle");
+  const [keyBindings, setKeyBindings] = useState<Bindings | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuAvailable = status === "connecting" || status === "connected";
   const menuShown = menuOpen && menuAvailable;
@@ -66,6 +70,7 @@ export function App() {
         setKicked(reason);
         if (reason === Kicked_Reason.SIGNED_OUT) window.location.replace(LOGIN_URL);
       },
+      onKeyBindings: setKeyBindings,
       onCoordinates: setCoordinates,
       onChatHistory: (messages) => { chatRef.current?.onChatHistory(messages); },
       onChatMessage: (message) => { chatRef.current?.onChatMessage(message); },
@@ -149,7 +154,7 @@ export function App() {
         )}
         <span className="absolute bottom-[max(0.5rem,env(safe-area-inset-bottom))] right-[max(0.5rem,env(safe-area-inset-right))] text-xs normal-case text-base-content/60" data-testid="version">{APP_VERSION}</span>
       </div>
-      {menuShown && <Menu onClose={() => { setMenuOpen(false); }} />}
+      {menuShown && <Menu onClose={() => { setMenuOpen(false); }} keyBindings={<KeyBindings bindings={keyBindings} onSave={saveKeyBindings} />} />}
     </div>
   );
 }
