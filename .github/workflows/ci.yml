@@ -20,6 +20,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Nur Markdown geändert (Specs, ADRs, READMEs) → Build, Tests und Images entfallen. Tags, Nacht-Lauf und manueller
+  # Start bauen immer.
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          range=""
+          if [[ "$EVENT" == "pull_request" ]]; then
+            range="${PR_BASE}...${PR_HEAD}"
+          elif [[ "$EVENT" == "push" && "$REF" == refs/heads/* && ! "$PUSH_BEFORE" =~ ^0+$ ]]; then
+            range="${PUSH_BEFORE}..${SHA}"
+          fi
+          code=true
+          if [[ -n "$range" ]] && files="$(git diff --name-only "$range")"; then
+            code=false
+            while IFS= read -r file; do
+              [[ -z "$file" || "$file" == *.md ]] || { code=true; break; }
+            done <<< "$files"
+          fi
+          echo "Code geändert: $code"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+
+  # Links in allen Markdown-Dateien und die Regeln für specs/ (specs/README.md).
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: python3 scripts/check-docs.py
+
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -39,6 +86,8 @@ jobs:
           ./actionlint -color
 
   contracts:
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -56,6 +105,8 @@ jobs:
           pr_comment: false
 
   server:
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -78,6 +129,8 @@ jobs:
 
   # Dieselben Tests gegen PostgreSQL (ADR 0004).
   server-postgres:
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     services:
@@ -121,6 +174,8 @@ jobs:
           done
 
   client:
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -144,7 +199,8 @@ jobs:
 
   # Zwei Images aus einem Dockerfile (ADR 0006): Spiel und Admin.
   docker:
-    needs: [contracts, server, server-postgres, client]
+    needs: [changes, contracts, server, server-postgres, client]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -306,7 +362,7 @@ jobs:
   # Einziger Required Check im Ruleset. Neue Jobs nur in `needs` eintragen.
   ci-ok:
     if: always()
-    needs: [lint, contracts, server, server-postgres, client, docker]
+    needs: [changes, docs, lint, contracts, server, server-postgres, client, docker]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
