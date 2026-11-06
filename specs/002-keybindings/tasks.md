@@ -10,7 +10,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 
 ## Server
 - [x] **T2** (AK-9, AK-10): `Account.KeyBindings` (`byte[]?`, max. 512), Migration `AddKeyBindings` für beide Provider.
-- [ ] **T3** (AK-7, AK-8, AK-11): `KeyBindingRules` (`IsValid`, `ToStored`, `ReservedCodes`) mit Unit-Tests.
+- [x] **T3** (AK-7, AK-8, AK-11): `KeyBindingRules` (`IsValid`, `ToStored`, `ReservedCodes`) mit Unit-Tests.
 - [ ] **T4** (AK-9, AK-10): Belegung beim Verbinden laden und in `Welcome` schicken; `SaveKeyBindings` prüfen und über
   `KeyBindingStore` speichern; Integrationstests (WS) gegen SQLite und PostgreSQL.
 - [ ] **T5** (AK-3): `GET /Account/Logout` zeigt Bestätigungsseite mit POST-Formular und „Zurück zum Spiel“; Texte de/en;
