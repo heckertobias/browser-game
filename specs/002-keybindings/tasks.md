@@ -22,7 +22,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 - [x] **T7** (AK-4, AK-5, AK-6): `InputTracker.setBindings` und `setSuspended`; `activeActions` auf `Bindings`; Vitest.
 - [x] **T8** (AK-9): `net.ts`/`game.ts`: Belegung aus `Welcome` übernehmen, `saveKeyBindings`, `setMenuOpen`,
   `GameEvents.onKeyBindings`.
-- [ ] **T9** (AK-1–4b): `Menu.tsx`, HUD-Button „Menü“ statt „Mein Account“, Esc-Listener (nicht in Eingabefeldern);
+- [x] **T9** (AK-1–4b): `Menu.tsx`, HUD-Button „Menü“ statt „Mein Account“, Esc-Listener (nicht in Eingabefeldern);
   `menuKeyAction` mit Vitest; i18n de/en.
 - [ ] **T10** (AK-5–8, AK-10, AK-11): `KeyBindings.tsx` (Aufnehmen, Konflikt-Rückfrage, Hinweise, „×“, Standard);
   i18n de/en.
