@@ -29,7 +29,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 
 ## Tests / Prüfung
 - [ ] **T11**: Manuelle Prüfung in der Testumgebung:
-  - PC: Esc auf/zu, Taste umlegen, zweite Taste, Konflikt, Esc nicht belegbar, letzte Taste nicht leerbar, Standard
+  - PC: Esc auf/zu, Taste umlegen, zweite Taste, Konflikt, Esc und Enter nicht belegbar (Chat geht dabei nicht auf), letzte Taste nicht leerbar, Standard
   - zweites Gerät: Belegung ist da (AK-9); offenes Menü, anderes Gerät läuft weiter (AK-4b)
   - Handy hochkant/quer: Menü-Button, Abmelden über die Bestätigungsseite
 

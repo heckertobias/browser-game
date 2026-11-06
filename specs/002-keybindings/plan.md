@@ -29,8 +29,10 @@ HTTP-API (OpenAPI, Antiforgery, zweiter Auth-Weg) lohnt sich für einen einzigen
 3. **Tasten werden als `KeyboardEvent.code` gespeichert** (wie bisher, unabhängig vom Tastaturlayout). Angezeigt wird
    der Name auf dem aktuellen Layout über `navigator.keyboard.getLayoutMap()` (Chromium); sonst ein Name aus dem Code
    (`KeyW` → `W`, `ArrowUp` → `↑`, `Digit1` → `1`).
-4. **Reserviert ist nur `Escape`** (AK-8). Wird beim Aufnehmen Esc gedrückt, bricht das Aufnehmen ab, der Platz bleibt
-   wie er war. 011 (Chat) reserviert später zusätzlich `Enter`; die Liste `RESERVED_CODES` liegt dafür an einer Stelle
+4. **Reserviert sind `Escape`, `Enter` und `NumpadEnter`** (AK-8). Enter öffnet seit 011 den Chat (`shouldOpenChat`
+   prüft `e.key`, trifft also beide Enter-Tasten). Wird beim Aufnehmen Esc gedrückt, bricht das Aufnehmen ab, der Platz
+   bleibt wie er war. Enter beim Aufnehmen ergibt `reserved`; der Aufnahme-Listener ruft `preventDefault()`, damit
+   `shouldOpenChat` (prüft `defaultPrevented`) den Chat nicht öffnet. Die Liste `RESERVED_CODES` liegt an einer Stelle
    (Client und Server).
 5. **Konflikt (AK-7):** Die Taste ist schon bei einer anderen Aktion belegt → Dialog „W ist schon ‚Nach oben‘ zugeordnet.
    Dort entfernen und hier belegen?“ mit „Überschreiben“ / „Abbrechen“. Wäre die andere Aktion danach ohne Taste
@@ -77,7 +79,7 @@ enum Action {
 
 message KeyBinding {
   Action action = 1;
-  // KeyboardEvent.code, höchstens 2, ohne Escape.
+  // KeyboardEvent.code, höchstens 2, ohne Escape, Enter, NumpadEnter.
   repeated string codes = 2;
 }
 
@@ -116,7 +118,7 @@ message Welcome {
   - Sonst: jede Aktion bekannt (nicht `UNSPECIFIED`, kein unbekannter Enum-Wert) und höchstens einmal aufgeführt.
   - Je Aktion 0–2 Codes; jede Bewegungsaktion mindestens 1 (AK-11).
   - Kein Code doppelt, weder in einer Aktion noch über Aktionen hinweg (AK-7).
-  - Kein Code aus `ReservedCodes` (`Escape`, AK-8).
+  - Kein Code aus `ReservedCodes` (`Escape`, `Enter`, `NumpadEnter`, AK-8).
   - Codes 1–32 Zeichen, nur `[A-Za-z0-9]`.
 - `ToStored(KeyBindings) → byte[]?`: leer → `null`, sonst `ToByteArray()`.
 
@@ -139,7 +141,8 @@ message Welcome {
 
 ### `features/game/input/bindings.ts` (reine Funktionen, Vitest)
 - Typen aus dem generierten Code (`Action`, `KeyBindings`); intern `type Bindings = ReadonlyMap<Action, readonly string[]>`.
-- `DEFAULT_BINDINGS` (WASD, zweiter Platz leer), `MOVE_ACTIONS`, `RESERVED_CODES = ["Escape"]`.
+  Die handgeschriebenen `Action`, `KeyBindings` und `DEFAULT_BINDINGS` in `input/input.ts` (aus 001) entfallen.
+- `DEFAULT_BINDINGS` (WASD, zweiter Platz leer), `MOVE_ACTIONS`, `RESERVED_CODES = ["Escape", "Enter", "NumpadEnter"]`.
 - `fromProto(KeyBindings) → Bindings`: leer → Standard. Aktionen, die fehlen (z. B. neue aus späteren Specs), bekommen
   ihren Standard, sofern dessen Taste noch frei ist, sonst bleiben sie leer.
 - `toProto(Bindings, isDefault) → KeyBindings`: gleich dem Standard → leer.
@@ -171,13 +174,13 @@ message Welcome {
 ### `features/game/menu/KeyBindings.tsx`
 - Tabelle: Aktion | Platz 1 | Platz 2. Klick auf einen Platz → „Taste drücken …“; der nächste `keydown` (mit
   `preventDefault`) wird über `assign` geprüft. Ergebnis `conflict` → Rückfrage (AK-7), `blocked` → Hinweis,
-  `reserved` → Hinweis „Esc ist für das Menü reserviert“ (AK-8).
+  `reserved` → Hinweis „Esc ist für das Menü reserviert“ bzw. „Enter ist für den Chat reserviert“ (AK-8).
 - „×“ je Platz (AK-11), Button „Standard wiederherstellen“ (AK-10), „Zurück“.
 - Am Handy ohne Tastatur ist die Seite erreichbar, aber ohne Tastatur nicht nutzbar; kein eigener Sonderfall.
 
 ### `i18n.ts`
 Neue Schlüssel (de/en): `menu`, `menuContinue`, `menuKeyBindings`, `menuSignOut`, Aktionsnamen (`actionMoveUp` …),
-`bindingPressKey`, `bindingConflict`, `bindingOverwrite`, `bindingCancel`, `bindingBlocked`, `bindingReserved`,
+`bindingPressKey`, `bindingConflict`, `bindingOverwrite`, `bindingCancel`, `bindingBlocked`, `bindingReserved`, `bindingReservedChat`,
 `bindingClear`, `bindingReset`, `back`.
 
 ## Abdeckung der Akzeptanzkriterien
@@ -192,7 +195,7 @@ Neue Schlüssel (de/en): `menu`, `menuContinue`, `menuKeyBindings`, `menuSignOut
 | 5 | `assign`, `setBindings` | Vitest: neue Taste → `activeActions` liefert die Aktion |
 | 6 | Map mit zwei Codes | Vitest: beide Codes lösen aus |
 | 7 | `assign` → `conflict`/`blocked`, Dialog | Vitest: Konflikt erkannt, nichts geändert; `assignOverwriting` entfernt bei der anderen Aktion; Unit (Server): doppelte Codes ungültig |
-| 8 | `RESERVED_CODES` Client + Server | Vitest: `Escape` → `reserved`; Unit (Server): `Escape` ungültig |
+| 8 | `RESERVED_CODES` Client + Server | Vitest: `Escape`, `Enter`, `NumpadEnter` → `reserved`; Aufnehmen mit Enter öffnet den Chat nicht (`defaultPrevented`); Unit (Server): alle drei ungültig |
 | 9 | `Account.KeyBindings`, Welcome | Integration (WS): speichern, neue Verbindung → `Welcome.key_bindings` gleich; ungültige Belegung → nicht gespeichert |
 | 10 | „Standard wiederherstellen“ → leer | Vitest: `toProto(DEFAULT)` leer; Integration: leere Belegung → Spalte `NULL`, Welcome leer |
 | 11 | `clear`/`canClear`, Server-Prüfung | Vitest: letzte Bewegungstaste nicht leerbar; Unit (Server): Bewegungsaktion ohne Taste ungültig |
