@@ -33,7 +33,8 @@ Linkshänder oder Gewohnheiten aus anderen Spielen. Dafür gibt es ein erstes Sp
 - **AK-6:** Gegeben eine Aktion hat zwei Tasten, dann lösen beide die Aktion aus.
 - **AK-7:** Gegeben ich belege eine Taste, die schon einer anderen Aktion zugeordnet ist, dann werde ich darauf
   hingewiesen, bevor etwas überschrieben wird.
-- **AK-8:** Gegeben Esc ist für das Menü reserviert, dann kann Esc keiner anderen Aktion zugeordnet werden.
+- **AK-8:** Gegeben Esc ist für das Menü und Enter für den Chat reserviert, dann kann keine der beiden Tasten einer
+  anderen Aktion zugeordnet werden.
 - **AK-9:** Gegeben ich habe Tasten umbelegt, wenn ich mich auf einem anderen Gerät anmelde, dann gilt dort meine Belegung.
 - **AK-10:** Gegeben ich habe Tasten umbelegt, wenn ich „Standard wiederherstellen“ wähle, dann gilt wieder WASD
   (zweiter Platz leer).
@@ -56,6 +57,7 @@ _Keine._
 - Bis zu zwei Tasten pro Aktion.
 - Einstellungen sind über ein Spielmenü erreichbar (Esc bzw. Menü-Button).
 - Standard: nur WASD, zweiter Platz leer.
+- Enter ist reserviert wie Esc, weil Enter seit 011 den Chat öffnet.
 - Das Spiel läuft bei offenem Menü weiter, nur die eigene Figur steht.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
