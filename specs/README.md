@@ -68,6 +68,8 @@ Nummern fortlaufend, Namen kurz und sprechend.
 - Die erste Spec ist ein **Walking Skeleton**: der dünnste Durchstich durch alle Schichten.
 - Verträge (`contracts/`) sind ausführbare Specs – aus ihnen wird Code generiert, nie umgekehrt.
 - Größere, schwer umkehrbare Entscheidungen → ADR in `docs/decisions/`.
+- `scripts/check-docs.py` prüft Links und diese Regeln (Status, Roadmap, offene Fragen, AK-Bezüge, Tasks); die CI
+  führt es bei jedem Push aus. Ändert ein Push nur Markdown, entfallen Build, Tests und Images.
 
 ## Roadmap
 
