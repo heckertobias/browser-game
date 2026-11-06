@@ -9,7 +9,8 @@ namespace BrowserGame.Server.Features.Accounts.Presentation.Account;
 /// <summary>Abmelden beendet die Sitzung auf allen Geräten (neuer Security-Stamp) – 003 AK-13.</summary>
 public sealed class LogoutModel(SignInManager<PlayerAccount> signIn, UserManager<PlayerAccount> users, GameLoop game) : PageModel
 {
-    public IActionResult OnGet() => Redirect("/");
+    // Ein GET meldet nie ab (kein CSRF über Links); abgemeldet wird nur über das POST-Formular der Seite.
+    public IActionResult OnGet() => User.Identity?.IsAuthenticated == true ? Page() : Redirect("/");
 
     public async Task<IActionResult> OnPostAsync()
     {
