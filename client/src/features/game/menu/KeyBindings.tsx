@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { Action } from "@/generated/browsergame/v1/game_pb";
-import { ACTIONS, canClear, keyLabel, type Bindings, type KeyLayout, type Slot } from "@/features/game/input/bindings";
+import { ACTIONS, keyLabel, type Bindings, type KeyLayout, type Slot } from "@/features/game/input/bindings";
 import { t } from "@/features/localization/i18n";
 import { ENTRY } from "./Menu";
 import {
@@ -36,7 +36,6 @@ export function slotId(action: Action, slot: Slot): string {
 }
 
 function noticeText(notice: Notice): string {
-  if (notice.kind === "blocked") return fill(t.bindingBlocked, { action: actionName(notice.other) });
   return notice.reservedFor === "menu" ? t.bindingReserved : t.bindingReservedChat;
 }
 
@@ -88,7 +87,7 @@ export function KeyBindingsView({ bindings, state, layout, onEvent }: KeyBinding
                             data-testid={`binding-clear-${String(action)}-${String(slot)}`}
                             aria-label={t.bindingClear}
                             title={t.bindingClear}
-                            disabled={!canClear(bindings, action, slot)}
+                            disabled={code === undefined}
                             className={CLEAR}
                             onClick={() => { onEvent({ type: "clear", action, slot }); }}
                           >

@@ -8,18 +8,13 @@ export type Bindings = ReadonlyMap<Action, readonly string[]>;
 export type Slot = 0 | 1;
 
 export type AssignResult =
-  | { kind: "ok"; bindings: Bindings }
-  | { kind: "conflict"; other: Action }
-  | { kind: "blocked"; other: Action }
+  | { kind: "ok"; bindings: Bindings; overwritten?: Action }
   | { kind: "reserved"; reservedFor: "menu" | "chat" };
 
 /** Teil von `KeyboardLayoutMap` (`navigator.keyboard.getLayoutMap()`, nur Chromium; fehlt in lib.dom). */
 export type KeyLayout = Pick<ReadonlyMap<string, string>, "get">;
 
 export const MAX_CODES_PER_ACTION = 2;
-
-/** Bewegungsaktionen brauchen mindestens eine Taste. */
-export const MOVE_ACTIONS: readonly Action[] = [Action.MOVE_UP, Action.MOVE_DOWN, Action.MOVE_LEFT, Action.MOVE_RIGHT];
 
 /** Esc öffnet das Menü, Enter (beide Tasten) den Chat. Gleich `KeyBindingRules.ReservedCodes` (Server). */
 export const RESERVED_CODES: readonly string[] = ["Escape", "Enter", "NumpadEnter"];
@@ -72,10 +67,6 @@ function place(bindings: Bindings, action: Action, slot: Slot, code: string): Bi
   return withCodes(bindings, action, codes);
 }
 
-function isMove(action: Action): boolean {
-  return MOVE_ACTIONS.includes(action);
-}
-
 /** Liefert immer eine Belegung, die der Server akzeptiert. */
 export function fromProto(proto: KeyBindings | undefined): Bindings {
   if (!proto || proto.bindings.length === 0) {
@@ -104,7 +95,7 @@ export function fromProto(proto: KeyBindings | undefined): Bindings {
   const result = new Map<Action, readonly string[]>();
   for (const action of ACTIONS) {
     const stored = present.get(action);
-    if (stored && !(isMove(action) && stored.length === 0)) {
+    if (stored) {
       result.set(action, stored);
       continue;
     }
@@ -113,9 +104,6 @@ export function fromProto(proto: KeyBindings | undefined): Bindings {
     result.set(action, defaults);
   }
 
-  if (MOVE_ACTIONS.some((action) => codesOf(result, action).length === 0)) {
-    return DEFAULT_BINDINGS;
-  }
   return result;
 }
 
@@ -137,6 +125,7 @@ export function toProto(bindings: Bindings): KeyBindings {
   });
 }
 
+/** Eine Taste einer anderen Aktion wird dort entfernt; `overwritten` nennt diese Aktion (AK-7). */
 export function assign(bindings: Bindings, action: Action, slot: Slot, code: string): AssignResult {
   const reserved = reservedFor(code);
   if (reserved) {
@@ -146,46 +135,26 @@ export function assign(bindings: Bindings, action: Action, slot: Slot, code: str
     return { kind: "ok", bindings };
   }
   const other = actionWith(bindings, code);
-  if (other !== undefined) {
-    return isMove(other) && codesOf(bindings, other).length === 1
-      ? { kind: "blocked", other }
-      : { kind: "conflict", other };
-  }
-  return { kind: "ok", bindings: place(bindings, action, slot, code) };
-}
-
-/** Wie `assign`, löst einen Konflikt aber auf, indem die Taste der anderen Aktion entzogen wird. */
-export function assignOverwriting(
-  bindings: Bindings,
-  action: Action,
-  slot: Slot,
-  code: string,
-): Exclude<AssignResult, { kind: "conflict" }> {
-  const result = assign(bindings, action, slot, code);
-  if (result.kind !== "conflict") {
-    return result;
+  if (other === undefined) {
+    return { kind: "ok", bindings: place(bindings, action, slot, code) };
   }
   const freed = withCodes(
     bindings,
-    result.other,
-    codesOf(bindings, result.other).filter((c) => c !== code),
+    other,
+    codesOf(bindings, other).filter((c) => c !== code),
   );
-  return { kind: "ok", bindings: place(freed, action, slot, code) };
-}
-
-export function canClear(bindings: Bindings, action: Action, slot: Slot): boolean {
-  const codes = codesOf(bindings, action);
-  return slot < codes.length && !(isMove(action) && codes.length === 1);
+  return { kind: "ok", bindings: place(freed, action, slot, code), overwritten: other };
 }
 
 export function clear(bindings: Bindings, action: Action, slot: Slot): Bindings {
-  if (!canClear(bindings, action, slot)) {
+  const codes = codesOf(bindings, action);
+  if (slot >= codes.length) {
     return bindings;
   }
   return withCodes(
     bindings,
     action,
-    codesOf(bindings, action).filter((_, i) => i !== slot),
+    codes.filter((_, i) => i !== slot),
   );
 }
 

@@ -2,8 +2,6 @@ import type { Action } from "@/generated/browsergame/v1/game_pb";
 import {
   DEFAULT_BINDINGS,
   assign,
-  assignOverwriting,
-  canClear,
   clear,
   isDefault,
   type AssignResult,
@@ -16,7 +14,7 @@ import { menuKeyAction } from "./menuLogic";
 export const SLOTS: readonly Slot[] = [0, 1];
 
 /** Hinweis nach einer abgelehnten Taste. */
-export type Notice = Extract<AssignResult, { kind: "blocked" | "reserved" }>;
+export type Notice = Extract<AssignResult, { kind: "reserved" }>;
 
 export type KeyBindingsState =
   | { mode: "idle"; notice: Notice | null }
@@ -39,7 +37,7 @@ export interface KeyBindingsStep {
   save: Bindings | null;
 }
 
-function settle(result: Exclude<AssignResult, { kind: "conflict" }>, bindings: Bindings): KeyBindingsStep {
+function settle(result: AssignResult, bindings: Bindings): KeyBindingsStep {
   if (result.kind === "ok") {
     // `assign` gibt bei „keine Änderung“ dasselbe Objekt zurück.
     return { state: IDLE, save: result.bindings === bindings ? null : result.bindings };
@@ -54,27 +52,18 @@ export function keyBindingsStep(state: KeyBindingsState, bindings: Bindings, eve
         return { state: IDLE, save: null };
       }
       return { state: { mode: "recording", action: event.action, slot: event.slot }, save: null };
-    case "key": {
+    case "key":
       if (state.mode !== "recording") return { state, save: null };
-      const result = assign(bindings, state.action, state.slot, event.code);
-      if (result.kind === "conflict") {
-        return {
-          state: { mode: "confirm", action: state.action, slot: state.slot, code: event.code, other: result.other },
-          save: null,
-        };
-      }
-      return settle(result, bindings);
-    }
+      return settle(assign(bindings, state.action, state.slot, event.code), bindings);
     case "cancel":
       return { state: IDLE, save: null };
     case "overwrite":
       if (state.mode !== "confirm") return { state, save: null };
-      return settle(assignOverwriting(bindings, state.action, state.slot, state.code), bindings);
-    case "clear":
-      return {
-        state: IDLE,
-        save: canClear(bindings, event.action, event.slot) ? clear(bindings, event.action, event.slot) : null,
-      };
+      return settle(assign(bindings, state.action, state.slot, state.code), bindings);
+    case "clear": {
+      const next = clear(bindings, event.action, event.slot);
+      return { state: IDLE, save: next === bindings ? null : next };
+    }
     case "reset":
       return { state: IDLE, save: isDefault(bindings) ? null : DEFAULT_BINDINGS };
   }

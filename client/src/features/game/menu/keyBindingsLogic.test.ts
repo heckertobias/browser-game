@@ -75,22 +75,26 @@ describe("keyBindingsStep", () => {
 
   describe("Konflikt (AK-7)", () => {
     const bindings = withUp("KeyW", "ArrowUp");
-    const confirm = press(bindings, DOWN, 1, "KeyW");
+    const confirming: KeyBindingsState = { mode: "confirm", action: DOWN, slot: 1, code: "KeyW", other: UP };
 
-    it("fragt nach, ohne etwas zu ändern", () => {
-      expect(confirm.state).toEqual({ mode: "confirm", action: DOWN, slot: 1, code: "KeyW", other: UP });
-      expect(confirm.save).toBeNull();
+    it("überschreibt sofort ohne Rückfrage", () => {
+      const { state, save } = press(bindings, DOWN, 1, "KeyW");
+      expect(state).toEqual(IDLE);
+      expect(save?.get(UP)).toEqual(["ArrowUp"]);
+      expect(save?.get(DOWN)).toEqual(["KeyS", "KeyW"]);
+      expect(triggers("KeyW", save, DOWN)).toBe(true);
+      expect(triggers("KeyW", save, UP)).toBe(false);
     });
 
     it("überschreibt", () => {
-      const { state, save } = keyBindingsStep(confirm.state, bindings, { type: "overwrite" });
+      const { state, save } = keyBindingsStep(confirming, bindings, { type: "overwrite" });
       expect(state).toEqual(IDLE);
       expect(save?.get(UP)).toEqual(["ArrowUp"]);
       expect(save?.get(DOWN)).toEqual(["KeyS", "KeyW"]);
     });
 
     it("bricht ab", () => {
-      expect(keyBindingsStep(confirm.state, bindings, { type: "cancel" })).toEqual({ state: IDLE, save: null });
+      expect(keyBindingsStep(confirming, bindings, { type: "cancel" })).toEqual({ state: IDLE, save: null });
     });
 
     it("überschreibt nicht ohne Rückfrage", () => {
@@ -100,11 +104,11 @@ describe("keyBindingsStep", () => {
     });
   });
 
-  it("blockiert die letzte Taste einer Bewegungsaktion (AK-7, AK-11)", () => {
-    expect(press(DEFAULT_BINDINGS, DOWN, 1, "KeyW")).toEqual({
-      state: { mode: "idle", notice: { kind: "blocked", other: UP } },
-      save: null,
-    });
+  it("überschreibt auch die letzte Taste einer anderen Aktion (AK-7, AK-11)", () => {
+    const { state, save } = press(DEFAULT_BINDINGS, DOWN, 1, "KeyW");
+    expect(state).toEqual(IDLE);
+    expect(save?.get(UP)).toEqual([]);
+    expect(save?.get(DOWN)).toEqual(["KeyS", "KeyW"]);
   });
 
   it.each([
@@ -125,8 +129,11 @@ describe("keyBindingsStep", () => {
     expect(triggers("KeyW", save, UP)).toBe(false);
   });
 
-  it("leert die letzte Bewegungstaste nicht (AK-11)", () => {
-    expect(keyBindingsStep(IDLE, DEFAULT_BINDINGS, { type: "clear", action: UP, slot: 0 }).save).toBeNull();
+  it("leert auch die letzte Taste (AK-11)", () => {
+    const { save } = keyBindingsStep(IDLE, DEFAULT_BINDINGS, { type: "clear", action: UP, slot: 0 });
+    expect(save?.get(UP)).toEqual([]);
+    expect(triggers("KeyW", save, UP)).toBe(false);
+    expect(keyBindingsStep(IDLE, DEFAULT_BINDINGS, { type: "clear", action: UP, slot: 1 }).save).toBeNull();
   });
 
   it("stellt den Standard wieder her (AK-10)", () => {

@@ -83,10 +83,11 @@ describe("Tastenbelegung (002 AK-5 bis AK-11)", () => {
     }
   });
 
-  it("sperrt × bei der letzten Bewegungstaste und leeren Plätzen (AK-11)", () => {
-    const locked = view();
-    expect(openingTag(locked, clearId(UP, 0))).toContain("disabled");
-    expect(openingTag(locked, clearId(UP, 1))).toContain("disabled");
+  it("sperrt × nur bei leeren Plätzen (AK-11)", () => {
+    const single = view();
+    expect(openingTag(single, clearId(UP, 0))).not.toContain("disabled");
+    expect(openingTag(single, clearId(UP, 1))).toContain("disabled");
+    expect(openingTag(view({ bindings: withUp() }), clearId(UP, 0))).toContain("disabled");
     const open = view({ bindings: withUp("KeyW", "ArrowUp") });
     expect(openingTag(open, clearId(UP, 0))).not.toContain("disabled");
     expect(openingTag(open, clearId(UP, 1))).not.toContain("disabled");
@@ -114,12 +115,11 @@ describe("Tastenbelegung (002 AK-5 bis AK-11)", () => {
     expect(markup).not.toContain('data-testid="binding-notice"');
   });
 
-  it("zeigt Hinweise (AK-7, AK-8)", () => {
+  it("zeigt Hinweise (AK-8)", () => {
     const notice = (n: Extract<KeyBindingsState, { mode: "idle" }>["notice"]) => view({ state: { mode: "idle", notice: n } });
-    const blocked = notice({ kind: "blocked", other: UP });
-    expect(openingTag(blocked, "binding-notice")).toContain('role="status"');
-    expect(inner(blocked, "binding-notice")).toBe(escaped(fill(t.bindingBlocked, { action: actionName(UP) })));
-    expect(inner(notice({ kind: "reserved", reservedFor: "chat" }), "binding-notice")).toBe(escaped(t.bindingReservedChat));
+    const chat = notice({ kind: "reserved", reservedFor: "chat" });
+    expect(openingTag(chat, "binding-notice")).toContain('role="status"');
+    expect(inner(chat, "binding-notice")).toBe(escaped(t.bindingReservedChat));
     expect(inner(notice({ kind: "reserved", reservedFor: "menu" }), "binding-notice")).toBe(escaped(t.bindingReserved));
     expect(view()).not.toContain('data-testid="binding-notice"');
   });
