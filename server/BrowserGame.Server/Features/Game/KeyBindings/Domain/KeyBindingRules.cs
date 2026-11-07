@@ -14,15 +14,11 @@ internal static class KeyBindingRules
     /// <summary>Esc öffnet das Menü, Enter (beide Tasten) den Chat (AK-8).</summary>
     public static ImmutableArray<string> ReservedCodes { get; } = ["Escape", "Enter", "NumpadEnter"];
 
-    private static readonly ProtoAction[] MoveActions =
-        [ProtoAction.MoveUp, ProtoAction.MoveDown, ProtoAction.MoveLeft, ProtoAction.MoveRight];
-
     private static readonly MessageParser<KeyBindings> KnownFieldsParser = KeyBindings.Parser.WithDiscardUnknownFields(true);
 
     /// <summary>
-    /// Leer ist gültig (Standard des Clients). Sonst: jede Aktion bekannt und höchstens einmal, je Aktion 0–2 Codes,
-    /// jede Bewegungsaktion vorhanden mit mindestens einem Code (AK-11), kein Code doppelt (AK-7), keiner reserviert (AK-8),
-    /// Codes 1–32 Zeichen aus [A-Za-z0-9].
+    /// Leer ist gültig (Standard des Clients). Sonst: jede Aktion bekannt und höchstens einmal, je Aktion 0–2 Codes
+    /// (AK-11, fehlende Aktionen erlaubt), kein Code doppelt (AK-7), keiner reserviert (AK-8), Codes 1–32 Zeichen aus [A-Za-z0-9].
     /// </summary>
     public static bool IsValid(KeyBindings bindings)
     {
@@ -45,11 +41,6 @@ internal static class KeyBindingRules
                 return false;
             }
 
-            if (binding.Codes.Count == 0 && MoveActions.Contains(binding.Action))
-            {
-                return false;
-            }
-
             foreach (var code in binding.Codes)
             {
                 if (!IsWellFormed(code) || ReservedCodes.Contains(code) || !codes.Add(code))
@@ -59,7 +50,7 @@ internal static class KeyBindingRules
             }
         }
 
-        return MoveActions.All(actions.Contains);
+        return true;
     }
 
     /// <summary>Bytes für <c>Account.KeyBindings</c>: leer → <c>null</c> (Standard), sonst nur die bekannten Felder.</summary>

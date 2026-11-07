@@ -28,7 +28,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
   i18n de/en.
 
 ## Änderung nach dem Test von 0.8.0-rc.1 (AK-7, AK-11)
-- [ ] **T11** (AK-7, AK-11): Server: `KeyBindingRules` ohne Pflichttasten und ohne Pflichtaktionen; Unit-Tests anpassen.
+- [x] **T11** (AK-7, AK-11): Server: `KeyBindingRules` ohne Pflichttasten und ohne Pflichtaktionen; Unit-Tests anpassen.
 - [ ] **T12** (AK-7, AK-11): `bindings.ts`: `assign` überschreibt sofort und meldet `overwritten`; kein `blocked`,
   kein `assignOverwriting`, kein `canClear`; `toProto` schickt leere Aktionen mit, `fromProto` lässt sie leer; Vitest.
 - [ ] **T13** (AK-7, AK-11): `KeyBindings.tsx`: keine Rückfrage, Mitteilung `bindingOverwritten`, „×“ immer aktiv;

@@ -93,16 +93,49 @@ public sealed class KeyBindingRulesTests
 
     // AK-11
     [Fact]
-    public void Missing_move_action_is_invalid() =>
-        Assert.False(KeyBindingRules.IsValid(Bindings(
+    public void Missing_actions_are_valid()
+    {
+        Assert.True(KeyBindingRules.IsValid(Bindings(
             Bind(ProtoAction.MoveUp, "KeyW"),
             Bind(ProtoAction.MoveDown, "KeyS"),
             Bind(ProtoAction.MoveLeft, "KeyA"))));
+        Assert.True(KeyBindingRules.IsValid(Bindings(Bind(ProtoAction.MoveUp, "KeyW"))));
+    }
 
     // AK-11
     [Fact]
-    public void Move_action_without_code_is_invalid() =>
-        Assert.False(KeyBindingRules.IsValid(WasdWithUp()));
+    public void Action_without_code_is_valid() =>
+        Assert.True(KeyBindingRules.IsValid(WasdWithUp()));
+
+    // AK-11
+    [Fact]
+    public void All_actions_without_code_are_valid_and_not_the_default()
+    {
+        var empty = Bindings(
+            Bind(ProtoAction.MoveUp),
+            Bind(ProtoAction.MoveDown),
+            Bind(ProtoAction.MoveLeft),
+            Bind(ProtoAction.MoveRight));
+
+        Assert.True(KeyBindingRules.IsValid(empty));
+        Assert.NotNull(KeyBindingRules.ToStored(empty));
+    }
+
+    // AK-7: Zustand nach dem Überschreiben – D liegt jetzt auf "Nach oben", "Nach rechts" ist leer.
+    [Fact]
+    public void Code_moved_to_other_action_is_valid() =>
+        Assert.True(KeyBindingRules.IsValid(Bindings(
+            Bind(ProtoAction.MoveUp, "KeyD"),
+            Bind(ProtoAction.MoveDown, "KeyS"),
+            Bind(ProtoAction.MoveLeft, "KeyA"),
+            Bind(ProtoAction.MoveRight))));
+
+    [Fact]
+    public void Unknown_action_without_code_is_invalid()
+    {
+        Assert.False(KeyBindingRules.IsValid(Bindings(Bind(ProtoAction.Unspecified))));
+        Assert.False(KeyBindingRules.IsValid(Bindings(Bind((ProtoAction)5))));
+    }
 
     // AK-6
     [Fact]

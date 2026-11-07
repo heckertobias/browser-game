@@ -36,4 +36,19 @@ public sealed class KeyBindingStoredTests
     [Fact] // AK-9
     public void FromStored_corrupt_bytes_are_empty() =>
         Assert.Equal(new KeyBindings(), KeyBindingRules.FromStored([0x0A, 0x05]));
+
+    [Fact] // AK-11
+    public void FromStored_keeps_actions_without_code()
+    {
+        var bindings = Bindings(
+            Bind(ProtoAction.MoveUp),
+            Bind(ProtoAction.MoveDown, "KeyS"),
+            Bind(ProtoAction.MoveLeft, "KeyA"),
+            Bind(ProtoAction.MoveRight, "KeyD"));
+
+        var read = KeyBindingRules.FromStored(KeyBindingRules.ToStored(bindings));
+
+        Assert.Equal(bindings, read);
+        Assert.Empty(read.Bindings.Single(b => b.Action == ProtoAction.MoveUp).Codes);
+    }
 }

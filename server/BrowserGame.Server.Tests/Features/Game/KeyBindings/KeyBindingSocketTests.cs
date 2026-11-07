@@ -89,6 +89,27 @@ public sealed class KeyBindingSocketTests(GameServerFactory factory) : IClassFix
         Assert.Equal(Custom(), Of(welcome));
     }
 
+    [Fact] // AK-11
+    public async Task Key_bindings_with_empty_action_reach_welcome_on_other_device()
+    {
+        var withoutRight = Bindings(
+            Bind(ProtoAction.MoveUp, "KeyW", "KeyD"),
+            Bind(ProtoAction.MoveDown, "KeyS"),
+            Bind(ProtoAction.MoveLeft, "KeyA"),
+            Bind(ProtoAction.MoveRight));
+        var (a, id, account) = await GameSockets.ConnectNewPlayerAsync(factory, Ct);
+        using var _ = a;
+        await GameSockets.ReceiveWelcomeAsync(a, Ct);
+
+        await SendSaveAsync(a, withoutRight, Ct);
+        await ProcessedAsync(a, 1, Ct);
+
+        Assert.Equal(withoutRight, KeyBindingRules.FromStored(await StoredAsync(id)));
+        var (b, welcome) = await ConnectOtherDeviceAsync(account.Email);
+        using var __ = b;
+        Assert.Equal(withoutRight, Of(welcome));
+    }
+
     [Theory] // AK-10
     [InlineData(true)]
     [InlineData(false)]
