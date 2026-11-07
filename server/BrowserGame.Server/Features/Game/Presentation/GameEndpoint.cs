@@ -8,11 +8,12 @@ using Microsoft.EntityFrameworkCore;
 namespace BrowserGame.Server.Features.Game;
 
 /// <summary>WebSocket <c>/ws</c>: binäre Protobuf-Nachrichten in beide Richtungen.</summary>
-internal static class GameEndpoint
+internal static partial class GameEndpoint
 {
     public static async Task HandleAsync(
         HttpContext context, GameLoop game, UserManager<Account> users, GameDbContext db,
-        IConfiguration configuration, IWebHostEnvironment environment, IHostApplicationLifetime lifetime)
+        IConfiguration configuration, IWebHostEnvironment environment, IHostApplicationLifetime lifetime,
+        KeyBindingStore keyBindings, ILoggerFactory loggers)
     {
         if (!context.WebSockets.IsWebSocketRequest)
         {
@@ -49,11 +50,14 @@ internal static class GameEndpoint
         // (003 AK-19, 011 AK-15) kämen nicht mehr zum Schreiben.
         using var stopping = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, lifetime.ApplicationStopping);
         var aborted = stopping.Token;
-        var connection = game.Join(account.Id, name, saved is null ? null : (saved.X, saved.Y), () => AbortConnection(context));
+        var logger = loggers.CreateLogger(typeof(GameEndpoint));
+        var connection = game.Join(
+            account.Id, name, saved is null ? null : (saved.X, saved.Y), () => AbortConnection(context),
+            KeyBindingRules.FromStored(account.KeyBindings));
 
         using var receiving = CancellationTokenSource.CreateLinkedTokenSource(aborted);
         var sending = SendLoopAsync(socket, connection, receiving, aborted);
-        var (status, reason) = await ReceiveLoopAsync(socket, connection, receiving.Token);
+        var (status, reason) = await ReceiveLoopAsync(socket, connection, keyBindings, logger, receiving.Token);
 
         game.Leave(connection); // beendet auch die Sende-Schleife
         await sending;
@@ -84,7 +88,7 @@ internal static class GameEndpoint
     }
 
     private static async Task<(WebSocketCloseStatus Status, string Reason)> ReceiveLoopAsync(
-        WebSocket socket, PlayerConnection connection, CancellationToken cancellationToken)
+        WebSocket socket, PlayerConnection connection, KeyBindingStore keyBindings, ILogger logger, CancellationToken cancellationToken)
     {
         var buffer = new byte[GameSettings.MaxClientMessageBytes];
         try
@@ -126,6 +130,11 @@ internal static class GameEndpoint
                 {
                     connection.Chat.Writer.TryWrite(message.SendChat.Text);
                 }
+                else if (message.PayloadCase == ClientMessage.PayloadOneofCase.SaveKeyBindings)
+                {
+                    await SaveKeyBindingsAsync(
+                        connection.PlayerId, message.SaveKeyBindings.KeyBindings ?? new KeyBindings(), keyBindings, logger, cancellationToken);
+                }
             }
         }
         catch (Exception ex) when (ex is WebSocketException or OperationCanceledException)
@@ -133,6 +142,37 @@ internal static class GameEndpoint
             return (WebSocketCloseStatus.EndpointUnavailable, "");
         }
     }
+
+    /// <summary>
+    /// Prüft und speichert die Belegung (002 AK-9, AK-10). Wird abgewartet: Die nächste Nachricht dieser Verbindung kommt erst
+    /// danach dran, und eine Anmeldung auf einem anderen Gerät liest schon den neuen Stand. Abbruch beendet die Verbindung wie
+    /// sonst auch; ein Datenbankfehler wird nur geloggt.
+    /// </summary>
+    private static async Task SaveKeyBindingsAsync(
+        string accountId, KeyBindings bindings, KeyBindingStore store, ILogger logger, CancellationToken cancellationToken)
+    {
+        if (!KeyBindingRules.IsValid(bindings))
+        {
+            LogKeyBindingsInvalid(logger, accountId);
+            return;
+        }
+
+        try
+        {
+            await store.SaveAsync(accountId, KeyBindingRules.ToStored(bindings), cancellationToken);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // Der Client hat die Belegung lokal und schickt sie beim nächsten Ändern vollständig erneut.
+            LogKeyBindingsSaveFailed(logger, ex, accountId);
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Ungültige Tastenbelegung von {AccountId} verworfen")]
+    private static partial void LogKeyBindingsInvalid(ILogger logger, string accountId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Tastenbelegung von {AccountId} nicht gespeichert")]
+    private static partial void LogKeyBindingsSaveFailed(ILogger logger, Exception exception, string accountId);
 
     private static readonly TimeSpan KickCloseTimeout = TimeSpan.FromSeconds(5);
 

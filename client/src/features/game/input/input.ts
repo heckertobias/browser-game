@@ -1,22 +1,13 @@
 import { POINTER_DEAD_ZONE } from "@/features/game/core/constants";
 import { clampDirection, ZERO, type Vec } from "@/features/game/core/vector";
+import { Action } from "@/generated/browsergame/v1/game_pb";
+import { DEFAULT_BINDINGS, type Bindings } from "./bindings";
 
-export type Action = "moveUp" | "moveDown" | "moveLeft" | "moveRight";
-
-/** Aktion → Tasten (`KeyboardEvent.code`, unabhängig vom Tastaturlayout). Umbelegen kommt mit 002. */
-export type KeyBindings = Readonly<Record<Action, readonly string[]>>;
-
-export const DEFAULT_BINDINGS: KeyBindings = {
-  moveUp: ["KeyW"],
-  moveDown: ["KeyS"],
-  moveLeft: ["KeyA"],
-  moveRight: ["KeyD"],
-};
-
-export function activeActions(pressedKeys: ReadonlySet<string>, bindings: KeyBindings): Set<Action> {
+/** Aktionen, deren Tasten gerade gedrückt sind; jeder Platz einer Aktion löst sie aus. */
+export function activeActions(pressedKeys: ReadonlySet<string>, bindings: Bindings): Set<Action> {
   const actions = new Set<Action>();
-  for (const [action, keys] of Object.entries(bindings) as [Action, readonly string[]][]) {
-    if (keys.some((key) => pressedKeys.has(key))) {
+  for (const [action, codes] of bindings) {
+    if (codes.some((code) => pressedKeys.has(code))) {
       actions.add(action);
     }
   }
@@ -24,8 +15,8 @@ export function activeActions(pressedKeys: ReadonlySet<string>, bindings: KeyBin
 }
 
 export function keyboardDirection(actions: ReadonlySet<Action>): Vec {
-  const x = (actions.has("moveRight") ? 1 : 0) - (actions.has("moveLeft") ? 1 : 0);
-  const y = (actions.has("moveDown") ? 1 : 0) - (actions.has("moveUp") ? 1 : 0);
+  const x = (actions.has(Action.MOVE_RIGHT) ? 1 : 0) - (actions.has(Action.MOVE_LEFT) ? 1 : 0);
+  const y = (actions.has(Action.MOVE_DOWN) ? 1 : 0) - (actions.has(Action.MOVE_UP) ? 1 : 0);
   return clampDirection(x, y);
 }
 
@@ -96,13 +87,12 @@ export class InputTracker {
   private readonly pressedKeys = new Set<string>();
   private readonly hold = new PointerHold();
   private readonly abort = new AbortController();
+  private bindings: Bindings = DEFAULT_BINDINGS;
+  private suspended = false;
 
-  constructor(
-    private readonly canvas: HTMLCanvasElement,
-    private readonly bindings: KeyBindings = DEFAULT_BINDINGS,
-  ) {
+  constructor(private readonly canvas: HTMLCanvasElement) {
     const signal = this.abort.signal;
-    window.addEventListener("keydown", (e) => { if (!isEditableTarget(e.target)) this.pressedKeys.add(e.code); }, { signal });
+    window.addEventListener("keydown", (e) => { if (!this.suspended && !isEditableTarget(e.target)) this.pressedKeys.add(e.code); }, { signal });
     window.addEventListener("keyup", (e) => { this.pressedKeys.delete(e.code); }, { signal });
     // Nur die Tasten, nicht reset(): ein gehaltener Zeiger läuft weiter.
     window.addEventListener("focusin", (e) => { if (isEditableTarget(e.target)) this.pressedKeys.clear(); }, { signal });
@@ -110,7 +100,7 @@ export class InputTracker {
     document.addEventListener("visibilitychange", () => { if (document.hidden) this.reset(); }, { signal });
 
     canvas.addEventListener("pointerdown", (e) => {
-      if (!this.hold.down(e)) return;
+      if (this.suspended || !this.hold.down(e)) return;
       // preventDefault unten verhindert auch den Fokuswechsel; das Feld behielte den Fokus und die Tasten blieben tot.
       const active = document.activeElement;
       if (isEditableTarget(active)) (active as HTMLElement).blur();
@@ -128,11 +118,26 @@ export class InputTracker {
     document.addEventListener("gesturechange", preventGesture, { signal, passive: false });
   }
 
+  /** Neue Belegung gilt ab dem nächsten `direction()` (AK-5). */
+  setBindings(bindings: Bindings): void {
+    this.bindings = bindings;
+  }
+
+  /**
+   * Menü offen (AK-4): gedrückte Tasten und gehaltener Zeiger verfallen, neue werden ignoriert, die Figur steht.
+   * Eine über das Schließen hinaus gehaltene Taste zählt erst wieder mit ihrer nächsten Wiederholung.
+   */
+  setSuspended(suspended: boolean): void {
+    this.suspended = suspended;
+    if (suspended) this.reset();
+  }
+
   /**
    * Aktuelle Wunschrichtung. `toWorld` rechnet Bildschirm- in Weltkoordinaten um,
    * `player` ist die eigene (vorhergesagte) Position.
    */
   direction(player: Vec, toWorld: (clientX: number, clientY: number, canvasRect: DOMRect) => Vec): Vec {
+    if (this.suspended) return ZERO;
     const client = this.hold.position();
     const pointer = client ? toWorld(client.x, client.y, this.canvas.getBoundingClientRect()) : null;
     return combinedDirection(activeActions(this.pressedKeys, this.bindings), pointer, player);

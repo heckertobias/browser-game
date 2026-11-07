@@ -1,6 +1,6 @@
 # 002 – Tastenbelegung & erstes Menü
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [003 – Accounts & gespeicherte Position](../003-accounts/spec.md) (die Belegung gehört zum Account).
 
@@ -31,21 +31,23 @@ Linkshänder oder Gewohnheiten aus anderen Spielen. Dafür gibt es ein erstes Sp
 - **AK-5:** Gegeben die Tastenbelegung, wenn ich bei einer Aktion einen der zwei Plätze wähle und eine Taste
   drücke, dann löst diese Taste ab sofort die Aktion aus.
 - **AK-6:** Gegeben eine Aktion hat zwei Tasten, dann lösen beide die Aktion aus.
-- **AK-7:** Gegeben ich belege eine Taste, die schon einer anderen Aktion zugeordnet ist, dann werde ich darauf
-  hingewiesen, bevor etwas überschrieben wird.
+- **AK-7:** Gegeben ich belege eine Taste, die schon einer anderen Aktion zugeordnet ist, dann gilt sie sofort für die
+  neue Aktion, die andere Aktion verliert sie, und ich bekomme eine Mitteilung, welche Aktion überschrieben wurde.
 - **AK-8:** Gegeben Esc ist für das Menü und Enter für den Chat reserviert, dann kann keine der beiden Tasten einer
   anderen Aktion zugeordnet werden.
 - **AK-9:** Gegeben ich habe Tasten umbelegt, wenn ich mich auf einem anderen Gerät anmelde, dann gilt dort meine Belegung.
 - **AK-10:** Gegeben ich habe Tasten umbelegt, wenn ich „Standard wiederherstellen“ wähle, dann gilt wieder WASD
   (zweiter Platz leer).
-- **AK-11:** Gegeben ein Platz ist belegt, wenn ich ihn leere, dann löst nur noch die andere Taste die Aktion aus;
-  mindestens eine Taste pro Bewegungsaktion bleibt Pflicht.
+- **AK-11:** Gegeben ein Platz ist belegt, wenn ich ihn leere, dann löst nur noch die andere Taste die Aktion aus.
+  Eine Aktion darf auch ganz ohne Taste sein.
 
 ## Out of Scope
 
 - Gamepad-Unterstützung
 - Belegung von Maus- und Touch-Gesten
 - Weitere Einstellungen (Grafik, Ton) – das Menü ist dafür vorbereitet, Inhalte folgen in eigenen Specs
+- Eventuell später: Esc und Enter freigeben und „Menü öffnen“ sowie „Chat öffnen“ selbst als belegbare Aktionen
+  anbieten
 
 ## Offene Fragen
 
@@ -58,6 +60,8 @@ _Keine._
 - Einstellungen sind über ein Spielmenü erreichbar (Esc bzw. Menü-Button).
 - Standard: nur WASD, zweiter Platz leer.
 - Enter ist reserviert wie Esc, weil Enter seit 011 den Chat öffnet.
+- Außer Esc und Enter gibt es keine reservierten Tasten und keine Pflichttasten. Ein Konflikt wird nicht
+  erfragt, sondern sofort überschrieben und mitgeteilt (Rückmeldung aus dem Test von 0.8.0-rc.1).
 - Das Spiel läuft bei offenem Menü weiter, nur die eigene Figur steht.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->

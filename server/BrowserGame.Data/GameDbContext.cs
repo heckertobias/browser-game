@@ -13,6 +13,11 @@ public sealed class Account : IdentityUser
     /// Standard „de“: Bestehende Accounts haben sich auf Deutsch registriert.
     /// </summary>
     public string Language { get; set; } = "de";
+
+    /// <summary>
+    /// Tastenbelegung (002) als Protobuf-Nachricht <c>browsergame.v1.KeyBindings</c>; <c>null</c> = Standard des Clients.
+    /// </summary>
+    public byte[]? KeyBindings { get; set; }
 }
 
 /// <summary>Zuletzt gespeicherte Position eines Accounts in der Welt.</summary>
@@ -58,6 +63,7 @@ public abstract class GameDbContext(DbContextOptions options) : IdentityDbContex
         base.OnModelCreating(builder);
 
         builder.Entity<Account>().Property(a => a.Language).HasMaxLength(8);
+        builder.Entity<Account>().Property(a => a.KeyBindings).HasMaxLength(512);
 
         builder.Entity<PlayerPosition>(position =>
         {

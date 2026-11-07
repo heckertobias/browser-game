@@ -36,6 +36,10 @@ namespace BrowserGame.Data.Migrations.Sqlite
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<byte[]>("KeyBindings")
+                        .HasMaxLength(512)
+                        .HasColumnType("BLOB");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasMaxLength(8)

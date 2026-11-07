@@ -1,2 +1,12 @@
 @page
 @model LogoutModel
+@{
+    ViewData["Title"] = T["Logout.Title"].Value;
+}
+<p>@T["Logout.Question"]</p>
+<div class="flex flex-wrap items-center gap-2">
+    <form method="post" asp-page="/Accounts/Presentation/Account/Logout" data-testid="logout-form">
+        <button type="submit" class="btn btn-primary rounded-none font-mono uppercase">@T["Index.SignOut"]</button>
+    </form>
+    <a href="/play" class="btn rounded-none font-mono uppercase" data-testid="back-to-game">@T["Logout.BackToGame"]</a>
+</div>

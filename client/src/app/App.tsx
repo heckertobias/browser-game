@@ -2,6 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Kicked_Reason } from "@/generated/browsergame/v1/game_pb";
 import { Chat, type ChatFeed } from "@/features/game/chat/Chat";
 import { Game, type ConnectionStatus } from "@/features/game/engine/game";
+import type { Bindings } from "@/features/game/input/bindings";
+import { KeyBindings } from "@/features/game/menu/KeyBindings";
+import { Menu } from "@/features/game/menu/Menu";
+import { menuKeyAction } from "@/features/game/menu/menuLogic";
 import type { KickReason } from "@/features/game/network/net";
 import { t } from "@/features/localization/i18n";
 import { browserReloadWindow, reloadPage } from "@/features/pwa/services/reload";
@@ -41,12 +45,17 @@ export function App() {
   const chatRef = useRef<ChatFeed>(null);
   const gameRef = useRef<Game | null>(null);
   const sendChat = useCallback((text: string) => gameRef.current?.sendChat(text) ?? false, []);
+  const saveKeyBindings = useCallback((bindings: Bindings) => { gameRef.current?.saveKeyBindings(bindings); }, []);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [name, setName] = useState<string | null>(null);
   const [kicked, setKicked] = useState<KickReason | null>(null);
   const [coordinates, setCoordinates] = useState<string | null>(null);
   const [update, setUpdate] = useState(false);
   const [reload, setReload] = useState<"idle" | "pending" | "stuck">("idle");
+  const [keyBindings, setKeyBindings] = useState<Bindings | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuAvailable = status === "connecting" || status === "connected";
+  const menuShown = menuOpen && menuAvailable;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -61,6 +70,7 @@ export function App() {
         setKicked(reason);
         if (reason === Kicked_Reason.SIGNED_OUT) window.location.replace(LOGIN_URL);
       },
+      onKeyBindings: setKeyBindings,
       onCoordinates: setCoordinates,
       onChatHistory: (messages) => { chatRef.current?.onChatHistory(messages); },
       onChatMessage: (message) => { chatRef.current?.onChatMessage(message); },
@@ -73,6 +83,20 @@ export function App() {
       gameRef.current = null;
     };
   }, []);
+
+  // Figur steht, Spiel läuft weiter (AK-4, AK-4b).
+  useEffect(() => { gameRef.current?.setMenuOpen(menuShown); }, [menuShown]);
+
+  useEffect(() => {
+    if (!menuAvailable) return;
+    const abort = new AbortController();
+    window.addEventListener(
+      "keydown",
+      (e) => { if (menuKeyAction(e, false) === "toggle") setMenuOpen((open) => !open); },
+      { signal: abort.signal },
+    );
+    return () => { abort.abort(); };
+  }, [menuAvailable]);
 
   useEffect(() => {
     if (status !== "disconnected") return;
@@ -89,7 +113,7 @@ export function App() {
   return (
     <div className="fixed inset-0 bg-black">
       <canvas ref={canvasRef} className="block h-full w-full touch-none [image-rendering:pixelated]" data-testid="game" />
-      <div className="pointer-events-none absolute inset-0 touch-none font-mono text-sm uppercase" data-testid="hud">
+      <div className="pointer-events-none absolute inset-0 touch-none font-mono text-sm uppercase" data-testid="hud" inert={menuShown}>
         <div className="absolute left-[max(0.5rem,env(safe-area-inset-left))] right-[max(0.5rem,env(safe-area-inset-right))] top-[max(0.5rem,env(safe-area-inset-top))] flex flex-wrap items-start gap-2">
           {name && <span className="badge badge-neutral rounded-none border-2 border-base-content/30">{name}</span>}
           {status !== "kicked" && (
@@ -102,9 +126,9 @@ export function App() {
           {coordinates && (
             <span className="badge badge-neutral rounded-none border-2 border-base-content/30" data-testid="coords">{coordinates}</span>
           )}
-          <a href="/Account/Manage" draggable={false} className="btn min-h-11 rounded-none font-mono uppercase pointer-events-auto ml-auto" data-testid="account">{t.myAccount}</a>
+          <button type="button" className="btn min-h-11 rounded-none font-mono uppercase pointer-events-auto ml-auto" data-testid="menu-button" onClick={() => { setMenuOpen(true); }}>{t.menu}</button>
         </div>
-        <Chat ref={chatRef} sendChat={sendChat} inGame={status === "connected"} />
+        <Chat ref={chatRef} sendChat={sendChat} inGame={status === "connected" && !menuShown} />
         {status === "disconnected" && (
           <div className={OVERLAY}>
             {update && <p role="status" className="max-w-xs normal-case">{t.updateAvailable}</p>}
@@ -130,6 +154,7 @@ export function App() {
         )}
         <span className="absolute bottom-[max(0.5rem,env(safe-area-inset-bottom))] right-[max(0.5rem,env(safe-area-inset-right))] text-xs normal-case text-base-content/60" data-testid="version">{APP_VERSION}</span>
       </div>
+      {menuShown && <Menu onClose={() => { setMenuOpen(false); }} keyBindings={<KeyBindings bindings={keyBindings} onSave={saveKeyBindings} />} />}
     </div>
   );
 }

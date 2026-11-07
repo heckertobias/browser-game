@@ -1,6 +1,7 @@
 import type { Snapshot, Welcome } from "@/generated/browsergame/v1/game_pb";
 import { t } from "@/features/localization/i18n";
 import { INTERPOLATION_DELAY_MS } from "@/features/game/core/constants";
+import { fromProto, toProto, type Bindings } from "@/features/game/input/bindings";
 import { InputTracker } from "@/features/game/input/input";
 import { formatCoordinates } from "@/features/game/render/hud";
 import { SnapshotBuffer } from "@/features/game/state/interpolation";
@@ -19,6 +20,8 @@ export interface GameEvents extends ChatHandlers {
   onKicked(reason: KickReason): void;
   /** Eigene Koordinaten (gerundet, aus der vorhergesagten Position), nur bei Änderung (AK-19b). */
   onCoordinates(text: string): void;
+  /** Aktuelle Belegung: nach Welcome (gespeicherte des Accounts, AK-9) und nach `saveKeyBindings`. */
+  onKeyBindings?(bindings: Bindings): void;
 }
 
 /** Nach längerer Pause (Tab im Hintergrund) höchstens so viel Zeit nachholen. */
@@ -86,10 +89,27 @@ export class Game {
     return this.connection?.sendChat(text) ?? false;
   }
 
+  /** Sofort lokal wirksam (AK-5) und an den Server; bei nicht offener Verbindung geht nur das Senden verloren. */
+  saveKeyBindings(bindings: Bindings): void {
+    this.applyKeyBindings(bindings);
+    this.connection?.saveKeyBindings(toProto(bindings));
+  }
+
+  /** Menü offen: Figur steht (AK-4); Snapshots und Rendern laufen weiter (AK-4b). */
+  setMenuOpen(open: boolean): void {
+    this.input.setSuspended(open);
+  }
+
+  private applyKeyBindings(bindings: Bindings): void {
+    this.input.setBindings(bindings);
+    this.events.onKeyBindings?.(bindings);
+  }
+
   private handleWelcome(welcome: Welcome): void {
     this.welcome = welcome;
     this.stepMs = 1000 / welcome.tickRateHz;
     this.predictor = new Predictor(welcome.speed / welcome.tickRateHz);
+    this.applyKeyBindings(fromProto(welcome.keyBindings));
     this.events.onWelcome(welcome.name);
     this.events.onStatus("connected");
   }
