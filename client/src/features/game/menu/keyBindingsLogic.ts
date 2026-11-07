@@ -13,13 +13,14 @@ import { menuKeyAction } from "./menuLogic";
 
 export const SLOTS: readonly Slot[] = [0, 1];
 
-/** Hinweis nach einer abgelehnten Taste. */
-export type Notice = Extract<AssignResult, { kind: "reserved" }>;
+/** Hinweis nach einer Taste: abgelehnt (AK-8) oder einer anderen Aktion weggenommen (AK-7). */
+export type Notice =
+  | Extract<AssignResult, { kind: "reserved" }>
+  | { kind: "overwritten"; code: string; from: Action; to: Action };
 
 export type KeyBindingsState =
   | { mode: "idle"; notice: Notice | null }
-  | { mode: "recording"; action: Action; slot: Slot }
-  | { mode: "confirm"; action: Action; slot: Slot; code: string; other: Action };
+  | { mode: "recording"; action: Action; slot: Slot };
 
 export const IDLE: KeyBindingsState = { mode: "idle", notice: null };
 
@@ -27,7 +28,6 @@ export type KeyBindingsEvent =
   | { type: "record"; action: Action; slot: Slot }
   | { type: "key"; code: string }
   | { type: "cancel" }
-  | { type: "overwrite" }
   | { type: "clear"; action: Action; slot: Slot }
   | { type: "reset" };
 
@@ -37,14 +37,6 @@ export interface KeyBindingsStep {
   save: Bindings | null;
 }
 
-function settle(result: AssignResult, bindings: Bindings): KeyBindingsStep {
-  if (result.kind === "ok") {
-    // `assign` gibt bei „keine Änderung“ dasselbe Objekt zurück.
-    return { state: IDLE, save: result.bindings === bindings ? null : result.bindings };
-  }
-  return { state: { mode: "idle", notice: result }, save: null };
-}
-
 export function keyBindingsStep(state: KeyBindingsState, bindings: Bindings, event: KeyBindingsEvent): KeyBindingsStep {
   switch (event.type) {
     case "record":
@@ -52,14 +44,19 @@ export function keyBindingsStep(state: KeyBindingsState, bindings: Bindings, eve
         return { state: IDLE, save: null };
       }
       return { state: { mode: "recording", action: event.action, slot: event.slot }, save: null };
-    case "key":
+    case "key": {
       if (state.mode !== "recording") return { state, save: null };
-      return settle(assign(bindings, state.action, state.slot, event.code), bindings);
+      const result = assign(bindings, state.action, state.slot, event.code);
+      if (result.kind === "reserved") return { state: { mode: "idle", notice: result }, save: null };
+      const notice: Notice | null =
+        result.overwritten === undefined
+          ? null
+          : { kind: "overwritten", code: event.code, from: result.overwritten, to: state.action };
+      // `assign` gibt bei „keine Änderung“ dasselbe Objekt zurück.
+      return { state: notice ? { mode: "idle", notice } : IDLE, save: result.bindings === bindings ? null : result.bindings };
+    }
     case "cancel":
       return { state: IDLE, save: null };
-    case "overwrite":
-      if (state.mode !== "confirm") return { state, save: null };
-      return settle(assign(bindings, state.action, state.slot, state.code), bindings);
     case "clear": {
       const next = clear(bindings, event.action, event.slot);
       return { state: IDLE, save: next === bindings ? null : next };
@@ -75,16 +72,14 @@ export type CaptureEvent = Pick<KeyboardEvent, "key" | "code" | "repeat" | "targ
 
 /**
  * Tastendruck im Capture-Listener der Tastenbelegung. Beim Aufnehmen gehört jede Taste der Aufnahme:
- * Sie löst keine Buttons aus, öffnet weder Chat (AK-8) noch schließt sie das Menü. In der Rückfrage nur Esc.
+ * Sie löst keine Buttons aus, öffnet weder Chat (AK-8) noch schließt sie das Menü.
  * `null`: Event unberührt lassen.
  */
 export function captureKey(e: CaptureEvent, mode: KeyBindingsState["mode"]): CapturedKey | null {
   if (mode === "idle") return null;
   const escape = menuKeyAction(e, true) === "cancelRecording";
-  if (mode === "confirm" && !escape) return null;
   e.preventDefault();
   e.stopImmediatePropagation();
-  if (mode === "confirm") return { type: "cancel" };
   if (e.repeat) return { type: "ignore" };
   if (escape) return { type: "cancel" };
   if (e.code === "" || e.code === "Unidentified") return { type: "ignore" };

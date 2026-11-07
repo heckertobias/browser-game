@@ -102,19 +102,6 @@ describe("Tastenbelegung (002 AK-5 bis AK-11)", () => {
     expect(openingTag(markup, slot(UP, 0))).toContain('aria-pressed="false"');
   });
 
-  it("fragt bei einem Konflikt nach (AK-7)", () => {
-    const markup = view({ state: { mode: "confirm", action: DOWN, slot: 1, code: "KeyW", other: UP } });
-    expect(openingTag(markup, "binding-confirm")).toBeTruthy();
-    expect(markup).toContain(escaped(fill(t.bindingConflict, { key: keyLabel("KeyW"), action: actionName(UP) })));
-    expect(markup).toContain(`>${t.bindingOverwrite}<`);
-    expect(markup).toContain(`>${t.bindingCancel}<`);
-    for (const id of ["binding-overwrite", "binding-cancel"]) {
-      expect(openingTag(markup, id).startsWith("<button")).toBe(true);
-      expect(openingTag(markup, id)).toContain('type="button"');
-    }
-    expect(markup).not.toContain('data-testid="binding-notice"');
-  });
-
   it("zeigt Hinweise (AK-8)", () => {
     const notice = (n: Extract<KeyBindingsState, { mode: "idle" }>["notice"]) => view({ state: { mode: "idle", notice: n } });
     const chat = notice({ kind: "reserved", reservedFor: "chat" });
@@ -122,6 +109,35 @@ describe("Tastenbelegung (002 AK-5 bis AK-11)", () => {
     expect(inner(chat, "binding-notice")).toBe(escaped(t.bindingReservedChat));
     expect(inner(notice({ kind: "reserved", reservedFor: "menu" }), "binding-notice")).toBe(escaped(t.bindingReserved));
     expect(view()).not.toContain('data-testid="binding-notice"');
+  });
+
+  describe("Mitteilung beim Überschreiben (AK-7)", () => {
+    const state: KeyBindingsState = { mode: "idle", notice: { kind: "overwritten", code: "KeyW", from: UP, to: DOWN } };
+
+    it("teilt mit, welche Aktion überschrieben wurde", () => {
+      const markup = view({ state });
+      expect(openingTag(markup, "binding-notice")).toContain('role="status"');
+      expect(inner(markup, "binding-notice")).toBe(
+        escaped(fill(t.bindingOverwritten, { key: keyLabel("KeyW"), from: actionName(UP), to: actionName(DOWN) })),
+      );
+      expect(markup.indexOf('data-testid="binding-notice"')).toBeLessThan(markup.indexOf('data-testid="binding-reset"'));
+      expect(markup.indexOf("</table>")).toBeLessThan(markup.indexOf('data-testid="binding-notice"'));
+    });
+
+    it("nennt die überschriebene Taste nach dem Layout", () => {
+      const layout = new Map([["KeyW", "z"]]);
+      expect(inner(view({ state, layout }), "binding-notice")).toBe(
+        escaped(fill(t.bindingOverwritten, { key: keyLabel("KeyW", layout), from: actionName(UP), to: actionName(DOWN) })),
+      );
+    });
+
+    it("hat keine Rückfrage-Buttons", () => {
+      const markup = view({ state });
+      expect(markup).not.toContain('data-testid="binding-overwrite"');
+      expect(markup).not.toContain('data-testid="binding-cancel"');
+      expect(openingTag(markup, slot(UP, 0))).not.toContain("disabled");
+      expect(openingTag(markup, slot(DOWN, 1))).not.toContain("disabled");
+    });
   });
 
   it("bietet Standard wiederherstellen an (AK-10)", () => {

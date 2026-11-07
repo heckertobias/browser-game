@@ -9,10 +9,7 @@ const KEYS = [
   "bindingAction",
   "bindingSlot",
   "bindingPressKey",
-  "bindingConflict",
-  "bindingOverwrite",
-  "bindingCancel",
-  "bindingBlocked",
+  "bindingOverwritten",
   "bindingReserved",
   "bindingReservedChat",
   "bindingClear",
@@ -26,9 +23,9 @@ describe("Texte der Tastenbelegung (002)", () => {
     });
 
     it(`enthält in ${language} die Platzhalter`, () => {
-      expect(texts.bindingConflict).toContain("{key}");
-      expect(texts.bindingConflict).toContain("{action}");
-      expect(texts.bindingBlocked).toContain("{action}");
+      expect(texts.bindingOverwritten).toContain("{key}");
+      expect(texts.bindingOverwritten).toContain("{from}");
+      expect(texts.bindingOverwritten).toContain("{to}");
       expect(texts.bindingSlot).toContain("{n}");
     });
 

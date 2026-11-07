@@ -18,7 +18,6 @@ import {
 
 const SLOT = "btn min-h-11 min-w-0 flex-1 rounded-none px-1 font-mono";
 const CLEAR = "btn min-h-11 min-w-11 rounded-none px-0 font-mono";
-const CONFIRM = "btn btn-lg min-h-11 flex-1 rounded-none font-mono uppercase";
 
 const ACTION_NAMES: ReadonlyMap<Action, string> = new Map([
   [Action.MOVE_UP, t.actionMoveUp],
@@ -35,7 +34,14 @@ export function slotId(action: Action, slot: Slot): string {
   return `binding-slot-${String(action)}-${String(slot)}`;
 }
 
-function noticeText(notice: Notice): string {
+function noticeText(notice: Notice, layout: KeyLayout | undefined): string {
+  if (notice.kind === "overwritten") {
+    return fill(t.bindingOverwritten, {
+      key: keyLabel(notice.code, layout),
+      from: actionName(notice.from),
+      to: actionName(notice.to),
+    });
+  }
   return notice.reservedFor === "menu" ? t.bindingReserved : t.bindingReservedChat;
 }
 
@@ -101,23 +107,8 @@ export function KeyBindingsView({ bindings, state, layout, onEvent }: KeyBinding
               ))}
             </tbody>
           </table>
-          {state.mode === "confirm" && (
-            <div data-testid="binding-confirm" className="flex flex-col gap-2">
-              <p role="status" className="normal-case">
-                {fill(t.bindingConflict, { key: keyLabel(state.code, layout), action: actionName(state.other) })}
-              </p>
-              <div className="flex gap-2">
-                <button type="button" data-testid="binding-overwrite" className={`${CONFIRM} btn-primary`} onClick={() => { onEvent({ type: "overwrite" }); }}>
-                  {t.bindingOverwrite}
-                </button>
-                <button type="button" data-testid="binding-cancel" autoFocus className={CONFIRM} onClick={() => { onEvent({ type: "cancel" }); }}>
-                  {t.bindingCancel}
-                </button>
-              </div>
-            </div>
-          )}
           {state.mode === "idle" && state.notice && (
-            <p role="status" data-testid="binding-notice" className="normal-case">{noticeText(state.notice)}</p>
+            <p role="status" data-testid="binding-notice" className="normal-case">{noticeText(state.notice, layout)}</p>
           )}
           <button type="button" data-testid="binding-reset" className={ENTRY} onClick={() => { onEvent({ type: "reset" }); }}>
             {t.bindingReset}
@@ -141,12 +132,7 @@ export function KeyBindings({ bindings, onSave }: KeyBindingsProps) {
   const apply = (event: KeyBindingsEvent) => {
     if (!bindings) return;
     // Der „×“-Button wird nach dem Leeren oft disabled; der Fokus ginge sonst verloren.
-    let back: string | null = null;
-    if (state.mode === "confirm" && (event.type === "cancel" || event.type === "overwrite")) {
-      back = slotId(state.action, state.slot);
-    } else if (event.type === "clear") {
-      back = slotId(event.action, event.slot);
-    }
+    const back = event.type === "clear" ? slotId(event.action, event.slot) : null;
     const next = keyBindingsStep(state, bindings, event);
     setState(next.state);
     if (next.save) onSave(next.save);

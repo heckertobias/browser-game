@@ -13,7 +13,7 @@ import {
   type LayoutSource,
 } from "./keyBindingsLogic";
 
-const { MOVE_UP: UP, MOVE_DOWN: DOWN } = Action;
+const { MOVE_UP: UP, MOVE_DOWN: DOWN, MOVE_LEFT: LEFT, MOVE_RIGHT: RIGHT } = Action;
 
 const withUp = (...codes: string[]): Bindings => new Map(DEFAULT_BINDINGS).set(UP, codes);
 const rec = (action: Action, slot: Slot): KeyBindingsState => ({ mode: "recording", action, slot });
@@ -75,40 +75,40 @@ describe("keyBindingsStep", () => {
 
   describe("Konflikt (AK-7)", () => {
     const bindings = withUp("KeyW", "ArrowUp");
-    const confirming: KeyBindingsState = { mode: "confirm", action: DOWN, slot: 1, code: "KeyW", other: UP };
 
     it("überschreibt sofort ohne Rückfrage", () => {
       const { state, save } = press(bindings, DOWN, 1, "KeyW");
-      expect(state).toEqual(IDLE);
+      expect(state).toEqual({ mode: "idle", notice: { kind: "overwritten", code: "KeyW", from: UP, to: DOWN } });
       expect(save?.get(UP)).toEqual(["ArrowUp"]);
       expect(save?.get(DOWN)).toEqual(["KeyS", "KeyW"]);
       expect(triggers("KeyW", save, DOWN)).toBe(true);
       expect(triggers("KeyW", save, UP)).toBe(false);
     });
-
-    it("überschreibt", () => {
-      const { state, save } = keyBindingsStep(confirming, bindings, { type: "overwrite" });
-      expect(state).toEqual(IDLE);
-      expect(save?.get(UP)).toEqual(["ArrowUp"]);
-      expect(save?.get(DOWN)).toEqual(["KeyS", "KeyW"]);
-    });
-
-    it("bricht ab", () => {
-      expect(keyBindingsStep(confirming, bindings, { type: "cancel" })).toEqual({ state: IDLE, save: null });
-    });
-
-    it("überschreibt nicht ohne Rückfrage", () => {
-      const step = keyBindingsStep(IDLE, bindings, { type: "overwrite" });
-      expect(step.state).toBe(IDLE);
-      expect(step.save).toBeNull();
-    });
   });
 
   it("überschreibt auch die letzte Taste einer anderen Aktion (AK-7, AK-11)", () => {
     const { state, save } = press(DEFAULT_BINDINGS, DOWN, 1, "KeyW");
-    expect(state).toEqual(IDLE);
+    expect(state).toEqual({ mode: "idle", notice: { kind: "overwritten", code: "KeyW", from: UP, to: DOWN } });
     expect(save?.get(UP)).toEqual([]);
     expect(save?.get(DOWN)).toEqual(["KeyS", "KeyW"]);
+  });
+
+  it("meldet ohne Überschreiben nichts (AK-5, AK-7)", () => {
+    expect(press(DEFAULT_BINDINGS, UP, 1, "ArrowUp").state).toBe(IDLE);
+    expect(press(withUp("KeyW", "ArrowUp"), UP, 0, "ArrowUp")).toEqual({ state: IDLE, save: null });
+  });
+
+  it("räumt die Mitteilung beim nächsten Ereignis weg (AK-7)", () => {
+    const noticed: KeyBindingsState = { mode: "idle", notice: { kind: "overwritten", code: "KeyW", from: UP, to: DOWN } };
+    expect(keyBindingsStep(noticed, DEFAULT_BINDINGS, { type: "record", action: UP, slot: 0 }).state).toEqual(rec(UP, 0));
+    expect(keyBindingsStep(noticed, DEFAULT_BINDINGS, { type: "cancel" }).state).toBe(IDLE);
+    expect(keyBindingsStep(noticed, DEFAULT_BINDINGS, { type: "clear", action: UP, slot: 0 }).state).toBe(IDLE);
+    expect(keyBindingsStep(noticed, withUp("KeyI"), { type: "reset" }).state).toBe(IDLE);
+  });
+
+  it("ersetzt die Mitteilung bei der nächsten überschriebenen Taste (AK-7)", () => {
+    const { state } = keyBindingsStep(rec(LEFT, 1), DEFAULT_BINDINGS, { type: "key", code: "KeyD" });
+    expect(state).toEqual({ mode: "idle", notice: { kind: "overwritten", code: "KeyD", from: RIGHT, to: LEFT } });
   });
 
   it.each([
@@ -195,19 +195,6 @@ describe("captureKey", () => {
 
   it.each(["Tab", "ShiftLeft", "ControlLeft", "AltLeft", "MetaLeft", "Space"])("nimmt %s als Taste auf", (code) => {
     expect(captureKey(keyEvent({ key: code, code }), "recording")).toEqual({ type: "key", code });
-  });
-
-  it("bricht in der Rückfrage bei Esc ab", () => {
-    const e = keyEvent({ key: "Escape", code: "Escape" });
-    expect(captureKey(e, "confirm")).toEqual({ type: "cancel" });
-    expect(e.preventDefault).toHaveBeenCalled();
-    expect(e.stopImmediatePropagation).toHaveBeenCalled();
-  });
-
-  it.each([{}, { key: "Enter", code: "Enter" }])("lässt andere Tasten in der Rückfrage durch", (over) => {
-    const e = keyEvent(over);
-    expect(captureKey(e, "confirm")).toBeNull();
-    expect(e.preventDefault).not.toHaveBeenCalled();
   });
 });
 
