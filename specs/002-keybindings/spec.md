@@ -46,6 +46,8 @@ Linkshänder oder Gewohnheiten aus anderen Spielen. Dafür gibt es ein erstes Sp
 - Gamepad-Unterstützung
 - Belegung von Maus- und Touch-Gesten
 - Weitere Einstellungen (Grafik, Ton) – das Menü ist dafür vorbereitet, Inhalte folgen in eigenen Specs
+- Eventuell später: Esc und Enter freigeben und „Menü öffnen“ sowie „Chat öffnen“ selbst als belegbare Aktionen
+  anbieten
 
 ## Offene Fragen
 
