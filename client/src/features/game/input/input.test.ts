@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { activeActions, combinedDirection, DEFAULT_BINDINGS, keyboardDirection, POINTER_RELEASE_EVENTS, PointerHold, pointerDirection } from "./input";
+import { activeActions, combinedDirection, keyboardDirection, POINTER_RELEASE_EVENTS, PointerHold, pointerDirection } from "./input";
+import { DEFAULT_BINDINGS, type Bindings } from "./bindings";
+import { Action } from "@/generated/browsergame/v1/game_pb";
 import { clampDirection } from "@/features/game/core/vector";
 
 const keys = (...codes: string[]) => activeActions(new Set(codes), DEFAULT_BINDINGS);
@@ -30,8 +32,8 @@ describe("Tastatur (AK-2)", () => {
   });
 
   it("nutzt die übergebene Belegung (Grundlage für 002)", () => {
-    const custom = { ...DEFAULT_BINDINGS, moveUp: ["ArrowUp"] };
-    expect(activeActions(new Set(["ArrowUp"]), custom)).toEqual(new Set(["moveUp"]));
+    const custom = new Map(DEFAULT_BINDINGS).set(Action.MOVE_UP, ["ArrowUp"]);
+    expect(activeActions(new Set(["ArrowUp"]), custom)).toEqual(new Set([Action.MOVE_UP]));
   });
 });
 
@@ -146,5 +148,22 @@ describe("PointerHold (007 AK-7)", () => {
 
   it("verlorenes Capture beendet das Halten wie pointerup", () => {
     expect(POINTER_RELEASE_EVENTS).toEqual(expect.arrayContaining(["pointerup", "pointercancel", "lostpointercapture"]));
+  });
+});
+
+describe("Belegung (002)", () => {
+  const upOn = (...codes: string[]): Bindings => new Map(DEFAULT_BINDINGS).set(Action.MOVE_UP, codes);
+
+  it.each(["KeyW", "ArrowUp"])("beide Tasten einer Aktion lösen aus: %s (AK-6)", (code) => {
+    expect(activeActions(new Set([code]), upOn("KeyW", "ArrowUp"))).toEqual(new Set([Action.MOVE_UP]));
+  });
+
+  it("beide Tasten zugleich ergeben die Aktion einmal (AK-6)", () => {
+    const dir = keyboardDirection(activeActions(new Set(["KeyW", "ArrowUp"]), upOn("KeyW", "ArrowUp")));
+    expect(dir).toEqual({ x: 0, y: -1 });
+  });
+
+  it("eine ersetzte Taste löst nicht mehr aus (AK-5)", () => {
+    expect(activeActions(new Set(["KeyW"]), upOn("ArrowUp")).size).toBe(0);
   });
 });

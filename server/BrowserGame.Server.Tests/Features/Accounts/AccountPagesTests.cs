@@ -47,7 +47,7 @@ public sealed partial class AccountPagesTests(GameServerFactory factory) : IClas
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/play")).Response.StatusCode);
 
         var (get, _) = await client.GetAsync("/Account/Logout");
-        Assert.Equal(HttpStatusCode.Redirect, get.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, get.StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/play")).Response.StatusCode);
 
         var (logout, _) = await client.PostAsync("/", "/Account/Logout", new Dictionary<string, string>());

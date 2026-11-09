@@ -1,5 +1,5 @@
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
-import { ClientMessageSchema, ServerMessageSchema } from "@/generated/browsergame/v1/game_pb";
+import { ClientMessageSchema, KeyBindingsSchema, ServerMessageSchema, type KeyBindings } from "@/generated/browsergame/v1/game_pb";
 
 type Payload = Parameters<typeof create<typeof ServerMessageSchema>>[1] extends infer I
   ? I extends { payload?: infer P } ? P : never
@@ -53,6 +53,20 @@ export class FakeWebSocket extends EventTarget {
     return this.sent.flatMap((data) => {
       const { payload } = fromBinary(ClientMessageSchema, data);
       return payload.case === "sendChat" ? [payload.value.text] : [];
+    });
+  }
+
+  sentKeyBindings(): KeyBindings[] {
+    return this.sent.flatMap((data) => {
+      const { payload } = fromBinary(ClientMessageSchema, data);
+      return payload.case === "saveKeyBindings" ? [payload.value.keyBindings ?? create(KeyBindingsSchema)] : [];
+    });
+  }
+
+  sentInputs(): { dirX: number; dirY: number }[] {
+    return this.sent.flatMap((data) => {
+      const { payload } = fromBinary(ClientMessageSchema, data);
+      return payload.case === "input" ? [{ dirX: payload.value.dirX, dirY: payload.value.dirY }] : [];
     });
   }
 

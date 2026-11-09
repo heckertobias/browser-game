@@ -96,4 +96,7 @@
   <data name="Manage.PasskeyAddFailed" xml:space="preserve"><value>Der Passkey konnte nicht hinzugefügt werden. Bitte versuche es erneut.</value></data>
   <data name="Delete.SubmitPasskey" xml:space="preserve"><value>Mit Passkey bestätigen und löschen</value></data>
   <data name="Delete.PasskeyFailed" xml:space="preserve"><value>Der Passkey konnte nicht bestätigt werden. Bitte versuche es erneut.</value></data>
+  <data name="Logout.Title" xml:space="preserve"><value>Abmelden</value></data>
+  <data name="Logout.Question" xml:space="preserve"><value>Wirklich abmelden?</value></data>
+  <data name="Logout.BackToGame" xml:space="preserve"><value>Zurück zum Spiel</value></data>
 </root>

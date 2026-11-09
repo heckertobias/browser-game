@@ -5,6 +5,7 @@ import {
   Kicked_Reason,
   ServerMessageSchema,
   type ChatMessage,
+  type KeyBindings,
   type Snapshot,
   type Welcome,
 } from "@/generated/browsergame/v1/game_pb";
@@ -33,6 +34,8 @@ export interface GameConnection {
   sendInput(input: PendingInput): void;
   /** Schickt den Text unverändert. `false`: Verbindung nicht offen, nichts gesendet. `true` ist keine Zustellbestätigung. */
   sendChat(text: string): boolean;
+  /** Schickt die Belegung (leer = Standard). `false`: Verbindung nicht offen, nichts gesendet. */
+  saveKeyBindings(keyBindings: KeyBindings): boolean;
   close(): void;
 }
 
@@ -106,6 +109,12 @@ export function connect(url: string, handlers: ConnectionHandlers & ChatHandlers
     sendChat(text) {
       if (socket.readyState !== WebSocket.OPEN) return false;
       const message = create(ClientMessageSchema, { payload: { case: "sendChat", value: { text } } });
+      socket.send(toBinary(ClientMessageSchema, message));
+      return true;
+    },
+    saveKeyBindings(keyBindings) {
+      if (socket.readyState !== WebSocket.OPEN) return false;
+      const message = create(ClientMessageSchema, { payload: { case: "saveKeyBindings", value: { keyBindings } } });
       socket.send(toBinary(ClientMessageSchema, message));
       return true;
     },

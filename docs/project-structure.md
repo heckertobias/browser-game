@@ -49,10 +49,11 @@ client/
         core/                constants.ts, vector.ts — Basis, von allen Unterordnern genutzt
         engine/              game.ts (Orchestrierung)
         state/               prediction.ts, interpolation.ts (Client-Vorschau des Serverstands)
-        input/               input.ts, wakeLock.ts
+        input/               input.ts, bindings.ts, wakeLock.ts
         render/              render.ts, viewport.ts, hud.ts
         network/             net.ts (WebSocket + Protobuf)
         chat/                Chat.tsx (Chatfenster), chatLogic.ts (reine Logik)
+        menu/                Menu.tsx (Spielmenü), KeyBindings.tsx (Tastenbelegung), menuLogic.ts und keyBindingsLogic.ts (reine Logik)
       accounts/api/          passkeys.ts — WebAuthn-Flow der Spielerseiten
       localization/          i18n.ts (Texte, Sprache) · language.ts (bestätigt bei Formularverlust)
       pwa/
@@ -104,6 +105,8 @@ server/
         Chat/Domain/         ChatRules (Text), ChatRateLimiter (Tempo), ChatHistory (Verlauf)
         Chat/Application/    ChatSaveQueue (Warteschlange Tick-Thread → ChatStore)
         Chat/Infrastructure/ ChatStore (Verlauf laden, gebündelt schreiben, aufräumen)
+        KeyBindings/Domain/  KeyBindingRules (Tastenbelegung prüfen, 002)
+        KeyBindings/Infrastructure/ KeyBindingStore (Belegung am Account speichern, 002)
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)
         Application/         GameLanguages, LanguageCookie, LanguageOnlyCultureProvider

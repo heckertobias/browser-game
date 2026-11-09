@@ -6,8 +6,8 @@ Gehört zu: [spec.md](spec.md)
 
 ```
 Client  ── features/game/menu/Menu.tsx         Overlay über dem Spiel: Weiterspielen, Tastenbelegung, Mein Account, Abmelden
-        ── features/game/menu/KeyBindings.tsx  Liste der Aktionen mit je zwei Plätzen, Taste aufnehmen, Hinweis bei Konflikt
-        ── features/game/input/bindings.ts     reine Logik: Belegung ändern, Konflikte, Pflichtplätze, Standard, Tastennamen
+        ── features/game/menu/KeyBindings.tsx  Liste der Aktionen mit je zwei Plätzen, Taste aufnehmen, Mitteilung bei Überschreiben
+        ── features/game/input/bindings.ts     reine Logik: Belegung ändern, Überschreiben, Standard, Tastennamen
         ── input.ts                            Belegung austauschbar, „pausiert“ solange das Menü offen ist
         ── net.ts / game.ts                    Belegung aus Welcome übernehmen, SaveKeyBindings schicken
 Server  ── GameEndpoint: Belegung beim Verbinden laden → Welcome; SaveKeyBindings prüfen und speichern
@@ -34,13 +34,14 @@ HTTP-API (OpenAPI, Antiforgery, zweiter Auth-Weg) lohnt sich für einen einzigen
    bleibt wie er war. Enter beim Aufnehmen ergibt `reserved`; der Aufnahme-Listener ruft `preventDefault()`, damit
    `shouldOpenChat` (prüft `defaultPrevented`) den Chat nicht öffnet. Die Liste `RESERVED_CODES` liegt an einer Stelle
    (Client und Server).
-5. **Konflikt (AK-7):** Die Taste ist schon bei einer anderen Aktion belegt → Dialog „W ist schon ‚Nach oben‘ zugeordnet.
-   Dort entfernen und hier belegen?“ mit „Überschreiben“ / „Abbrechen“. Wäre die andere Aktion danach ohne Taste
-   (AK-11), wird nicht überschrieben, sondern nur erklärt: „‚Nach oben‘ braucht mindestens eine Taste. Belege dort zuerst
-   eine andere.“ Dieselbe Taste zweimal bei derselben Aktion wird still ignoriert.
-6. **Leeren (AK-11):** Jeder Platz hat ein „×“. Bei Bewegungsaktionen ist es deaktiviert, solange der Platz die letzte
-   Taste der Aktion ist. Rückt der zweite Platz nach, wenn der erste geleert wird? Ja: Eine Aktion hält eine Liste mit
-   0–2 Tasten, die Anzeige füllt von vorne.
+5. **Überschreiben (AK-7):** Die Taste ist schon bei einer anderen Aktion belegt → sie wird dort entfernt und hier
+   belegt, ohne Rückfrage. Danach steht eine Mitteilung „W war ‚Nach rechts‘ zugeordnet und ist jetzt ‚Nach oben‘.“
+   Die andere Aktion darf dadurch ohne Taste sein. Dieselbe Taste zweimal bei derselben Aktion wird still ignoriert.
+   (Geändert nach dem Test von 0.8.0-rc.1; vorher Rückfrage und Pflichttaste je Bewegungsaktion.)
+6. **Leeren (AK-11):** Jeder Platz hat ein „×“, immer aktiv, sobald der Platz belegt ist. Es gibt keine Pflichttasten.
+   Rückt der zweite Platz nach, wenn der erste geleert wird? Ja: Eine Aktion hält eine Liste mit 0–2 Tasten, die
+   Anzeige füllt von vorne. Eine Aktion ohne Taste wird mitgeschickt (leere Liste), damit `fromProto` ihr nicht wieder
+   den Standard gibt.
 7. **Menü statt „Mein Account“-Link im HUD.** 003 hat den Link nur bis zum Menü vorgesehen. Der HUD-Button „Menü“ ist
    immer sichtbar (auch am PC, damit man ihn mit der Maus findet) und erfüllt AK-2. Im Menü bleibt „Mein Account“ als
    vierter Eintrag, sonst gäbe es keinen Weg mehr dorthin.
@@ -116,7 +117,7 @@ message Welcome {
 - `IsValid(KeyBindings)`:
   - leer → gültig (Standard).
   - Sonst: jede Aktion bekannt (nicht `UNSPECIFIED`, kein unbekannter Enum-Wert) und höchstens einmal aufgeführt.
-  - Je Aktion 0–2 Codes; jede Bewegungsaktion mindestens 1 (AK-11).
+  - Je Aktion 0–2 Codes (AK-11); keine Pflichtaktionen, fehlende Aktionen sind erlaubt.
   - Kein Code doppelt, weder in einer Aktion noch über Aktionen hinweg (AK-7).
   - Kein Code aus `ReservedCodes` (`Escape`, `Enter`, `NumpadEnter`, AK-8).
   - Codes 1–32 Zeichen, nur `[A-Za-z0-9]`.
@@ -142,13 +143,13 @@ message Welcome {
 ### `features/game/input/bindings.ts` (reine Funktionen, Vitest)
 - Typen aus dem generierten Code (`Action`, `KeyBindings`); intern `type Bindings = ReadonlyMap<Action, readonly string[]>`.
   Die handgeschriebenen `Action`, `KeyBindings` und `DEFAULT_BINDINGS` in `input/input.ts` (aus 001) entfallen.
-- `DEFAULT_BINDINGS` (WASD, zweiter Platz leer), `MOVE_ACTIONS`, `RESERVED_CODES = ["Escape", "Enter", "NumpadEnter"]`.
+- `DEFAULT_BINDINGS` (WASD, zweiter Platz leer), `RESERVED_CODES = ["Escape", "Enter", "NumpadEnter"]`.
 - `fromProto(KeyBindings) → Bindings`: leer → Standard. Aktionen, die fehlen (z. B. neue aus späteren Specs), bekommen
-  ihren Standard, sofern dessen Taste noch frei ist, sonst bleiben sie leer.
-- `toProto(Bindings, isDefault) → KeyBindings`: gleich dem Standard → leer.
-- `assign(bindings, action, slot, code) → { kind: "ok", bindings } | { kind: "conflict", other } | { kind: "blocked", other } | { kind: "reserved" }`
-  und `assignOverwriting(…)` für „Überschreiben“ (AK-5, AK-7, AK-8, AK-11).
-- `clear(bindings, action, slot)`; `canClear(…)` (AK-11).
+  ihren Standard, sofern dessen Taste noch frei ist, sonst bleiben sie leer. Mitgeschickte leere Aktionen bleiben leer.
+- `toProto(Bindings) → KeyBindings`: gleich dem Standard → leer; sonst alle Aktionen, auch leere.
+- `assign(bindings, action, slot, code) → { kind: "ok", bindings, overwritten?: Action } | { kind: "reserved" }`
+  (AK-5, AK-7, AK-8): `overwritten` ist die Aktion, der die Taste weggenommen wurde.
+- `clear(bindings, action, slot)` (AK-11).
 - `keyLabel(code, layoutMap?)`.
 
 ### `input.ts`
@@ -173,14 +174,14 @@ message Welcome {
 
 ### `features/game/menu/KeyBindings.tsx`
 - Tabelle: Aktion | Platz 1 | Platz 2. Klick auf einen Platz → „Taste drücken …“; der nächste `keydown` (mit
-  `preventDefault`) wird über `assign` geprüft. Ergebnis `conflict` → Rückfrage (AK-7), `blocked` → Hinweis,
+  `preventDefault`) wird über `assign` geprüft. Ergebnis `ok` mit `overwritten` → Mitteilung (AK-7),
   `reserved` → Hinweis „Esc ist für das Menü reserviert“ bzw. „Enter ist für den Chat reserviert“ (AK-8).
-- „×“ je Platz (AK-11), Button „Standard wiederherstellen“ (AK-10), „Zurück“.
+- „×“ je belegtem Platz (AK-11), Button „Standard wiederherstellen“ (AK-10), „Zurück“.
 - Am Handy ohne Tastatur ist die Seite erreichbar, aber ohne Tastatur nicht nutzbar; kein eigener Sonderfall.
 
 ### `i18n.ts`
 Neue Schlüssel (de/en): `menu`, `menuContinue`, `menuKeyBindings`, `menuSignOut`, Aktionsnamen (`actionMoveUp` …),
-`bindingPressKey`, `bindingConflict`, `bindingOverwrite`, `bindingCancel`, `bindingBlocked`, `bindingReserved`, `bindingReservedChat`,
+`bindingPressKey`, `bindingOverwritten`, `bindingReserved`, `bindingReservedChat`,
 `bindingClear`, `bindingReset`, `back`.
 
 ## Abdeckung der Akzeptanzkriterien
@@ -194,11 +195,11 @@ Neue Schlüssel (de/en): `menu`, `menuContinue`, `menuKeyBindings`, `menuSignOut
 | 4b | Rendern läuft weiter | **manuell:** zwei Geräte, eines mit offenem Menü sieht das andere laufen |
 | 5 | `assign`, `setBindings` | Vitest: neue Taste → `activeActions` liefert die Aktion |
 | 6 | Map mit zwei Codes | Vitest: beide Codes lösen aus |
-| 7 | `assign` → `conflict`/`blocked`, Dialog | Vitest: Konflikt erkannt, nichts geändert; `assignOverwriting` entfernt bei der anderen Aktion; Unit (Server): doppelte Codes ungültig |
+| 7 | `assign` → `ok` mit `overwritten`, Mitteilung | Vitest: Taste wechselt die Aktion, `overwritten` nennt die alte, andere Aktion darf leer werden; Unit (Server): doppelte Codes ungültig |
 | 8 | `RESERVED_CODES` Client + Server | Vitest: `Escape`, `Enter`, `NumpadEnter` → `reserved`; Aufnehmen mit Enter öffnet den Chat nicht (`defaultPrevented`); Unit (Server): alle drei ungültig |
 | 9 | `Account.KeyBindings`, Welcome | Integration (WS): speichern, neue Verbindung → `Welcome.key_bindings` gleich; ungültige Belegung → nicht gespeichert |
 | 10 | „Standard wiederherstellen“ → leer | Vitest: `toProto(DEFAULT)` leer; Integration: leere Belegung → Spalte `NULL`, Welcome leer |
-| 11 | `clear`/`canClear`, Server-Prüfung | Vitest: letzte Bewegungstaste nicht leerbar; Unit (Server): Bewegungsaktion ohne Taste ungültig |
+| 11 | `clear`, Server-Prüfung | Vitest: auch die letzte Taste ist leerbar, leere Aktion bleibt nach `toProto`/`fromProto` leer; Unit (Server): Aktion ohne Taste gültig |
 
 Integrationstests laufen wie in 003 gegen SQLite und PostgreSQL.
 

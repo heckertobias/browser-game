@@ -24,12 +24,6 @@ function viewportContent(html: string): string[] {
 describe("HUD auf dem Handy (003 T13a)", () => {
   const markup = renderToStaticMarkup(createElement(App));
 
-  it("lässt den Link „Mein Account“ nicht ziehen (007 AK-8)", () => {
-    const link = openingTag(markup, "account");
-    expect(link).toContain('href="/Account/Manage"');
-    expect(link).toContain('draggable="false"');
-  });
-
   it("sperrt Gesten auf der HUD-Ebene wie auf dem Spielbild (007 AK-8)", () => {
     const hud = classes(openingTag(markup, "hud"));
     expect(hud).toContain("touch-none");

@@ -9,6 +9,7 @@ message ClientMessage {
   oneof payload {
     Input input = 1;
     SendChat send_chat = 2;
+    SaveKeyBindings save_key_bindings = 3;
   }
 }
 
@@ -26,6 +27,31 @@ message Input {
 // der Server trimmt und prüft selbst.
 message SendChat {
   string text = 1;
+}
+
+// Spieleraktionen, die auf Tasten liegen (002). Neue Aktionen (z. B. Angriffe in 013) kommen hier dazu.
+enum Action {
+  ACTION_UNSPECIFIED = 0;
+  ACTION_MOVE_UP = 1;
+  ACTION_MOVE_DOWN = 2;
+  ACTION_MOVE_LEFT = 3;
+  ACTION_MOVE_RIGHT = 4;
+}
+
+message KeyBinding {
+  Action action = 1;
+  // KeyboardEvent.code, höchstens 2, ohne Escape, Enter, NumpadEnter.
+  repeated string codes = 2;
+}
+
+// Belegung eines Accounts. Leer = Standard des Clients.
+message KeyBindings {
+  repeated KeyBinding bindings = 1;
+}
+
+// Neue Belegung speichern; leer = Standard wiederherstellen (AK-10). Ungültige Belegungen verwirft der Server still.
+message SaveKeyBindings {
+  KeyBindings key_bindings = 1;
 }
 
 // Server → Client
@@ -61,6 +87,8 @@ message Welcome {
   // Welteinheiten pro Sekunde.
   float speed = 3;
   uint32 tick_rate_hz = 4;
+  // Gespeicherte Belegung des Accounts; leer = Standard (AK-9).
+  KeyBindings key_bindings = 5;
 }
 
 message Snapshot {
