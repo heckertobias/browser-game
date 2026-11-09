@@ -35,7 +35,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
   i18n de/en ohne die entfallenen Schlüssel.
 
 ## Tests / Prüfung
-- [ ] **T14**: Manuelle Prüfung in der Testumgebung:
+- [x] **T14**: Manuelle Prüfung in der Testumgebung:
   - PC: Esc auf/zu, Taste umlegen, zweite Taste, Überschreiben mit Mitteilung, Esc und Enter nicht belegbar (Chat geht dabei nicht auf), jede Taste leerbar, Standard
   - zweites Gerät: Belegung ist da (AK-9); offenes Menü, anderes Gerät läuft weiter (AK-4b)
   - Handy hochkant/quer: Menü-Button, Abmelden über die Bestätigungsseite

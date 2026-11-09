@@ -1,6 +1,6 @@
 # 002 – Tastenbelegung & erstes Menü
 
-**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [003 – Accounts & gespeicherte Position](../003-accounts/spec.md) (die Belegung gehört zum Account).
 
