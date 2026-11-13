@@ -89,6 +89,9 @@ message Welcome {
   uint32 tick_rate_hz = 4;
   // Gespeicherte Belegung des Accounts; leer = Standard (AK-9).
   KeyBindings key_bindings = 5;
+  // Maximalwerte für HP und Mana (012).
+  float max_hp = 6;
+  float max_mana = 7;
 }
 
 message Snapshot {
@@ -96,6 +99,9 @@ message Snapshot {
   // Pro Empfänger: letzte vom Server verarbeitete Eingabe.
   uint32 last_processed_seq = 2;
   repeated PlayerState players = 3;
+  // Pro Empfänger: eigene aktuelle Werte (012).
+  float hp = 4;
+  float mana = 5;
 }
 
 message PlayerState {
@@ -107,6 +113,8 @@ message PlayerState {
   uint32 color = 5;
   // Verbindung verloren, Figur wartet noch (Nachlauf) – anders darstellen.
   bool away = 6;
+  // Zählt Sprünge der Figur (Respawn, Zurücksetzen); ändert er sich, nicht interpolieren.
+  uint32 spawn_seq = 7;
 }
 
 message ChatHistory {

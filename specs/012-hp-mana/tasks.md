@@ -5,7 +5,7 @@ Gehört zu: [plan.md](plan.md)
 Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task bringt seine Tests mit.
 
 ## Verträge
-- [ ] **T1** (AK-1, AK-5, AK-6, AK-8): `game.proto`: `Welcome.max_hp`/`max_mana` (6, 7), `Snapshot.hp`/`mana` (4, 5),
+- [x] **T1** (AK-1, AK-5, AK-6, AK-8): `game.proto`: `Welcome.max_hp`/`max_mana` (6, 7), `Snapshot.hp`/`mana` (4, 5),
   `PlayerState.spawn_seq` (7); `buf lint` und `buf breaking` grün.
 
 ## Server
