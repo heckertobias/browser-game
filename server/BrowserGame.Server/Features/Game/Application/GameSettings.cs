@@ -16,6 +16,12 @@ internal static class GameSettings
     /// <summary>Mana pro Sekunde; leer bis voll in 20 s (012 AK-3). HP regeneriert nicht (AK-4).</summary>
     public const double ManaRegenPerSecond = World.DefaultManaRegenPerSecond;
 
+    /// <summary>Blickrichtung neuer Figuren in Bogenmaß; π/2 = nach unten (016 AK-4).</summary>
+    public const double DefaultFacing = World.DefaultFacing;
+
+    /// <summary>Kürzere Richtungsvektoren ändern die Blickrichtung nicht (016 AK-5).</summary>
+    public const double MinFacingInput = World.DefaultMinFacingInput;
+
     /// <summary>
     /// Standard-Nachlauf: So lange bleibt eine getrennte Figur stehen (003 AK-20).
     /// Überschreibbar mit <c>Game:LingerSeconds</c> (z. B. in Tests).

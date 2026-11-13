@@ -119,7 +119,7 @@ export class Game {
   private handleWelcome(welcome: Welcome): void {
     this.welcome = welcome;
     this.stepMs = 1000 / welcome.tickRateHz;
-    this.predictor = new Predictor(welcome.speed / welcome.tickRateHz);
+    this.predictor = new Predictor(welcome.speed / welcome.tickRateHz, welcome.minFacingInput);
     this.applyKeyBindings(fromProto(welcome.keyBindings));
     this.events.onWelcome(welcome.name);
     this.events.onStatus("connected");
@@ -129,7 +129,7 @@ export class Game {
     const selfId = this.welcome?.playerId;
     const own = snapshot.players.find((p) => p.id === selfId);
     if (own && this.predictor) {
-      this.predictor.reconcile(own.x, own.y, snapshot.lastProcessedSeq);
+      this.predictor.reconcile(own.x, own.y, snapshot.lastProcessedSeq, own.facing);
       this.self = { name: own.name, color: own.color, x: own.x, y: own.y };
     }
     if (own) this.reportVitals(snapshot);
@@ -198,7 +198,7 @@ export class Game {
     let camera: Vec = { x: 0, y: 0 };
     if (this.predictor?.initialized && this.self) {
       camera = this.predictor.renderPosition(this.accumulator / this.stepMs);
-      players.push({ ...this.self, ...camera });
+      players.push({ ...this.self, ...camera, facing: this.predictor.facing });
     }
     render(this.ctx, this.viewport, camera, players);
   }

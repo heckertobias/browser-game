@@ -1,3 +1,5 @@
+import { lerpAngle } from "@/features/game/core/vector";
+
 export interface RemotePlayer {
   id: string;
   name: string;
@@ -7,6 +9,8 @@ export interface RemotePlayer {
   away?: boolean;
   /** Zählt Sprünge der Figur (Respawn); ändert er sich, wird nicht interpoliert (012 AK-8). */
   spawnSeq?: number;
+  /** Blickrichtung in Bogenmaß (016); interpoliert über den kürzeren Bogen. */
+  facing?: number;
 }
 
 interface TimedSnapshot {
@@ -32,7 +36,7 @@ export class SnapshotBuffer {
     }
   }
 
-  /** Spieler zum Zeitpunkt `renderTime`. Wer im späteren Snapshot fehlt, ist weg (AK-4). Wer gesprungen ist (anderer `spawnSeq`), steht sofort an der neuen Position (012 AK-8). */
+  /** Spieler zum Zeitpunkt `renderTime`. Wer im späteren Snapshot fehlt, ist weg (AK-4). Wer gesprungen ist (anderer `spawnSeq`), steht sofort an der neuen Position (012 AK-8). Die Blickrichtung wird über den kürzeren Bogen interpoliert (016 AK-7). */
   sample(renderTime: number): RemotePlayer[] {
     const later = this.snapshots.findIndex((s) => s.time >= renderTime);
     const newest = this.snapshots.at(-1);
@@ -56,9 +60,18 @@ export class SnapshotBuffer {
     const t = span > 0 ? (renderTime - from.time) / span : 1;
     return [...to.players.values()].map((target) => {
       const start = from.players.get(target.id);
-      return start && start.spawnSeq === target.spawnSeq
-        ? { ...target, x: start.x + (target.x - start.x) * t, y: start.y + (target.y - start.y) * t }
-        : target;
+      if (!start || start.spawnSeq !== target.spawnSeq) {
+        return target;
+      }
+      const between: RemotePlayer = {
+        ...target,
+        x: start.x + (target.x - start.x) * t,
+        y: start.y + (target.y - start.y) * t,
+      };
+      if (start.facing !== undefined && target.facing !== undefined) {
+        between.facing = lerpAngle(start.facing, target.facing, t);
+      }
+      return between;
     });
   }
 }

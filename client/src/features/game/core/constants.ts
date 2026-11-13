@@ -5,6 +5,10 @@ export const MAX_ASPECT_LONG = 21;
 export const MAX_ASPECT_SHORT = 9;
 
 export const PLAYER_SIZE = 16;
+/** Pfeil der Blickrichtung (016) in Weltpixeln: Abstand vom Rand der Figur, Länge der Spitze, Breite der Basis. */
+export const ARROW_GAP = 3;
+export const ARROW_LENGTH = 5;
+export const ARROW_WIDTH = 6;
 /** Culling (ADR 0010): Figur samt Namen (≤ 16 Zeichen) muss das Sichtfeld um diesen Rand in Weltpixeln schneiden. */
 export const CULL_MARGIN = 64;
 export const GRID_MINOR = 32;

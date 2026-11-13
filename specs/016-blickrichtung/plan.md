@@ -27,7 +27,7 @@ Winkel in Bogenmaß, 0 = rechts (+x), π/2 = unten (+y, Bildschirm-Koordinaten w
 ## Entschiedene Fragen (Plan)
 
 1. **Quelle ist die vom Server angewandte Richtung** (`Player.DirX/DirY` nach Eingabe oder Nachlauf in `World.Step()`).
-   Ist ihre Länge mindestens `MinFacingInput`, wird `Facing = atan2(DirY, DirX)` (AK-1, AK-2, AK-12). Sonst bleibt
+   Ist ihre Länge größer als 0 und mindestens `MinFacingInput`, wird `Facing = atan2(DirY, DirX)` (AK-1, AK-2, AK-12). Sonst bleibt
    der alte Wert (AK-3, AK-5). Die Totzone des Zeigers aus 001 liefert ohnehin (0, 0); `MinFacingInput` fängt
    zusätzlich winzige Vektoren eines manipulierten Clients ab.
 2. **Neue Figur → `DefaultFacing`** (AK-4, AK-11). Wie bei HP/Mana (012) gilt das für jede neue Figur; die Übernahme
@@ -66,9 +66,9 @@ message PlayerState {
 
 ## Server
 
-- `Player.Facing` (`double`); `World`-Konstruktor bekommt `defaultFacing` und `minFacingInput` (Constitution §8).
+- `Player.Facing` (`double`); `World`-Konstruktor bekommt `startFacing` und `minFacingInput` (Constitution §8).
 - `World.Step()`: nach dem Bestimmen von `DirX/DirY` (vor der Bewegung):
-  `if (hypot(DirX, DirY) >= MinFacingInput) Facing = atan2(DirY, DirX)`. Wartende Figuren werden übersprungen wie bisher.
+  `if (len > 0 && len >= MinFacingInput) Facing = atan2(DirY, DirX)`. Wartende Figuren werden übersprungen wie bisher.
 - `GameLoop.BroadcastSnapshot`: `Facing = (float)p.Facing`.
 - Kein Speichern (AK-11): `PositionStore` bleibt unverändert.
 - 013 liest `Player.Facing` für Angriffe, 014 für den Spawn-Punkt (AK-10); in 016 selbst gibt es keine weitere
