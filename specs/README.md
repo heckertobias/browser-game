@@ -92,6 +92,10 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 11 | [013 – Rudimentäres Kampfsystem](013-kampfsystem/spec.md) | bereit | 012, 016 |
 | 12 | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | bereit | 011, 012, 003 |
 | 13 | [014 – Gegner (erstes Ziel, das HP hat und zurückwirkt)](014-gegner/spec.md) | bereit | 012, 013, 015, 016 |
+| 14 | [017 – Spielfigur als Pixel-Art](017-spielfigur/spec.md) | entwurf | 001, 003, 015, 016 |
+| 15 | [018 – Boden statt Gitter](018-boden/spec.md) | entwurf | 017 |
+| 16 | [019 – Deko-Objekte](019-deko/spec.md) | entwurf | 018 |
+| 17 | [020 – Pixel-Schrift](020-pixel-schrift/spec.md) | entwurf | 001 |
 | später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |
 | später | [008 – Push-Benachrichtigungen](008-push/spec.md) | entwurf | 007, Haus |
 | nach Release | [009 – Wechsel auf .NET 11](009-dotnet-11/spec.md) | entwurf | .NET 11 GA + 7 Tage |
