@@ -1,6 +1,6 @@
 # 016 – Blickrichtung
 
-**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) (Bewegung per Tasten und Pointer,
 freie Richtungsvektoren)

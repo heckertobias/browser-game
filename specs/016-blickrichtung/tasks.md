@@ -18,7 +18,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 - [x] **T5** (AK-6–8): Pfeil in `render.ts` (`arrowPoints`, Konstanten in `constants.ts`); Vitest.
 
 ## Tests / Prüfung
-- [ ] **T6**: Manuelle Prüfung in der Testumgebung (PC mit Tasten und Maus, Handy hochkant/quer, zwei Geräte):
+- [x] **T6**: Manuelle Prüfung in der Testumgebung (PC mit Tasten und Maus, Handy hochkant/quer, zwei Geräte):
   Pfeil dreht stufenlos mit, bleibt im Stehen, Standard nach Anmeldung, andere Figur zeigt ihren Pfeil.
 
   Danach alle AKs abhaken, Spec-Status auf `umgesetzt`, Roadmap aktualisieren. AK-10 wird mit 014 geprüft.
