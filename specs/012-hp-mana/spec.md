@@ -1,6 +1,6 @@
 # 012 – HP & Mana
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md)
 Voraussetzung für: [013 – Rudimentäres Kampfsystem](../013-kampfsystem/spec.md) (geplant), [014 – Gegner](../014-gegner/spec.md) (geplant)
