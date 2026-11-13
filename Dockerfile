@@ -22,7 +22,7 @@ ARG APP_VERSION
 RUN cd client && VITE_APP_VERSION="$APP_VERSION" npm run build
 
 # 2) Gemeinsamer Restore für Spiel und Admin
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0@sha256:de4fe90a98845d75910b9769662465c84de1a934665c431279d1382b2bddc02b AS restore
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0@sha256:fe0fd4e93bd2fbb47c883b7a6369e5c8d3db8bf01cdc5981f6ee35fbdf3ff4fb AS restore
 ARG TARGETARCH
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
 WORKDIR /src
@@ -53,7 +53,7 @@ COPY --from=client /src/server/BrowserGame.Admin/wwwroot/ server/BrowserGame.Adm
 RUN dotnet publish server/BrowserGame.Admin/BrowserGame.Admin.csproj --configuration Release --arch $TARGETARCH --no-restore --output /app
 
 # 4a) Laufzeit Admin: chiseled (keine Shell, kein Paketmanager), non-root-User "app"
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:c89a6a61f494f20a5ae302990e814627a8d91b332fd4a8e7c1707c2d4da9555d AS admin
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:7c625e44e5d588b4d7b2a913e94ca4bd5098ce47442da404829e4c7936a764e1 AS admin
 WORKDIR /app
 COPY --from=publish-admin /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data
@@ -67,7 +67,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 ENTRYPOINT ["dotnet", "BrowserGame.Admin.dll"]
 
 # 4b) Laufzeit Spiel (Standardziel)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:c89a6a61f494f20a5ae302990e814627a8d91b332fd4a8e7c1707c2d4da9555d AS game
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled@sha256:7c625e44e5d588b4d7b2a913e94ca4bd5098ce47442da404829e4c7936a764e1 AS game
 WORKDIR /app
 COPY --from=publish-game /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data
