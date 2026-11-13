@@ -57,7 +57,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     private readonly Dictionary<string, PlayerConnection> _connections = [];
     private readonly World _world = new(
         GameSettings.Speed, GameSettings.TickRateHz, new Random(),
-        GameSettings.MaxHp, GameSettings.MaxMana, GameSettings.ManaRegenPerSecond);
+        GameSettings.MaxHp, GameSettings.MaxMana, GameSettings.ManaRegenPerSecond,
+        GameSettings.DefaultFacing, GameSettings.MinFacingInput);
     private readonly uint _lingerTicks = GameSettings.ToTicks(configuration.GetValue(GameSettings.LingerSecondsKey, GameSettings.LingerSeconds));
 
     // Mindestens 1 Tick, sonst Division durch 0 im Speicher-Takt.

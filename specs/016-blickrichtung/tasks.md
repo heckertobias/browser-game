@@ -8,7 +8,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 - [x] **T1** (AK-8, AK-12): `game.proto`: `PlayerState.facing` (Feld 8), `Welcome.min_facing_input` (Feld 8); `buf lint` und `buf breaking` grün.
 
 ## Server
-- [ ] **T2** (AK-1–5, AK-9, AK-11): `Player.Facing`, `DefaultFacing`, `MinFacingInput`; Ableitung in `World.Step()`;
+- [x] **T2** (AK-1–5, AK-9, AK-11): `Player.Facing`, `DefaultFacing`, `MinFacingInput`; Ableitung in `World.Step()`;
   Unit-Tests.
 - [ ] **T3** (AK-4, AK-8, AK-11, AK-12): `facing` im Snapshot, `min_facing_input` im `Welcome`; Integrationstests (WS).
 
