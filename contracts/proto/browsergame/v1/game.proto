@@ -92,6 +92,8 @@ message Welcome {
   // Maximalwerte für HP und Mana (012).
   float max_hp = 6;
   float max_mana = 7;
+  // Kürzere Richtungsvektoren ändern die Blickrichtung nicht (016).
+  float min_facing_input = 8;
 }
 
 message Snapshot {
@@ -115,6 +117,8 @@ message PlayerState {
   bool away = 6;
   // Zählt Sprünge der Figur (Respawn, Zurücksetzen); ändert er sich, nicht interpolieren.
   uint32 spawn_seq = 7;
+  // Blickrichtung in Bogenmaß, 0 = +x, π/2 = +y (unten). Folgt der Laufrichtung (016).
+  float facing = 8;
 }
 
 message ChatHistory {
