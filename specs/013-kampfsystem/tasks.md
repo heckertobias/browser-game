@@ -6,7 +6,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 Erst beginnen, wenn 012 und 016 umgesetzt sind.
 
 ## Verträge
-- [ ] **T1** (AK-4–15, AK-18, AK-19): `game.proto`: `Attack` (`ClientMessage` 4), `AttackRejected` (`ServerMessage` 7),
+- [x] **T1** (AK-4–15, AK-18, AK-19): `game.proto`: `Attack` (`ClientMessage` 4), `AttackRejected` (`ServerMessage` 7),
   `TargetState`, `ProjectileState`, `Snapshot.targets`/`projectiles` (6, 7), `Action` 5–6; `buf lint` und `buf breaking`
   grün.
 

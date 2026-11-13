@@ -68,7 +68,7 @@ public sealed class KeyBindingRulesTests
     }
 
     [Theory]
-    [InlineData(5)]
+    [InlineData(100)]
     [InlineData(99)]
     [InlineData(-1)]
     public void Unknown_action_is_invalid(int value)
@@ -134,7 +134,17 @@ public sealed class KeyBindingRulesTests
     public void Unknown_action_without_code_is_invalid()
     {
         Assert.False(KeyBindingRules.IsValid(Bindings(Bind(ProtoAction.Unspecified))));
-        Assert.False(KeyBindingRules.IsValid(Bindings(Bind((ProtoAction)5))));
+        Assert.False(KeyBindingRules.IsValid(Bindings(Bind((ProtoAction)99))));
+    }
+
+    // 013: Angriffsaktionen sind belegbar.
+    [Fact]
+    public void Attack_actions_are_valid()
+    {
+        var bindings = Wasd();
+        bindings.Bindings.Add(Bind(ProtoAction.AttackMelee, "Digit1"));
+        bindings.Bindings.Add(Bind(ProtoAction.AttackRanged, "Digit2"));
+        Assert.True(KeyBindingRules.IsValid(bindings));
     }
 
     // AK-6

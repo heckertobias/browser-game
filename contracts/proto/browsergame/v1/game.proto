@@ -10,6 +10,7 @@ message ClientMessage {
     Input input = 1;
     SendChat send_chat = 2;
     SaveKeyBindings save_key_bindings = 3;
+    Attack attack = 4;
   }
 }
 
@@ -36,6 +37,8 @@ enum Action {
   ACTION_MOVE_DOWN = 2;
   ACTION_MOVE_LEFT = 3;
   ACTION_MOVE_RIGHT = 4;
+  ACTION_ATTACK_MELEE = 5;
+  ACTION_ATTACK_RANGED = 6;
 }
 
 message KeyBinding {
@@ -54,6 +57,18 @@ message SaveKeyBindings {
   KeyBindings key_bindings = 1;
 }
 
+// Angriff auf ein Ziel (013). Der Server prüft Ziel, Cooldown, Reichweite, Blickrichtung und Mana.
+message Attack {
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    KIND_MELEE = 1;
+    KIND_RANGED = 2;
+  }
+  Kind kind = 1;
+  // ID aus TargetState.id.
+  string target_id = 2;
+}
+
 // Server → Client
 message ServerMessage {
   oneof payload {
@@ -67,6 +82,8 @@ message ServerMessage {
     ChatMessage chat_message = 5;
     // Nur an den Absender: Nachricht nicht angenommen.
     ChatRejected chat_rejected = 6;
+    // Nur an den Angreifer: Angriff nicht ausgeführt (013).
+    AttackRejected attack_rejected = 7;
   }
 }
 
@@ -104,6 +121,10 @@ message Snapshot {
   // Pro Empfänger: eigene aktuelle Werte (012).
   float hp = 4;
   float mana = 5;
+  // Lebende Ziele (013: Trainings-Dummy; 014: Gegner). Fehlt eine ID, ist das Ziel weg.
+  repeated TargetState targets = 6;
+  // Fliegende Projektile (013).
+  repeated ProjectileState projectiles = 7;
 }
 
 message PlayerState {
@@ -139,4 +160,36 @@ message ChatRejected {
     REASON_TOO_FAST = 1;
   }
   Reason reason = 1;
+}
+
+message AttackRejected {
+  enum Reason {
+    REASON_UNSPECIFIED = 0;
+    // Zu wenig Mana für den Fernkampf (AK-8).
+    REASON_NOT_ENOUGH_MANA = 1;
+    // Ziel nicht in Blickrichtung (AK-19).
+    REASON_NOT_FACING = 2;
+  }
+  Reason reason = 1;
+}
+
+// Zielbares Objekt mit HP (013: Trainings-Dummy; 014: Gegner).
+message TargetState {
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    KIND_TRAINING_DUMMY = 1;
+  }
+  string id = 1;
+  Kind kind = 2;
+  float x = 3;
+  float y = 4;
+  float hp = 5;
+  float max_hp = 6;
+}
+
+message ProjectileState {
+  // Eindeutig, solange das Projektil fliegt.
+  uint32 id = 1;
+  float x = 2;
+  float y = 3;
 }
