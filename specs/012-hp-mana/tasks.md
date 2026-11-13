@@ -21,7 +21,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 - [x] **T6** (AK-8): `interpolation.ts` springt bei neuem `spawnSeq`; Vitest.
 
 ## Tests / Prüfung
-- [ ] **T7**: Manuelle Prüfung in der Testumgebung (PC und Handy hochkant/quer): HUD zeigt volle Werte, nach
+- [x] **T7**: Manuelle Prüfung in der Testumgebung (PC und Handy hochkant/quer): HUD zeigt volle Werte, nach
   Anmeldung voll. Schaden und Respawn sind ohne Gegner nur über die Unit- und Integrationstests prüfbar (AK-10); am
   Gerät sichtbar wird es mit 013 (Mana-Verbrauch) bzw. 015 (`fullHealth()`).
 
