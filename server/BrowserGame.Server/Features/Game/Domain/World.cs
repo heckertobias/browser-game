@@ -78,9 +78,8 @@ internal sealed class World(
     /// <summary>Neue Figur am Startpunkt der Welt: zufällig im SpawnRadius um (0,0) (003 AK-17).</summary>
     public Player AddPlayer(string id, string name, uint color)
     {
-        var angle = random.NextDouble() * 2 * Math.PI;
-        var radius = random.NextDouble() * SpawnRadius;
-        return AddPlayer(id, name, color, Math.Cos(angle) * radius, Math.Sin(angle) * radius);
+        var (x, y) = RandomStartPosition();
+        return AddPlayer(id, name, color, x, y);
     }
 
     public Player AddPlayer(string id, string name, uint color, double x, double y)
@@ -143,6 +142,76 @@ internal sealed class World(
     public bool RemovePlayer(string id) => _players.Remove(id);
 
     public Player? GetPlayer(string id) => _players.GetValueOrDefault(id);
+
+    /// <summary>
+    /// Senkt die HP um <paramref name="amount"/> (012 AK-7). Bei HP ≤ 0 stirbt die Figur und erscheint im selben Aufruf
+    /// neu (AK-8, AK-9). Liefert, ob die Figur gestorben ist.
+    /// </summary>
+    public bool Damage(string playerId, double amount)
+    {
+        if (!(amount > 0) || !_players.TryGetValue(playerId, out var player))
+        {
+            return false;
+        }
+
+        player.Hp -= amount;
+        if (player.Hp > 0)
+        {
+            return false;
+        }
+
+        Respawn(player);
+        return true;
+    }
+
+    /// <summary>
+    /// Setzt HP und/oder Mana direkt, begrenzt auf [0, Max] (012 AK-1, AK-10). <c>null</c> und NaN lassen den Wert unverändert.
+    /// HP ≤ 0 heißt tot: sofortiger Respawn (AK-8, AK-9).
+    /// </summary>
+    public void SetVitals(string playerId, double? hp = null, double? mana = null)
+    {
+        if (!_players.TryGetValue(playerId, out var player))
+        {
+            return;
+        }
+
+        if (mana is { } newMana && !double.IsNaN(newMana))
+        {
+            player.Mana = Math.Clamp(newMana, 0, MaxMana);
+        }
+
+        if (hp is { } newHp && !double.IsNaN(newHp))
+        {
+            player.Hp = Math.Clamp(newHp, 0, MaxHp);
+            if (player.Hp <= 0)
+            {
+                Respawn(player);
+            }
+        }
+    }
+
+    /// <summary>Tote Figur erscheint am Startpunkt der Welt mit vollen Werten (012 AK-8).</summary>
+    private void Respawn(Player player)
+    {
+        (player.X, player.Y) = RandomStartPosition();
+        player.SpawnSeq++;
+        player.PendingInputs.Clear();
+        // Verworfene Eingaben gelten als verarbeitet, sonst wendet der Client sie auf die neue Position an.
+        player.LastProcessedSeq = player.LastQueuedSeq;
+        player.TicksWithoutInput = 0;
+        (player.DirX, player.DirY) = (0, 0);
+
+        player.Hp = MaxHp;
+        player.Mana = MaxMana;
+    }
+
+    /// <summary>Zufälliger Punkt im SpawnRadius um (0,0), der Startpunkt der Welt (003 AK-17).</summary>
+    private (double X, double Y) RandomStartPosition()
+    {
+        var angle = random.NextDouble() * 2 * Math.PI;
+        var radius = random.NextDouble() * SpawnRadius;
+        return (Math.Cos(angle) * radius, Math.Sin(angle) * radius);
+    }
 
     public void EnqueueInput(string playerId, MoveInput input)
     {

@@ -11,7 +11,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 ## Server
 - [x] **T2** (AK-1–4): Konstanten in `GameSettings`; `Player.Hp/Mana/SpawnSeq`; Regeneration in `World.Step()`;
   Unit-Tests.
-- [ ] **T3** (AK-7–10): `World.Damage`, `World.SetVitals`, `World.Respawn`; Unit-Tests ohne Gegner.
+- [x] **T3** (AK-7–10): `World.Damage`, `World.SetVitals`, `World.Respawn`; Unit-Tests ohne Gegner.
 - [ ] **T4** (AK-2, AK-5, AK-6): `GameLoop`: Max-Werte im `Welcome`, eigene Werte und `spawn_seq` im Snapshot;
   Integrationstests (WS) inkl. Übernahme einer wartenden Figur.
 
