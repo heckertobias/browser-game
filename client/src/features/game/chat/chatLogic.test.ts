@@ -301,7 +301,7 @@ describe("Enter öffnet den Chat (011 AK-5)", () => {
   });
 });
 
-/* eslint-disable @typescript-eslint/no-deprecated -- keyCode ist bei Safari-IME das einzige Merkmal */
+/* oxlint-disable typescript/no-deprecated -- keyCode ist bei Safari-IME das einzige Merkmal */
 describe("Enter im Feld (011 AK-5)", () => {
   it("isComposingKey erkennt IME", () => {
     expect(isComposingKey({ isComposing: true, keyCode: 13 })).toBe(true);
@@ -316,7 +316,7 @@ describe("Enter im Feld (011 AK-5)", () => {
     expect(ignoresEnterInField({ repeat: false, isComposing: false, keyCode: 13 })).toBe(false);
   });
 });
-/* eslint-enable @typescript-eslint/no-deprecated */
+/* oxlint-enable typescript/no-deprecated */
 
 describe("chatReducer", () => {
   const texts = (state: ChatState) => state.lines.map((line) => line.message.text);

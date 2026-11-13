@@ -14,7 +14,7 @@
     "build:landing": "tailwindcss -i src/styles/landing.css -o ../server/BrowserGame.Server/wwwroot/css/site.css --minify",
     "test": "npm run gen && vitest run",
     "typecheck": "npm run gen && tsc --noEmit",
-    "lint": "npm run gen && eslint .",
+    "lint": "npm run gen && oxlint",
     "build:admin": "node scripts/admin-lib.mjs",
     "build:passkeys": "vite build -c vite.passkeys.config.ts && mkdir -p ../server/BrowserGame.Admin/wwwroot/js && cp ../server/BrowserGame.Server/wwwroot/js/passkeys.js ../server/BrowserGame.Admin/wwwroot/js/passkeys.js"
   },
@@ -26,7 +26,6 @@
   "devDependencies": {
     "@bufbuild/buf": "1.75.0",
     "@bufbuild/protoc-gen-es": "2.16.0",
-    "@eslint/js": "10.0.1",
     "@tailwindcss/cli": "4.3.3",
     "@tailwindcss/vite": "4.3.3",
     "@types/react": "19.3.0",
@@ -35,16 +34,11 @@
     "bootstrap": "5.3.8",
     "bootstrap-icons": "1.13.2",
     "daisyui": "5.7.50",
-    "eslint": "10.14.0",
-    "eslint-plugin-react-hooks": "7.1.1",
-    "globals": "17.13.0",
+    "oxlint": "1.91.0",
+    "oxlint-tsgolint": "7.0.2006",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.72.1",
     "vite": "8.3.5",
     "vitest": "5.0.5"
-  },
-  "overrides": {
-    "minimatch": "11.0.5"
   }
 }

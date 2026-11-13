@@ -30,6 +30,7 @@
   "include": [
     "src",
     "vite.config.ts",
-    "vite.passkeys.config.ts"
+    "vite.passkeys.config.ts",
+    "oxlint.config.ts"
   ]
 }
