@@ -88,7 +88,7 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 7 | [011 – Chat](011-chat/spec.md) | in arbeit | 003, 007 (Code auf `main`, nur die Android-Prüfung fehlt) |
 | 8 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | umgesetzt | 003 |
 | 9 | [012 – HP & Mana](012-hp-mana/spec.md) | umgesetzt | 001 |
-| 10 | [016 – Blickrichtung](016-blickrichtung/spec.md) | bereit | 001 |
+| 10 | [016 – Blickrichtung](016-blickrichtung/spec.md) | in arbeit | 001 |
 | 11 | [013 – Rudimentäres Kampfsystem](013-kampfsystem/spec.md) | bereit | 012, 016 |
 | 12 | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | bereit | 011, 012, 003 |
 | 13 | [014 – Gegner (erstes Ziel, das HP hat und zurückwirkt)](014-gegner/spec.md) | bereit | 012, 013, 015, 016 |
