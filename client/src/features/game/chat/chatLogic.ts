@@ -122,7 +122,7 @@ export function handleChatEnter(
 
 /** Safari meldet das bestätigende Enter nach `compositionend` mit `isComposing=false` und nur `keyCode` 229. */
 export function isComposingKey(e: Pick<KeyboardEvent, "isComposing" | "keyCode">): boolean {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated -- nur so erkennbar (Safari, IME)
+  // oxlint-disable-next-line typescript/no-deprecated -- nur so erkennbar (Safari, IME)
   return e.isComposing || e.keyCode === 229;
 }
 

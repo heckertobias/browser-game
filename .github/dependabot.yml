@@ -36,10 +36,6 @@ updates:
     groups:
       npm-minor-patch:
         update-types: [minor, patch]
-    ignore:
-      # typescript-eslint unterstützt TypeScript 7 noch nicht (Peer-Range <6.1). Wieder freigeben, sobald es das tut.
-      - dependency-name: typescript
-        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /

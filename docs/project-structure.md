@@ -39,7 +39,7 @@ client/
   vite.config.ts             Mehrseiten-Build (index + offline), Tests (vitest), Alias @/ (aus tsconfig)
   vite.passkeys.config.ts    Feste Bundles für die Razor-Seiten: passkeys.js und language.js
                              (Einträge: features/accounts/api/passkeys.ts, features/localization/language.ts)
-  eslint.config.js           inkl. Importgrenzen zwischen Features (siehe unten)
+  oxlint.config.ts           Linter (ADR 0014), inkl. Importgrenzen zwischen Features (siehe unten)
   package.json               Skripte: dev/test/lint/build; build:landing mit src/styles/landing.css als
                              Tailwind-Eingabe; build:admin kopiert Bootstrap (scripts/admin-lib.mjs)
   src/
@@ -67,11 +67,11 @@ client/
 Regeln:
 
 - **Alias `@/` = `client/src/`** (`tsconfig.json` `paths`, Vite nutzt ihn über `resolve.tsconfigPaths`). Importe über
-  Ordnergrenzen laufen über `@/…` (in `features/` verbietet ESLint `../`); nur Importe im selben Ordner bleiben relativ (`./x`). `generated/` nur über
+  Ordnergrenzen laufen über `@/…` (in `features/` verbietet oxlint `../`); nur Importe im selben Ordner bleiben relativ (`./x`). `generated/` nur über
   `@/generated/…`.
-- **Importgrenzen** prüft ESLint (`no-restricted-imports`, `npm run lint`): Features importieren nie aus `app/`,
+- **Importgrenzen** prüft oxlint (`no-restricted-imports`, `npm run lint`): Features importieren nie aus `app/`,
   `app/` importiert Features. Zwischen Features ist nur erlaubt, was die Tabelle unter
-  [Abhängigkeitsrichtung](#abhängigkeitsrichtung) nennt. Neue Abhängigkeit = Tabelle und `eslint.config.js` anpassen.
+  [Abhängigkeitsrichtung](#abhängigkeitsrichtung) nennt. Neue Abhängigkeit = Tabelle und `oxlint.config.ts` anpassen.
 - **Tailwind-Quellen:** `landing.css` scannt nur `**/*.cshtml` des Spielservers, kein C#. Das Admin nutzt Bootstrap ohne Tailwind (ADR 0007).
 - **Spielnahe Features** (Chat, Kampf, Gegner, Slash-Commands …) kommen als Unterordner `features/game/<sub>/`, nicht als
   eigenes Top-Level-Feature. Bestehender Code wird nicht künstlich in Subs aufgeteilt.

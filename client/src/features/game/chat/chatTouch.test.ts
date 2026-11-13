@@ -156,7 +156,7 @@ describe("liftWhileFocused (011 AK-7)", () => {
   });
 });
 
-/* eslint-disable @typescript-eslint/no-deprecated -- keyCode ist bei Safari-IME das einzige Merkmal */
+/* oxlint-disable typescript/no-deprecated -- keyCode ist bei Safari-IME das einzige Merkmal */
 describe("blocksEnterInField (011 AK-5, AK-7)", () => {
   const combos = [
     [false, 13],
@@ -183,7 +183,7 @@ describe("blocksEnterInField (011 AK-5, AK-7)", () => {
     expect(blocksEnterInField({ repeat: true, isComposing: false, keyCode: 13 }, false)).toBe(true);
   });
 });
-/* eslint-enable @typescript-eslint/no-deprecated */
+/* oxlint-enable typescript/no-deprecated */
 
 describe("Chat-Markup für Handy (011 AK-3, AK-7)", () => {
   it("Feld", () => {
