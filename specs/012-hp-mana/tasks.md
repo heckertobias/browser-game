@@ -18,7 +18,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 ## Client
 - [x] **T5** (AK-5, AK-6): `game.ts` `onVitals` (nur bei Änderung); `Vitals.tsx` mit `vitalsText`/`fillPercent` und
   Vitest; i18n de/en.
-- [ ] **T6** (AK-8): `interpolation.ts` springt bei neuem `spawnSeq`; Vitest.
+- [x] **T6** (AK-8): `interpolation.ts` springt bei neuem `spawnSeq`; Vitest.
 
 ## Tests / Prüfung
 - [ ] **T7**: Manuelle Prüfung in der Testumgebung (PC und Handy hochkant/quer): HUD zeigt volle Werte, nach
