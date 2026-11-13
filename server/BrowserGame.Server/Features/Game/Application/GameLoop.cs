@@ -39,9 +39,11 @@ internal sealed class PlayerConnection(
 /// </summary>
 public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null) : BackgroundService
 {
-    private enum ChangeKind { Join, Leave, ForceLeave, ForceLeaveWithoutSave, ChatHistoryLoaded, RemoveChat }
+    private enum ChangeKind { Join, Leave, ForceLeave, ForceLeaveWithoutSave, ChatHistoryLoaded, RemoveChat, SetVitals }
 
-    private readonly record struct Change(ChangeKind Kind, string PlayerId, PlayerConnection? Connection, IReadOnlyList<ChatHistoryEntry>? ChatHistory = null);
+    private readonly record struct Change(
+        ChangeKind Kind, string PlayerId, PlayerConnection? Connection, IReadOnlyList<ChatHistoryEntry>? ChatHistory = null,
+        double? Hp = null, double? Mana = null);
 
     private readonly Channel<Change> _changes = Channel.CreateUnbounded<Change>();
     private static readonly byte[] ChatTooFast =
@@ -111,6 +113,13 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     /// </summary>
     public void RemoveChatOf(string accountId) =>
         _changes.Writer.TryWrite(new Change(ChangeKind.RemoveChat, accountId, null));
+
+    /// <summary>
+    /// Setzt HP und/oder Mana einer Figur im nächsten Tick, von jedem Thread aus (012 AK-10). <c>null</c> lässt den Wert
+    /// unverändert; HP ≤ 0 heißt sofortiger Respawn (AK-8, AK-9). Unbekannte Accounts werden ignoriert.
+    /// </summary>
+    internal void SetVitals(string accountId, double? hp = null, double? mana = null) =>
+        _changes.Writer.TryWrite(new Change(ChangeKind.SetVitals, accountId, null, Hp: hp, Mana: mana));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -203,6 +212,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                         Name = joined.Name,
                         Speed = (float)_world.Speed,
                         TickRateHz = (uint)_world.TickRateHz,
+                        MaxHp = (float)_world.MaxHp,
+                        MaxMana = (float)_world.MaxMana,
                         KeyBindings = change.Connection!.KeyBindings,
                     };
                     change.Connection!.Outbox.SendRequired(new ServerMessage { Welcome = welcome }.ToByteArray());
@@ -251,6 +262,10 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                 case ChangeKind.RemoveChat:
                     _chatHistory.RemoveAccount(change.PlayerId);
                     _chatRemoved.Add(change.PlayerId);
+                    break;
+
+                case ChangeKind.SetVitals:
+                    _world.SetVitals(change.PlayerId, change.Hp, change.Mana);
                     break;
             }
         }
@@ -361,13 +376,24 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
 
     private void BroadcastSnapshot()
     {
+        // Einmal für alle Empfänger; pro Empfänger kommen nur die eigenen Werte dazu (012: andere sehen fremde HP nicht).
         var players = _world.Players
-            .Select(p => new PlayerState { Id = p.Id, Name = p.Name, X = (float)p.X, Y = (float)p.Y, Color = p.Color, Away = p.Away })
+            .Select(p => new PlayerState
+            {
+                Id = p.Id, Name = p.Name, X = (float)p.X, Y = (float)p.Y, Color = p.Color, Away = p.Away, SpawnSeq = p.SpawnSeq,
+            })
             .ToList();
 
         foreach (var connection in _connections.Values)
         {
-            var snapshot = new Snapshot { Tick = _tick, LastProcessedSeq = _world.GetPlayer(connection.PlayerId)?.LastProcessedSeq ?? 0 };
+            var self = _world.GetPlayer(connection.PlayerId);
+            var snapshot = new Snapshot
+            {
+                Tick = _tick,
+                LastProcessedSeq = self?.LastProcessedSeq ?? 0,
+                Hp = (float)(self?.Hp ?? 0),
+                Mana = (float)(self?.Mana ?? 0),
+            };
             snapshot.Players.AddRange(players);
             connection.Outbox.OfferSnapshot(new ServerMessage { Snapshot = snapshot }.ToByteArray());
         }
