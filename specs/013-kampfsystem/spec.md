@@ -77,8 +77,9 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
 ### Blickrichtung
 - **AK-19:** Gegeben ich habe ein Ziel in Reichweite markiert, das nicht grob in meiner Blickrichtung
   (016) liegt (fester Winkel um die Blickrichtung, Konstante im Plan), wenn ich einen Nah- oder
-  Fernangriff auslöse, dann passiert nichts: kein Schaden, kein Projektil, kein Mana-Abzug. Meine
-  Figur dreht sich dabei nicht von selbst zum Ziel.
+  Fernangriff auslöse, dann passiert nichts: kein Schaden, kein Projektil, kein Mana-Abzug. Ich
+  erhalte einen kurzen Hinweis (wie bei AK-8, z. B. „Ziel nicht vor dir“). Meine Figur dreht sich
+  dabei nicht von selbst zum Ziel.
 
 ### Trainings-Dummy
 - **AK-13:** Gegeben der Spieler ist im Spiel, dann ist genau ein Trainings-Dummy an einem festen Ort
@@ -108,8 +109,6 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
 - Ein Ziel-Reticule oder Richtungssteuerung per Maus; „zielen" heißt hier: das Ziel antippen /
   anklicken (AK-1) und sich ihm zuwenden. Die Blickrichtung folgt nur der Bewegung (016); es gibt
   kein Drehen im Stand und kein automatisches Ausrichten beim Angriff.
-- Ein Hinweis, dass das Ziel nicht in Blickrichtung liegt; der Versuch scheitert still wie außerhalb
-  der Reichweite.
 - Persistenz des Dummies oder des Kampfs (der Dummy lebt nicht zwischen Sessions).
 - Projektile, die andere Spieler oder echte Gegner treffen (der einzige angreifbare und zielbare
   Gegenstand ist der Dummy).

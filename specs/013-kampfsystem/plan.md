@@ -9,7 +9,7 @@ Client  ── input.ts            Tippen/Klicken auf ein Ziel wählt es aus (st
         ── features/game/combat/targeting.ts  reine Logik: Treffer-Test, aktives Ziel, Ziel weg → aufheben
         ── features/game/combat/AttackButtons.tsx  zwei HUD-Buttons „Nah“ / „Fern“ (Touch und Maus)
         ── render.ts           Dummy, HP-Balken, Ziel-Umrandung, Projektile
-        ── net.ts / game.ts    Attack schicken, Ziele + Projektile aus dem Snapshot, Hinweis „zu wenig Mana“
+        ── net.ts / game.ts    Attack schicken, Ziele + Projektile aus dem Snapshot, Hinweise „zu wenig Mana“ / „nicht vor dir“
 Server  ── GameEndpoint: Attack → Angriffs-Channel der Verbindung
         ── GameLoop: Angriffe im Tick prüfen und ausführen, Ziele + Projektile in den Snapshot
         ── Features/Game/Combat/Domain/: Combat (Regeln), Target (zielbares Objekt mit HP), Projectile
@@ -43,12 +43,10 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 2. **Ein Ziel, das im Snapshot fehlt, ist weg.** Ein toter Dummy wird bis zur Wiederherstellung nicht übertragen und
    nicht gezeichnet. Der Client hebt die Auswahl auf, sobald die ID fehlt (Spec: „stirbt er, wird das Ziel aufgehoben“).
 3. **Reihenfolge der Prüfungen:** Ziel gültig → Cooldown abgelaufen → in Reichweite → in Blickrichtung →
-   (Fernkampf) genug Mana. Ein
-   Versuch während des Cooldowns wird still ignoriert. „Zu wenig Mana“ kommt also erst, wenn sonst alles passt, und
-   flackert nicht bei jedem Tastendruck im Cooldown.
-4. **Nur „zu wenig Mana“ wird gemeldet** (`AttackRejected`, AK-8). Alles andere scheitert still (AK-2, AK-5, AK-9,
-   AK-19);
-   die Spec verlangt dafür keine Rückmeldung.
+   (Fernkampf) genug Mana. Ein Versuch während des Cooldowns wird still ignoriert. Die Hinweise kommen also erst,
+   wenn das Vorherige passt, und flackern nicht bei jedem Tastendruck im Cooldown.
+4. **Nur „zu wenig Mana“ und „nicht in Blickrichtung“ werden gemeldet** (`AttackRejected`, AK-8, AK-19). Alles
+   andere scheitert still (AK-2, AK-5, AK-9); die Spec verlangt dafür keine Rückmeldung.
 5. **Projektile verfolgen ihr Ziel** (Ziele stehen in 013 und 014 ohnehin still). Pro Tick bewegt sich das Projektil
    `ProjectileSpeed / TickRateHz` auf das Ziel zu; ist der Rest kürzer, schlägt es ein. Ist das Ziel inzwischen weg
    (tot, besiegt), verschwindet das Projektil ohne Wirkung. Die Reichweite wird nur beim Start geprüft (AK-9).
@@ -110,6 +108,8 @@ message AttackRejected {
     REASON_UNSPECIFIED = 0;
     // Zu wenig Mana für den Fernkampf (AK-8).
     REASON_NOT_ENOUGH_MANA = 1;
+    // Ziel nicht in Blickrichtung (AK-19).
+    REASON_NOT_FACING = 2;
   }
   Reason reason = 1;
 }
@@ -166,7 +166,7 @@ message ProjectileState {
 - `GameEndpoint`: `Attack` → `connection.Attacks.Writer.TryWrite(…)` (eigener kleiner Channel, Kapazität 4,
   `DropOldest`).
 - `GameLoop.Tick()`: nach `World.Step()` (Positionen aktuell) die Angriffs-Channels aller Verbindungen leeren und
-  `Combat.TryAttack` aufrufen; `NotEnoughMana` → `AttackRejected` an den Angreifer. Danach `Combat.Step(tick)`, dann
+  `Combat.TryAttack` aufrufen; `NotEnoughMana` und `NotFacing` → `AttackRejected` mit passendem Grund an den Angreifer. Danach `Combat.Step(tick)`, dann
   Snapshot mit `targets` (nur lebende) und `projectiles`.
 
 ## Client
@@ -188,10 +188,11 @@ message ProjectileState {
     (AK-18).
   - Aktives Ziel: gelbe Umrandung (AK-1).
   - Projektil: kleiner heller Kreis.
-- **`AttackButtons.tsx`:** zwei Buttons (Entscheidung 9). Hinweis „Zu wenig Mana“ kurz (2 s) über den Buttons (AK-8).
+- **`AttackButtons.tsx`:** zwei Buttons (Entscheidung 9). Hinweis „Zu wenig Mana“ bzw. „Ziel nicht vor dir“ kurz (2 s) über den
+  Buttons (AK-8, AK-19); ein neuer Hinweis ersetzt den alten.
 - **Tastenbelegung (002):** `DEFAULT_BINDINGS` um `Digit1`/`Digit2` ergänzen, Aktionsnamen in i18n. `fromProto` aus 002
   gibt älteren gespeicherten Belegungen die neuen Standardtasten, sofern frei.
-- **`i18n.ts`:** `attackMelee`, `attackRanged`, `notEnoughMana`, `actionAttackMelee`, `actionAttackRanged` (de/en).
+- **`i18n.ts`:** `attackMelee`, `attackRanged`, `notEnoughMana`, `notFacing`, `actionAttackMelee`, `actionAttackRanged` (de/en).
 
 ## Abdeckung der Akzeptanzkriterien
 
@@ -215,7 +216,7 @@ message ProjectileState {
 | 16 | keine Angriffslogik | Unit: Spieler neben Dummy, 100 Ticks → Spieler-HP unverändert |
 | 17 | nur im Speicher | Integration: neuer Server → Dummy mit vollen HP |
 | 18 | HP-Balken | Vitest: `hpBarWidth`; **manuell** |
-| 19 | Winkel zur Blickrichtung | Unit: Ziel genau vorn, auf ± 45° → `Ok`; auf 46° und hinter dem Spieler → `NotFacing`, HP, Mana und Cooldown unverändert; Abstand 0 → `Ok`; gilt für Nah- und Fernkampf |
+| 19 | Winkel zur Blickrichtung | Unit: Ziel genau vorn, auf ± 45° → `Ok`; auf 46° und hinter dem Spieler → `NotFacing`, HP, Mana und Cooldown unverändert; Integration: nur Angreifer bekommt `AttackRejected` mit `REASON_NOT_FACING`; Vitest: Hinweis je Grund; Abstand 0 → `Ok`; gilt für Nah- und Fernkampf |
 
 ## Constitution-Check
 
