@@ -22,6 +22,42 @@ internal static class GameSettings
     /// <summary>Kürzere Richtungsvektoren ändern die Blickrichtung nicht (016 AK-5).</summary>
     public const double MinFacingInput = World.DefaultMinFacingInput;
 
+    /// <summary>Öffnungswinkel nach vorn in Grad (± die Hälfte um die Blickrichtung), für Nah- und Fernkampf (013 AK-19).</summary>
+    public const double AttackArcDegrees = Combat.DefaultAttackArcDegrees;
+
+    /// <summary>Nahkampfreichweite, Mittelpunkt zu Mittelpunkt in Welteinheiten (013 AK-4, AK-5).</summary>
+    public const double MeleeRange = Combat.DefaultMeleeRange;
+
+    /// <summary>Nahkampfschaden (013 AK-4).</summary>
+    public const double MeleeDamage = Combat.DefaultMeleeDamage;
+
+    /// <summary>Maximalreichweite des Fernkampfs, geprüft beim Start (013 AK-9).</summary>
+    public const double RangedRange = Combat.DefaultRangedRange;
+
+    /// <summary>Fernkampfschaden beim Einschlag (013 AK-7).</summary>
+    public const double RangedDamage = Combat.DefaultRangedDamage;
+
+    /// <summary>Mana je Fernkampf (013 AK-10).</summary>
+    public const double RangedManaCost = Combat.DefaultRangedManaCost;
+
+    /// <summary>Projektil-Tempo in Welteinheiten pro Sekunde (013 AK-7).</summary>
+    public const double ProjectileSpeed = Combat.DefaultProjectileSpeed;
+
+    /// <summary>Allgemeiner Cooldown nach einem erfolgreichen Angriff (013 AK-11).</summary>
+    public const double GlobalCooldownSeconds = Combat.DefaultGlobalCooldownSeconds;
+
+    /// <summary>Feste Position des Trainings-Dummys, x (013 AK-13).</summary>
+    public const double DummyX = Combat.DefaultDummyX;
+
+    /// <summary>Feste Position des Trainings-Dummys, y; außerhalb des Spawn-Radius (013 AK-13).</summary>
+    public const double DummyY = Combat.DefaultDummyY;
+
+    /// <summary>Start-HP des Trainings-Dummys (013 AK-13).</summary>
+    public const double DummyMaxHp = Combat.DefaultDummyMaxHp;
+
+    /// <summary>Verzögerung, bis der Dummy mit vollen HP zurückkehrt (013 AK-15).</summary>
+    public const double DummyRespawnSeconds = Combat.DefaultDummyRespawnSeconds;
+
     /// <summary>
     /// Standard-Nachlauf: So lange bleibt eine getrennte Figur stehen (003 AK-20).
     /// Überschreibbar mit <c>Game:LingerSeconds</c> (z. B. in Tests).

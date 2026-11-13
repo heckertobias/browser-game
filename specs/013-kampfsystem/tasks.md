@@ -11,7 +11,7 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
   grün.
 
 ## Server
-- [ ] **T2** (AK-13, AK-15–17): Konstanten in `GameSettings`; `Target`, `Projectile`; `Combat` mit Dummy und
+- [x] **T2** (AK-13, AK-15–17): Konstanten in `GameSettings`; `Target`, `Projectile`; `Combat` mit Dummy und
   `Step(tick)` (Respawn); Unit-Tests.
 - [ ] **T3** (AK-2, AK-4–12, AK-14, AK-19): `Combat.TryAttack` (Reihenfolge Ziel → Cooldown → Reichweite →
   Blickrichtung → Mana),

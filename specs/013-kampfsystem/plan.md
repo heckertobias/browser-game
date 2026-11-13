@@ -30,10 +30,10 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 | `RangedManaCost` | 20 | Mana je Fernkampf (bei 012: 5 Schüsse aus vollem Mana, dann alle 4 s einer) |
 | `ProjectileSpeed` | 400 | Welteinheiten pro Sekunde (volle Reichweite in 0,4 s) |
 | `GlobalCooldownSeconds` | 1 | allgemeiner Cooldown (Spec: 1 Sekunde) |
-| `DummyPosition` | (0, −128) | fest, außerhalb des Spawn-Radius (64), auf dem Bildschirm beim Start sichtbar |
+| `DummyX`, `DummyY` | 0, −128 | fest, außerhalb des Spawn-Radius (64), auf dem Bildschirm beim Start sichtbar |
 | `DummyMaxHp` | 100 | Start-HP |
 | `DummyRespawnSeconds` | 5 | Verzögerung bis zur Wiederherstellung |
-| `TargetHitRadius` | 12 | Klick-/Tipp-Radius um ein Ziel (Client) |
+| `TARGET_HIT_RADIUS` | 12 | Klick-/Tipp-Radius um ein Ziel; Bedienung, daher Client-Konstante (`constants.ts`, Constitution §8) |
 
 ## Entschiedene Fragen (Plan)
 
@@ -51,7 +51,7 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
    `ProjectileSpeed / TickRateHz` auf das Ziel zu; ist der Rest kürzer, schlägt es ein. Ist das Ziel inzwischen weg
    (tot, besiegt), verschwindet das Projektil ohne Wirkung. Die Reichweite wird nur beim Start geprüft (AK-9).
 6. **Cooldown in Ticks**, gemessen ab dem Tick des erfolgreichen Angriffs (`NextAttackTick = tick + 20`).
-7. **Pointer:** `pointerdown` auf ein Ziel (innerhalb `TargetHitRadius`, nächstes gewinnt) wählt es aus und startet
+7. **Pointer:** `pointerdown` auf ein Ziel (innerhalb `TARGET_HIT_RADIUS`, nächstes gewinnt) wählt es aus und startet
    **kein** Halten-und-Folgen. Daneben läuft man wie bisher; die Auswahl bleibt dabei bestehen.
 8. **Tasten:** zwei neue Aktionen für die Tastenbelegung aus 002: `ACTION_ATTACK_MELEE` (Standard `Digit1`) und
    `ACTION_ATTACK_RANGED` (Standard `Digit2`). Sie lösen bei `keydown` einmal aus (ohne Auto-Repeat), nicht solange die
@@ -149,7 +149,7 @@ message ProjectileState {
 - `Target` (`Id`, `Kind`, `X`, `Y`, `Hp`, `MaxHp`, `RespawnAtTick?`). `IsAlive => RespawnAtTick is null && Hp > 0`.
 - `Projectile` (`Id`, `X`, `Y`, `TargetId`, `Damage`).
 - `Combat` (gehört zur `World`, wird im Tick-Thread benutzt):
-  - Konstruktor mit den Konstanten (Tests setzen eigene); legt den Dummy `"dummy"` an `DummyPosition` mit vollen HP an
+  - Konstruktor mit den Konstanten (Tests setzen eigene); legt den Dummy `"dummy"` an (`DummyX`, `DummyY`) mit vollen HP an
     (AK-13, AK-17: lebt nur im Speicher, neu bei Serverstart).
   - `TryAttack(Player attacker, Attack.Kind kind, string targetId, uint tick) → AttackResult`
     (`Ok`, `InvalidTarget`, `Cooldown`, `OutOfRange`, `NotFacing`, `NotEnoughMana`) nach der Reihenfolge oben.
@@ -210,7 +210,7 @@ message ProjectileState {
 | 10 | Mana-Abzug | Unit: Mana 100 → 80 |
 | 11 | `NextAttackTick` | Unit: zweiter Angriff im selben Takt → `Cooldown`; nach 20 Ticks ok; gilt über Angriffsarten hinweg |
 | 12 | Fehler setzt keinen Cooldown | Unit: `OutOfRange`, dann gültiger Angriff im nächsten Tick → `Ok` |
-| 13 | Dummy beim Start | Unit: `Combat` neu → Dummy an `DummyPosition` mit `DummyMaxHp`; Integration: erster Snapshot enthält ihn |
+| 13 | Dummy beim Start | Unit: `Combat` neu → Dummy an (`DummyX`, `DummyY`) mit `DummyMaxHp`; Integration: erster Snapshot enthält ihn |
 | 14 | `Damage` | Unit (siehe 4, 7) |
 | 15 | `RespawnAtTick` | Unit: 0 HP → fehlt in lebenden Zielen; nach 100 Ticks wieder da, volle HP; Projektil auf toten Dummy verfällt |
 | 16 | keine Angriffslogik | Unit: Spieler neben Dummy, 100 Ticks → Spieler-HP unverändert |
