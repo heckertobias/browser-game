@@ -4,7 +4,9 @@
 
 Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) (Bewegung per Tasten und Pointer,
 freie Richtungsvektoren)
-Voraussetzung für: [014 – Gegner](../014-gegner/spec.md) (Gegner erscheint vor dem Spieler)
+Voraussetzung für: [014 – Gegner](../014-gegner/spec.md) (Gegner erscheint vor dem Spieler) ·
+[017 – Spielfigur als Pixel-Art](../017-spielfigur/spec.md) (Figur zeigt die Blickrichtung; der Pfeil wird dort
+zur Entwickleroption)
 
 ## Ziel
 
@@ -75,7 +77,8 @@ dem Spieler" zu platzieren.
 - Blickrichtung als **Kampfmechanik** (Treffer nur nach vorne, Sichtkegel, Ausweichen von hinten,
   Richtungsboni) – eigene spätere Spec.
 - **Sicht/Aggro** von Gegnern anhand ihrer Blickrichtung (014 greift reine Reichweite an).
-- **Sprites/Animationen** je Richtung; sichtbar ist nur der kleine Pfeil.
+- **Sprites/Animationen** je Richtung; sichtbar ist nur der kleine Pfeil. Sie kommen mit
+  [017](../017-spielfigur/spec.md).
 - **Persistenz** der Blickrichtung im Account (003).
 - **Feinere Darstellung** (Kompass, Gradanzeige, Fadenkreuz).
 
@@ -95,7 +98,8 @@ _Keine._
 - **Standard-Blickrichtung:** Nach dem ersten Start/Login zeigt die Figur in eine feste Richtung
   (Konstante im Plan), bis zur ersten Bewegung.
 - **Für alle sichtbar:** Der Pfeil gehört zur Figur und wird allen Spielern angezeigt (die Richtung
-  geht in die Spielstand-Übertragung ein).
+  geht in die Spielstand-Übertragung ein). Mit [017](../017-spielfigur/spec.md) zeigt die Figur selbst
+  die Richtung; der Pfeil ist dann standardmäßig aus und nur noch als Entwickleroption zuschaltbar.
 - **Nur Anzeige:** Kein Einfluss auf Tempo, Reichweite oder Treffer. Einzige mechanische Verwendung
   ist die Spawn-Richtung in 014.
 - **Server ist Autorität** (Constitution 2): Der Client schickt nur die Bewegungsrichtung (001); der
