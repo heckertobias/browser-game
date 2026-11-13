@@ -17,7 +17,7 @@ Client  ── prediction.ts: eigene Blickrichtung wie die Position vorhersagen 
 | Name | Wert | Wo | Bedeutung |
 |---|---|---|---|
 | `DefaultFacing` | π/2 (nach unten, „zur Kamera“) | Server `GameSettings` | Standard-Blickrichtung (AK-4) |
-| `MinFacingInput` | 0,01 | Server `World`, Client `prediction.ts` | kürzere Richtungsvektoren ändern die Blickrichtung nicht (AK-5) |
+| `MinFacingInput` | 0,01 | Server `GameSettings` → `World`; Client aus `Welcome` | kürzere Richtungsvektoren ändern die Blickrichtung nicht (AK-5) |
 | `ARROW_GAP` | 3 | Client `constants.ts` | Abstand des Pfeils vom Rand der Figur (Weltpixel) |
 | `ARROW_LENGTH` | 5 | Client `constants.ts` | Länge der Pfeilspitze |
 | `ARROW_WIDTH` | 6 | Client `constants.ts` | Breite der Pfeilbasis |
@@ -45,9 +45,16 @@ Winkel in Bogenmaß, 0 = rechts (+x), π/2 = unten (+y, Bildschirm-Koordinaten w
 ## Verträge
 
 **Protobuf** (`contracts/proto/browsergame/v1/game.proto`), abwärtskompatibel. Feldnummern sind über die Pläne 002 und
-011–016 abgestimmt: `PlayerState` 7 = `spawn_seq` (012), 8 = `facing` (016).
+011–016 abgestimmt: `PlayerState` 7 = `spawn_seq` (012), 8 = `facing` (016); `Welcome` 6–7 = Max-Werte (012),
+8 = `min_facing_input` (016). Der Client bekommt den Schwellwert vom Server (Constitution §8).
 
 ```proto
+message Welcome {
+  // … 1–7 wie bisher
+  // Kürzere Richtungsvektoren ändern die Blickrichtung nicht (016).
+  float min_facing_input = 8;
+}
+
 message PlayerState {
   // … 1–6 wie bisher, 7: spawn_seq (012)
   // Blickrichtung in Bogenmaß, 0 = +x, π/2 = +y (unten). Folgt der Laufrichtung (016).
@@ -59,16 +66,17 @@ message PlayerState {
 
 ## Server
 
-- `Player.Facing` (`double`), Startwert aus dem `World`-Konstruktor (`defaultFacing`).
+- `Player.Facing` (`double`); `World`-Konstruktor bekommt `defaultFacing` und `minFacingInput` (Constitution §8).
 - `World.Step()`: nach dem Bestimmen von `DirX/DirY` (vor der Bewegung):
   `if (hypot(DirX, DirY) >= MinFacingInput) Facing = atan2(DirY, DirX)`. Wartende Figuren werden übersprungen wie bisher.
 - `GameLoop.BroadcastSnapshot`: `Facing = (float)p.Facing`.
 - Kein Speichern (AK-11): `PositionStore` bleibt unverändert.
-- 014 liest `Player.Facing` für den Spawn-Punkt (AK-10); in 016 selbst gibt es keine weitere Verwendung (AK-9).
+- 013 liest `Player.Facing` für Angriffe, 014 für den Spawn-Punkt (AK-10); in 016 selbst gibt es keine weitere
+  Verwendung (AK-9).
 
 ## Client
 
-- **`core/vector.ts`**: `facingOf(dir, current)` (gleiche Regel wie der Server) und `lerpAngle(a, b, t)` über den
+- **`core/vector.ts`**: `facingOf(dir, current, minInput)` (gleiche Regel wie der Server, Schwellwert aus `Welcome`) und `lerpAngle(a, b, t)` über den
   kürzeren Bogen.
 - **`prediction.ts`**: `facing` (Start: Wert aus dem ersten Snapshot), `step` setzt ihn per `facingOf`, `reconcile`
   übernimmt den Server-Wert und wendet die offenen Eingaben erneut an.

@@ -5,12 +5,12 @@ Gehört zu: [plan.md](plan.md)
 Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task bringt seine Tests mit.
 
 ## Verträge
-- [ ] **T1** (AK-8, AK-12): `game.proto`: `PlayerState.facing` (Feld 8); `buf lint` und `buf breaking` grün.
+- [ ] **T1** (AK-8, AK-12): `game.proto`: `PlayerState.facing` (Feld 8), `Welcome.min_facing_input` (Feld 8); `buf lint` und `buf breaking` grün.
 
 ## Server
 - [ ] **T2** (AK-1–5, AK-9, AK-11): `Player.Facing`, `DefaultFacing`, `MinFacingInput`; Ableitung in `World.Step()`;
   Unit-Tests.
-- [ ] **T3** (AK-4, AK-8, AK-11, AK-12): `facing` im Snapshot; Integrationstests (WS).
+- [ ] **T3** (AK-4, AK-8, AK-11, AK-12): `facing` im Snapshot, `min_facing_input` im `Welcome`; Integrationstests (WS).
 
 ## Client
 - [ ] **T4** (AK-1–5, AK-7): `facingOf`, `lerpAngle` in `vector.ts`; `Predictor.facing`; Interpolation der

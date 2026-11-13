@@ -2,7 +2,7 @@
 
 **Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
-Setzt voraus: [012 – HP & Mana](../012-hp-mana/spec.md)
+Setzt voraus: [012 – HP & Mana](../012-hp-mana/spec.md) · [016 – Blickrichtung](../016-blickrichtung/spec.md)
 Voraussetzung für: [014 – Gegner](../014-gegner/spec.md) (geplant)
 
 ## Ziel
@@ -12,7 +12,8 @@ Trainings-Dummy – und kann es mit einem von zwei Angriffen treffen: **Nahkampf
 Reichweite, Treffen sofort) und **Fernkampf** (kostet Mana, größere Reichweite, ein Projektil mit
 Flugzeit). Der Dummy nimmt Schaden und stellt sich wieder her. Zwischen zwei Angriffen liegt eine
 kurze, **allgemeine Abklingzeit (Cooldown)**, damit kein Angriff ohne Wartezeit den anderen
-verdrängt.
+verdrängt. Beide Angriffe gehen nur **nach vorn**: Das Ziel muss grob in der Blickrichtung der
+Figur (016) liegen.
 
 Das ist der dünnste Kampf-Durchstich: **Zielauswahl, zwei Angriffstypen und „Dingen Schaden
 zufügen"** laufen Ende-zu-Ende (Client schlägt vor, Server entscheidet). Der Spieler selbst lernt
@@ -44,14 +45,15 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
 
 ### Nahkampf
 - **AK-4:** Gegeben ich habe ein Ziel markiert, wenn ich den Nahkampf-Slot auslöse und mir das Ziel
-  in der festen Nahkampfreichweite (Konstante im Plan) ist, dann erleidet das Ziel sofort den
+  in der festen Nahkampfreichweite (Konstante im Plan) und in Blickrichtung (AK-19) ist, dann erleidet das Ziel sofort den
   Nahkampfschaden (feste Konstante im Plan).
 - **AK-5:** Gegeben ich habe ein Ziel markiert, wenn ich den Nahkampf auslöse und das Ziel außerhalb
   der Nahkampfreichweite ist, dann passiert nichts (kein Schaden).
 - **AK-6:** Gegeben ich löse einen Nahkampf aus, dann wird kein Mana verbraucht.
 
 ### Fernkampf
-- **AK-7:** Gegeben ich habe ein Ziel in Reichweite markiert, wenn ich den Fernkampf-Slot auslöse und
+- **AK-7:** Gegeben ich habe ein Ziel in Reichweite und in Blickrichtung (AK-19) markiert, wenn ich
+  den Fernkampf-Slot auslöse und
   genug Mana habe, dann wird ein Projektil auf das Ziel gestartet; sobald es einschlägt, erleidet
   das Ziel den Fernkampfschaden (feste Konstante im Plan).
 - **AK-8:** Gegeben ich habe ein Ziel in Reichweite markiert, wenn ich den Fernkampf auslöse und
@@ -69,8 +71,15 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
   Plan) auf, bevor ich den nächsten Angriff ausführen kann. Die Abklingzeit gilt für jeden
   Angriffstyp gleichermaßen (ein allgemeiner Cooldown).
 - **AK-12:** Gegeben ein Angriffsversuch schlägt fehl, weil kein Ziel anvisiert ist (AK-2), nicht in
-  Reichweite (AK-5 / AK-9) oder zu wenig Mana (AK-8), dann startet keine Abklingzeit: Ein
+  Reichweite (AK-5 / AK-9), nicht in Blickrichtung (AK-19) oder zu wenig Mana (AK-8), dann startet keine Abklingzeit: Ein
   fehlgeschlagener Versuch sperrt mich nicht aus.
+
+### Blickrichtung
+- **AK-19:** Gegeben ich habe ein Ziel in Reichweite markiert, das nicht grob in meiner Blickrichtung
+  (016) liegt (fester Winkel um die Blickrichtung, Konstante im Plan), wenn ich einen Nah- oder
+  Fernangriff auslöse, dann passiert nichts: kein Schaden, kein Projektil, kein Mana-Abzug. Ich
+  erhalte einen kurzen Hinweis (wie bei AK-8, z. B. „Ziel nicht vor dir“). Meine Figur dreht sich
+  dabei nicht von selbst zum Ziel.
 
 ### Trainings-Dummy
 - **AK-13:** Gegeben der Spieler ist im Spiel, dann ist genau ein Trainings-Dummy an einem festen Ort
@@ -98,7 +107,8 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
 - Schadenszahlen oder ein Kampf-Log.
 - Mehrere Dummy-Ziele oder eine frei wählbare Auslage; es gibt genau einen, an einer festen Stelle.
 - Ein Ziel-Reticule oder Richtungssteuerung per Maus; „zielen" heißt hier: das Ziel antippen /
-  anklicken (AK-1).
+  anklicken (AK-1) und sich ihm zuwenden. Die Blickrichtung folgt nur der Bewegung (016); es gibt
+  kein Drehen im Stand und kein automatisches Ausrichten beim Angriff.
 - Persistenz des Dummies oder des Kampfs (der Dummy lebt nicht zwischen Sessions).
 - Projektile, die andere Spieler oder echte Gegner treffen (der einzige angreifbare und zielbare
   Gegenstand ist der Dummy).
@@ -120,6 +130,9 @@ _Keine._
   mit Flugzeit). Die Anzahl der Slots bleibt klein und ändert sich **nicht pro Zauber**, wenn
   später mehr Zauber dazukommen – man zieht sie in die wenigen Slots, statt viele Buttons ins
   Gesicht zu bekommen.
+- **Nur nach vorn (AK-19):** Nah- und Fernkampf treffen nur ein Ziel, das grob in Blickrichtung
+  liegt. Die Auswahl bleibt Pflicht (AK-2); die Blickrichtung ist eine zusätzliche Bedingung. Das
+  Projektil fliegt weiter auf das ausgewählte Ziel, nicht geradeaus.
 - **Fernkampf** kostet fixe Mana, hat eine feste Maximalreichweite und feuert ein Projektil.
   **Kein Cast** bei zu wenig Mana (mit Feedback und ohne Mana-Abzug, AK-8) oder außerhalb der
   Reichweite (AK-9).
