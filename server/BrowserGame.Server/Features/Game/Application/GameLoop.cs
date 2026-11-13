@@ -53,7 +53,9 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     // Gelöschte Accounts (011 AK-17). Nur der Tick-Thread; wächst nur mit Löschungen und endet mit dem Neustart.
     private readonly HashSet<string> _chatRemoved = [];
     private readonly Dictionary<string, PlayerConnection> _connections = [];
-    private readonly World _world = new(GameSettings.Speed, GameSettings.TickRateHz, new Random());
+    private readonly World _world = new(
+        GameSettings.Speed, GameSettings.TickRateHz, new Random(),
+        GameSettings.MaxHp, GameSettings.MaxMana, GameSettings.ManaRegenPerSecond);
     private readonly uint _lingerTicks = GameSettings.ToTicks(configuration.GetValue(GameSettings.LingerSecondsKey, GameSettings.LingerSeconds));
 
     // Mindestens 1 Tick, sonst Division durch 0 im Speicher-Takt.

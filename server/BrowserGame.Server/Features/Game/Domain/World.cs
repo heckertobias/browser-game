@@ -12,6 +12,15 @@ internal sealed class Player(string id, string name, uint color, double x, doubl
     public double Y { get; set; } = y;
     public uint LastProcessedSeq { get; set; }
 
+    /// <summary>Aktuelle HP, zwischen 0 und <see cref="World.MaxHp"/> (012 AK-1).</summary>
+    public double Hp { get; internal set; }
+
+    /// <summary>Aktuelles Mana, zwischen 0 und <see cref="World.MaxMana"/> (012 AK-1).</summary>
+    public double Mana { get; internal set; }
+
+    /// <summary>Zählt Sprünge der Figur (Respawn); ändert er sich, interpoliert der Client nicht (012 AK-8).</summary>
+    public uint SpawnSeq { get; internal set; }
+
     /// <summary>Verbindung weg, Figur wartet noch (003 AK-20).</summary>
     public bool Away => AwaySince.HasValue;
 
@@ -28,8 +37,15 @@ internal sealed class Player(string id, string name, uint color, double x, doubl
 /// <summary>
 /// Spielwelt ohne Netzwerk und Datenbank. Wird ausschließlich vom Tick-Thread verändert.
 /// Der Server ist Autorität: Clients liefern nur Richtungen, die Strecke pro Tick bestimmt die Welt.
+/// HP und Mana leben nur hier (012); Mana wächst in jedem Tick, HP nicht.
 /// </summary>
-internal sealed class World(double speed, int tickRateHz, Random random)
+internal sealed class World(
+    double speed,
+    int tickRateHz,
+    Random random,
+    double maxHp = World.DefaultMaxHp,
+    double maxMana = World.DefaultMaxMana,
+    double manaRegenPerSecond = World.DefaultManaRegenPerSecond)
 {
     /// <summary>Mehr gepufferte Eingaben bringen keinen Vorteil, ältere werden verworfen.</summary>
     public const int MaxQueuedInputs = 10;
@@ -42,11 +58,21 @@ internal sealed class World(double speed, int tickRateHz, Random random)
 
     public const double SpawnRadius = 64;
 
+    public const double DefaultMaxHp = 100;
+    public const double DefaultMaxMana = 100;
+
+    /// <summary>Leer bis voll in 20 s (012 AK-3).</summary>
+    public const double DefaultManaRegenPerSecond = 5;
+
     private readonly Dictionary<string, Player> _players = [];
 
     public double Speed { get; } = speed;
     public int TickRateHz { get; } = tickRateHz;
     public double StepDistance => Speed / TickRateHz;
+    public double MaxHp { get; } = maxHp;
+    public double MaxMana { get; } = maxMana;
+    public double ManaRegenPerSecond { get; } = manaRegenPerSecond;
+    public double ManaRegenPerTick => ManaRegenPerSecond / TickRateHz;
     public IReadOnlyCollection<Player> Players => _players.Values;
 
     /// <summary>Neue Figur am Startpunkt der Welt: zufällig im SpawnRadius um (0,0) (003 AK-17).</summary>
@@ -59,7 +85,7 @@ internal sealed class World(double speed, int tickRateHz, Random random)
 
     public Player AddPlayer(string id, string name, uint color, double x, double y)
     {
-        var player = new Player(id, name, color, x, y);
+        var player = new Player(id, name, color, x, y) { Hp = MaxHp, Mana = MaxMana };
         _players.Add(id, player);
         return player;
     }
@@ -137,6 +163,8 @@ internal sealed class World(double speed, int tickRateHz, Random random)
     {
         foreach (var player in _players.Values)
         {
+            player.Mana = Math.Min(MaxMana, player.Mana + ManaRegenPerTick);
+
             if (player.Away)
             {
                 continue;
