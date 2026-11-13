@@ -34,6 +34,7 @@ Kurz: Welche Teile des Systems sind betroffen?
 - [ ] Typen nur aus `contracts/`
 - [ ] Offline-Fortschritt berechnet statt simuliert (falls relevant)
 - [ ] Keine unnötigen neuen Abhängigkeiten
+- [ ] Spielwerte benannt, zentral und der Logik übergeben
 
 ## Risiken / Abweichungen
 

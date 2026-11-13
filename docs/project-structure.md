@@ -24,7 +24,7 @@ Diese Seite beschreibt, **wo** etwas im Repo liegt und **warum**. Kurzversion im
 |---|---|
 | `specs/` | Features-Anforderungen: `spec.md` (WAS/WARUM), `plan.md`, `tasks.md` |
 | `contracts/` | Einzige Typquelle: OpenAPI (HTTP), Protobuf (WebSocket); Typen werden generiert, nie gedoppelt |
-| `docs/decisions/` | ADRs (0001–0013) |
+| `docs/decisions/` | ADRs (0001–0015) |
 | `client/` | TypeScript/React/Canvas-Spielclient (siehe unten) |
 | `server/` | .NET: Spielserver, Admin, gemeinsame Datenschicht, Tests (siehe unten) |
 | `deploy/`, `scripts/`, `.github/` | Betrieb (Compose), Release-Tooling, CI |
