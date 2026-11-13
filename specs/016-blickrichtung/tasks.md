@@ -13,7 +13,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 - [x] **T3** (AK-4, AK-8, AK-11, AK-12): `facing` im Snapshot, `min_facing_input` im `Welcome`; Integrationstests (WS).
 
 ## Client
-- [ ] **T4** (AK-1–5, AK-7): `facingOf`, `lerpAngle` in `vector.ts`; `Predictor.facing`; Interpolation der
+- [x] **T4** (AK-1–5, AK-7): `facingOf`, `lerpAngle` in `vector.ts`; `Predictor.facing`; Interpolation der
   Blickrichtung; Vitest.
 - [ ] **T5** (AK-6–8): Pfeil in `render.ts` (`arrowPoints`, Konstanten in `constants.ts`); Vitest.
 

@@ -1,4 +1,4 @@
-import { clampDirection, type Vec } from "@/features/game/core/vector";
+import { clampDirection, facingOf, type Vec } from "@/features/game/core/vector";
 
 export interface PendingInput {
   seq: number;
@@ -20,12 +20,18 @@ export class Predictor {
   /** Position vor dem letzten Fixed-Step, für flüssiges Rendern zwischen zwei Steps. */
   prevX = 0;
   prevY = 0;
+  /** Blickrichtung in Bogenmaß (016); gilt erst nach dem ersten `reconcile` (Server-Wert, AK-4). */
+  facing = 0;
   initialized = false;
 
   private pending: PendingInput[] = [];
   private nextSeq = 1;
 
-  constructor(private readonly stepDistance: number) {}
+  constructor(
+    private readonly stepDistance: number,
+    /** Aus `Welcome.minFacingInput` (Constitution §8). */
+    private readonly minFacingInput = 0,
+  ) {}
 
   /** Ein Fixed-Step: Eingabe lokal anwenden und zum Versenden zurückgeben. */
   step(direction: Vec): PendingInput {
@@ -41,12 +47,13 @@ export class Predictor {
     return input;
   }
 
-  /** Server-Position übernehmen und noch unbestätigte Eingaben erneut anwenden. */
-  reconcile(serverX: number, serverY: number, lastProcessedSeq: number): void {
+  /** Server-Position und -Blickrichtung übernehmen und noch unbestätigte Eingaben erneut anwenden. */
+  reconcile(serverX: number, serverY: number, lastProcessedSeq: number, serverFacing?: number): void {
     const before = { x: this.x, y: this.y };
     this.pending = this.pending.filter((input) => input.seq > lastProcessedSeq);
     this.x = serverX;
     this.y = serverY;
+    this.facing = serverFacing ?? this.facing;
     for (const input of this.pending) {
       this.apply(input);
     }
@@ -74,5 +81,6 @@ export class Predictor {
   private apply(input: PendingInput): void {
     this.x += input.dirX * this.stepDistance;
     this.y += input.dirY * this.stepDistance;
+    this.facing = facingOf({ x: input.dirX, y: input.dirY }, this.facing, this.minFacingInput);
   }
 }
