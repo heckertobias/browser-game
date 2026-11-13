@@ -215,6 +215,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                         TickRateHz = (uint)_world.TickRateHz,
                         MaxHp = (float)_world.MaxHp,
                         MaxMana = (float)_world.MaxMana,
+                        MinFacingInput = (float)_world.MinFacingInput,
                         KeyBindings = change.Connection!.KeyBindings,
                     };
                     change.Connection!.Outbox.SendRequired(new ServerMessage { Welcome = welcome }.ToByteArray());
@@ -382,6 +383,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             .Select(p => new PlayerState
             {
                 Id = p.Id, Name = p.Name, X = (float)p.X, Y = (float)p.Y, Color = p.Color, Away = p.Away, SpawnSeq = p.SpawnSeq,
+                Facing = (float)p.Facing,
             })
             .ToList();
 

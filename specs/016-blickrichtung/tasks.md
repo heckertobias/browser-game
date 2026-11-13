@@ -10,7 +10,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 ## Server
 - [x] **T2** (AK-1–5, AK-9, AK-11): `Player.Facing`, `DefaultFacing`, `MinFacingInput`; Ableitung in `World.Step()`;
   Unit-Tests.
-- [ ] **T3** (AK-4, AK-8, AK-11, AK-12): `facing` im Snapshot, `min_facing_input` im `Welcome`; Integrationstests (WS).
+- [x] **T3** (AK-4, AK-8, AK-11, AK-12): `facing` im Snapshot, `min_facing_input` im `Welcome`; Integrationstests (WS).
 
 ## Client
 - [ ] **T4** (AK-1–5, AK-7): `facingOf`, `lerpAngle` in `vector.ts`; `Predictor.facing`; Interpolation der
