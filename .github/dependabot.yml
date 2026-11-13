@@ -24,6 +24,14 @@ updates:
     groups:
       nuget-minor-patch:
         update-types: [minor, patch]
+    ignore:
+      # Nur .NET-LTS (gerade Majors); den Wechsel auf die nächste LTS machen wir bewusst von Hand.
+      - dependency-name: "Microsoft.*"
+        update-types: [version-update:semver-major]
+      - dependency-name: "System.*"
+        update-types: [version-update:semver-major]
+      - dependency-name: "Npgsql.EntityFrameworkCore.PostgreSQL"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: npm
     directory: /client
@@ -52,6 +60,11 @@ updates:
       # Build-Stage bleibt auf Node-LTS (gerade Majors); den Wechsel auf die nächste LTS machen wir bewusst von Hand.
       - dependency-name: node
         update-types: [version-update:semver-major]
+      # Ebenso .NET: nur LTS, Wechsel von Hand.
+      - dependency-name: dotnet/sdk
+        update-types: [version-update:semver-major]
+      - dependency-name: dotnet/aspnet
+        update-types: [version-update:semver-major]
 
   # Hält das SDK in global.json aktuell – der einzige Weg zu einem neuen SDK (global.json: rollForward "patch").
   - package-ecosystem: dotnet-sdk
@@ -62,3 +75,7 @@ updates:
       default-days: 7
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      # Nur .NET-LTS; den Wechsel auf die nächste LTS machen wir bewusst von Hand.
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
