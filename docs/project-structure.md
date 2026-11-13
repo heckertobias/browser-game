@@ -24,7 +24,7 @@ Diese Seite beschreibt, **wo** etwas im Repo liegt und **warum**. Kurzversion im
 |---|---|
 | `specs/` | Features-Anforderungen: `spec.md` (WAS/WARUM), `plan.md`, `tasks.md` |
 | `contracts/` | Einzige Typquelle: OpenAPI (HTTP), Protobuf (WebSocket); Typen werden generiert, nie gedoppelt |
-| `docs/decisions/` | ADRs (0001–0013) |
+| `docs/decisions/` | ADRs (0001–0015) |
 | `client/` | TypeScript/React/Canvas-Spielclient (siehe unten) |
 | `server/` | .NET: Spielserver, Admin, gemeinsame Datenschicht, Tests (siehe unten) |
 | `deploy/`, `scripts/`, `.github/` | Betrieb (Compose), Release-Tooling, CI |
@@ -54,6 +54,7 @@ client/
         network/             net.ts (WebSocket + Protobuf)
         chat/                Chat.tsx (Chatfenster), chatLogic.ts (reine Logik)
         menu/                Menu.tsx (Spielmenü), KeyBindings.tsx (Tastenbelegung), menuLogic.ts und keyBindingsLogic.ts (reine Logik)
+        hud/                 Vitals.tsx (HP-/Mana-Balken im HUD, reine Funktionen vitalsText/fillPercent)
       accounts/api/          passkeys.ts — WebAuthn-Flow der Spielerseiten
       localization/          i18n.ts (Texte, Sprache) · language.ts (bestätigt bei Formularverlust)
       pwa/

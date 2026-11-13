@@ -12,6 +12,20 @@ internal sealed class Player(string id, string name, uint color, double x, doubl
     public double Y { get; set; } = y;
     public uint LastProcessedSeq { get; set; }
 
+    /// <summary>Aktuelle HP, zwischen 0 und <see cref="World.MaxHp"/> (012 AK-1).</summary>
+    public double Hp { get; internal set; }
+
+    /// <summary>Aktuelles Mana, zwischen 0 und <see cref="World.MaxMana"/> (012 AK-1).</summary>
+    public double Mana { get; internal set; }
+
+    /// <summary>Zählt Sprünge der Figur (Respawn); ändert er sich, interpoliert der Client nicht (012 AK-8).</summary>
+    public uint SpawnSeq { get; internal set; }
+
+    /// <summary>
+    /// Blickrichtung in Bogenmaß, 0 = +x, π/2 = +y (unten), Bereich (−π, π]. Folgt der Laufrichtung, bleibt im Stehen (016 AK-1–3).
+    /// </summary>
+    public double Facing { get; internal set; }
+
     /// <summary>Verbindung weg, Figur wartet noch (003 AK-20).</summary>
     public bool Away => AwaySince.HasValue;
 
@@ -28,8 +42,18 @@ internal sealed class Player(string id, string name, uint color, double x, doubl
 /// <summary>
 /// Spielwelt ohne Netzwerk und Datenbank. Wird ausschließlich vom Tick-Thread verändert.
 /// Der Server ist Autorität: Clients liefern nur Richtungen, die Strecke pro Tick bestimmt die Welt.
+/// HP und Mana leben nur hier (012); Mana wächst in jedem Tick, HP nicht.
+/// Die Blickrichtung folgt der angewandten Laufrichtung (016).
 /// </summary>
-internal sealed class World(double speed, int tickRateHz, Random random)
+internal sealed class World(
+    double speed,
+    int tickRateHz,
+    Random random,
+    double maxHp = World.DefaultMaxHp,
+    double maxMana = World.DefaultMaxMana,
+    double manaRegenPerSecond = World.DefaultManaRegenPerSecond,
+    double startFacing = World.DefaultFacing,
+    double minFacingInput = World.DefaultMinFacingInput)
 {
     /// <summary>Mehr gepufferte Eingaben bringen keinen Vorteil, ältere werden verworfen.</summary>
     public const int MaxQueuedInputs = 10;
@@ -42,24 +66,41 @@ internal sealed class World(double speed, int tickRateHz, Random random)
 
     public const double SpawnRadius = 64;
 
+    public const double DefaultMaxHp = 100;
+    public const double DefaultMaxMana = 100;
+
+    /// <summary>Leer bis voll in 20 s (012 AK-3).</summary>
+    public const double DefaultManaRegenPerSecond = 5;
+
+    /// <summary>Blickrichtung neuer Figuren: nach unten, zur Kamera (016 AK-4).</summary>
+    public const double DefaultFacing = Math.PI / 2;
+
+    /// <summary>Kürzere Richtungsvektoren ändern die Blickrichtung nicht (016 AK-5).</summary>
+    public const double DefaultMinFacingInput = 0.01;
+
     private readonly Dictionary<string, Player> _players = [];
 
     public double Speed { get; } = speed;
     public int TickRateHz { get; } = tickRateHz;
     public double StepDistance => Speed / TickRateHz;
+    public double MaxHp { get; } = maxHp;
+    public double MaxMana { get; } = maxMana;
+    public double ManaRegenPerSecond { get; } = manaRegenPerSecond;
+    public double ManaRegenPerTick => ManaRegenPerSecond / TickRateHz;
+    public double StartFacing { get; } = startFacing;
+    public double MinFacingInput { get; } = minFacingInput;
     public IReadOnlyCollection<Player> Players => _players.Values;
 
     /// <summary>Neue Figur am Startpunkt der Welt: zufällig im SpawnRadius um (0,0) (003 AK-17).</summary>
     public Player AddPlayer(string id, string name, uint color)
     {
-        var angle = random.NextDouble() * 2 * Math.PI;
-        var radius = random.NextDouble() * SpawnRadius;
-        return AddPlayer(id, name, color, Math.Cos(angle) * radius, Math.Sin(angle) * radius);
+        var (x, y) = RandomStartPosition();
+        return AddPlayer(id, name, color, x, y);
     }
 
     public Player AddPlayer(string id, string name, uint color, double x, double y)
     {
-        var player = new Player(id, name, color, x, y);
+        var player = new Player(id, name, color, x, y) { Hp = MaxHp, Mana = MaxMana, Facing = StartFacing };
         _players.Add(id, player);
         return player;
     }
@@ -118,6 +159,76 @@ internal sealed class World(double speed, int tickRateHz, Random random)
 
     public Player? GetPlayer(string id) => _players.GetValueOrDefault(id);
 
+    /// <summary>
+    /// Senkt die HP um <paramref name="amount"/> (012 AK-7). Bei HP ≤ 0 stirbt die Figur und erscheint im selben Aufruf
+    /// neu (AK-8, AK-9). Liefert, ob die Figur gestorben ist.
+    /// </summary>
+    public bool Damage(string playerId, double amount)
+    {
+        if (!(amount > 0) || !_players.TryGetValue(playerId, out var player))
+        {
+            return false;
+        }
+
+        player.Hp -= amount;
+        if (player.Hp > 0)
+        {
+            return false;
+        }
+
+        Respawn(player);
+        return true;
+    }
+
+    /// <summary>
+    /// Setzt HP und/oder Mana direkt, begrenzt auf [0, Max] (012 AK-1, AK-10). <c>null</c> und NaN lassen den Wert unverändert.
+    /// HP ≤ 0 heißt tot: sofortiger Respawn (AK-8, AK-9).
+    /// </summary>
+    public void SetVitals(string playerId, double? hp = null, double? mana = null)
+    {
+        if (!_players.TryGetValue(playerId, out var player))
+        {
+            return;
+        }
+
+        if (mana is { } newMana && !double.IsNaN(newMana))
+        {
+            player.Mana = Math.Clamp(newMana, 0, MaxMana);
+        }
+
+        if (hp is { } newHp && !double.IsNaN(newHp))
+        {
+            player.Hp = Math.Clamp(newHp, 0, MaxHp);
+            if (player.Hp <= 0)
+            {
+                Respawn(player);
+            }
+        }
+    }
+
+    /// <summary>Tote Figur erscheint am Startpunkt der Welt mit vollen Werten (012 AK-8).</summary>
+    private void Respawn(Player player)
+    {
+        (player.X, player.Y) = RandomStartPosition();
+        player.SpawnSeq++;
+        player.PendingInputs.Clear();
+        // Verworfene Eingaben gelten als verarbeitet, sonst wendet der Client sie auf die neue Position an.
+        player.LastProcessedSeq = player.LastQueuedSeq;
+        player.TicksWithoutInput = 0;
+        (player.DirX, player.DirY) = (0, 0);
+
+        player.Hp = MaxHp;
+        player.Mana = MaxMana;
+    }
+
+    /// <summary>Zufälliger Punkt im SpawnRadius um (0,0), der Startpunkt der Welt (003 AK-17).</summary>
+    private (double X, double Y) RandomStartPosition()
+    {
+        var angle = random.NextDouble() * 2 * Math.PI;
+        var radius = random.NextDouble() * SpawnRadius;
+        return (Math.Cos(angle) * radius, Math.Sin(angle) * radius);
+    }
+
     public void EnqueueInput(string playerId, MoveInput input)
     {
         if (!_players.TryGetValue(playerId, out var player) || player.Away || input.Seq <= player.LastQueuedSeq)
@@ -137,6 +248,8 @@ internal sealed class World(double speed, int tickRateHz, Random random)
     {
         foreach (var player in _players.Values)
         {
+            player.Mana = Math.Min(MaxMana, player.Mana + ManaRegenPerTick);
+
             if (player.Away)
             {
                 continue;
@@ -153,8 +266,23 @@ internal sealed class World(double speed, int tickRateHz, Random random)
                 (player.DirX, player.DirY) = (0, 0);
             }
 
+            UpdateFacing(player);
+
             player.X += player.DirX * StepDistance;
             player.Y += player.DirY * StepDistance;
+        }
+    }
+
+    /// <summary>
+    /// Blickrichtung aus der angewandten Laufrichtung; zu kurze Vektoren und Stillstand lassen sie stehen (016 AK-1–3, AK-5).
+    /// Stillstand zählt nie, auch nicht bei <see cref="MinFacingInput"/> = 0.
+    /// </summary>
+    private void UpdateFacing(Player player)
+    {
+        var length = Math.Sqrt(player.DirX * player.DirX + player.DirY * player.DirY);
+        if (length > 0 && length >= MinFacingInput)
+        {
+            player.Facing = Math.Atan2(player.DirY, player.DirX);
         }
     }
 

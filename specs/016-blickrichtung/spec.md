@@ -1,10 +1,11 @@
 # 016 – Blickrichtung
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) (Bewegung per Tasten und Pointer,
 freie Richtungsvektoren)
-Voraussetzung für: [014 – Gegner](../014-gegner/spec.md) (Gegner erscheint vor dem Spieler) ·
+Voraussetzung für: [013 – Rudimentäres Kampfsystem](../013-kampfsystem/spec.md) (Angriffe nur in Blickrichtung) ·
+[014 – Gegner](../014-gegner/spec.md) (Gegner erscheint vor dem Spieler) ·
 [017 – Spielfigur als Pixel-Art](../017-spielfigur/spec.md) (Figur zeigt die Blickrichtung; der Pfeil wird dort
 zur Entwickleroption)
 
@@ -15,9 +16,9 @@ Jede Figur hat eine **Blickrichtung**: Sie schaut dorthin, wohin sie zuletzt gel
 Die Richtung ist ein **freier Winkel** (kein 8er-Raster), weil die Bewegung aus 001 ohnehin freie
 Richtungsvektoren liefert; der Pfeil dreht also stufenlos mit.
 
-In dieser Spec ist die Blickrichtung **reine Anzeige**. Sie beeinflusst weder Tempo noch Reichweite
-oder Treffer. Einzige Ausnahme: [014 – Gegner](../014-gegner/spec.md) nutzt sie, um den Gegner „vor
-dem Spieler" zu platzieren.
+In dieser Spec ist die Blickrichtung **reine Anzeige**. Mechanisch nutzen sie erst spätere Specs:
+[013 – Rudimentäres Kampfsystem](../013-kampfsystem/spec.md) erlaubt Angriffe nur auf Ziele grob in
+Blickrichtung, [014 – Gegner](../014-gegner/spec.md) platziert den Gegner „vor dem Spieler".
 
 ## User Stories
 
@@ -56,11 +57,10 @@ dem Spieler" zu platzieren.
 ### Wirkung & Abgrenzung
 
 - **AK-9:** Gegeben meine Blickrichtung ist beliebig, dann ändern sich **Tempo, Angriffsreichweiten
-  und Treffer** dadurch nicht (013 bleibt unverändert); die Blickrichtung ist in dieser Spec nur
-  Anzeige.
+  und Treffer** in dieser Spec dadurch nicht; die Blickrichtung ist hier nur Anzeige. Angriffe in
+  Blickrichtung regelt 013.
 - **AK-10:** Gegeben ein Gegner wird per `/run spawnEnemy()` erzeugt (014), dann erscheint er **vor**
-  dem Spieler, also in dessen Blickrichtung; die Blickrichtung ist damit die einzige mechanische
-  Verwendung.
+  dem Spieler, also in dessen Blickrichtung.
 - **AK-11:** Gegeben ich melde mich ab und wieder an, dann startet meine Figur mit der
   Standard-Blickrichtung (AK-4); die Blickrichtung wird **nicht** gespeichert.
 
@@ -74,8 +74,8 @@ dem Spieler" zu platzieren.
 - **Feste 8 (oder 4) Richtungen / Rasterung** – die Blickrichtung ist ein freier Winkel.
 - Eine **eigene Steuerung** der Blickrichtung (Drehtasten, Mauszeiger im Stehen, Gesten) – sie folgt
   ausschließlich der Bewegung.
-- Blickrichtung als **Kampfmechanik** (Treffer nur nach vorne, Sichtkegel, Ausweichen von hinten,
-  Richtungsboni) – eigene spätere Spec.
+- Blickrichtung als **Kampfmechanik** – „Angriff nur nach vorn" regelt 013; Sichtkegel, Ausweichen
+  von hinten und Richtungsboni kommen in einer eigenen späteren Spec.
 - **Sicht/Aggro** von Gegnern anhand ihrer Blickrichtung (014 greift reine Reichweite an).
 - **Sprites/Animationen** je Richtung; sichtbar ist nur der kleine Pfeil. Sie kommen mit
   [017](../017-spielfigur/spec.md).
@@ -100,8 +100,8 @@ _Keine._
 - **Für alle sichtbar:** Der Pfeil gehört zur Figur und wird allen Spielern angezeigt (die Richtung
   geht in die Spielstand-Übertragung ein). Mit [017](../017-spielfigur/spec.md) zeigt die Figur selbst
   die Richtung; der Pfeil ist dann standardmäßig aus und nur noch als Entwickleroption zuschaltbar.
-- **Nur Anzeige:** Kein Einfluss auf Tempo, Reichweite oder Treffer. Einzige mechanische Verwendung
-  ist die Spawn-Richtung in 014.
+- **Nur Anzeige:** In dieser Spec kein Einfluss auf Tempo, Reichweite oder Treffer. Mechanisch nutzen
+  sie 013 (Angriffe nur nach vorn) und 014 (Spawn-Richtung).
 - **Server ist Autorität** (Constitution 2): Der Client schickt nur die Bewegungsrichtung (001); der
   Server leitet daraus die Blickrichtung ab und verteilt sie.
 - **Nicht gespeichert:** Die Blickrichtung gilt pro Session und startet nach erneutem Anmelden wieder

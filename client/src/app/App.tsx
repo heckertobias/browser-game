@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Kicked_Reason } from "@/generated/browsergame/v1/game_pb";
 import { Chat, type ChatFeed } from "@/features/game/chat/Chat";
-import { Game, type ConnectionStatus } from "@/features/game/engine/game";
+import { Game, type ConnectionStatus, type PlayerVitals } from "@/features/game/engine/game";
+import { Vitals } from "@/features/game/hud/Vitals";
 import type { Bindings } from "@/features/game/input/bindings";
 import { KeyBindings } from "@/features/game/menu/KeyBindings";
 import { Menu } from "@/features/game/menu/Menu";
@@ -50,6 +51,7 @@ export function App() {
   const [name, setName] = useState<string | null>(null);
   const [kicked, setKicked] = useState<KickReason | null>(null);
   const [coordinates, setCoordinates] = useState<string | null>(null);
+  const [vitals, setVitals] = useState<PlayerVitals | null>(null);
   const [update, setUpdate] = useState(false);
   const [reload, setReload] = useState<"idle" | "pending" | "stuck">("idle");
   const [keyBindings, setKeyBindings] = useState<Bindings | null>(null);
@@ -72,6 +74,7 @@ export function App() {
       },
       onKeyBindings: setKeyBindings,
       onCoordinates: setCoordinates,
+      onVitals: setVitals,
       onChatHistory: (messages) => { chatRef.current?.onChatHistory(messages); },
       onChatMessage: (message) => { chatRef.current?.onChatMessage(message); },
       onChatRejected: (reason) => { chatRef.current?.onChatRejected(reason); },
@@ -127,6 +130,7 @@ export function App() {
             <span className="badge badge-neutral rounded-none border-2 border-base-content/30" data-testid="coords">{coordinates}</span>
           )}
           <button type="button" className="btn min-h-11 rounded-none font-mono uppercase pointer-events-auto ml-auto" data-testid="menu-button" onClick={() => { setMenuOpen(true); }}>{t.menu}</button>
+          {vitals && <Vitals vitals={vitals} />}
         </div>
         <Chat ref={chatRef} sendChat={sendChat} inGame={status === "connected" && !menuShown} />
         {status === "disconnected" && (

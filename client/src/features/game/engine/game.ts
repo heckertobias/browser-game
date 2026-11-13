@@ -14,12 +14,22 @@ import { ScreenWakeLock } from "@/features/game/input/wakeLock";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "kicked";
 
+/** Eigene HP und Mana mit Maximum, abgerundet (012 AK-5). */
+export interface PlayerVitals {
+  hp: number;
+  maxHp: number;
+  mana: number;
+  maxMana: number;
+}
+
 export interface GameEvents extends ChatHandlers {
   onStatus(status: ConnectionStatus): void;
   onWelcome(name: string): void;
   onKicked(reason: KickReason): void;
   /** Eigene Koordinaten (gerundet, aus der vorhergesagten Position), nur bei Änderung (AK-19b). */
   onCoordinates(text: string): void;
+  /** Eigene HP/Mana (abgerundet), nur bei Änderung (012 AK-6). Ab dem ersten Snapshot mit eigener Figur. */
+  onVitals?(vitals: PlayerVitals): void;
   /** Aktuelle Belegung: nach Welcome (gespeicherte des Accounts, AK-9) und nach `saveKeyBindings`. */
   onKeyBindings?(bindings: Bindings): void;
 }
@@ -47,6 +57,7 @@ export class Game {
   private readonly wakeLock = new ScreenWakeLock(navigator.wakeLock, document);
   private self: DrawablePlayer | null = null;
   private coordinates = "";
+  private vitals: PlayerVitals | null = null;
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly events: GameEvents) {
     const ctx = canvas.getContext("2d");
@@ -108,7 +119,7 @@ export class Game {
   private handleWelcome(welcome: Welcome): void {
     this.welcome = welcome;
     this.stepMs = 1000 / welcome.tickRateHz;
-    this.predictor = new Predictor(welcome.speed / welcome.tickRateHz);
+    this.predictor = new Predictor(welcome.speed / welcome.tickRateHz, welcome.minFacingInput);
     this.applyKeyBindings(fromProto(welcome.keyBindings));
     this.events.onWelcome(welcome.name);
     this.events.onStatus("connected");
@@ -118,9 +129,10 @@ export class Game {
     const selfId = this.welcome?.playerId;
     const own = snapshot.players.find((p) => p.id === selfId);
     if (own && this.predictor) {
-      this.predictor.reconcile(own.x, own.y, snapshot.lastProcessedSeq);
+      this.predictor.reconcile(own.x, own.y, snapshot.lastProcessedSeq, own.facing);
       this.self = { name: own.name, color: own.color, x: own.x, y: own.y };
     }
+    if (own) this.reportVitals(snapshot);
     this.snapshots.push(performance.now(), snapshot.players.filter((p) => p.id !== selfId));
   }
 
@@ -163,6 +175,20 @@ export class Game {
     this.events.onCoordinates(text);
   }
 
+  private reportVitals(snapshot: Snapshot): void {
+    if (!this.welcome) return;
+    const next: PlayerVitals = {
+      hp: Math.floor(snapshot.hp),
+      maxHp: Math.floor(this.welcome.maxHp),
+      mana: Math.floor(snapshot.mana),
+      maxMana: Math.floor(this.welcome.maxMana),
+    };
+    const last = this.vitals;
+    if (last?.hp === next.hp && last.maxHp === next.maxHp && last.mana === next.mana && last.maxMana === next.maxMana) return;
+    this.vitals = next;
+    this.events.onVitals?.(next);
+  }
+
   private draw(now: number): void {
     this.updateViewport();
     if (!this.viewport) return;
@@ -172,7 +198,7 @@ export class Game {
     let camera: Vec = { x: 0, y: 0 };
     if (this.predictor?.initialized && this.self) {
       camera = this.predictor.renderPosition(this.accumulator / this.stepMs);
-      players.push({ ...this.self, ...camera });
+      players.push({ ...this.self, ...camera, facing: this.predictor.facing });
     }
     render(this.ctx, this.viewport, camera, players);
   }
