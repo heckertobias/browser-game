@@ -7,6 +7,15 @@ internal static class GameSettings
 
     public const int TickRateHz = 20;
 
+    /// <summary>Max-HP einer Figur (012 AK-1).</summary>
+    public const double MaxHp = World.DefaultMaxHp;
+
+    /// <summary>Max-Mana einer Figur (012 AK-1).</summary>
+    public const double MaxMana = World.DefaultMaxMana;
+
+    /// <summary>Mana pro Sekunde; leer bis voll in 20 s (012 AK-3). HP regeneriert nicht (AK-4).</summary>
+    public const double ManaRegenPerSecond = World.DefaultManaRegenPerSecond;
+
     /// <summary>
     /// Standard-Nachlauf: So lange bleibt eine getrennte Figur stehen (003 AK-20).
     /// Überschreibbar mit <c>Game:LingerSeconds</c> (z. B. in Tests).
