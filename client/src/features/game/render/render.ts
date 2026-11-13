@@ -1,4 +1,4 @@
-import { CULL_MARGIN, GRID_MAJOR, GRID_MINOR, PLAYER_SIZE } from "@/features/game/core/constants";
+import { ARROW_GAP, ARROW_LENGTH, ARROW_WIDTH, CULL_MARGIN, GRID_MAJOR, GRID_MINOR, PLAYER_SIZE } from "@/features/game/core/constants";
 import type { Vec } from "@/features/game/core/vector";
 import type { Viewport } from "./viewport";
 
@@ -9,6 +9,8 @@ export interface DrawablePlayer {
   y: number;
   /** Verbindung verloren, Figur wartet noch (AK-20). */
   away?: boolean;
+  /** Blickrichtung in Bogenmaß (016); ohne Wert kein Pfeil. */
+  facing?: number;
 }
 
 const AWAY_ALPHA = 0.5;
@@ -25,6 +27,27 @@ export function desaturate(rgb: number): number {
 const BACKGROUND = "#1d2b1f";
 const GRID_MINOR_COLOR = "rgba(255, 255, 255, 0.06)";
 const GRID_MAJOR_COLOR = "rgba(255, 255, 255, 0.18)";
+const ARROW_FILL = "#ffffff";
+const ARROW_OUTLINE = "#000000";
+/** Sichtbarer Rand des Pfeils in Weltpixeln (016 AK-6). */
+const ARROW_OUTLINE_WIDTH = 1;
+
+/**
+ * Ecken des Blickrichtungs-Pfeils um den Mittelpunkt (x, y): Spitze, dann die beiden Ecken der Basis (016 AK-6).
+ * Die Basis liegt `PLAYER_SIZE / 2 + ARROW_GAP` vor dem Mittelpunkt; der Winkel wird nicht gerastert (AK-7).
+ */
+export function arrowPoints(x: number, y: number, facing: number): readonly [Vec, Vec, Vec] {
+  const dx = Math.cos(facing);
+  const dy = Math.sin(facing);
+  const base = PLAYER_SIZE / 2 + ARROW_GAP;
+  const reach = base + ARROW_LENGTH;
+  const half = ARROW_WIDTH / 2;
+  return [
+    { x: x + dx * reach, y: y + dy * reach },
+    { x: x + dx * base - dy * half, y: y + dy * base + dx * half },
+    { x: x + dx * base + dy * half, y: y + dy * base - dx * half },
+  ];
+}
 
 /** Weltkoordinate der linken oberen Ecke des Sichtfelds, auf Gerätepixel gerundet (kein Flimmern). */
 export function cameraOrigin(camera: Vec, viewport: Viewport): Vec {
@@ -98,11 +121,28 @@ export function render(
     ctx.globalAlpha = player.away ? AWAY_ALPHA : 1;
     ctx.fillStyle = toCssColor(player.away ? desaturate(player.color) : player.color);
     ctx.fillRect(left, top, PLAYER_SIZE, PLAYER_SIZE);
+    if (player.facing !== undefined) drawArrow(ctx, left + PLAYER_SIZE / 2, top + PLAYER_SIZE / 2, player.facing);
     ctx.fillStyle = "#ffffff";
     ctx.fillText(player.name, Math.round(player.x), top - 2);
   }
   ctx.globalAlpha = 1;
   if (letterbox) ctx.restore();
+}
+
+/** Dunkler Rand zuerst, die Füllung deckt seine innere Hälfte (016 AK-6). */
+function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, facing: number): void {
+  const [tip, baseA, baseB] = arrowPoints(x, y, facing);
+  ctx.beginPath();
+  ctx.moveTo(tip.x, tip.y);
+  ctx.lineTo(baseA.x, baseA.y);
+  ctx.lineTo(baseB.x, baseB.y);
+  ctx.closePath();
+  ctx.strokeStyle = ARROW_OUTLINE;
+  ctx.lineWidth = 2 * ARROW_OUTLINE_WIDTH;
+  ctx.lineJoin = "round";
+  ctx.stroke();
+  ctx.fillStyle = ARROW_FILL;
+  ctx.fill();
 }
 
 function drawGrid(

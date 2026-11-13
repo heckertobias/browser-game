@@ -198,7 +198,7 @@ export class Game {
     let camera: Vec = { x: 0, y: 0 };
     if (this.predictor?.initialized && this.self) {
       camera = this.predictor.renderPosition(this.accumulator / this.stepMs);
-      players.push({ ...this.self, ...camera });
+      players.push({ ...this.self, ...camera, facing: this.predictor.facing });
     }
     render(this.ctx, this.viewport, camera, players);
   }

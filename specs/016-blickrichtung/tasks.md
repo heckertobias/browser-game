@@ -15,7 +15,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 ## Client
 - [x] **T4** (AK-1–5, AK-7): `facingOf`, `lerpAngle` in `vector.ts`; `Predictor.facing`; Interpolation der
   Blickrichtung; Vitest.
-- [ ] **T5** (AK-6–8): Pfeil in `render.ts` (`arrowPoints`, Konstanten in `constants.ts`); Vitest.
+- [x] **T5** (AK-6–8): Pfeil in `render.ts` (`arrowPoints`, Konstanten in `constants.ts`); Vitest.
 
 ## Tests / Prüfung
 - [ ] **T6**: Manuelle Prüfung in der Testumgebung (PC mit Tasten und Maus, Handy hochkant/quer, zwei Geräte):
