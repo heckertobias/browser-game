@@ -3,7 +3,7 @@
 Gehört zu: [plan.md](plan.md)
 
 Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task bringt seine Tests mit.
-Erst beginnen, wenn 012 umgesetzt ist.
+Erst beginnen, wenn 012 und 016 umgesetzt sind.
 
 ## Verträge
 - [ ] **T1** (AK-4–15, AK-18): `game.proto`: `Attack` (`ClientMessage` 4), `AttackRejected` (`ServerMessage` 7),
@@ -13,7 +13,8 @@ Erst beginnen, wenn 012 umgesetzt ist.
 ## Server
 - [ ] **T2** (AK-13, AK-15–17): Konstanten in `GameSettings`; `Target`, `Projectile`; `Combat` mit Dummy und
   `Step(tick)` (Respawn); Unit-Tests.
-- [ ] **T3** (AK-2, AK-4–12, AK-14): `Combat.TryAttack` (Reihenfolge Ziel → Cooldown → Reichweite → Mana),
+- [ ] **T3** (AK-2, AK-4–12, AK-14, AK-19): `Combat.TryAttack` (Reihenfolge Ziel → Cooldown → Reichweite →
+  Blickrichtung → Mana),
   Projektilflug und Einschlag; `Player.NextAttackTick`; Unit-Tests.
 - [ ] **T4** (AK-7, AK-8, AK-13): `Attack` im `GameEndpoint` → Angriffs-Channel; im `GameLoop` ausführen,
   `AttackRejected` an den Angreifer, Ziele und Projektile im Snapshot; Integrationstests (WS).
@@ -29,6 +30,7 @@ Erst beginnen, wenn 012 umgesetzt ist.
 ## Tests / Prüfung
 - [ ] **T8**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
   - Dummy anwählen, Nah- und Fernkampf, außer Reichweite, Mana leer schießen (Hinweis)
+  - mit dem Rücken zum Dummy: kein Angriff; nach einem Schritt auf ihn zu: Angriff geht
   - Cooldown spürbar, Dummy stirbt und kommt nach 5 s wieder, Auswahl wird dabei aufgehoben
   - zweites Gerät sieht Projektile und HP-Balken
 

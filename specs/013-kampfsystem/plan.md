@@ -22,6 +22,7 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 
 | Name | Wert | Bedeutung |
 |---|---|---|
+| `AttackArcDegrees` | 90 | Öffnungswinkel nach vorn (± 45° um die Blickrichtung aus 016), für beide Angriffe |
 | `MeleeRange` | 32 | Nahkampfreichweite (Mittelpunkt zu Mittelpunkt, Welteinheiten) |
 | `MeleeDamage` | 10 | Nahkampfschaden |
 | `RangedRange` | 160 | Maximalreichweite Fernkampf (knapp die halbe kurze Bildschirmseite) |
@@ -41,10 +42,12 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
    Hervorhebung und „höchstens ein Ziel“ (AK-1, AK-3) sind reine Anzeige.
 2. **Ein Ziel, das im Snapshot fehlt, ist weg.** Ein toter Dummy wird bis zur Wiederherstellung nicht übertragen und
    nicht gezeichnet. Der Client hebt die Auswahl auf, sobald die ID fehlt (Spec: „stirbt er, wird das Ziel aufgehoben“).
-3. **Reihenfolge der Prüfungen:** Ziel gültig → Cooldown abgelaufen → in Reichweite → (Fernkampf) genug Mana. Ein
+3. **Reihenfolge der Prüfungen:** Ziel gültig → Cooldown abgelaufen → in Reichweite → in Blickrichtung →
+   (Fernkampf) genug Mana. Ein
    Versuch während des Cooldowns wird still ignoriert. „Zu wenig Mana“ kommt also erst, wenn sonst alles passt, und
    flackert nicht bei jedem Tastendruck im Cooldown.
-4. **Nur „zu wenig Mana“ wird gemeldet** (`AttackRejected`, AK-8). Alles andere scheitert still (AK-2, AK-5, AK-9);
+4. **Nur „zu wenig Mana“ wird gemeldet** (`AttackRejected`, AK-8). Alles andere scheitert still (AK-2, AK-5, AK-9,
+   AK-19);
    die Spec verlangt dafür keine Rückmeldung.
 5. **Projektile verfolgen ihr Ziel** (Ziele stehen in 013 und 014 ohnehin still). Pro Tick bewegt sich das Projektil
    `ProjectileSpeed / TickRateHz` auf das Ziel zu; ist der Rest kürzer, schlägt es ein. Ist das Ziel inzwischen weg
@@ -57,7 +60,10 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
    Taste gedrückt ist. Ohne Taste belegt sind sie erlaubt (002 AK-11 gilt nur für Bewegung).
 9. **Buttons im HUD:** „Nah“ und „Fern“ unten rechts über der Versionsanzeige, groß genug für Daumen (`min-h-14`),
    auch am PC sichtbar (mit Maus klickbar). Ohne Ziel sind sie ausgegraut, lösen aber nichts aus (AK-2).
-10. **Ziel-Modell allgemein:** `Target` (ID, Art, Position, HP, Max-HP) im Domain-Code; 014 hängt Gegner als weitere
+10. **Blickrichtung (AK-19):** Der Winkel zwischen `Player.Facing` (016, Server) und dem Vektor Angreifer → Ziel
+    darf höchstens `AttackArcDegrees / 2` betragen; genau auf der Grenze zählt als vorn. Steht das Ziel auf der
+    Position des Angreifers (Abstand 0), zählt es als vorn. Der Server dreht die Figur nicht.
+11. **Ziel-Modell allgemein:** `Target` (ID, Art, Position, HP, Max-HP) im Domain-Code; 014 hängt Gegner als weitere
     Art ein. Spieler sind keine Ziele (Out of Scope).
 
 ## Verträge
@@ -146,7 +152,7 @@ message ProjectileState {
   - Konstruktor mit den Konstanten (Tests setzen eigene); legt den Dummy `"dummy"` an `DummyPosition` mit vollen HP an
     (AK-13, AK-17: lebt nur im Speicher, neu bei Serverstart).
   - `TryAttack(Player attacker, Attack.Kind kind, string targetId, uint tick) → AttackResult`
-    (`Ok`, `InvalidTarget`, `Cooldown`, `OutOfRange`, `NotEnoughMana`) nach der Reihenfolge oben.
+    (`Ok`, `InvalidTarget`, `Cooldown`, `OutOfRange`, `NotFacing`, `NotEnoughMana`) nach der Reihenfolge oben.
     - Nahkampf: Schaden sofort (AK-4, AK-6).
     - Fernkampf: Mana abziehen (AK-10), Projektil an der Position des Angreifers starten (AK-7).
     - Erfolg setzt `attacker.NextAttackTick = tick + GlobalCooldownTicks` (AK-11); Fehler nicht (AK-12).
@@ -209,6 +215,7 @@ message ProjectileState {
 | 16 | keine Angriffslogik | Unit: Spieler neben Dummy, 100 Ticks → Spieler-HP unverändert |
 | 17 | nur im Speicher | Integration: neuer Server → Dummy mit vollen HP |
 | 18 | HP-Balken | Vitest: `hpBarWidth`; **manuell** |
+| 19 | Winkel zur Blickrichtung | Unit: Ziel genau vorn, auf ± 45° → `Ok`; auf 46° und hinter dem Spieler → `NotFacing`, HP, Mana und Cooldown unverändert; Abstand 0 → `Ok`; gilt für Nah- und Fernkampf |
 
 ## Constitution-Check
 
@@ -226,6 +233,9 @@ message ProjectileState {
 - **Reichweite und Verzögerung:** Der Server prüft die Reichweite mit seiner Position, der Spieler sieht seine
   vorhergesagte. Am Rand der Reichweite kann ein Angriff daher scheitern, obwohl es knapp passend aussah. Bei 50 ms
   Ticks und 200 Einheiten/s sind das wenige Welteinheiten.
+- **Blickrichtung und Verzögerung:** Der Server prüft mit seiner Blickrichtung, der Client zeigt die vorhergesagte
+  (016). Wer sich gerade erst zum Ziel gedreht hat, kann knapp scheitern; ± 45° lassen dafür genug Spielraum.
 - **Viele Projektile:** Pro Spieler höchstens eines pro Sekunde (Cooldown); kein eigenes Limit nötig.
 - **Klick auf ein Ziel startet keine Bewegung:** Wer genau auf den Dummy tippt, um hinzulaufen, wählt ihn stattdessen
-  aus. Laufen geht daneben oder mit Tasten.
+  aus. Laufen geht daneben oder mit Tasten. Um sich dem Ziel zuzuwenden (AK-19), tippt man knapp daneben in seine
+  Richtung oder läuft mit Tasten einen Schritt darauf zu.

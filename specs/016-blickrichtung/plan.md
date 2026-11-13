@@ -64,7 +64,8 @@ message PlayerState {
   `if (hypot(DirX, DirY) >= MinFacingInput) Facing = atan2(DirY, DirX)`. Wartende Figuren werden übersprungen wie bisher.
 - `GameLoop.BroadcastSnapshot`: `Facing = (float)p.Facing`.
 - Kein Speichern (AK-11): `PositionStore` bleibt unverändert.
-- 014 liest `Player.Facing` für den Spawn-Punkt (AK-10); in 016 selbst gibt es keine weitere Verwendung (AK-9).
+- 013 liest `Player.Facing` für Angriffe, 014 für den Spawn-Punkt (AK-10); in 016 selbst gibt es keine weitere
+  Verwendung (AK-9).
 
 ## Client
 
