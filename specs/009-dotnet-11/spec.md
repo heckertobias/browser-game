@@ -1,6 +1,6 @@
 # 009 – Wechsel auf .NET 11
 
-**Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: Veröffentlichung von .NET 11 (voraussichtlich November 2026) plus 7 Tage Wartezeit (ADR 0002)
 
