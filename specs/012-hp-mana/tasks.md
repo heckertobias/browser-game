@@ -16,7 +16,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
   Integrationstests (WS) inkl. Übernahme einer wartenden Figur.
 
 ## Client
-- [ ] **T5** (AK-5, AK-6): `game.ts` `onVitals` (nur bei Änderung); `Vitals.tsx` mit `vitalsText`/`fillPercent` und
+- [x] **T5** (AK-5, AK-6): `game.ts` `onVitals` (nur bei Änderung); `Vitals.tsx` mit `vitalsText`/`fillPercent` und
   Vitest; i18n de/en.
 - [ ] **T6** (AK-8): `interpolation.ts` springt bei neuem `spawnSeq`; Vitest.
 
