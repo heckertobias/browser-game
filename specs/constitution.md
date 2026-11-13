@@ -30,3 +30,14 @@ Lieber ein hässlicher, funktionierender Durchstich als eine schöne halbe Schic
 ## 7. Testbar ab Akzeptanzkriterium
 Jedes Akzeptanzkriterium hat mindestens einen automatisierten Test oder eine dokumentierte manuelle Prüfung.
 Spiellogik (Kampf, Bewegung, Offline-Berechnung) ist ohne Netzwerk und ohne Datenbank testbar.
+
+## 8. Spielwerte sind einstellbar
+Jeder Wert, der Spielverhalten festlegt (Schaden, Reichweite, Winkel, Tempo, Abklingzeit, HP, Kosten …), ist ein
+benannter Wert an einer zentralen Stelle, nie eine Zahl in der Spiellogik. Er muss sich später konfigurieren lassen,
+ohne die Logik umzubauen.
+- Die Spiellogik bekommt die Werte übergeben (z. B. im Konstruktor), statt sie selbst zu lesen. Tests setzen eigene.
+- Braucht der Client einen solchen Wert, bekommt er ihn vom Server (z. B. im `Welcome`), statt ihn zu kopieren.
+- Die Spec nennt keine Zahlen; der Plan führt jeden Wert mit Standard in seiner Tabelle.
+- Nicht gemeint: reine Darstellung und Bedienung (Farben, Pixelgrößen, Tipp-Radius) und technische Grenzen
+  (Nachrichtengröße, Channel-Kapazität).
+Wo und wie die Werte konfiguriert werden (Datei, Admin-Interface), regelt eine eigene Spec.
