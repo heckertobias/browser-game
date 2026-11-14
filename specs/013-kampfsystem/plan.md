@@ -184,8 +184,9 @@ message ProjectileState {
   - `pickTarget(world, targets, radius)`: nächstes Ziel innerhalb des Radius oder `null`.
   - `TargetSelection`: `select(id)`, `current`, `sync(ids)` hebt auf, wenn die ID fehlt (AK-3, Entscheidung 2).
   - `attackRequest(selection, kind)`: ohne Ziel `null` → es wird nichts geschickt (AK-2).
-- **`game.ts`:** Ziele aus dem Snapshot (ohne Interpolation, sie stehen still), Projektile mit derselben Interpolation
-  wie andere Spieler; `attack(kind)` für Tasten und Buttons; `GameEvents.onTarget(id | null)` und
+- **`game.ts`:** Ziele und Projektile laufen durch denselben verzögerten Puffer wie andere Spieler. So sinkt der
+  HP-Balken genau dann, wenn das Projektil sichtbar einschlägt (nach dem ersten RC: ohne Puffer sank er etwa 100 ms
+  zu früh). Die Auswahl (`sync`) richtet sich weiter nach dem neuesten Snapshot; `attack(kind)` für Tasten und Buttons; `GameEvents.onTarget(id | null)` und
   `onAttackRejected(reason)`.
 - **`render.ts`:**
   - Dummy: brauner Pfosten mit Querbalken (deutlich anders als die farbigen Spieler-Quadrate), HP-Balken darüber

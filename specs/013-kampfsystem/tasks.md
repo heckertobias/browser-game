@@ -31,7 +31,8 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
 ## Nachtrag nach dem ersten RC
 - [ ] **T8** (AK-2, AK-5, AK-9, AK-20): `REASON_OUT_OF_RANGE` in `game.proto`; Server meldet `OutOfRange` an den
   Angreifer; Client meldet „kein Ziel“ selbst; Hinweise als `AttackHint.tsx` mittig oben, groß (statt über den
-  Buttons); i18n de/en; Tests.
+  Buttons); i18n de/en; Ziele über denselben verzögerten Puffer wie Projektile (HP-Balken sinkt beim sichtbaren
+  Einschlag); Tests.
 
 ## Tests / Prüfung
 - [ ] **T9**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
