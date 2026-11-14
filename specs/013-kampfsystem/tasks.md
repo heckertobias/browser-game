@@ -22,7 +22,7 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
 ## Client
 - [x] **T5** (AK-1–3): `targeting.ts` (`pickTarget`, `TargetSelection`, `attackRequest`) mit Vitest; `input.ts`:
   `pointerdown` auf Ziel wählt aus statt zu laufen, Angriffstasten bei `keydown` ohne Repeat.
-- [ ] **T6** (AK-1, AK-7, AK-18): `net.ts` `sendAttack`, `game.attack(kind)`, Callbacks des `InputTracker` in `game.ts`;
+- [x] **T6** (AK-1, AK-7, AK-18): `net.ts` `sendAttack`, `game.attack(kind)`, Callbacks des `InputTracker` in `game.ts`;
   `game.ts`/`render.ts`: Ziele, Umrandung, HP-Balken (`hpBarWidth` mit Vitest),
   Projektile mit Interpolation.
 - [ ] **T7** (AK-8, AK-19): `AttackRejected` → `onAttackRejected`; `AttackButtons.tsx` mit Hinweisen „Zu wenig Mana“ und „Ziel nicht vor dir“; Angriffsaktionen in `DEFAULT_BINDINGS` (`Digit1`,

@@ -1,4 +1,23 @@
-import { ARROW_GAP, ARROW_LENGTH, ARROW_WIDTH, CULL_MARGIN, GRID_MAJOR, GRID_MINOR, PLAYER_SIZE } from "@/features/game/core/constants";
+import {
+  ARROW_GAP,
+  ARROW_LENGTH,
+  ARROW_WIDTH,
+  CULL_MARGIN,
+  DUMMY_ARM_HEIGHT,
+  DUMMY_ARM_OFFSET,
+  DUMMY_ARM_WIDTH,
+  DUMMY_HEIGHT,
+  DUMMY_POST_WIDTH,
+  GRID_MAJOR,
+  GRID_MINOR,
+  HP_BAR_GAP,
+  HP_BAR_HEIGHT,
+  HP_BAR_WIDTH,
+  PLAYER_SIZE,
+  PROJECTILE_RADIUS,
+  TARGET_OUTLINE_GAP,
+  TARGET_OUTLINE_WIDTH,
+} from "@/features/game/core/constants";
 import type { Vec } from "@/features/game/core/vector";
 import type { Viewport } from "./viewport";
 
@@ -11,6 +30,30 @@ export interface DrawablePlayer {
   away?: boolean;
   /** Blickrichtung in Bogenmaß (016); ohne Wert kein Pfeil. */
   facing?: number;
+}
+
+/** Zielbares Objekt (013); `TargetState` aus dem Snapshot passt direkt. */
+export interface DrawableTarget {
+  id: string;
+  x: number;
+  y: number;
+  hp: number;
+  maxHp: number;
+}
+
+/** Kampf im Bild (013): Ziele ohne Interpolation, Projektile interpoliert, höchstens ein aktives Ziel. */
+export interface CombatScene {
+  targets: readonly DrawableTarget[];
+  projectiles: readonly Vec[];
+  selectedId: string | null;
+}
+
+const EMPTY_SCENE: CombatScene = { targets: [], projectiles: [], selectedId: null };
+
+/** Gefüllte Breite des HP-Balkens (013 AK-18): anteilig, auf 0 … `width` begrenzt; ohne Maximum leer. */
+export function hpBarWidth(hp: number, maxHp: number, width: number): number {
+  if (maxHp <= 0) return 0;
+  return width * Math.min(1, Math.max(0, hp / maxHp));
 }
 
 const AWAY_ALPHA = 0.5;
@@ -29,6 +72,11 @@ const GRID_MINOR_COLOR = "rgba(255, 255, 255, 0.06)";
 const GRID_MAJOR_COLOR = "rgba(255, 255, 255, 0.18)";
 const ARROW_FILL = "#ffffff";
 const ARROW_OUTLINE = "#000000";
+const DUMMY_COLOR = "#8b5a2b";
+const HP_BAR_BACKGROUND = "#000000";
+const HP_BAR_FILL = "#e53935";
+const TARGET_OUTLINE_COLOR = "#ffd400";
+const PROJECTILE_COLOR = "#fff6c2";
 /** Sichtbarer Rand des Pfeils in Weltpixeln (016 AK-6). */
 const ARROW_OUTLINE_WIDTH = 1;
 
@@ -89,6 +137,7 @@ export function render(
   viewport: Viewport,
   camera: Vec,
   players: readonly DrawablePlayer[],
+  scene: CombatScene = EMPTY_SCENE,
 ): void {
   const { scale, canvasWidth, canvasHeight, viewWidth, viewHeight, offsetX, offsetY } = viewport;
   const origin = cameraOrigin(camera, viewport);
@@ -111,6 +160,11 @@ export function render(
   drawGrid(ctx, origin, viewWidth, viewHeight, GRID_MINOR, 1 / scale, GRID_MINOR_COLOR);
   drawGrid(ctx, origin, viewWidth, viewHeight, GRID_MAJOR, 1, GRID_MAJOR_COLOR);
 
+  for (const target of scene.targets) {
+    if (!isVisible(target, origin, viewport, CULL_MARGIN)) continue;
+    drawTarget(ctx, target, target.id === scene.selectedId);
+  }
+
   ctx.font = "8px monospace";
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
@@ -126,7 +180,53 @@ export function render(
     ctx.fillText(player.name, Math.round(player.x), top - 2);
   }
   ctx.globalAlpha = 1;
+  for (const projectile of scene.projectiles) {
+    if (!isVisible(projectile, origin, viewport, CULL_MARGIN)) continue;
+    drawProjectile(ctx, projectile);
+  }
   if (letterbox) ctx.restore();
+}
+
+/** Pfosten mit Querbalken, darüber der HP-Balken; das aktive Ziel bekommt eine Umrandung (013 AK-1, AK-18). */
+function drawTarget(ctx: CanvasRenderingContext2D, target: DrawableTarget, selected: boolean): void {
+  const cx = Math.round(target.x);
+  const top = Math.round(target.y) - DUMMY_HEIGHT / 2;
+  ctx.fillStyle = DUMMY_COLOR;
+  ctx.fillRect(cx - DUMMY_POST_WIDTH / 2, top, DUMMY_POST_WIDTH, DUMMY_HEIGHT);
+  ctx.fillRect(cx - DUMMY_ARM_WIDTH / 2, top + DUMMY_ARM_OFFSET, DUMMY_ARM_WIDTH, DUMMY_ARM_HEIGHT);
+  if (selected) drawOutline(ctx, cx - DUMMY_ARM_WIDTH / 2, top, DUMMY_ARM_WIDTH, DUMMY_HEIGHT);
+  const barLeft = cx - HP_BAR_WIDTH / 2;
+  const barTop = top - HP_BAR_GAP - HP_BAR_HEIGHT;
+  ctx.fillStyle = HP_BAR_BACKGROUND;
+  ctx.fillRect(barLeft, barTop, HP_BAR_WIDTH, HP_BAR_HEIGHT);
+  ctx.fillStyle = HP_BAR_FILL;
+  ctx.fillRect(barLeft, barTop, hpBarWidth(target.hp, target.maxHp, HP_BAR_WIDTH), HP_BAR_HEIGHT);
+}
+
+/** Rahmen `TARGET_OUTLINE_GAP` außerhalb des Kastens; der Pfad liegt eine halbe Strichstärke innen, damit ganze Pixel gefüllt werden. */
+function drawOutline(ctx: CanvasRenderingContext2D, left: number, top: number, width: number, height: number): void {
+  const inset = TARGET_OUTLINE_WIDTH / 2;
+  const l = left - TARGET_OUTLINE_GAP + inset;
+  const t = top - TARGET_OUTLINE_GAP + inset;
+  const r = left + width + TARGET_OUTLINE_GAP - inset;
+  const b = top + height + TARGET_OUTLINE_GAP - inset;
+  ctx.beginPath();
+  ctx.moveTo(l, t);
+  ctx.lineTo(r, t);
+  ctx.lineTo(r, b);
+  ctx.lineTo(l, b);
+  ctx.closePath();
+  ctx.strokeStyle = TARGET_OUTLINE_COLOR;
+  ctx.lineWidth = TARGET_OUTLINE_WIDTH;
+  ctx.lineJoin = "miter";
+  ctx.stroke();
+}
+
+function drawProjectile(ctx: CanvasRenderingContext2D, projectile: Vec): void {
+  ctx.fillStyle = PROJECTILE_COLOR;
+  ctx.beginPath();
+  ctx.arc(projectile.x, projectile.y, PROJECTILE_RADIUS, 0, 2 * Math.PI);
+  ctx.fill();
 }
 
 /** Dunkler Rand zuerst, die Füllung deckt seine innere Hälfte (016 AK-6). */

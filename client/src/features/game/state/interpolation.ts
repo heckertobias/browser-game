@@ -13,23 +13,32 @@ export interface RemotePlayer {
   facing?: number;
 }
 
-interface TimedSnapshot {
+/** Was der Puffer interpoliert: Spieler (001) und Projektile (013). */
+export interface Interpolatable {
+  id: string | number;
+  x: number;
+  y: number;
+  spawnSeq?: number;
+  facing?: number;
+}
+
+interface TimedSnapshot<T extends Interpolatable> {
   time: number;
-  players: Map<string, RemotePlayer>;
+  items: Map<T["id"], T>;
 }
 
 /** Wie lange Snapshots aufbewahrt werden (ms). */
 const RETENTION_MS = 1000;
 
 /**
- * Puffer für die Darstellung anderer Spieler: Gerendert wird leicht in der Vergangenheit,
+ * Puffer für die Darstellung anderer Spieler und der Projektile (013): Gerendert wird leicht in der Vergangenheit,
  * zwischen den zwei Snapshots, die diesen Zeitpunkt einschließen.
  */
-export class SnapshotBuffer {
-  private snapshots: TimedSnapshot[] = [];
+export class SnapshotBuffer<T extends Interpolatable = RemotePlayer> {
+  private snapshots: TimedSnapshot<T>[] = [];
 
-  push(time: number, players: Iterable<RemotePlayer>): void {
-    this.snapshots.push({ time, players: new Map([...players].map((p) => [p.id, p])) });
+  push(time: number, items: Iterable<T>): void {
+    this.snapshots.push({ time, items: new Map([...items].map((item) => [item.id, item])) });
     const cutoff = time - RETENTION_MS;
     while (this.snapshots.length > 2 && (this.snapshots[1]?.time ?? Infinity) < cutoff) {
       this.snapshots.shift();
@@ -37,14 +46,14 @@ export class SnapshotBuffer {
   }
 
   /** Spieler zum Zeitpunkt `renderTime`. Wer im späteren Snapshot fehlt, ist weg (AK-4). Wer gesprungen ist (anderer `spawnSeq`), steht sofort an der neuen Position (012 AK-8). Die Blickrichtung wird über den kürzeren Bogen interpoliert (016 AK-7). */
-  sample(renderTime: number): RemotePlayer[] {
+  sample(renderTime: number): T[] {
     const later = this.snapshots.findIndex((s) => s.time >= renderTime);
     const newest = this.snapshots.at(-1);
     if (!newest) {
       return [];
     }
     if (later === -1) {
-      return [...newest.players.values()];
+      return [...newest.items.values()];
     }
 
     const to = this.snapshots[later];
@@ -53,25 +62,26 @@ export class SnapshotBuffer {
       return [];
     }
     if (!from) {
-      return [...to.players.values()];
+      return [...to.items.values()];
     }
 
     const span = to.time - from.time;
     const t = span > 0 ? (renderTime - from.time) / span : 1;
-    return [...to.players.values()].map((target) => {
-      const start = from.players.get(target.id);
+    return [...to.items.values()].map((target): T => {
+      const start = from.items.get(target.id);
       if (!start || start.spawnSeq !== target.spawnSeq) {
         return target;
       }
-      const between: RemotePlayer = {
+      const facing =
+        start.facing !== undefined && target.facing !== undefined
+          ? { facing: lerpAngle(start.facing, target.facing, t) }
+          : {};
+      return {
         ...target,
         x: start.x + (target.x - start.x) * t,
         y: start.y + (target.y - start.y) * t,
+        ...facing,
       };
-      if (start.facing !== undefined && target.facing !== undefined) {
-        between.facing = lerpAngle(start.facing, target.facing, t);
-      }
-      return between;
     });
   }
 }

@@ -4,6 +4,7 @@ import {
   ClientMessageSchema,
   Kicked_Reason,
   ServerMessageSchema,
+  type Attack,
   type ChatMessage,
   type KeyBindings,
   type Snapshot,
@@ -36,6 +37,8 @@ export interface GameConnection {
   sendChat(text: string): boolean;
   /** Schickt die Belegung (leer = Standard). `false`: Verbindung nicht offen, nichts gesendet. */
   saveKeyBindings(keyBindings: KeyBindings): boolean;
+  /** Schickt einen Angriffswunsch (013); der Server entscheidet. Bei nicht offener Verbindung geht er verloren. */
+  sendAttack(attack: Attack): void;
   close(): void;
 }
 
@@ -117,6 +120,11 @@ export function connect(url: string, handlers: ConnectionHandlers & ChatHandlers
       const message = create(ClientMessageSchema, { payload: { case: "saveKeyBindings", value: { keyBindings } } });
       socket.send(toBinary(ClientMessageSchema, message));
       return true;
+    },
+    sendAttack(attack) {
+      if (socket.readyState !== WebSocket.OPEN) return;
+      const message = create(ClientMessageSchema, { payload: { case: "attack", value: attack } });
+      socket.send(toBinary(ClientMessageSchema, message));
     },
     close() {
       socket.close();
