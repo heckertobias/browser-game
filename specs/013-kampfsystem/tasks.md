@@ -28,9 +28,15 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
 - [x] **T7** (AK-8, AK-19): `AttackRejected` → `onAttackRejected`; `AttackButtons.tsx` mit Hinweisen „Zu wenig Mana“ und „Ziel nicht vor dir“; Angriffsaktionen in `DEFAULT_BINDINGS` (`Digit1`,
   `Digit2`) und in der Tastenbelegung (002); i18n de/en.
 
+## Nachtrag nach dem ersten RC
+- [ ] **T8** (AK-2, AK-5, AK-9, AK-20): `REASON_OUT_OF_RANGE` in `game.proto`; Server meldet `OutOfRange` an den
+  Angreifer; Client meldet „kein Ziel“ selbst; Hinweise als `AttackHint.tsx` mittig oben, groß (statt über den
+  Buttons); i18n de/en; Tests.
+
 ## Tests / Prüfung
-- [ ] **T8**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
-  - Dummy anwählen, Nah- und Fernkampf, außer Reichweite, Mana leer schießen (Hinweis)
+- [ ] **T9**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
+  - Dummy anwählen, Nah- und Fernkampf, außer Reichweite (Hinweis), Mana leer schießen (Hinweis), ohne Ziel (Hinweis)
+  - Hinweise gut sichtbar mittig oben
   - mit dem Rücken zum Dummy: kein Angriff, Hinweis; nach einem Schritt auf ihn zu: Angriff geht
   - Cooldown spürbar, Dummy stirbt und kommt nach 5 s wieder, Auswahl wird dabei aufgehoben
   - zweites Gerät sieht Projektile und HP-Balken

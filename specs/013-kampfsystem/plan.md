@@ -9,7 +9,7 @@ Client  ── input.ts            Tippen/Klicken auf ein Ziel wählt es aus (st
         ── features/game/combat/targeting.ts  reine Logik: Treffer-Test, aktives Ziel, Ziel weg → aufheben
         ── features/game/combat/AttackButtons.tsx  zwei HUD-Buttons „Nah“ / „Fern“ (Touch und Maus)
         ── render.ts           Dummy, HP-Balken, Ziel-Umrandung, Projektile
-        ── net.ts / game.ts    Attack schicken, Ziele + Projektile aus dem Snapshot, Hinweise „zu wenig Mana“ / „nicht vor dir“
+        ── net.ts / game.ts    Attack schicken, Ziele + Projektile aus dem Snapshot, Hinweise (kein Ziel, Reichweite, Blickrichtung, Mana)
 Server  ── GameEndpoint: Attack → Angriffs-Channel der Verbindung
         ── GameLoop: Angriffe im Tick prüfen und ausführen, Ziele + Projektile in den Snapshot
         ── Features/Game/Combat/Domain/: Combat (Regeln), Target (zielbares Objekt mit HP), Projectile
@@ -45,8 +45,10 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 3. **Reihenfolge der Prüfungen:** Ziel gültig → Cooldown abgelaufen → in Reichweite → in Blickrichtung →
    (Fernkampf) genug Mana. Ein Versuch während des Cooldowns wird still ignoriert. Die Hinweise kommen also erst,
    wenn das Vorherige passt, und flackern nicht bei jedem Tastendruck im Cooldown.
-4. **Nur „zu wenig Mana“ und „nicht in Blickrichtung“ werden gemeldet** (`AttackRejected`, AK-8, AK-19). Alles
-   andere scheitert still (AK-2, AK-5, AK-9); die Spec verlangt dafür keine Rückmeldung.
+4. **Gemeldet werden „kein Ziel“, „nicht in Reichweite“, „nicht in Blickrichtung“ und „zu wenig Mana“** (AK-20).
+   „Kein Ziel“ erkennt der Client selbst (er schickt dann nichts, AK-2). Die anderen drei meldet der Server mit
+   `AttackRejected` (`OutOfRange`, `NotFacing`, `NotEnoughMana`). Still bleiben Cooldown, eine unbekannte Angriffsart
+   und ein Ziel, das inzwischen nicht mehr lebt (`InvalidTarget`; der Client hebt die Auswahl dann ohnehin auf).
 5. **Projektile verfolgen ihr Ziel** (Ziele stehen in 013 und 014 ohnehin still). Pro Tick bewegt sich das Projektil
    `ProjectileSpeed / TickRateHz` auf das Ziel zu; ist der Rest höchstens so lang, schlägt es ein. Ist das Ziel inzwischen weg
    (tot, besiegt), verschwindet das Projektil ohne Wirkung. Die Reichweite wird nur beim Start geprüft (AK-9).
@@ -110,6 +112,8 @@ message AttackRejected {
     REASON_NOT_ENOUGH_MANA = 1;
     // Ziel nicht in Blickrichtung (AK-19).
     REASON_NOT_FACING = 2;
+    // Ziel außerhalb der Reichweite (AK-5, AK-9).
+    REASON_OUT_OF_RANGE = 3;
   }
   Reason reason = 1;
 }
@@ -188,11 +192,13 @@ message ProjectileState {
     (AK-18).
   - Aktives Ziel: gelbe Umrandung (AK-1).
   - Projektil: kleiner heller Kreis.
-- **`AttackButtons.tsx`:** zwei Buttons (Entscheidung 9). Hinweis „Zu wenig Mana“ bzw. „Ziel nicht vor dir“ kurz (2 s) über den
-  Buttons (AK-8, AK-19); ein neuer Hinweis ersetzt den alten.
+- **`AttackButtons.tsx`:** zwei Buttons (Entscheidung 9).
+- **`AttackHint.tsx`:** Hinweis mittig im oberen Drittel des Spielfelds, große Schrift, kontrastreicher Hintergrund,
+  2 s sichtbar, ein neuer ersetzt den alten (AK-20). Er fängt keine Eingaben ab (`pointer-events-none`). Gründe:
+  kein Ziel (Client), nicht in Reichweite, nicht vor dir, zu wenig Mana.
 - **Tastenbelegung (002):** `DEFAULT_BINDINGS` um `Digit1`/`Digit2` ergänzen, Aktionsnamen in i18n. `fromProto` aus 002
   gibt älteren gespeicherten Belegungen die neuen Standardtasten, sofern frei.
-- **`i18n.ts`:** `attackMelee`, `attackRanged`, `notEnoughMana`, `notFacing`, `actionAttackMelee`, `actionAttackRanged` (de/en).
+- **`i18n.ts`:** `attackMelee`, `attackRanged`, `notEnoughMana`, `notFacing`, `outOfRange`, `noTarget`, `actionAttackMelee`, `actionAttackRanged` (de/en).
 
 ## Abdeckung der Akzeptanzkriterien
 
@@ -207,6 +213,7 @@ message ProjectileState {
 | 7 | Projektil, Schaden bei Einschlag | Unit: Start → nach n Ticks Einschlag, erst dann Schaden; Integration (WS): Angriff → Projektil im Snapshot, danach Dummy-HP gesenkt |
 | 8 | `NotEnoughMana`, `AttackRejected`, Hinweis | Unit: Mana 19 → abgelehnt, Mana 19, kein Projektil; Integration: nur Angreifer bekommt `AttackRejected` |
 | 9 | Reichweite beim Start | Unit: Abstand 161 → `OutOfRange` |
+| 20 | Hinweise | Integration: `OutOfRange` → nur Angreifer bekommt `AttackRejected` mit `REASON_OUT_OF_RANGE`; Vitest: Hinweis je Grund inkl. „kein Ziel“ ohne Senden, Lage (oben mittig), 2 s, neuer ersetzt alten; **manuell:** gut sichtbar |
 | 10 | Mana-Abzug | Unit: Mana 100 → 80 |
 | 11 | `NextAttackTick` | Unit: zweiter Angriff im selben Takt → `Cooldown`; nach 20 Ticks ok; gilt über Angriffsarten hinweg |
 | 12 | Fehler setzt keinen Cooldown | Unit: `OutOfRange`, dann gültiger Angriff im nächsten Tick → `Ok` |
