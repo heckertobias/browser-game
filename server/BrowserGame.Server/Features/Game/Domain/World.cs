@@ -26,6 +26,9 @@ internal sealed class Player(string id, string name, uint color, double x, doubl
     /// </summary>
     public double Facing { get; internal set; }
 
+    /// <summary>Frühester Tick für den nächsten Angriff; nur ein erfolgreicher Angriff setzt ihn (013 AK-11, AK-12).</summary>
+    public uint NextAttackTick { get; internal set; }
+
     /// <summary>Verbindung weg, Figur wartet noch (003 AK-20).</summary>
     public bool Away => AwaySince.HasValue;
 

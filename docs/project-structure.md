@@ -55,6 +55,7 @@ client/
         chat/                Chat.tsx (Chatfenster), chatLogic.ts (reine Logik)
         menu/                Menu.tsx (Spielmenü), KeyBindings.tsx (Tastenbelegung), menuLogic.ts und keyBindingsLogic.ts (reine Logik)
         hud/                 Vitals.tsx (HP-/Mana-Balken im HUD, reine Funktionen vitalsText/fillPercent)
+        combat/              targeting.ts (Zielauswahl und Angriffswunsch, reine Logik, 013), AttackButtons.tsx (Angriffs-Buttons im HUD, 013), AttackHint.tsx (Hinweis bei gescheitertem Angriff, oben mittig, 013)
       accounts/api/          passkeys.ts — WebAuthn-Flow der Spielerseiten
       localization/          i18n.ts (Texte, Sprache) · language.ts (bestätigt bei Formularverlust)
       pwa/
@@ -108,6 +109,7 @@ server/
         Chat/Infrastructure/ ChatStore (Verlauf laden, gebündelt schreiben, aufräumen)
         KeyBindings/Domain/  KeyBindingRules (Tastenbelegung prüfen, 002)
         KeyBindings/Infrastructure/ KeyBindingStore (Belegung am Account speichern, 002)
+        Combat/Domain/       Combat (Kampfregeln, Trainings-Dummy, 013), Target, Projectile, AttackResult
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)
         Application/         GameLanguages, LanguageCookie, LanguageOnlyCultureProvider

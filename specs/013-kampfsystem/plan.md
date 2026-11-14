@@ -9,7 +9,7 @@ Client  ── input.ts            Tippen/Klicken auf ein Ziel wählt es aus (st
         ── features/game/combat/targeting.ts  reine Logik: Treffer-Test, aktives Ziel, Ziel weg → aufheben
         ── features/game/combat/AttackButtons.tsx  zwei HUD-Buttons „Nah“ / „Fern“ (Touch und Maus)
         ── render.ts           Dummy, HP-Balken, Ziel-Umrandung, Projektile
-        ── net.ts / game.ts    Attack schicken, Ziele + Projektile aus dem Snapshot, Hinweise „zu wenig Mana“ / „nicht vor dir“
+        ── net.ts / game.ts    Attack schicken, Ziele + Projektile aus dem Snapshot, Hinweise (kein Ziel, Reichweite, Blickrichtung, Mana)
 Server  ── GameEndpoint: Attack → Angriffs-Channel der Verbindung
         ── GameLoop: Angriffe im Tick prüfen und ausführen, Ziele + Projektile in den Snapshot
         ── Features/Game/Combat/Domain/: Combat (Regeln), Target (zielbares Objekt mit HP), Projectile
@@ -30,10 +30,10 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 | `RangedManaCost` | 20 | Mana je Fernkampf (bei 012: 5 Schüsse aus vollem Mana, dann alle 4 s einer) |
 | `ProjectileSpeed` | 400 | Welteinheiten pro Sekunde (volle Reichweite in 0,4 s) |
 | `GlobalCooldownSeconds` | 1 | allgemeiner Cooldown (Spec: 1 Sekunde) |
-| `DummyPosition` | (0, −128) | fest, außerhalb des Spawn-Radius (64), auf dem Bildschirm beim Start sichtbar |
+| `DummyX`, `DummyY` | 0, −128 | fest, außerhalb des Spawn-Radius (64), auf dem Bildschirm beim Start sichtbar |
 | `DummyMaxHp` | 100 | Start-HP |
 | `DummyRespawnSeconds` | 5 | Verzögerung bis zur Wiederherstellung |
-| `TargetHitRadius` | 12 | Klick-/Tipp-Radius um ein Ziel (Client) |
+| `TARGET_HIT_RADIUS` | 12 | Klick-/Tipp-Radius um ein Ziel; Bedienung, daher Client-Konstante (`constants.ts`, Constitution §8) |
 
 ## Entschiedene Fragen (Plan)
 
@@ -45,13 +45,15 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 3. **Reihenfolge der Prüfungen:** Ziel gültig → Cooldown abgelaufen → in Reichweite → in Blickrichtung →
    (Fernkampf) genug Mana. Ein Versuch während des Cooldowns wird still ignoriert. Die Hinweise kommen also erst,
    wenn das Vorherige passt, und flackern nicht bei jedem Tastendruck im Cooldown.
-4. **Nur „zu wenig Mana“ und „nicht in Blickrichtung“ werden gemeldet** (`AttackRejected`, AK-8, AK-19). Alles
-   andere scheitert still (AK-2, AK-5, AK-9); die Spec verlangt dafür keine Rückmeldung.
+4. **Gemeldet werden „kein Ziel“, „nicht in Reichweite“, „nicht in Blickrichtung“ und „zu wenig Mana“** (AK-20).
+   „Kein Ziel“ erkennt der Client selbst (er schickt dann nichts, AK-2). Die anderen drei meldet der Server mit
+   `AttackRejected` (`OutOfRange`, `NotFacing`, `NotEnoughMana`). Still bleiben Cooldown, eine unbekannte Angriffsart
+   und ein Ziel, das inzwischen nicht mehr lebt (`InvalidTarget`; der Client hebt die Auswahl dann ohnehin auf).
 5. **Projektile verfolgen ihr Ziel** (Ziele stehen in 013 und 014 ohnehin still). Pro Tick bewegt sich das Projektil
-   `ProjectileSpeed / TickRateHz` auf das Ziel zu; ist der Rest kürzer, schlägt es ein. Ist das Ziel inzwischen weg
+   `ProjectileSpeed / TickRateHz` auf das Ziel zu; ist der Rest höchstens so lang, schlägt es ein. Ist das Ziel inzwischen weg
    (tot, besiegt), verschwindet das Projektil ohne Wirkung. Die Reichweite wird nur beim Start geprüft (AK-9).
 6. **Cooldown in Ticks**, gemessen ab dem Tick des erfolgreichen Angriffs (`NextAttackTick = tick + 20`).
-7. **Pointer:** `pointerdown` auf ein Ziel (innerhalb `TargetHitRadius`, nächstes gewinnt) wählt es aus und startet
+7. **Pointer:** `pointerdown` auf ein Ziel (innerhalb `TARGET_HIT_RADIUS`, nächstes gewinnt) wählt es aus und startet
    **kein** Halten-und-Folgen. Daneben läuft man wie bisher; die Auswahl bleibt dabei bestehen.
 8. **Tasten:** zwei neue Aktionen für die Tastenbelegung aus 002: `ACTION_ATTACK_MELEE` (Standard `Digit1`) und
    `ACTION_ATTACK_RANGED` (Standard `Digit2`). Sie lösen bei `keydown` einmal aus (ohne Auto-Repeat), nicht solange die
@@ -61,6 +63,12 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 10. **Blickrichtung (AK-19):** Der Winkel zwischen `Player.Facing` (016, Server) und dem Vektor Angreifer → Ziel
     darf höchstens `AttackArcDegrees / 2` betragen; genau auf der Grenze zählt als vorn. Steht das Ziel auf der
     Position des Angreifers (Abstand 0), zählt es als vorn. Der Server dreht die Figur nicht.
+12. **Projektile im Client sind Kosmetik (AK-21, nach dem ersten RC):** Der Server rechnet Flug, Treffer und Schaden
+    allein (Constitution §2). Er meldet den Start und den Treffer; der Client spielt ein eigenes Projektil als Effekt
+    ab und zeigt den Schaden eines Fernkampftreffers erst, wenn sein Effekt einschlägt. Nahkampfschaden erscheint
+    sofort. Das Projektiltempo bekommt der Client vom Server (Constitution §8). Wie Start und Treffer im Vertrag
+    gemeldet werden, legt der Task-Plan zu T9 fest. Verworfen: Ziele über den verzögerten Puffer zu zeichnen
+    (gleicher Effekt, aber die Projektile wären weiter Server-Zustand statt Kosmetik).
 11. **Ziel-Modell allgemein:** `Target` (ID, Art, Position, HP, Max-HP) im Domain-Code; 014 hängt Gegner als weitere
     Art ein. Spieler sind keine Ziele (Out of Scope).
 
@@ -110,6 +118,8 @@ message AttackRejected {
     REASON_NOT_ENOUGH_MANA = 1;
     // Ziel nicht in Blickrichtung (AK-19).
     REASON_NOT_FACING = 2;
+    // Ziel außerhalb der Reichweite (AK-5, AK-9).
+    REASON_OUT_OF_RANGE = 3;
   }
   Reason reason = 1;
 }
@@ -149,10 +159,10 @@ message ProjectileState {
 - `Target` (`Id`, `Kind`, `X`, `Y`, `Hp`, `MaxHp`, `RespawnAtTick?`). `IsAlive => RespawnAtTick is null && Hp > 0`.
 - `Projectile` (`Id`, `X`, `Y`, `TargetId`, `Damage`).
 - `Combat` (gehört zur `World`, wird im Tick-Thread benutzt):
-  - Konstruktor mit den Konstanten (Tests setzen eigene); legt den Dummy `"dummy"` an `DummyPosition` mit vollen HP an
+  - Konstruktor mit den Konstanten (Tests setzen eigene); legt den Dummy `"dummy"` an (`DummyX`, `DummyY`) mit vollen HP an
     (AK-13, AK-17: lebt nur im Speicher, neu bei Serverstart).
   - `TryAttack(Player attacker, Attack.Kind kind, string targetId, uint tick) → AttackResult`
-    (`Ok`, `InvalidTarget`, `Cooldown`, `OutOfRange`, `NotFacing`, `NotEnoughMana`) nach der Reihenfolge oben.
+    (`Ok`, `InvalidKind`, `InvalidTarget`, `Cooldown`, `OutOfRange`, `NotFacing`, `NotEnoughMana`; eine unbekannte Angriffsart scheitert zuerst und still) nach der Reihenfolge oben.
     - Nahkampf: Schaden sofort (AK-4, AK-6).
     - Fernkampf: Mana abziehen (AK-10), Projektil an der Position des Angreifers starten (AK-7).
     - Erfolg setzt `attacker.NextAttackTick = tick + GlobalCooldownTicks` (AK-11); Fehler nicht (AK-12).
@@ -166,7 +176,7 @@ message ProjectileState {
 - `GameEndpoint`: `Attack` → `connection.Attacks.Writer.TryWrite(…)` (eigener kleiner Channel, Kapazität 4,
   `DropOldest`).
 - `GameLoop.Tick()`: nach `World.Step()` (Positionen aktuell) die Angriffs-Channels aller Verbindungen leeren und
-  `Combat.TryAttack` aufrufen; `NotEnoughMana` und `NotFacing` → `AttackRejected` mit passendem Grund an den Angreifer. Danach `Combat.Step(tick)`, dann
+  `Combat.TryAttack` aufrufen; `OutOfRange`, `NotFacing` und `NotEnoughMana` → `AttackRejected` mit passendem Grund an den Angreifer (Entscheidung 4). Danach `Combat.Step(tick)`, dann
   Snapshot mit `targets` (nur lebende) und `projectiles`.
 
 ## Client
@@ -180,19 +190,20 @@ message ProjectileState {
   - `pickTarget(world, targets, radius)`: nächstes Ziel innerhalb des Radius oder `null`.
   - `TargetSelection`: `select(id)`, `current`, `sync(ids)` hebt auf, wenn die ID fehlt (AK-3, Entscheidung 2).
   - `attackRequest(selection, kind)`: ohne Ziel `null` → es wird nichts geschickt (AK-2).
-- **`game.ts`:** Ziele aus dem Snapshot (ohne Interpolation, sie stehen still), Projektile mit derselben Interpolation
-  wie andere Spieler; `attack(kind)` für Tasten und Buttons; `GameEvents.onTarget(id | null)` und
+- **`game.ts`:** Ziele aus dem neuesten Snapshot. Projektile sind ab T9 reine Kosmetik im Client (Entscheidung 12); `attack(kind)` für Tasten und Buttons; `GameEvents.onTarget(id | null)` und
   `onAttackRejected(reason)`.
 - **`render.ts`:**
   - Dummy: brauner Pfosten mit Querbalken (deutlich anders als die farbigen Spieler-Quadrate), HP-Balken darüber
     (AK-18).
   - Aktives Ziel: gelbe Umrandung (AK-1).
   - Projektil: kleiner heller Kreis.
-- **`AttackButtons.tsx`:** zwei Buttons (Entscheidung 9). Hinweis „Zu wenig Mana“ bzw. „Ziel nicht vor dir“ kurz (2 s) über den
-  Buttons (AK-8, AK-19); ein neuer Hinweis ersetzt den alten.
+- **`AttackButtons.tsx`:** zwei Buttons (Entscheidung 9).
+- **`AttackHint.tsx`:** Hinweis mittig im oberen Drittel des Spielfelds, große Schrift, kontrastreicher Hintergrund,
+  2 s sichtbar, ein neuer ersetzt den alten (AK-20). Er fängt keine Eingaben ab (`pointer-events-none`). Gründe:
+  kein Ziel (Client), nicht in Reichweite, nicht vor dir, zu wenig Mana.
 - **Tastenbelegung (002):** `DEFAULT_BINDINGS` um `Digit1`/`Digit2` ergänzen, Aktionsnamen in i18n. `fromProto` aus 002
   gibt älteren gespeicherten Belegungen die neuen Standardtasten, sofern frei.
-- **`i18n.ts`:** `attackMelee`, `attackRanged`, `notEnoughMana`, `notFacing`, `actionAttackMelee`, `actionAttackRanged` (de/en).
+- **`i18n.ts`:** `attackMelee`, `attackRanged`, `notEnoughMana`, `notFacing`, `outOfRange`, `noTarget`, `actionAttackMelee`, `actionAttackRanged` (de/en).
 
 ## Abdeckung der Akzeptanzkriterien
 
@@ -207,10 +218,12 @@ message ProjectileState {
 | 7 | Projektil, Schaden bei Einschlag | Unit: Start → nach n Ticks Einschlag, erst dann Schaden; Integration (WS): Angriff → Projektil im Snapshot, danach Dummy-HP gesenkt |
 | 8 | `NotEnoughMana`, `AttackRejected`, Hinweis | Unit: Mana 19 → abgelehnt, Mana 19, kein Projektil; Integration: nur Angreifer bekommt `AttackRejected` |
 | 9 | Reichweite beim Start | Unit: Abstand 161 → `OutOfRange` |
+| 20 | Hinweise | Integration: `OutOfRange` → nur Angreifer bekommt `AttackRejected` mit `REASON_OUT_OF_RANGE`; Vitest: Hinweis je Grund inkl. „kein Ziel“ ohne Senden, Lage (oben mittig), 2 s, neuer ersetzt alten; **manuell:** gut sichtbar |
+| 21 | Kosmetisches Projektil, Schaden beim Einschlag | Vitest: angezeigte HP sinken erst beim Einschlag des Effekts, Nahkampf sofort; Integration: Start- und Treffermeldung (Details im Task-Plan T9); **manuell:** auf zwei Geräten |
 | 10 | Mana-Abzug | Unit: Mana 100 → 80 |
 | 11 | `NextAttackTick` | Unit: zweiter Angriff im selben Takt → `Cooldown`; nach 20 Ticks ok; gilt über Angriffsarten hinweg |
 | 12 | Fehler setzt keinen Cooldown | Unit: `OutOfRange`, dann gültiger Angriff im nächsten Tick → `Ok` |
-| 13 | Dummy beim Start | Unit: `Combat` neu → Dummy an `DummyPosition` mit `DummyMaxHp`; Integration: erster Snapshot enthält ihn |
+| 13 | Dummy beim Start | Unit: `Combat` neu → Dummy an (`DummyX`, `DummyY`) mit `DummyMaxHp`; Integration: erster Snapshot enthält ihn |
 | 14 | `Damage` | Unit (siehe 4, 7) |
 | 15 | `RespawnAtTick` | Unit: 0 HP → fehlt in lebenden Zielen; nach 100 Ticks wieder da, volle HP; Projektil auf toten Dummy verfällt |
 | 16 | keine Angriffslogik | Unit: Spieler neben Dummy, 100 Ticks → Spieler-HP unverändert |

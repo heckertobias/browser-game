@@ -18,7 +18,16 @@ export interface PathOp {
   lineWidth: number;
 }
 
-export type DrawOp = RectOp | PathOp;
+export interface ArcOp {
+  kind: "arc";
+  x: number;
+  y: number;
+  radius: number;
+  style: string;
+  alpha: number;
+}
+
+export type DrawOp = RectOp | PathOp | ArcOp;
 
 /** Ersatz für den Canvas-2D-Kontext in Tests: merkt sich Rechtecke und gefüllte/umrandete Pfade. */
 export class FakeContext {
@@ -46,6 +55,10 @@ export class FakeContext {
     return this.ops.filter((op): op is PathOp => op.kind === kind);
   }
 
+  arcs(): ArcOp[] {
+    return this.ops.filter((op): op is ArcOp => op.kind === "arc");
+  }
+
   setTransform(): void {}
   save(): void {}
   restore(): void {}
@@ -64,6 +77,11 @@ export class FakeContext {
 
   lineTo(x: number, y: number): void {
     this.path.push({ x, y });
+  }
+
+  /** Merkt sich Mittelpunkt und Radius mit der aktuellen Füllfarbe (die Projektile setzen sie vorher). */
+  arc(x: number, y: number, radius: number): void {
+    this.ops.push({ kind: "arc", x, y, radius, style: this.fillStyle, alpha: this.globalAlpha });
   }
 
   fillRect(x: number, y: number, width: number, height: number): void {
