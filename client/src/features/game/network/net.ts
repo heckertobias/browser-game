@@ -1,5 +1,6 @@
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import {
+  AttackRejected_Reason,
   ChatRejected_Reason,
   ClientMessageSchema,
   Kicked_Reason,
@@ -18,11 +19,16 @@ export type KickReason = Kicked_Reason.SIGNED_IN_ELSEWHERE | Kicked_Reason.SIGNE
 /** Gründe, aus denen der Server eine Chatnachricht ablehnt (AK-13). */
 export type ChatRejectReason = ChatRejected_Reason.TOO_FAST;
 
+/** Gründe, aus denen der Server einen Angriff meldet (013 AK-8, AK-19); alles andere scheitert still. */
+export type AttackRejectReason = AttackRejected_Reason.NOT_ENOUGH_MANA | AttackRejected_Reason.NOT_FACING;
+
 export interface ConnectionHandlers {
   onWelcome(welcome: Welcome): void;
   onSnapshot(snapshot: Snapshot): void;
   onKicked(reason: KickReason): void;
   onClose(): void;
+  /** Nur an den Angreifer: Angriff nicht ausgeführt (013 AK-8, AK-19). */
+  onAttackRejected?(reason: AttackRejectReason): void;
 }
 
 export interface ChatHandlers {
@@ -81,6 +87,13 @@ export function createReceiver(handlers: ConnectionHandlers & Partial<ChatHandle
         case "chatRejected": {
           const { reason } = message.payload.value;
           if (reason === ChatRejected_Reason.TOO_FAST) handlers.onChatRejected?.(reason);
+          break;
+        }
+        case "attackRejected": {
+          const { reason } = message.payload.value;
+          if (reason === AttackRejected_Reason.NOT_ENOUGH_MANA || reason === AttackRejected_Reason.NOT_FACING) {
+            handlers.onAttackRejected?.(reason);
+          }
           break;
         }
         case undefined:

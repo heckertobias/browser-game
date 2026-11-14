@@ -6,7 +6,7 @@ import { fromProto, toProto, type Bindings } from "@/features/game/input/binding
 import { InputTracker } from "@/features/game/input/input";
 import { formatCoordinates } from "@/features/game/render/hud";
 import { SnapshotBuffer } from "@/features/game/state/interpolation";
-import { connect, gameSocketUrl, type ChatHandlers, type GameConnection, type KickReason } from "@/features/game/network/net";
+import { connect, gameSocketUrl, type AttackRejectReason, type ChatHandlers, type GameConnection, type KickReason } from "@/features/game/network/net";
 import { Predictor } from "@/features/game/state/prediction";
 import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "@/features/game/render/render";
 import type { Vec } from "@/features/game/core/vector";
@@ -35,6 +35,8 @@ export interface GameEvents extends ChatHandlers {
   onKeyBindings?(bindings: Bindings): void;
   /** Aktives Ziel nach Antippen/Anklicken oder `null`, wenn es im Snapshot fehlt (013 AK-1, plan.md Entscheidung 2). Nur bei Änderung. */
   onTarget?(id: string | null): void;
+  /** Angriff abgelehnt: zu wenig Mana (AK-8) oder Ziel nicht vor dir (AK-19). */
+  onAttackRejected?(reason: AttackRejectReason): void;
 }
 
 /** Nach längerer Pause (Tab im Hintergrund) höchstens so viel Zeit nachholen. */
@@ -93,6 +95,7 @@ export class Game {
       onChatHistory: (messages) => { this.events.onChatHistory(messages); },
       onChatMessage: (message) => { this.events.onChatMessage(message); },
       onChatRejected: (reason) => { this.events.onChatRejected(reason); },
+      onAttackRejected: (reason) => { this.events.onAttackRejected?.(reason); },
     });
     this.lastFrame = performance.now();
     this.frameHandle = requestAnimationFrame(this.frame);
@@ -117,7 +120,7 @@ export class Game {
     this.connection?.saveKeyBindings(toProto(bindings));
   }
 
-  /** Angriff auf das aktive Ziel (Tasten, in T7 auch Buttons). Ohne Ziel wird nichts geschickt (AK-2). */
+  /** Angriff auf das aktive Ziel (Tasten und Buttons). Ohne Ziel wird nichts geschickt (AK-2). */
   attack(kind: Attack_Kind): void {
     const request = attackRequest(this.selection, kind);
     if (request !== null) this.connection?.sendAttack(request);

@@ -55,7 +55,7 @@ client/
         chat/                Chat.tsx (Chatfenster), chatLogic.ts (reine Logik)
         menu/                Menu.tsx (Spielmenü), KeyBindings.tsx (Tastenbelegung), menuLogic.ts und keyBindingsLogic.ts (reine Logik)
         hud/                 Vitals.tsx (HP-/Mana-Balken im HUD, reine Funktionen vitalsText/fillPercent)
-        combat/              targeting.ts (Zielauswahl und Angriffswunsch, reine Logik, 013)
+        combat/              targeting.ts (Zielauswahl und Angriffswunsch, reine Logik, 013), AttackButtons.tsx (Angriffs-Buttons und Hinweise im HUD, 013)
       accounts/api/          passkeys.ts — WebAuthn-Flow der Spielerseiten
       localization/          i18n.ts (Texte, Sprache) · language.ts (bestätigt bei Formularverlust)
       pwa/

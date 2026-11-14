@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Kicked_Reason } from "@/generated/browsergame/v1/game_pb";
+import { Kicked_Reason, type Attack_Kind } from "@/generated/browsergame/v1/game_pb";
+import { AttackButtons, type AttackFeed } from "@/features/game/combat/AttackButtons";
 import { Chat, type ChatFeed } from "@/features/game/chat/Chat";
 import { Game, type ConnectionStatus, type PlayerVitals } from "@/features/game/engine/game";
 import { Vitals } from "@/features/game/hud/Vitals";
@@ -44,14 +45,17 @@ const browserWatchDeps = (): ServerWatchDeps => ({
 export function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chatRef = useRef<ChatFeed>(null);
+  const attackRef = useRef<AttackFeed>(null);
   const gameRef = useRef<Game | null>(null);
   const sendChat = useCallback((text: string) => gameRef.current?.sendChat(text) ?? false, []);
+  const attack = useCallback((kind: Attack_Kind) => { gameRef.current?.attack(kind); }, []);
   const saveKeyBindings = useCallback((bindings: Bindings) => { gameRef.current?.saveKeyBindings(bindings); }, []);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
   const [name, setName] = useState<string | null>(null);
   const [kicked, setKicked] = useState<KickReason | null>(null);
   const [coordinates, setCoordinates] = useState<string | null>(null);
   const [vitals, setVitals] = useState<PlayerVitals | null>(null);
+  const [target, setTarget] = useState<string | null>(null);
   const [update, setUpdate] = useState(false);
   const [reload, setReload] = useState<"idle" | "pending" | "stuck">("idle");
   const [keyBindings, setKeyBindings] = useState<Bindings | null>(null);
@@ -75,6 +79,8 @@ export function App() {
       onKeyBindings: setKeyBindings,
       onCoordinates: setCoordinates,
       onVitals: setVitals,
+      onTarget: setTarget,
+      onAttackRejected: (reason) => { attackRef.current?.onAttackRejected(reason); },
       onChatHistory: (messages) => { chatRef.current?.onChatHistory(messages); },
       onChatMessage: (message) => { chatRef.current?.onChatMessage(message); },
       onChatRejected: (reason) => { chatRef.current?.onChatRejected(reason); },
@@ -132,6 +138,7 @@ export function App() {
           <button type="button" className="btn min-h-11 rounded-none font-mono uppercase pointer-events-auto ml-auto" data-testid="menu-button" onClick={() => { setMenuOpen(true); }}>{t.menu}</button>
           {vitals && <Vitals vitals={vitals} />}
         </div>
+        <AttackButtons ref={attackRef} hasTarget={target !== null} onAttack={attack} />
         <Chat ref={chatRef} sendChat={sendChat} inGame={status === "connected" && !menuShown} />
         {status === "disconnected" && (
           <div className={OVERLAY}>

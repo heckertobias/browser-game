@@ -25,7 +25,7 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
 - [x] **T6** (AK-1, AK-7, AK-18): `net.ts` `sendAttack`, `game.attack(kind)`, Callbacks des `InputTracker` in `game.ts`;
   `game.ts`/`render.ts`: Ziele, Umrandung, HP-Balken (`hpBarWidth` mit Vitest),
   Projektile mit Interpolation.
-- [ ] **T7** (AK-8, AK-19): `AttackRejected` → `onAttackRejected`; `AttackButtons.tsx` mit Hinweisen „Zu wenig Mana“ und „Ziel nicht vor dir“; Angriffsaktionen in `DEFAULT_BINDINGS` (`Digit1`,
+- [x] **T7** (AK-8, AK-19): `AttackRejected` → `onAttackRejected`; `AttackButtons.tsx` mit Hinweisen „Zu wenig Mana“ und „Ziel nicht vor dir“; Angriffsaktionen in `DEFAULT_BINDINGS` (`Digit1`,
   `Digit2`) und in der Tastenbelegung (002); i18n de/en.
 
 ## Tests / Prüfung
