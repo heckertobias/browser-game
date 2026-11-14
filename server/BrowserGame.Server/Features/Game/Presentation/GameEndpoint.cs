@@ -130,6 +130,10 @@ internal static partial class GameEndpoint
                 {
                     connection.Chat.Writer.TryWrite(message.SendChat.Text);
                 }
+                else if (message.PayloadCase == ClientMessage.PayloadOneofCase.Attack)
+                {
+                    connection.Attacks.Writer.TryWrite(message.Attack);
+                }
                 else if (message.PayloadCase == ClientMessage.PayloadOneofCase.SaveKeyBindings)
                 {
                     await SaveKeyBindingsAsync(

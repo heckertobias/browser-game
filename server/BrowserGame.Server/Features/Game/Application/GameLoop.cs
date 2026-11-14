@@ -26,6 +26,10 @@ internal sealed class PlayerConnection(
     public Channel<string> Chat { get; } = Channel.CreateBounded<string>(
         new BoundedChannelOptions(GameSettings.ChatInboxCapacity) { FullMode = BoundedChannelFullMode.DropOldest, SingleReader = true, SingleWriter = true });
 
+    /// <summary>Angriffe vom Client, noch ungeprüft (013); bei Flut fallen die ältesten weg.</summary>
+    public Channel<Attack> Attacks { get; } = Channel.CreateBounded<Attack>(
+        new BoundedChannelOptions(GameSettings.AttackInboxCapacity) { FullMode = BoundedChannelFullMode.DropOldest, SingleReader = true, SingleWriter = true });
+
     /// <summary>Serialisierte Server-Nachrichten; ein langsamer Client verpasst Snapshots statt den Tick zu bremsen.</summary>
     public PlayerOutbox Outbox { get; } = new(GameSettings.OutboxRequiredLimit, onOverflow);
 
@@ -34,7 +38,7 @@ internal sealed class PlayerConnection(
 }
 
 /// <summary>
-/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, simulieren, Snapshots verschicken.
+/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, simulieren, Angriffe ausführen (013), Snapshots verschicken.
 /// Dazu Nachlauf getrennter Figuren, Übernahme und Rauswurf (003 AK-12, AK-20–22); Positionen an den PositionStore (AK-18, AK-19).
 /// </summary>
 public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null) : BackgroundService
@@ -49,6 +53,11 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     private static readonly byte[] ChatTooFast =
         new ServerMessage { ChatRejected = new ChatRejected { Reason = ChatRejected.Types.Reason.TooFast } }.ToByteArray();
 
+    private static readonly byte[] AttackNotEnoughMana =
+        new ServerMessage { AttackRejected = new AttackRejected { Reason = AttackRejected.Types.Reason.NotEnoughMana } }.ToByteArray();
+    private static readonly byte[] AttackNotFacing =
+        new ServerMessage { AttackRejected = new AttackRejected { Reason = AttackRejected.Types.Reason.NotFacing } }.ToByteArray();
+
     private readonly TimeProvider _time = time ?? TimeProvider.System;
     private readonly ChatRateLimiter _chatLimiter = new(GameSettings.ChatRateLimitCount, TimeSpan.FromSeconds(GameSettings.ChatRateLimitSeconds));
     private readonly ChatHistory _chatHistory = new(GameSettings.ChatHistoryCount, TimeSpan.FromHours(GameSettings.ChatHistoryHours));
@@ -59,6 +68,12 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         GameSettings.Speed, GameSettings.TickRateHz, new Random(),
         GameSettings.MaxHp, GameSettings.MaxMana, GameSettings.ManaRegenPerSecond,
         GameSettings.DefaultFacing, GameSettings.MinFacingInput);
+    // Trainings-Dummy und Projektile leben nur im Speicher, neu mit jedem Server (013 AK-13, AK-17).
+    private readonly Combat _combat = new(
+        GameSettings.TickRateHz, GameSettings.AttackArcDegrees, GameSettings.MeleeRange, GameSettings.MeleeDamage,
+        GameSettings.RangedRange, GameSettings.RangedDamage, GameSettings.RangedManaCost, GameSettings.ProjectileSpeed,
+        GameSettings.GlobalCooldownSeconds, GameSettings.DummyX, GameSettings.DummyY, GameSettings.DummyMaxHp,
+        GameSettings.DummyRespawnSeconds);
     private readonly uint _lingerTicks = GameSettings.ToTicks(configuration.GetValue(GameSettings.LingerSecondsKey, GameSettings.LingerSeconds));
 
     // Mindestens 1 Tick, sonst Division durch 0 im Speicher-Takt.
@@ -195,6 +210,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
 
         _world.Step();
         _tick++;
+        ProcessAttacks();
+        _combat.Step(_tick);
         BroadcastSnapshot();
         return removed;
     }
@@ -376,6 +393,35 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         }
     }
 
+    /// <summary>
+    /// Angriffe aller Verbindungen nach der Bewegung (Positionen und Blickrichtung aktuell) ausführen (013). Nur zu wenig Mana
+    /// und falsche Blickrichtung bekommt der Angreifer gemeldet (AK-8, AK-19); alles andere scheitert still.
+    /// </summary>
+    private void ProcessAttacks()
+    {
+        foreach (var connection in _connections.Values)
+        {
+            while (connection.Attacks.Reader.TryRead(out var attack))
+            {
+                if (_world.GetPlayer(connection.PlayerId) is not { } attacker)
+                {
+                    continue;
+                }
+
+                var rejection = _combat.TryAttack(attacker, attack.Kind, attack.TargetId, _tick) switch
+                {
+                    AttackResult.NotEnoughMana => AttackNotEnoughMana,
+                    AttackResult.NotFacing => AttackNotFacing,
+                    _ => null,
+                };
+                if (rejection is not null)
+                {
+                    connection.Outbox.SendRequired(rejection);
+                }
+            }
+        }
+    }
+
     private void BroadcastSnapshot()
     {
         // Einmal für alle Empfänger; pro Empfänger kommen nur die eigenen Werte dazu (012: andere sehen fremde HP nicht).
@@ -385,6 +431,17 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                 Id = p.Id, Name = p.Name, X = (float)p.X, Y = (float)p.Y, Color = p.Color, Away = p.Away, SpawnSeq = p.SpawnSeq,
                 Facing = (float)p.Facing,
             })
+            .ToList();
+
+        // Ziele und Projektile sehen alle gleich; tote Ziele fehlen (013, plan.md Entscheidung 2).
+        var targets = _combat.AliveTargets
+            .Select(t => new TargetState
+            {
+                Id = t.Id, Kind = t.Kind, X = (float)t.X, Y = (float)t.Y, Hp = (float)t.Hp, MaxHp = (float)t.MaxHp,
+            })
+            .ToList();
+        var projectiles = _combat.Projectiles
+            .Select(p => new ProjectileState { Id = p.Id, X = (float)p.X, Y = (float)p.Y })
             .ToList();
 
         foreach (var connection in _connections.Values)
@@ -398,6 +455,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                 Mana = (float)(self?.Mana ?? 0),
             };
             snapshot.Players.AddRange(players);
+            snapshot.Targets.AddRange(targets);
+            snapshot.Projectiles.AddRange(projectiles);
             connection.Outbox.OfferSnapshot(new ServerMessage { Snapshot = snapshot }.ToByteArray());
         }
     }

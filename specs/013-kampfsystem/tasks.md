@@ -16,7 +16,7 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
 - [x] **T3** (AK-2, AK-4–12, AK-14, AK-19): `Combat.TryAttack` (Reihenfolge Ziel → Cooldown → Reichweite →
   Blickrichtung → Mana),
   Projektilflug und Einschlag; `Player.NextAttackTick`; Unit-Tests.
-- [ ] **T4** (AK-7, AK-8, AK-13, AK-19): `Attack` im `GameEndpoint` → Angriffs-Channel; im `GameLoop` ausführen,
+- [x] **T4** (AK-7, AK-8, AK-13, AK-19): `Attack` im `GameEndpoint` → Angriffs-Channel; im `GameLoop` ausführen,
   `AttackRejected` an den Angreifer, Ziele und Projektile im Snapshot; Integrationstests (WS).
 
 ## Client

@@ -102,6 +102,12 @@ internal static class GameSettings
     public const int ChatInboxCapacity = 8;
 
     /// <summary>
+    /// Kapazität des Angriffs-Channels je Verbindung (013). Der Tick leert ihn; wegen des Cooldowns bringt mehr als ein
+    /// Angriff pro Tick nichts, sodass nur eine Flut die ältesten Einträge verliert.
+    /// </summary>
+    public const int AttackInboxCapacity = 4;
+
+    /// <summary>
     /// So viele Pflichtnachrichten warten je Verbindung höchstens. Auslegung 100 Spieler am Tempolimit: Ein Stoß von 500 Nachrichten
     /// passt, und bei 50 Nachrichten/s übersteht ein Client etwa 20 s Hänger (011 AK-10). Darüber wird die Verbindung getrennt.
     /// </summary>
