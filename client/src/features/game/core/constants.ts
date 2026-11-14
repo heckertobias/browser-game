@@ -19,3 +19,6 @@ export const INTERPOLATION_DELAY_MS = 100;
 
 /** Halten-und-Folgen: So nah am Zeiger bleibt die Figur stehen (verhindert Zittern). */
 export const POINTER_DEAD_ZONE = 4;
+
+/** Zielauswahl (013): Tippen/Klicken höchstens so weit vom Mittelpunkt eines Ziels wählt es aus. Bedienung, kein Spielwert. */
+export const TARGET_HIT_RADIUS = 12;

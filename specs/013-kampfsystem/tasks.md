@@ -20,11 +20,12 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
   `AttackRejected` an den Angreifer, Ziele und Projektile im Snapshot; Integrationstests (WS).
 
 ## Client
-- [ ] **T5** (AK-1–3): `targeting.ts` (`pickTarget`, `TargetSelection`, `attackRequest`) mit Vitest; `input.ts`:
+- [x] **T5** (AK-1–3): `targeting.ts` (`pickTarget`, `TargetSelection`, `attackRequest`) mit Vitest; `input.ts`:
   `pointerdown` auf Ziel wählt aus statt zu laufen, Angriffstasten bei `keydown` ohne Repeat.
-- [ ] **T6** (AK-1, AK-7, AK-18): `game.ts`/`render.ts`: Ziele, Umrandung, HP-Balken (`hpBarWidth` mit Vitest),
+- [ ] **T6** (AK-1, AK-7, AK-18): `net.ts` `sendAttack`, `game.attack(kind)`, Callbacks des `InputTracker` in `game.ts`;
+  `game.ts`/`render.ts`: Ziele, Umrandung, HP-Balken (`hpBarWidth` mit Vitest),
   Projektile mit Interpolation.
-- [ ] **T7** (AK-8, AK-19): `AttackButtons.tsx` mit Hinweisen „Zu wenig Mana“ und „Ziel nicht vor dir“; Angriffsaktionen in `DEFAULT_BINDINGS` (`Digit1`,
+- [ ] **T7** (AK-8, AK-19): `AttackRejected` → `onAttackRejected`; `AttackButtons.tsx` mit Hinweisen „Zu wenig Mana“ und „Ziel nicht vor dir“; Angriffsaktionen in `DEFAULT_BINDINGS` (`Digit1`,
   `Digit2`) und in der Tastenbelegung (002); i18n de/en.
 
 ## Tests / Prüfung
