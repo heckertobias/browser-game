@@ -103,6 +103,9 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
   wird nicht gespeichert.
 - **AK-18:** Gegeben der Trainings-Dummy ist sichtbar, dann ist sein aktueller HP-Wert erkennbar
   (z. B. ein Balken über ihm), damit der Spieler sieht, ob ein Angriff etwas gewirkt hat.
+- **AK-21:** Gegeben ein Fernkampf-Projektil ist unterwegs, dann sinkt der angezeigte HP-Wert des Ziels
+  erst, wenn das sichtbare Projektil einschlägt – nicht vorher. Das Projektil im Client ist reine
+  Darstellung; ob und wann es trifft, entscheidet der Server.
 
 ## Out of Scope
 

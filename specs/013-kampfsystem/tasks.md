@@ -31,15 +31,18 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
 ## Nachtrag nach dem ersten RC
 - [ ] **T8** (AK-2, AK-5, AK-9, AK-20): `REASON_OUT_OF_RANGE` in `game.proto`; Server meldet `OutOfRange` an den
   Angreifer; Client meldet „kein Ziel“ selbst; Hinweise als `AttackHint.tsx` mittig oben, groß (statt über den
-  Buttons); i18n de/en; Ziele über denselben verzögerten Puffer wie Projektile (HP-Balken sinkt beim sichtbaren
-  Einschlag); Tests.
+  Buttons); i18n de/en; Tests.
+- [ ] **T9** (AK-7, AK-18, AK-21): Projektile im Client als Kosmetik (plan.md Entscheidung 12): Server meldet Start
+  und Treffer, Projektiltempo im `Welcome`; Client spielt den Effekt ab und senkt die angezeigten HP erst beim
+  sichtbaren Einschlag; Verträge, Server, Client, Tests.
 
 ## Tests / Prüfung
-- [ ] **T9**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
+- [ ] **T10**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
   - Dummy anwählen, Nah- und Fernkampf, außer Reichweite (Hinweis), Mana leer schießen (Hinweis), ohne Ziel (Hinweis)
   - Hinweise gut sichtbar mittig oben
   - mit dem Rücken zum Dummy: kein Angriff, Hinweis; nach einem Schritt auf ihn zu: Angriff geht
   - Cooldown spürbar, Dummy stirbt und kommt nach 5 s wieder, Auswahl wird dabei aufgehoben
   - zweites Gerät sieht Projektile und HP-Balken
+  - HP-Balken sinkt genau beim sichtbaren Einschlag, auf beiden Geräten
 
   Danach alle AKs abhaken, Spec-Status auf `umgesetzt`, Roadmap aktualisieren.
