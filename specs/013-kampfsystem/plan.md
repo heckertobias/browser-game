@@ -170,7 +170,7 @@ message ProjectileState {
 - `GameEndpoint`: `Attack` → `connection.Attacks.Writer.TryWrite(…)` (eigener kleiner Channel, Kapazität 4,
   `DropOldest`).
 - `GameLoop.Tick()`: nach `World.Step()` (Positionen aktuell) die Angriffs-Channels aller Verbindungen leeren und
-  `Combat.TryAttack` aufrufen; `NotEnoughMana` und `NotFacing` → `AttackRejected` mit passendem Grund an den Angreifer. Danach `Combat.Step(tick)`, dann
+  `Combat.TryAttack` aufrufen; `OutOfRange`, `NotFacing` und `NotEnoughMana` → `AttackRejected` mit passendem Grund an den Angreifer (Entscheidung 4). Danach `Combat.Step(tick)`, dann
   Snapshot mit `targets` (nur lebende) und `projectiles`.
 
 ## Client
