@@ -48,7 +48,7 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 4. **Nur „zu wenig Mana“ und „nicht in Blickrichtung“ werden gemeldet** (`AttackRejected`, AK-8, AK-19). Alles
    andere scheitert still (AK-2, AK-5, AK-9); die Spec verlangt dafür keine Rückmeldung.
 5. **Projektile verfolgen ihr Ziel** (Ziele stehen in 013 und 014 ohnehin still). Pro Tick bewegt sich das Projektil
-   `ProjectileSpeed / TickRateHz` auf das Ziel zu; ist der Rest kürzer, schlägt es ein. Ist das Ziel inzwischen weg
+   `ProjectileSpeed / TickRateHz` auf das Ziel zu; ist der Rest höchstens so lang, schlägt es ein. Ist das Ziel inzwischen weg
    (tot, besiegt), verschwindet das Projektil ohne Wirkung. Die Reichweite wird nur beim Start geprüft (AK-9).
 6. **Cooldown in Ticks**, gemessen ab dem Tick des erfolgreichen Angriffs (`NextAttackTick = tick + 20`).
 7. **Pointer:** `pointerdown` auf ein Ziel (innerhalb `TARGET_HIT_RADIUS`, nächstes gewinnt) wählt es aus und startet
@@ -152,7 +152,7 @@ message ProjectileState {
   - Konstruktor mit den Konstanten (Tests setzen eigene); legt den Dummy `"dummy"` an (`DummyX`, `DummyY`) mit vollen HP an
     (AK-13, AK-17: lebt nur im Speicher, neu bei Serverstart).
   - `TryAttack(Player attacker, Attack.Kind kind, string targetId, uint tick) → AttackResult`
-    (`Ok`, `InvalidTarget`, `Cooldown`, `OutOfRange`, `NotFacing`, `NotEnoughMana`) nach der Reihenfolge oben.
+    (`Ok`, `InvalidKind`, `InvalidTarget`, `Cooldown`, `OutOfRange`, `NotFacing`, `NotEnoughMana`; eine unbekannte Angriffsart scheitert zuerst und still) nach der Reihenfolge oben.
     - Nahkampf: Schaden sofort (AK-4, AK-6).
     - Fernkampf: Mana abziehen (AK-10), Projektil an der Position des Angreifers starten (AK-7).
     - Erfolg setzt `attacker.NextAttackTick = tick + GlobalCooldownTicks` (AK-11); Fehler nicht (AK-12).

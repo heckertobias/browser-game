@@ -6,6 +6,7 @@ namespace BrowserGame.Server.Features.Game;
 /// Kampfregeln ohne Netzwerk und Datenbank (013). Wird ausschließlich vom Tick-Thread benutzt.
 /// Hält genau einen Trainings-Dummy; er lebt nur im Speicher und entsteht mit jeder Instanz neu (013 AK-13, AK-17).
 /// Der Dummy hat keinerlei Angriffslogik (013 AK-16).
+/// Prüft und führt Angriffe aus und lässt Projektile fliegen (013 AK-4–12, AK-19).
 /// </summary>
 internal sealed class Combat(
     int tickRateHz,
@@ -60,10 +61,16 @@ internal sealed class Combat(
     /// <summary>Verzögerung in Sekunden, bis der Dummy mit vollen HP zurückkehrt (013 AK-15).</summary>
     public const double DefaultDummyRespawnSeconds = 5;
 
+    // Rundungstoleranz für den Winkelvergleich, kein Spielwert: „genau auf der Grenze“ zählt als vorn (plan.md Entscheidung 10).
+    private const double AngleTolerance = 1e-9;
+
     private readonly Dictionary<string, Target> _targets = new()
     {
         [DummyId] = new Target(DummyId, TargetState.Types.Kind.TrainingDummy, dummyX, dummyY, dummyMaxHp),
     };
+
+    private readonly List<Projectile> _projectiles = [];
+    private uint _nextProjectileId = 1;
 
     public int TickRateHz { get; } = tickRateHz;
     public double AttackArcDegrees { get; } = attackArcDegrees;
@@ -75,6 +82,12 @@ internal sealed class Combat(
     public double ProjectileSpeed { get; } = projectileSpeed;
     public uint GlobalCooldownTicks { get; } = ToTicks(globalCooldownSeconds, tickRateHz);
     public uint DummyRespawnTicks { get; } = ToTicks(dummyRespawnSeconds, tickRateHz);
+
+    /// <summary>Strecke eines Projektils pro Tick.</summary>
+    public double ProjectileStepDistance => ProjectileSpeed / TickRateHz;
+
+    /// <summary>Fliegende Projektile in Startreihenfolge.</summary>
+    public IReadOnlyCollection<Projectile> Projectiles => _projectiles;
 
     /// <summary>Alle Ziele, auch tote.</summary>
     public IReadOnlyCollection<Target> Targets => _targets.Values;
@@ -96,10 +109,67 @@ internal sealed class Combat(
     }
 
     /// <summary>
-    /// Ein Tick: Ziele mit 0 HP warten <see cref="DummyRespawnTicks"/> Ticks und kehren dann mit vollen HP zurück (013 AK-15).
+    /// Angriffsversuch im Tick <paramref name="tick"/>. Prüft Art → Ziel → Cooldown → Reichweite → Blickrichtung → Mana
+    /// (plan.md Entscheidung 3). Nur bei <see cref="AttackResult.Ok"/> ändert sich etwas: Nahkampf schadet sofort (AK-4, AK-6),
+    /// Fernkampf kostet Mana und startet ein Projektil (AK-7, AK-10); der Cooldown beginnt (AK-11). Die Figur dreht sich nie (AK-19).
+    /// </summary>
+    public AttackResult TryAttack(Player attacker, Attack.Types.Kind kind, string targetId, uint tick)
+    {
+        if (kind is not (Attack.Types.Kind.Melee or Attack.Types.Kind.Ranged))
+        {
+            return AttackResult.InvalidKind;
+        }
+
+        if (GetTarget(targetId) is not { IsAlive: true } target)
+        {
+            return AttackResult.InvalidTarget;
+        }
+
+        if (tick < attacker.NextAttackTick)
+        {
+            return AttackResult.Cooldown;
+        }
+
+        var dx = target.X - attacker.X;
+        var dy = target.Y - attacker.Y;
+        var melee = kind == Attack.Types.Kind.Melee;
+        if (!(Math.Sqrt(dx * dx + dy * dy) <= (melee ? MeleeRange : RangedRange)))
+        {
+            return AttackResult.OutOfRange;
+        }
+
+        if (!IsInFront(attacker.Facing, dx, dy))
+        {
+            return AttackResult.NotFacing;
+        }
+
+        if (melee)
+        {
+            Damage(target, MeleeDamage);
+        }
+        else
+        {
+            if (attacker.Mana < RangedManaCost)
+            {
+                return AttackResult.NotEnoughMana;
+            }
+
+            attacker.Mana -= RangedManaCost;
+            _projectiles.Add(new Projectile(_nextProjectileId++, attacker.X, attacker.Y, target.Id, RangedDamage));
+        }
+
+        attacker.NextAttackTick = tick + GlobalCooldownTicks;
+        return AttackResult.Ok;
+    }
+
+    /// <summary>
+    /// Ein Tick: Zuerst fliegen Projektile und schlagen ein (013 AK-7, AK-14); Projektile auf ein totes oder
+    /// fehlendes Ziel verfallen ohne Wirkung. Dann: Ziele mit 0 HP warten <see cref="DummyRespawnTicks"/> Ticks und kehren dann mit vollen HP zurück (013 AK-15).
     /// </summary>
     public void Step(uint tick)
     {
+        MoveProjectiles();
+
         foreach (var target in _targets.Values)
         {
             if (target.RespawnAtTick is null && target.Hp <= 0)
@@ -112,6 +182,51 @@ internal sealed class Combat(
                 target.Hp = target.MaxHp;
                 target.RespawnAtTick = null;
             }
+        }
+    }
+
+    /// <summary>
+    /// Liegt der Vektor (<paramref name="dx"/>, <paramref name="dy"/>) höchstens <see cref="AttackArcDegrees"/>/2 neben
+    /// <paramref name="facing"/>? Abstand 0 zählt als vorn (plan.md Entscheidung 10).
+    /// </summary>
+    private bool IsInFront(double facing, double dx, double dy)
+    {
+        if (dx == 0 && dy == 0)
+        {
+            return true;
+        }
+
+        var diff = Math.Abs(Math.IEEERemainder(Math.Atan2(dy, dx) - facing, 2 * Math.PI));
+        return diff <= AttackArcDegrees / 2 * Math.PI / 180 + AngleTolerance;
+    }
+
+    /// <summary>Bewegt alle Projektile um <see cref="ProjectileStepDistance"/> auf ihr Ziel zu; ist der Rest nicht länger, schlagen sie ein.</summary>
+    private void MoveProjectiles()
+    {
+        var step = ProjectileStepDistance;
+        var i = 0;
+        while (i < _projectiles.Count)
+        {
+            var projectile = _projectiles[i];
+            if (GetTarget(projectile.TargetId) is not { IsAlive: true } target)
+            {
+                _projectiles.RemoveAt(i);
+                continue;
+            }
+
+            var dx = target.X - projectile.X;
+            var dy = target.Y - projectile.Y;
+            var rest = Math.Sqrt(dx * dx + dy * dy);
+            if (rest <= step)
+            {
+                Damage(target, projectile.Damage);
+                _projectiles.RemoveAt(i);
+                continue;
+            }
+
+            projectile.X += dx / rest * step;
+            projectile.Y += dy / rest * step;
+            i++;
         }
     }
 
