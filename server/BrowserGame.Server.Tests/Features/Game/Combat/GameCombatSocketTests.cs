@@ -123,6 +123,23 @@ public sealed class GameCombatSocketTests(GameServerFactory factory) : IClassFix
         Assert.Equal((float)GameSettings.DefaultFacing, next.Players.Single(p => p.Id == id).Facing);
         Assert.False(await CombatSockets.SawRejectionUntilAsync(observer, next.Tick + 1));
     }
+
+    [Fact] // AK-5, AK-20
+    public async Task Out_of_range_over_socket_reaches_only_the_attacker()
+    {
+        using var observer = await CombatSockets.ObserverAsync(factory);
+        var (socket, _, _, first) = await CombatSockets.JoinAtAsync(factory, CombatSockets.RangedSpot);
+        using var _ = socket;
+        var before = CombatSockets.Dummy(first).Hp;
+
+        await CombatSockets.SendAttackAsync(socket, Attack.Types.Kind.Melee);
+        var rejected = await GameSockets.ReceiveUntilAsync(socket, m => m.PayloadCase == ServerMessage.PayloadOneofCase.AttackRejected, Ct);
+        var next = await GameSockets.ReceiveSnapshotUntilAsync(socket, _ => true, Ct);
+
+        Assert.Equal(AttackRejected.Types.Reason.OutOfRange, rejected.AttackRejected.Reason);
+        Assert.Equal(before, CombatSockets.Dummy(next).Hp);
+        Assert.False(await CombatSockets.SawRejectionUntilAsync(observer, next.Tick + 1));
+    }
 }
 
 public sealed class GameCombatServerTests

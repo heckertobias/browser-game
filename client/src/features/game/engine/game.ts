@@ -35,8 +35,10 @@ export interface GameEvents extends ChatHandlers {
   onKeyBindings?(bindings: Bindings): void;
   /** Aktives Ziel nach Antippen/Anklicken oder `null`, wenn es im Snapshot fehlt (013 AK-1, plan.md Entscheidung 2). Nur bei Änderung. */
   onTarget?(id: string | null): void;
-  /** Angriff abgelehnt: zu wenig Mana (AK-8) oder Ziel nicht vor dir (AK-19). */
+  /** Angriff abgelehnt: nicht in Reichweite (AK-5, AK-9), nicht vor dir (AK-19) oder zu wenig Mana (AK-8). */
   onAttackRejected?(reason: AttackRejectReason): void;
+  /** Angriff ausgelöst, aber kein Ziel gewählt (AK-2): nichts geschickt, nur Hinweis (AK-20). */
+  onNoTarget?(): void;
 }
 
 /** Nach längerer Pause (Tab im Hintergrund) höchstens so viel Zeit nachholen. */
@@ -120,10 +122,14 @@ export class Game {
     this.connection?.saveKeyBindings(toProto(bindings));
   }
 
-  /** Angriff auf das aktive Ziel (Tasten und Buttons). Ohne Ziel wird nichts geschickt (AK-2). */
+  /** Angriff auf das aktive Ziel (Tasten und Buttons). Ohne Ziel wird nichts geschickt, nur gemeldet (AK-2, AK-20). */
   attack(kind: Attack_Kind): void {
     const request = attackRequest(this.selection, kind);
-    if (request !== null) this.connection?.sendAttack(request);
+    if (request === null) {
+      this.events.onNoTarget?.();
+      return;
+    }
+    this.connection?.sendAttack(request);
   }
 
   /** Menü offen: Figur steht (AK-4); Snapshots und Rendern laufen weiter (AK-4b). */

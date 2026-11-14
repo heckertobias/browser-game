@@ -214,31 +214,23 @@ public sealed class GameLoopCombatTests
         Assert.Equal(MaxMana, snapshot.Mana);
     }
 
-    [Fact] // AK-2, AK-5, AK-9, AK-11
+    [Fact] // AK-2, AK-11, AK-20
     public void Other_failures_stay_silent()
     {
         using var game = NewGame();
         var a = game.Join("a", "A", MeleeSpot);
-        var b = game.Join("b", "B", (GameSettings.DummyX, GameSettings.DummyY + 200));
         game.Tick();
         FaceDummy(game, a);
-        Drain(b);
 
         SendAttack(a, Attack.Types.Kind.Unspecified);
         SendAttack(a, Attack.Types.Kind.Melee, "nope");
         SendAttack(a, Attack.Types.Kind.Melee);
         SendAttack(a, Attack.Types.Kind.Melee);
-        SendAttack(b, Attack.Types.Kind.Ranged);
         game.Tick();
 
         var messagesA = Drain(a);
-        var messagesB = Drain(b);
         Assert.Equal([ServerMessage.PayloadOneofCase.Snapshot], Payloads(messagesA));
-        Assert.Equal([ServerMessage.PayloadOneofCase.Snapshot], Payloads(messagesB));
         Assert.Equal(DummyMaxHp - (float)GameSettings.MeleeDamage, Dummy(LastSnapshot(messagesA)).Hp);
-        var snapshotB = LastSnapshot(messagesB);
-        Assert.Equal(MaxMana, snapshotB.Mana);
-        Assert.Empty(snapshotB.Projectiles);
     }
 
     [Fact] // AK-13
@@ -275,5 +267,45 @@ public sealed class GameLoopCombatTests
         game.Tick();
 
         Assert.Equal(DummyMaxHp, Dummy(LastSnapshot(a)).Hp);
+    }
+
+    [Fact] // AK-5, AK-20
+    public void Out_of_range_melee_is_reported_to_the_attacker_only()
+    {
+        using var game = NewGame();
+        var observer = game.Join("o", "O", (500, 500));
+        var a = game.Join("a", "A", RangedSpot);
+        game.Tick();
+        FaceDummy(game, a);
+        Drain(observer);
+
+        SendAttack(a, Attack.Types.Kind.Melee);
+        game.Tick();
+
+        var messagesA = Drain(a);
+        Assert.Equal([ServerMessage.PayloadOneofCase.AttackRejected, ServerMessage.PayloadOneofCase.Snapshot], Payloads(messagesA));
+        Assert.Equal(AttackRejected.Types.Reason.OutOfRange, messagesA[0].AttackRejected.Reason);
+        Assert.Equal(DummyMaxHp, Dummy(LastSnapshot(messagesA)).Hp);
+        Assert.Equal([ServerMessage.PayloadOneofCase.Snapshot], Payloads(Drain(observer)));
+    }
+
+    [Fact] // AK-9, AK-20
+    public void Out_of_range_ranged_is_reported_without_projectile_or_mana()
+    {
+        using var game = NewGame();
+        var b = game.Join("b", "B", (GameSettings.DummyX, GameSettings.DummyY + 200));
+        game.Tick();
+        Drain(b);
+
+        SendAttack(b, Attack.Types.Kind.Ranged);
+        game.Tick();
+
+        var messages = Drain(b);
+        Assert.Equal([ServerMessage.PayloadOneofCase.AttackRejected, ServerMessage.PayloadOneofCase.Snapshot], Payloads(messages));
+        Assert.Equal(AttackRejected.Types.Reason.OutOfRange, messages[0].AttackRejected.Reason);
+        var snapshot = LastSnapshot(messages);
+        Assert.Empty(snapshot.Projectiles);
+        Assert.Equal(MaxMana, snapshot.Mana);
+        Assert.Equal(DummyMaxHp, Dummy(snapshot).Hp);
     }
 }

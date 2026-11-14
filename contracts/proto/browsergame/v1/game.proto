@@ -169,6 +169,8 @@ message AttackRejected {
     REASON_NOT_ENOUGH_MANA = 1;
     // Ziel nicht in Blickrichtung (AK-19).
     REASON_NOT_FACING = 2;
+    // Ziel außerhalb der Reichweite (AK-5, AK-9).
+    REASON_OUT_OF_RANGE = 3;
   }
   Reason reason = 1;
 }

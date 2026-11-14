@@ -57,6 +57,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         new ServerMessage { AttackRejected = new AttackRejected { Reason = AttackRejected.Types.Reason.NotEnoughMana } }.ToByteArray();
     private static readonly byte[] AttackNotFacing =
         new ServerMessage { AttackRejected = new AttackRejected { Reason = AttackRejected.Types.Reason.NotFacing } }.ToByteArray();
+    private static readonly byte[] AttackOutOfRange =
+        new ServerMessage { AttackRejected = new AttackRejected { Reason = AttackRejected.Types.Reason.OutOfRange } }.ToByteArray();
 
     private readonly TimeProvider _time = time ?? TimeProvider.System;
     private readonly ChatRateLimiter _chatLimiter = new(GameSettings.ChatRateLimitCount, TimeSpan.FromSeconds(GameSettings.ChatRateLimitSeconds));
@@ -394,8 +396,9 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     }
 
     /// <summary>
-    /// Angriffe aller Verbindungen nach der Bewegung (Positionen und Blickrichtung aktuell) ausführen (013). Nur zu wenig Mana
-    /// und falsche Blickrichtung bekommt der Angreifer gemeldet (AK-8, AK-19); alles andere scheitert still.
+    /// Angriffe aller Verbindungen nach der Bewegung (Positionen und Blickrichtung aktuell) ausführen (013). Nicht in Reichweite,
+    /// nicht in Blickrichtung und zu wenig Mana bekommt der Angreifer gemeldet (AK-5, AK-8, AK-9, AK-19, AK-20); Cooldown,
+    /// unbekannte Angriffsart und ungültiges Ziel bleiben still (plan.md Entscheidung 4).
     /// </summary>
     private void ProcessAttacks()
     {
@@ -410,6 +413,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
 
                 var rejection = _combat.TryAttack(attacker, attack.Kind, attack.TargetId, _tick) switch
                 {
+                    AttackResult.OutOfRange => AttackOutOfRange,
                     AttackResult.NotEnoughMana => AttackNotEnoughMana,
                     AttackResult.NotFacing => AttackNotFacing,
                     _ => null,
