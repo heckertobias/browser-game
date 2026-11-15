@@ -6,7 +6,7 @@ Reihenfolge: Verträge → Server → Client → Tests/Prüfung. Jeder Task brin
 Erst beginnen, wenn 011 und 012 umgesetzt sind.
 
 ## Verträge
-- [ ] **T1** (AK-4): `game.proto`: `CommandRejected` (`ServerMessage` Feld 8); `buf lint` und `buf breaking` grün.
+- [x] **T1** (AK-4): `game.proto`: `CommandRejected` (`ServerMessage` Feld 8); `buf lint` und `buf breaking` grün.
 
 ## Server
 - [ ] **T2** (AK-3, AK-4): `CommandParser` mit Unit-Tests (gültige Formen, Parameter, Fehlerfälle).
