@@ -63,7 +63,7 @@ Reine Darstellung, Client. Keine Spielwerte, solange Objekte nichts blockieren (
 ## Verträge
 
 Keine Änderung (⚠ F-1, F-3). Bei Kollision oder Karte vom Server: Objekte als Weltdaten in der `World`, an den Client
-im `Welcome` (nächste freie Nummer dort ist 9; abstimmen mit dem dann aktuellen Stand).
+im `Welcome` (nächste freie Nummer dort ist 10, weil 013 die 9 belegt; abstimmen mit dem dann aktuellen Stand).
 
 ## Server
 
