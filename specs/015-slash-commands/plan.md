@@ -28,11 +28,12 @@ ein Command darf die `World` direkt ändern.
    ```
    /run <name>               z. B. /run fullHealth
    /run <name>(<args>)       z. B. /run fullHealth()   /run debug(A, B, C)
-   name := Buchstabe (Buchstabe | Ziffer)*
+   name := Buchstabe (Buchstabe | Ziffer)*      Buchstabe, Ziffer := nur ASCII
    args := leer | arg (',' arg)*      arg := getrimmter Text ohne ',' und ')', nicht leer
    ```
-   Alles andere nach `/` ist ein Fehler. Namen werden ohne Rücksicht auf Groß-/Kleinschreibung gefunden
-   (`/run fullhealth()` geht auch).
+   Alles andere nach `/` ist ein Fehler. Das Präfix reicht bis zum ersten Leerraum oder Textende; nach `/run` muss
+   Leerraum folgen (`/run()` und `/runfullHealth()` sind ein anderes Präfix). Präfix und Namen gelten ohne Rücksicht
+   auf Groß-/Kleinschreibung (`/Run fullhealth()` geht auch). Text ohne führendes `/` liefert `UnknownPrefix`.
 4. **Zwei Fehlerarten** (`CommandRejected.Reason`):
    - `UNKNOWN_COMMAND`: anderes Präfix als `/run` (z. B. `/xyz`) oder unbekannter Name (AK-4).
    - `INVALID`: `/run` ohne Namen, kaputte Klammern oder falsche Anzahl Parameter (Spec: „fehlerhafter Befehl“).
