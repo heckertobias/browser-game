@@ -42,7 +42,7 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
   Bestätigung; Verträge, Server, Client, Tests.
 
 ## Tests / Prüfung
-- [ ] **T11**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
+- [x] **T11**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
   - Dummy anwählen, Nah- und Fernkampf, außer Reichweite (Hinweis), Mana leer schießen (Hinweis), ohne Ziel (Hinweis)
   - Hinweise gut sichtbar mittig oben
   - mit dem Rücken zum Dummy: kein Angriff, Hinweis; nach einem Schritt auf ihn zu: Angriff geht

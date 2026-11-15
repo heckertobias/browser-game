@@ -1,6 +1,6 @@
 # 013 – Rudimentäres Kampfsystem
 
-**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [012 – HP & Mana](../012-hp-mana/spec.md) · [016 – Blickrichtung](../016-blickrichtung/spec.md)
 Voraussetzung für: [014 – Gegner](../014-gegner/spec.md) (geplant)
