@@ -9,9 +9,9 @@ Client  ── input.ts            Tippen/Klicken auf ein Ziel wählt es aus (st
         ── features/game/combat/targeting.ts  reine Logik: Treffer-Test, aktives Ziel, Ziel weg → aufheben
         ── features/game/combat/AttackButtons.tsx  zwei HUD-Buttons „Nah“ / „Fern“ (Touch und Maus)
         ── render.ts           Dummy, HP-Balken, Ziel-Umrandung, Projektile
-        ── net.ts / game.ts    Attack schicken, Ziele + Projektile aus dem Snapshot, Hinweise (kein Ziel, Reichweite, Blickrichtung, Mana)
+        ── net.ts / game.ts    Attack schicken, Ziele aus dem Snapshot, Projektil-Effekte aus `CombatEvents`, Hinweise (kein Ziel, Reichweite, Blickrichtung, Mana)
 Server  ── GameEndpoint: Attack → Angriffs-Channel der Verbindung
-        ── GameLoop: Angriffe im Tick prüfen und ausführen, Ziele + Projektile in den Snapshot
+        ── GameLoop: Angriffe im Tick prüfen und ausführen, Ziele in den Snapshot, Start und Treffer als `CombatEvents`
         ── Features/Game/Combat/Domain/: Combat (Regeln), Target (zielbares Objekt mit HP), Projectile
 ```
 
@@ -75,7 +75,7 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 ## Verträge
 
 **Protobuf** (`contracts/proto/browsergame/v1/game.proto`), abwärtskompatibel. Feldnummern sind über die Pläne 002 und
-011–016 abgestimmt: `ClientMessage` 4, `ServerMessage` 7, `Snapshot` 6–7, `Action` 5–6.
+011–016 abgestimmt: `ClientMessage` 4, `ServerMessage` 7 und 10, `Snapshot` 6 (7 reserviert), `Welcome` 9, `Action` 5–6.
 
 ```proto
 message ClientMessage {
@@ -108,7 +108,15 @@ message ServerMessage {
     // … 1–3, 4–6: Chat (011)
     // Nur an den Angreifer: Angriff nicht ausgeführt.
     AttackRejected attack_rejected = 7;
+    // An alle, vor dem Snapshot desselben Ticks (Entscheidung 12, T9).
+    CombatEvents combat_events = 10;
   }
+}
+
+message Welcome {
+  // … 1–8
+  // Welteinheiten pro Sekunde; der Client zeichnet Projektile damit (T9).
+  float projectile_speed = 9;
 }
 
 message AttackRejected {
@@ -128,7 +136,9 @@ message Snapshot {
   // … 1–3, 4–5: eigene HP/Mana (012)
   // Lebende Ziele (013: Trainings-Dummy; 014: Gegner). Fehlt eine ID, ist das Ziel weg.
   repeated TargetState targets = 6;
-  repeated ProjectileState projectiles = 7;
+  // 7: früher projectiles, ab T9 durch CombatEvents ersetzt.
+  reserved 7;
+  reserved "projectiles";
 }
 
 message TargetState {
@@ -144,10 +154,23 @@ message TargetState {
   float max_hp = 6;
 }
 
-message ProjectileState {
-  uint32 id = 1;
-  float x = 2;
-  float y = 3;
+message CombatEvents {
+  repeated ProjectileLaunched launched = 1;
+  repeated ProjectileHit hits = 2;
+}
+
+message ProjectileLaunched {
+  // Eindeutig, solange der Server läuft; nie 0.
+  uint32 projectile_id = 1;
+  string shooter_id = 2;
+  string target_id = 3;
+}
+
+message ProjectileHit {
+  uint32 projectile_id = 1;
+  string target_id = 2;
+  // Tatsächlich abgezogene HP (höchstens die HP vor dem Treffer).
+  float damage = 3;
 }
 ```
 
@@ -177,7 +200,7 @@ message ProjectileState {
   `DropOldest`).
 - `GameLoop.Tick()`: nach `World.Step()` (Positionen aktuell) die Angriffs-Channels aller Verbindungen leeren und
   `Combat.TryAttack` aufrufen; `OutOfRange`, `NotFacing` und `NotEnoughMana` → `AttackRejected` mit passendem Grund an den Angreifer (Entscheidung 4). Danach `Combat.Step(tick)`, dann
-  Snapshot mit `targets` (nur lebende) und `projectiles`.
+  `CombatEvents` (Starts und Treffer des Ticks, nur wenn nicht leer) an alle, dann Snapshot mit `targets` (nur lebende).
 
 ## Client
 
@@ -215,11 +238,11 @@ message ProjectileState {
 | 4 | Nahkampf in Reichweite | Unit: Abstand 32 → Schaden 10 |
 | 5 | Nahkampf außer Reichweite | Unit: Abstand 33 → `OutOfRange`, HP gleich |
 | 6 | kein Mana-Abzug | Unit: Mana vorher = nachher |
-| 7 | Projektil, Schaden bei Einschlag | Unit: Start → nach n Ticks Einschlag, erst dann Schaden; Integration (WS): Angriff → Projektil im Snapshot, danach Dummy-HP gesenkt |
+| 7 | Projektil, Schaden bei Einschlag | Unit: Start → nach n Ticks Einschlag, erst dann Schaden; Integration (WS): Angriff → `ProjectileLaunched`, danach `ProjectileHit` vor dem Snapshot mit gesenkten Dummy-HP |
 | 8 | `NotEnoughMana`, `AttackRejected`, Hinweis | Unit: Mana 19 → abgelehnt, Mana 19, kein Projektil; Integration: nur Angreifer bekommt `AttackRejected` |
 | 9 | Reichweite beim Start | Unit: Abstand 161 → `OutOfRange` |
 | 20 | Hinweise | Integration: `OutOfRange` → nur Angreifer bekommt `AttackRejected` mit `REASON_OUT_OF_RANGE`; Vitest: Hinweis je Grund inkl. „kein Ziel“ ohne Senden, Lage (oben mittig), 2 s, neuer ersetzt alten; **manuell:** gut sichtbar |
-| 21 | Kosmetisches Projektil, Schaden beim Einschlag | Vitest: angezeigte HP sinken erst beim Einschlag des Effekts, Nahkampf sofort; Integration: Start- und Treffermeldung (Details im Task-Plan T9); **manuell:** auf zwei Geräten |
+| 21 | Kosmetisches Projektil, Schaden beim Einschlag | Vitest: angezeigte HP sinken erst beim Einschlag des Effekts, Nahkampf sofort; Integration: `ProjectileLaunched` an alle, `ProjectileHit` mit abgezogenen HP vor dem Snapshot; **manuell:** auf zwei Geräten |
 | 10 | Mana-Abzug | Unit: Mana 100 → 80 |
 | 11 | `NextAttackTick` | Unit: zweiter Angriff im selben Takt → `Cooldown`; nach 20 Ticks ok; gilt über Angriffsarten hinweg |
 | 12 | Fehler setzt keinen Cooldown | Unit: `OutOfRange`, dann gültiger Angriff im nächsten Tick → `Ok` |
