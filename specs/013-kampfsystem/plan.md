@@ -72,15 +72,15 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
 13. **Cooldown-Anzeige (AK-22, nach dem zweiten RC):** Der Server bleibt Quelle des Cooldowns (Constitution §2).
     Der Client zeigt den Sweep erst, wenn der Server einen erfolgreichen Angriff bestätigt hat, nicht schon beim
     Senden; sonst zeigte ein abgelehnter Versuch (AK-12) fälschlich eine Abklingzeit. Die Dauer bekommt der Client
-    vom Server (Constitution §8). Wie Bestätigung und Dauer im Vertrag gemeldet werden, legt der Task-Plan zu T10
-    fest.
+    vom Server (Constitution §8). Der Server schickt dafür `AttackAccepted` mit der Dauer nur an den Angreifer.
+    Die Buttons bleiben im Cooldown klickbar; der Server ignoriert den Versuch.
 11. **Ziel-Modell allgemein:** `Target` (ID, Art, Position, HP, Max-HP) im Domain-Code; 014 hängt Gegner als weitere
     Art ein. Spieler sind keine Ziele (Out of Scope).
 
 ## Verträge
 
 **Protobuf** (`contracts/proto/browsergame/v1/game.proto`), abwärtskompatibel. Feldnummern sind über die Pläne 002 und
-011–016 abgestimmt: `ClientMessage` 4, `ServerMessage` 7 und 10, `Snapshot` 6 (7 reserviert), `Welcome` 9, `Action` 5–6.
+011–016 abgestimmt: `ClientMessage` 4, `ServerMessage` 7, 10 und 11, `Snapshot` 6 (7 reserviert), `Welcome` 9, `Action` 5–6.
 
 ```proto
 message ClientMessage {
@@ -115,6 +115,8 @@ message ServerMessage {
     AttackRejected attack_rejected = 7;
     // An alle, vor dem Snapshot desselben Ticks (Entscheidung 12, T9).
     CombatEvents combat_events = 10;
+    // Nur an den Angreifer: Angriff ausgeführt (AK-22, T10).
+    AttackAccepted attack_accepted = 11;
   }
 }
 
@@ -135,6 +137,12 @@ message AttackRejected {
     REASON_OUT_OF_RANGE = 3;
   }
   Reason reason = 1;
+}
+
+// Angriff ausgeführt (AK-11, AK-22). Der Client zeigt damit die Abklingzeit auf den Angriffs-Buttons.
+message AttackAccepted {
+  // Dauer der Abklingzeit in Sekunden, auf ganze Server-Ticks aufgerundet.
+  float cooldown_seconds = 1;
 }
 
 message Snapshot {
@@ -204,7 +212,7 @@ message ProjectileHit {
 - `GameEndpoint`: `Attack` → `connection.Attacks.Writer.TryWrite(…)` (eigener kleiner Channel, Kapazität 4,
   `DropOldest`).
 - `GameLoop.Tick()`: nach `World.Step()` (Positionen aktuell) die Angriffs-Channels aller Verbindungen leeren und
-  `Combat.TryAttack` aufrufen; `OutOfRange`, `NotFacing` und `NotEnoughMana` → `AttackRejected` mit passendem Grund an den Angreifer (Entscheidung 4). Danach `Combat.Step(tick)`, dann
+  `Combat.TryAttack` aufrufen; `OutOfRange`, `NotFacing` und `NotEnoughMana` → `AttackRejected` mit passendem Grund an den Angreifer (Entscheidung 4), `Ok` → `AttackAccepted` mit der Cooldown-Dauer an den Angreifer (Entscheidung 13). Danach `Combat.Step(tick)`, dann
   `CombatEvents` (Starts und Treffer des Ticks, nur wenn nicht leer) an alle, dann Snapshot mit `targets` (nur lebende).
 
 ## Client
@@ -218,14 +226,15 @@ message ProjectileHit {
   - `pickTarget(world, targets, radius)`: nächstes Ziel innerhalb des Radius oder `null`.
   - `TargetSelection`: `select(id)`, `current`, `sync(ids)` hebt auf, wenn die ID fehlt (AK-3, Entscheidung 2).
   - `attackRequest(selection, kind)`: ohne Ziel `null` → es wird nichts geschickt (AK-2).
-- **`game.ts`:** Ziele aus dem neuesten Snapshot. Projektile sind ab T9 reine Kosmetik im Client (Entscheidung 12); `attack(kind)` für Tasten und Buttons; `GameEvents.onTarget(id | null)` und
-  `onAttackRejected(reason)`.
+- **`game.ts`:** Ziele aus dem neuesten Snapshot. Projektile sind ab T9 reine Kosmetik im Client (Entscheidung 12); `attack(kind)` für Tasten und Buttons; `GameEvents.onTarget(id | null)`,
+  `onAttackRejected(reason)` und `onCooldown(ms)` (AK-22).
 - **`render.ts`:**
   - Dummy: brauner Pfosten mit Querbalken (deutlich anders als die farbigen Spieler-Quadrate), HP-Balken darüber
     (AK-18).
   - Aktives Ziel: gelbe Umrandung (AK-1).
   - Projektil: kleiner heller Kreis.
-- **`AttackButtons.tsx`:** zwei Buttons (Entscheidung 9).
+- **`AttackButtons.tsx`:** zwei Buttons (Entscheidung 9). Im Cooldown dunkelt ein Sweep (`conic-gradient`, ab
+  12 Uhr im Uhrzeigersinn ablaufend) beide ab; die Logik liegt in `combat/cooldownSweep.ts` (AK-22).
 - **`AttackHint.tsx`:** Hinweis mittig im oberen Drittel des Spielfelds, große Schrift, kontrastreicher Hintergrund,
   2 s sichtbar, ein neuer ersetzt den alten (AK-20). Er fängt keine Eingaben ab (`pointer-events-none`). Gründe:
   kein Ziel (Client), nicht in Reichweite, nicht vor dir, zu wenig Mana.
@@ -248,7 +257,7 @@ message ProjectileHit {
 | 9 | Reichweite beim Start | Unit: Abstand 161 → `OutOfRange` |
 | 20 | Hinweise | Integration: `OutOfRange` → nur Angreifer bekommt `AttackRejected` mit `REASON_OUT_OF_RANGE`; Vitest: Hinweis je Grund inkl. „kein Ziel“ ohne Senden, Lage (oben mittig), 2 s, neuer ersetzt alten; **manuell:** gut sichtbar |
 | 21 | Kosmetisches Projektil, Schaden beim Einschlag | Vitest: angezeigte HP sinken erst beim Einschlag des Effekts, Nahkampf sofort; Integration: `ProjectileLaunched` an alle, `ProjectileHit` mit abgezogenen HP vor dem Snapshot; **manuell:** auf zwei Geräten |
-| 22 | Cooldown-Anzeige | Vitest: Sweep startet erst mit der Bestätigung des Servers, nicht bei Ablehnung; läuft über die vom Server gemeldete Dauer ab; beide Buttons; Details im Task-Plan T10; **manuell:** am PC und auf dem Handy |
+| 22 | Cooldown-Anzeige | Vitest: Sweep startet erst mit der Bestätigung des Servers, nicht bei Ablehnung; läuft über die vom Server gemeldete Dauer ab; beide Buttons; Integration: `Ok` → nur Angreifer bekommt `AttackAccepted` mit der Dauer, Ablehnung → keins; **manuell:** am PC und auf dem Handy |
 | 10 | Mana-Abzug | Unit: Mana 100 → 80 |
 | 11 | `NextAttackTick` | Unit: zweiter Angriff im selben Takt → `Cooldown`; nach 20 Ticks ok; gilt über Angriffsarten hinweg |
 | 12 | Fehler setzt keinen Cooldown | Unit: `OutOfRange`, dann gültiger Angriff im nächsten Tick → `Ok` |
