@@ -23,7 +23,9 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
 ## Client
 - [ ] **T4** (AK-4–8, AK-19): `FACING_TIE_EPSILON`; `sprites/rig.ts` (`parseRig`, `sheetSize`, `frameRect`) und
   `sprites/direction.ts` (`spriteDirection`); Vitest `rig.test.ts`, `direction.test.ts` inkl. 45°-Fällen als float32
-  und aller Regelverletzungen in `parseRig`.
+  und aller Regelverletzungen in `parseRig`. Importgrenze für `sprites/` in `oxlint.config.ts` und in
+  `docs/project-structure.md`; Gegenprobe: ein Import aus `core/` in `sprites/` lässt `npm run lint` scheitern
+  (nur ausprobieren, nicht einchecken).
 - [ ] **T5** (AK-2, AK-9, AK-14, AK-15, AK-18–20): `sprites/compose.ts` (`tint`, `compose`, `greyscale`),
   `sprites/spriteSet.ts` (`Appearance`, `playerAppearance`, `appearanceKey`, `SpriteSet` mit Cache, `loadSpriteSet` mit `null` bei
   Fehler), `sprites/browser.ts`; Vitest mit synthetischen Pixeln, eigenem Test-Rig (zweites Kleidungsteil, dritter

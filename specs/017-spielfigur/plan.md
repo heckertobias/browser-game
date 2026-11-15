@@ -17,6 +17,7 @@ Client  ── client/src/assets/                 LICENSES.md · licenses.test.t
         ── engine/game.ts, network/net.ts     Pfeil-Schalter (nur lokal), Sprites übernehmen
         ── app/App.tsx                        Sprites beim Start laden; Fehler → Quadrate
         ── client/scripts/import-sprites.mjs  Pack-Figur → Teile im eigenen Format (einmalig je Figur)
+        ── client/oxlint.config.ts            Importgrenze: sprites/ importiert nichts aus dem übrigen Spiel
 Server  ── Commands (015): neuer Command toggleFacingArrows() → Nachricht nur an den Absender
 Doku    ── ADR 0016: Grafiken nur CC0 oder selbst erstellt; Register client/src/assets/LICENSES.md
         ── ADR 0017: Sprite-Format (Figur aus Teilen, Beschreibung statt Pack-Aufbau)
@@ -101,8 +102,8 @@ sehen (Constitution §2).
 (Profil, Startseite), wird `sprites/` als eigenes Paket herausgelöst und dort genauso eingebunden wie im Spiel. Das
 ist der bevorzugte Weg für alles, was im Browser läuft; die Ausweichlösung auf dem Server bleibt für Orte ohne
 JavaScript (Mails, Vorschaubilder). Damit das Herauslösen einfach bleibt, gilt ab jetzt: Code in `sprites/`
-importiert nichts aus dem übrigen Spiel (kein Zustand, kein Netz, kein React, keine Konstanten aus `core/`). Nur
-`sprites/browser.ts` nutzt das DOM. Spielbezogen und beim Herauslösen im Spiel zu lassen sind `playerAppearance`,
+importiert nichts aus dem übrigen Spiel (kein Zustand, kein Netz, kein React, keine Konstanten aus `core/`). Der
+Linter erzwingt das (siehe `client/oxlint.config.ts` unten). Nur `sprites/browser.ts` nutzt das DOM. Spielbezogen und beim Herauslösen im Spiel zu lassen sind `playerAppearance`,
 `HUMANOID_RIG`, `HUMANOID_IMAGES` und `assets.test.ts`.
 
 Boden (018) und Deko (019) folgen demselben Grundsatz mit einem **Atlas**: ein Bild plus Beschreibung mit benannten
@@ -233,6 +234,14 @@ Alles in `Features/Game/Commands/Application/` aus 015.
 - Bricht mit Meldung ab, wenn A und B verschieden groß sind oder die Maske leer ist. Gibt die Zahl der
   Kleidungspixel und ihre Originalfarben aus (für `LICENSES.md`).
 - Neue Abhängigkeit **`pngjs`** (devDependency, PNG lesen und schreiben in Node), dazu `@types/pngjs` für den Test.
+
+### `client/oxlint.config.ts`
+- Neuer Override für `src/features/game/sprites/**` ohne `*.test.ts`: `no-restricted-imports` verbietet zusätzlich
+  `@/features/**`, `@/generated/**`, `react` und `react-dom`. Erlaubt bleiben `./…` im selben Ordner und `@/assets/**`.
+- Ein späterer Override ersetzt die Einstellung derselben Regel. Der neue Override übernimmt deshalb die Muster aus
+  `featureRestrictions` für `game` (kein `app/`, kein `../`, `generated/` nur per Alias) und ergänzt die eigenen.
+- Tests sind ausgenommen: `assets.test.ts` prüft die Bilder des Spiels gegen `PLAYER_SIZE`.
+- `docs/project-structure.md`: Regel unter „Importgrenzen“ nachtragen.
 
 ### `sprites/rig.ts` (neu, rein)
 - `type SpriteDirection = "down" | "up" | "left" | "right"`.
@@ -369,6 +378,7 @@ Alles in `Features/Game/Commands/Application/` aus 015.
   liefern. Der Command läuft über den Server wie alle aus 015.
 - [x] **Typen nur aus `contracts/`:** `ToggleFacingArrows` in Protobuf. `Rig` und `Appearance` gehen nicht über das
   Netz.
+- [x] **Projektstruktur:** `sprites/` bekommt eine eigene Importgrenze im Linter, wie die Feature-Grenzen (ADR 0013).
 - [x] **Offline-Fortschritt:** nicht betroffen.
 - [x] **Keine unnötigen neuen Abhängigkeiten:** `pngjs` und `@types/pngjs` als devDependencies; Grund: Import-Skript
   und Prüfung der echten Bilder brauchen einen PNG-Leser in Node. Beide Versionen müssen mindestens 7 Tage alt sein.
