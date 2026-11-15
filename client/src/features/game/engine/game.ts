@@ -1,6 +1,7 @@
-import type { Attack_Kind, Snapshot, TargetState, Welcome } from "@/generated/browsergame/v1/game_pb";
+import type { Attack_Kind, CombatEvents, Snapshot, TargetState, Welcome } from "@/generated/browsergame/v1/game_pb";
 import { t } from "@/features/localization/i18n";
-import { INTERPOLATION_DELAY_MS, TARGET_HIT_RADIUS } from "@/features/game/core/constants";
+import { INTERPOLATION_DELAY_MS, PROJECTILE_EFFECT_MAX_MS, TARGET_HIT_RADIUS } from "@/features/game/core/constants";
+import { ProjectileEffects } from "@/features/game/combat/projectileEffects";
 import { attackRequest, pickTarget, TargetSelection } from "@/features/game/combat/targeting";
 import { fromProto, toProto, type Bindings } from "@/features/game/input/bindings";
 import { InputTracker } from "@/features/game/input/input";
@@ -65,8 +66,9 @@ export class Game {
   private self: DrawablePlayer | null = null;
   private coordinates = "";
   private vitals: PlayerVitals | null = null;
-  private readonly projectiles = new SnapshotBuffer<Vec & { id: number }>();
+  private readonly effects = new ProjectileEffects(PROJECTILE_EFFECT_MAX_MS);
   private readonly selection = new TargetSelection();
+  /** Ziele aus dem neuesten Snapshot: Auswahl, Antippen und `sync` richten sich danach. */
   private targets: readonly TargetState[] = [];
   /** Zuletzt gezeichnete Kamera; Tippen auf ein Ziel rechnet mit dem, was der Spieler sieht. */
   private camera: Vec = { x: 0, y: 0 };
@@ -89,6 +91,7 @@ export class Game {
     this.connection = connect(gameSocketUrl(window.location), {
       onWelcome: (welcome) => { this.handleWelcome(welcome); },
       onSnapshot: (snapshot) => { this.handleSnapshot(snapshot); },
+      onCombatEvents: (events) => { this.handleCombatEvents(events); },
       onKicked: (reason) => {
         this.events.onKicked(reason);
         this.events.onStatus("kicked");
@@ -143,6 +146,7 @@ export class Game {
   }
 
   private handleWelcome(welcome: Welcome): void {
+    this.effects.clear();
     this.welcome = welcome;
     this.stepMs = 1000 / welcome.tickRateHz;
     this.predictor = new Predictor(welcome.speed / welcome.tickRateHz, welcome.minFacingInput);
@@ -162,10 +166,31 @@ export class Game {
     if (own) this.reportVitals(snapshot);
     this.snapshots.push(now, snapshot.players.filter((p) => p.id !== selfId));
     this.targets = snapshot.targets;
+    this.effects.observe(snapshot.targets);
     const selected = this.selection.current;
     this.selection.sync(snapshot.targets.map((target) => target.id));
     if (this.selection.current !== selected) this.events.onTarget?.(this.selection.current);
-    this.projectiles.push(now, snapshot.projectiles.map(({ id, x, y }) => ({ id, x, y })));
+  }
+
+  /** Start und Treffer vom Server (013 AK-21): Effekt vom angezeigten Schützen zum Ziel; Fernkampfschaden erst beim Einschlag. */
+  private handleCombatEvents(events: CombatEvents): void {
+    const now = performance.now();
+    const speed = this.welcome?.projectileSpeed ?? 0;
+    for (const launch of events.launched) {
+      const from = this.shooterPosition(launch.shooterId, now);
+      const to = this.targets.find((target) => target.id === launch.targetId);
+      if (from && to) this.effects.launch(now, launch.projectileId, from, { x: to.x, y: to.y }, speed);
+    }
+    for (const hit of events.hits) this.effects.hit(now, hit.projectileId, hit.targetId, hit.damage);
+  }
+
+  /** Wo der Spieler den Schützen gerade sieht: eigene Figur vorhergesagt, andere interpoliert wie gezeichnet. */
+  private shooterPosition(id: string, now: number): Vec | null {
+    if (id === this.welcome?.playerId) {
+      return this.predictor?.initialized ? this.predictor.renderPosition(this.accumulator / this.stepMs) : null;
+    }
+    const other = this.snapshots.sample(now - INTERPOLATION_DELAY_MS).find((p) => p.id === id);
+    return other ? { x: other.x, y: other.y } : null;
   }
 
   /** Liegt unter dem Zeiger ein Ziel, wird es aktiv (AK-1, AK-3); dann läuft die Figur nicht los (plan.md Entscheidung 7). */
@@ -255,10 +280,10 @@ export class Game {
       players.push({ ...this.self, ...camera, facing: this.predictor.facing });
     }
     this.camera = camera;
-    const projectiles = this.projectiles.sample(now - INTERPOLATION_DELAY_MS);
+    this.effects.update(now);
     render(this.ctx, this.viewport, camera, players, {
-      targets: this.targets,
-      projectiles,
+      targets: this.effects.targets(),
+      projectiles: this.effects.positions(now),
       selectedId: this.selection.current,
     });
   }

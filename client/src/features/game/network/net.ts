@@ -7,6 +7,7 @@ import {
   ServerMessageSchema,
   type Attack,
   type ChatMessage,
+  type CombatEvents,
   type KeyBindings,
   type Snapshot,
   type Welcome,
@@ -32,6 +33,8 @@ export interface ConnectionHandlers {
   onClose(): void;
   /** Nur an den Angreifer: Angriff nicht ausgeführt (013 AK-5, AK-8, AK-9, AK-19). */
   onAttackRejected?(reason: AttackRejectReason): void;
+  /** An alle: Projektile gestartet und eingeschlagen, vor dem Snapshot desselben Ticks (013 AK-21). */
+  onCombatEvents?(events: CombatEvents): void;
 }
 
 export interface ChatHandlers {
@@ -103,6 +106,9 @@ export function createReceiver(handlers: ConnectionHandlers & Partial<ChatHandle
           }
           break;
         }
+        case "combatEvents":
+          handlers.onCombatEvents?.(message.payload.value);
+          break;
         case undefined:
           break;
       }

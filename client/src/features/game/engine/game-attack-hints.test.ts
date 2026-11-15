@@ -4,7 +4,6 @@ import {
   Attack_Kind,
   AttackRejected_Reason,
   TargetState_Kind,
-  ProjectileStateSchema,
   TargetStateSchema,
 } from "@/generated/browsergame/v1/game_pb";
 import { FakeWebSocket, serverBytes } from "@/features/game/network/fakeWebSocket";
@@ -79,11 +78,10 @@ const welcome = serverBytes({
 });
 
 type TargetInit = NonNullable<Parameters<typeof create<typeof TargetStateSchema>>[1]>;
-type ProjectileInit = NonNullable<Parameters<typeof create<typeof ProjectileStateSchema>>[1]>;
 
 const dummy: TargetInit = { id: "dummy", kind: TargetState_Kind.TRAINING_DUMMY, x: 0, y: -128, hp: 100, maxHp: 100 };
 
-const snap = (init: { targets?: TargetInit[]; projectiles?: ProjectileInit[]; ownX?: number; ownY?: number } = {}) =>
+const snap = (init: { targets?: TargetInit[]; ownX?: number; ownY?: number } = {}) =>
   serverBytes({
     case: "snapshot",
     value: {
@@ -91,7 +89,6 @@ const snap = (init: { targets?: TargetInit[]; projectiles?: ProjectileInit[]; ow
       lastProcessedSeq: 0,
       players: [{ id: "a", name: "n", x: init.ownX ?? 0, y: init.ownY ?? 0 }],
       targets: init.targets ?? [],
-      projectiles: init.projectiles ?? [],
     },
   });
 

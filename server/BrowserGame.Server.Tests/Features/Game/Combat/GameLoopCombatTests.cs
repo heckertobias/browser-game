@@ -76,7 +76,6 @@ public sealed class GameLoopCombatTests
         Assert.Equal(DummyY, dummy.Y);
         Assert.Equal(DummyMaxHp, dummy.Hp);
         Assert.Equal(DummyMaxHp, dummy.MaxHp);
-        Assert.Empty(snapshot.Projectiles);
     }
 
     [Fact] // AK-13
@@ -111,51 +110,6 @@ public sealed class GameLoopCombatTests
         Assert.Equal(MaxMana, snapshot.Mana);
     }
 
-    [Fact] // AK-7
-    public void Ranged_projectile_shows_in_snapshots_and_hits_on_impact()
-    {
-        using var game = NewGame();
-        var a = game.Join("a", "A", RangedSpot);
-        game.Tick();
-        FaceDummy(game, a);
-        game.Tick();
-        var playerY = LastSnapshot(a).Players.Single(p => p.Id == "a").Y;
-
-        SendAttack(a, Attack.Types.Kind.Ranged);
-        game.Tick();
-        var snapshot = LastSnapshot(a);
-
-        var projectile = Assert.Single(snapshot.Projectiles);
-        Assert.NotEqual(0u, projectile.Id);
-        Assert.Equal(DummyX, projectile.X);
-        Assert.InRange(projectile.Y, DummyY + 0.001f, playerY - 0.001f);
-        Assert.Equal(DummyMaxHp, Dummy(snapshot).Hp);
-        Assert.Equal(MaxMana - (float)GameSettings.RangedManaCost, snapshot.Mana);
-
-        var flying = 1;
-        var previousY = projectile.Y;
-        for (var i = 0; i < 20 && snapshot.Projectiles.Count > 0; i++)
-        {
-            game.Tick();
-            snapshot = LastSnapshot(a);
-            if (snapshot.Projectiles.Count == 0)
-            {
-                break;
-            }
-
-            var next = Assert.Single(snapshot.Projectiles);
-            Assert.Equal(projectile.Id, next.Id);
-            Assert.True(next.Y < previousY);
-            Assert.Equal(DummyMaxHp, Dummy(snapshot).Hp);
-            previousY = next.Y;
-            flying++;
-        }
-
-        Assert.True(flying >= 2);
-        Assert.Empty(snapshot.Projectiles);
-        Assert.Equal(DummyMaxHp - (float)GameSettings.RangedDamage, Dummy(snapshot).Hp);
-    }
-
     [Fact] // AK-8
     public void Not_enough_mana_is_reported_to_the_attacker_only()
     {
@@ -176,7 +130,6 @@ public sealed class GameLoopCombatTests
         Assert.Equal([ServerMessage.PayloadOneofCase.AttackRejected, ServerMessage.PayloadOneofCase.Snapshot], Payloads(messages));
         Assert.Equal(AttackRejected.Types.Reason.NotEnoughMana, messages[0].AttackRejected.Reason);
         var snapshot = LastSnapshot(messages);
-        Assert.Empty(snapshot.Projectiles);
         Assert.Equal(DummyMaxHp, Dummy(snapshot).Hp);
         Assert.Equal(before + RegenPerTick, snapshot.Mana);
         Assert.Equal([ServerMessage.PayloadOneofCase.Snapshot], Payloads(Drain(observer)));
@@ -210,7 +163,6 @@ public sealed class GameLoopCombatTests
         Assert.Equal([ServerMessage.PayloadOneofCase.AttackRejected, ServerMessage.PayloadOneofCase.Snapshot], Payloads(messages));
         Assert.Equal(AttackRejected.Types.Reason.NotFacing, messages[0].AttackRejected.Reason);
         snapshot = LastSnapshot(messages);
-        Assert.Empty(snapshot.Projectiles);
         Assert.Equal(MaxMana, snapshot.Mana);
     }
 
@@ -304,7 +256,6 @@ public sealed class GameLoopCombatTests
         Assert.Equal([ServerMessage.PayloadOneofCase.AttackRejected, ServerMessage.PayloadOneofCase.Snapshot], Payloads(messages));
         Assert.Equal(AttackRejected.Types.Reason.OutOfRange, messages[0].AttackRejected.Reason);
         var snapshot = LastSnapshot(messages);
-        Assert.Empty(snapshot.Projectiles);
         Assert.Equal(MaxMana, snapshot.Mana);
         Assert.Equal(DummyMaxHp, Dummy(snapshot).Hp);
     }

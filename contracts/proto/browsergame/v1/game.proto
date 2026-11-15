@@ -84,6 +84,9 @@ message ServerMessage {
     ChatRejected chat_rejected = 6;
     // Nur an den Angreifer: Angriff nicht ausgeführt (013).
     AttackRejected attack_rejected = 7;
+    // 8: CommandRejected (015), 9: ToggleFacingArrows (017)
+    // An alle, höchstens eine pro Tick und vor dem Snapshot desselben Ticks: Projektile gestartet und eingeschlagen (013).
+    CombatEvents combat_events = 10;
   }
 }
 
@@ -111,6 +114,8 @@ message Welcome {
   float max_mana = 7;
   // Kürzere Richtungsvektoren ändern die Blickrichtung nicht (016).
   float min_facing_input = 8;
+  // Welteinheiten pro Sekunde; der Client fliegt damit den Effekt eines Fernkampf-Projektils (013).
+  float projectile_speed = 9;
 }
 
 message Snapshot {
@@ -123,8 +128,9 @@ message Snapshot {
   float mana = 5;
   // Lebende Ziele (013: Trainings-Dummy; 014: Gegner). Fehlt eine ID, ist das Ziel weg.
   repeated TargetState targets = 6;
-  // Fliegende Projektile (013).
-  repeated ProjectileState projectiles = 7;
+  // 7 war die Liste fliegender Projektile (013, vor T9); Projektile meldet jetzt CombatEvents.
+  reserved 7;
+  reserved "projectiles";
 }
 
 message PlayerState {
@@ -189,9 +195,24 @@ message TargetState {
   float max_hp = 6;
 }
 
-message ProjectileState {
-  // Eindeutig, solange das Projektil fliegt.
-  uint32 id = 1;
-  float x = 2;
-  float y = 3;
+// Was in einem Tick im Kampf passiert ist (013). Der Server rechnet Flug, Treffer und Schaden; der Client spielt nur Effekte ab.
+message CombatEvents {
+  repeated ProjectileLaunched launched = 1;
+  repeated ProjectileHit hits = 2;
+}
+
+message ProjectileLaunched {
+  // Eindeutig, solange der Server läuft; nie 0.
+  uint32 projectile_id = 1;
+  // PlayerState.id des Schützen.
+  string shooter_id = 2;
+  // TargetState.id des Ziels.
+  string target_id = 3;
+}
+
+message ProjectileHit {
+  uint32 projectile_id = 1;
+  string target_id = 2;
+  // Tatsächlich abgezogene HP (höchstens die HP vor dem Treffer).
+  float damage = 3;
 }

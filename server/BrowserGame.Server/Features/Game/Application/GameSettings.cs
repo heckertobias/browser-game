@@ -40,7 +40,7 @@ internal static class GameSettings
     /// <summary>Mana je Fernkampf (013 AK-10).</summary>
     public const double RangedManaCost = Combat.DefaultRangedManaCost;
 
-    /// <summary>Projektil-Tempo in Welteinheiten pro Sekunde (013 AK-7).</summary>
+    /// <summary>Projektil-Tempo in Welteinheiten pro Sekunde (013 AK-7). Geht im <c>Welcome</c> an den Client (013 AK-21, Constitution §8).</summary>
     public const double ProjectileSpeed = Combat.DefaultProjectileSpeed;
 
     /// <summary>Allgemeiner Cooldown nach einem erfolgreichen Angriff (013 AK-11).</summary>

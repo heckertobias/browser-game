@@ -41,7 +41,7 @@ export interface DrawableTarget {
   maxHp: number;
 }
 
-/** Kampf im Bild (013): Ziele ohne Interpolation, Projektile interpoliert, höchstens ein aktives Ziel. */
+/** Kampf im Bild (013): Ziele ohne Interpolation (HP mit zurückgehaltenen Treffern, AK-21), Projektil-Effekte (reine Darstellung), höchstens ein aktives Ziel. */
 export interface CombatScene {
   targets: readonly DrawableTarget[];
   projectiles: readonly Vec[];

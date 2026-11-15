@@ -39,3 +39,5 @@ export const TARGET_OUTLINE_GAP = 2;
 export const TARGET_OUTLINE_WIDTH = 1;
 /** Projektil (013): Radius des Kreises in Weltpixeln. */
 export const PROJECTILE_RADIUS = 2;
+/** Projektil-Effekt (013 AK-21): höchstens so lange in ms; so lange hält der Client einen Fernkampftreffer höchstens zurück. Technische Grenze, kein Spielwert. */
+export const PROJECTILE_EFFECT_MAX_MS = 1000;

@@ -32,7 +32,7 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
 - [x] **T8** (AK-2, AK-5, AK-9, AK-20): `REASON_OUT_OF_RANGE` in `game.proto`; Server meldet `OutOfRange` an den
   Angreifer; Client meldet „kein Ziel“ selbst; Hinweise als `AttackHint.tsx` mittig oben, groß (statt über den
   Buttons); i18n de/en; Tests.
-- [ ] **T9** (AK-7, AK-18, AK-21): Projektile im Client als Kosmetik (plan.md Entscheidung 12): Server meldet Start
+- [x] **T9** (AK-7, AK-18, AK-21): Projektile im Client als Kosmetik (plan.md Entscheidung 12): Server meldet Start
   und Treffer, Projektiltempo im `Welcome`; Client spielt den Effekt ab und senkt die angezeigten HP erst beim
   sichtbaren Einschlag; Verträge, Server, Client, Tests.
 

@@ -38,7 +38,7 @@ internal sealed class PlayerConnection(
 }
 
 /// <summary>
-/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, simulieren, Angriffe ausführen (013), Snapshots verschicken.
+/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, simulieren, Angriffe ausführen und Projektil-Ereignisse melden (013), Snapshots verschicken.
 /// Dazu Nachlauf getrennter Figuren, Übernahme und Rauswurf (003 AK-12, AK-20–22); Positionen an den PositionStore (AK-18, AK-19).
 /// </summary>
 public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null) : BackgroundService
@@ -214,6 +214,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         _tick++;
         ProcessAttacks();
         _combat.Step(_tick);
+        SendCombatEvents();
         BroadcastSnapshot();
         return removed;
     }
@@ -235,6 +236,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                         MaxHp = (float)_world.MaxHp,
                         MaxMana = (float)_world.MaxMana,
                         MinFacingInput = (float)_world.MinFacingInput,
+                        ProjectileSpeed = (float)_combat.ProjectileSpeed,
                         KeyBindings = change.Connection!.KeyBindings,
                     };
                     change.Connection!.Outbox.SendRequired(new ServerMessage { Welcome = welcome }.ToByteArray());
@@ -426,6 +428,36 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         }
     }
 
+    /// <summary>
+    /// Starts und Einschläge dieses Ticks an alle (013 AK-21), als Pflichtnachricht vor dem Snapshot desselben Ticks: So kennt
+    /// der Client einen Treffer, bevor er die gesenkten HP sieht. Ohne Ereignis geht nichts raus.
+    /// </summary>
+    private void SendCombatEvents()
+    {
+        if (_combat.Launches.Count == 0 && _combat.Impacts.Count == 0)
+        {
+            return;
+        }
+
+        var events = new CombatEvents();
+        events.Launched.AddRange(_combat.Launches.Select(l => new ProjectileLaunched
+        {
+            ProjectileId = l.ProjectileId, ShooterId = l.ShooterId, TargetId = l.TargetId,
+        }));
+        events.Hits.AddRange(_combat.Impacts.Select(i => new ProjectileHit
+        {
+            ProjectileId = i.ProjectileId, TargetId = i.TargetId, Damage = (float)i.Damage,
+        }));
+        _combat.ClearEvents();
+
+        // Einmal serialisiert, alle Verbindungen teilen das Array; es wird nur gelesen.
+        var bytes = new ServerMessage { CombatEvents = events }.ToByteArray();
+        foreach (var connection in _connections.Values)
+        {
+            connection.Outbox.SendRequired(bytes);
+        }
+    }
+
     private void BroadcastSnapshot()
     {
         // Einmal für alle Empfänger; pro Empfänger kommen nur die eigenen Werte dazu (012: andere sehen fremde HP nicht).
@@ -437,15 +469,12 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             })
             .ToList();
 
-        // Ziele und Projektile sehen alle gleich; tote Ziele fehlen (013, plan.md Entscheidung 2).
+        // Ziele sehen alle gleich; tote Ziele fehlen (013, plan.md Entscheidung 2).
         var targets = _combat.AliveTargets
             .Select(t => new TargetState
             {
                 Id = t.Id, Kind = t.Kind, X = (float)t.X, Y = (float)t.Y, Hp = (float)t.Hp, MaxHp = (float)t.MaxHp,
             })
-            .ToList();
-        var projectiles = _combat.Projectiles
-            .Select(p => new ProjectileState { Id = p.Id, X = (float)p.X, Y = (float)p.Y })
             .ToList();
 
         foreach (var connection in _connections.Values)
@@ -460,7 +489,6 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             };
             snapshot.Players.AddRange(players);
             snapshot.Targets.AddRange(targets);
-            snapshot.Projectiles.AddRange(projectiles);
             connection.Outbox.OfferSnapshot(new ServerMessage { Snapshot = snapshot }.ToByteArray());
         }
     }

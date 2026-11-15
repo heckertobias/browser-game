@@ -79,10 +79,8 @@ public sealed class GameCombatSocketTests(GameServerFactory factory) : IClassFix
 
         await CombatSockets.SendAttackAsync(socket, Attack.Types.Kind.Ranged);
         await GameSockets.ReceiveSnapshotUntilAsync(socket, s => s.Mana < MaxMana, Ct);
-        var hit = await GameSockets.ReceiveSnapshotUntilAsync(
+        await GameSockets.ReceiveSnapshotUntilAsync(
             socket, s => CombatSockets.Dummy(s).Hp == before - (float)GameSettings.RangedDamage, Ct);
-
-        Assert.Empty(hit.Projectiles);
     }
 
     [Fact] // AK-8
@@ -101,7 +99,6 @@ public sealed class GameCombatSocketTests(GameServerFactory factory) : IClassFix
         var next = await GameSockets.ReceiveSnapshotUntilAsync(socket, _ => true, Ct);
 
         Assert.Equal(AttackRejected.Types.Reason.NotEnoughMana, rejected.AttackRejected.Reason);
-        Assert.Empty(next.Projectiles);
         Assert.Equal(before, CombatSockets.Dummy(next).Hp);
         Assert.False(await CombatSockets.SawRejectionUntilAsync(observer, next.Tick + 1));
     }
@@ -163,7 +160,6 @@ public sealed class GameCombatServerTests
         Assert.Equal((float)GameSettings.DummyY, dummy.Y);
         Assert.Equal((float)GameSettings.DummyMaxHp, dummy.Hp);
         Assert.Equal((float)GameSettings.DummyMaxHp, dummy.MaxHp);
-        Assert.Empty(snapshot.Projectiles);
     }
 
     [Fact] // AK-17

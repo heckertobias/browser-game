@@ -7,6 +7,7 @@ namespace BrowserGame.Server.Features.Game;
 /// Hält genau einen Trainings-Dummy; er lebt nur im Speicher und entsteht mit jeder Instanz neu (013 AK-13, AK-17).
 /// Der Dummy hat keinerlei Angriffslogik (013 AK-16).
 /// Prüft und führt Angriffe aus und lässt Projektile fliegen (013 AK-4–12, AK-19).
+/// Meldet Starts und Einschläge (<see cref="Launches"/>, <see cref="Impacts"/>) für den Effekt im Client (013 AK-21).
 /// </summary>
 internal sealed class Combat(
     int tickRateHz,
@@ -70,6 +71,8 @@ internal sealed class Combat(
     };
 
     private readonly List<Projectile> _projectiles = [];
+    private readonly List<ProjectileLaunch> _launches = [];
+    private readonly List<ProjectileImpact> _impacts = [];
     private uint _nextProjectileId = 1;
 
     public int TickRateHz { get; } = tickRateHz;
@@ -89,6 +92,12 @@ internal sealed class Combat(
     /// <summary>Fliegende Projektile in Startreihenfolge.</summary>
     public IReadOnlyCollection<Projectile> Projectiles => _projectiles;
 
+    /// <summary>Seit dem letzten <see cref="ClearEvents"/> gestartete Projektile (013 AK-21).</summary>
+    public IReadOnlyList<ProjectileLaunch> Launches => _launches;
+
+    /// <summary>Seit dem letzten <see cref="ClearEvents"/> eingeschlagene Projektile (013 AK-7, AK-21).</summary>
+    public IReadOnlyList<ProjectileImpact> Impacts => _impacts;
+
     /// <summary>Alle Ziele, auch tote.</summary>
     public IReadOnlyCollection<Target> Targets => _targets.Values;
 
@@ -97,15 +106,24 @@ internal sealed class Combat(
 
     public Target? GetTarget(string id) => _targets.GetValueOrDefault(id);
 
-    /// <summary>Senkt die HP, nie unter 0 (013 AK-14). Nicht positive Werte und NaN werden ignoriert.</summary>
-    public static void Damage(Target target, double amount)
+    /// <summary>Vergisst die gemeldeten Starts und Einschläge; der GameLoop ruft das nach dem Versand jedes Ticks.</summary>
+    public void ClearEvents()
+    {
+        _launches.Clear();
+        _impacts.Clear();
+    }
+
+    /// <summary>Senkt die HP, nie unter 0 (013 AK-14), und liefert die tatsächlich abgezogenen HP. Nicht positive Werte und NaN werden ignoriert (0).</summary>
+    public static double Damage(Target target, double amount)
     {
         if (!(amount > 0))
         {
-            return;
+            return 0;
         }
 
+        var before = target.Hp;
         target.Hp = Math.Max(0, target.Hp - amount);
+        return before - target.Hp;
     }
 
     /// <summary>
@@ -155,7 +173,9 @@ internal sealed class Combat(
             }
 
             attacker.Mana -= RangedManaCost;
-            _projectiles.Add(new Projectile(_nextProjectileId++, attacker.X, attacker.Y, target.Id, RangedDamage));
+            var projectile = new Projectile(_nextProjectileId++, attacker.X, attacker.Y, target.Id, RangedDamage);
+            _projectiles.Add(projectile);
+            _launches.Add(new ProjectileLaunch(projectile.Id, attacker.Id, target.Id));
         }
 
         attacker.NextAttackTick = tick + GlobalCooldownTicks;
@@ -219,7 +239,8 @@ internal sealed class Combat(
             var rest = Math.Sqrt(dx * dx + dy * dy);
             if (rest <= step)
             {
-                Damage(target, projectile.Damage);
+                var applied = Damage(target, projectile.Damage);
+                _impacts.Add(new ProjectileImpact(projectile.Id, target.Id, applied));
                 _projectiles.RemoveAt(i);
                 continue;
             }

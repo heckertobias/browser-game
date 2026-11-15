@@ -4,7 +4,6 @@ import {
   Action,
   Attack_Kind,
   TargetState_Kind,
-  ProjectileStateSchema,
   TargetStateSchema,
 } from "@/generated/browsergame/v1/game_pb";
 import { DUMMY_POST_WIDTH, HP_BAR_HEIGHT, HP_BAR_WIDTH, TARGET_HIT_RADIUS } from "@/features/game/core/constants";
@@ -79,11 +78,10 @@ const welcome = serverBytes({
 });
 
 type TargetInit = NonNullable<Parameters<typeof create<typeof TargetStateSchema>>[1]>;
-type ProjectileInit = NonNullable<Parameters<typeof create<typeof ProjectileStateSchema>>[1]>;
 
 const dummy: TargetInit = { id: "dummy", kind: TargetState_Kind.TRAINING_DUMMY, x: 0, y: -128, hp: 100, maxHp: 100 };
 
-const snap = (init: { targets?: TargetInit[]; projectiles?: ProjectileInit[]; ownX?: number; ownY?: number } = {}) =>
+const snap = (init: { targets?: TargetInit[]; ownX?: number; ownY?: number } = {}) =>
   serverBytes({
     case: "snapshot",
     value: {
@@ -91,7 +89,6 @@ const snap = (init: { targets?: TargetInit[]; projectiles?: ProjectileInit[]; ow
       lastProcessedSeq: 0,
       players: [{ id: "a", name: "n", x: init.ownX ?? 0, y: init.ownY ?? 0 }],
       targets: init.targets ?? [],
-      projectiles: init.projectiles ?? [],
     },
   });
 
@@ -239,36 +236,5 @@ describe("Game: Angriff (013)", () => {
     socket.receive(snap({ targets: [] }));
     game.attack(Attack_Kind.MELEE);
     expect(socket.sentAttacks()).toEqual([]);
-  });
-});
-
-describe("Game: Projektile (013, AK-7)", () => {
-  it("wird interpoliert gezeichnet", () => {
-    const { ctx, socket } = setup();
-    socket.receive(welcome);
-    clock = 0;
-    socket.receive(snap({ projectiles: [{ id: 1, x: 0, y: 0 }] }));
-    clock = 50;
-    socket.receive(snap({ projectiles: [{ id: 1, x: 20, y: 0 }] }));
-    now = 125;
-    drawFrame(ctx);
-    const arcs = ctx.arcs();
-    expect(arcs).toHaveLength(1);
-    expect(arcs[0]?.x).toBeCloseTo(10, 9);
-    expect(arcs[0]?.y).toBeCloseTo(0, 9);
-  });
-
-  it("nach dem Einschlag nicht mehr gezeichnet", () => {
-    const { ctx, socket } = setup();
-    socket.receive(welcome);
-    clock = 0;
-    socket.receive(snap({ projectiles: [{ id: 1, x: 0, y: 0 }] }));
-    clock = 50;
-    socket.receive(snap({ projectiles: [{ id: 1, x: 20, y: 0 }] }));
-    clock = 100;
-    socket.receive(snap({ projectiles: [] }));
-    now = 300;
-    drawFrame(ctx);
-    expect(ctx.arcs()).toHaveLength(0);
   });
 });

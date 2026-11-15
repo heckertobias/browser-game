@@ -13,7 +13,7 @@ export interface RemotePlayer {
   facing?: number;
 }
 
-/** Was der Puffer interpoliert: Spieler (001) und Projektile (013). */
+/** Was der Puffer interpoliert: Spieler (001); IDs dürfen auch Zahlen sein. */
 export interface Interpolatable {
   id: string | number;
   x: number;
@@ -31,7 +31,7 @@ interface TimedSnapshot<T extends Interpolatable> {
 const RETENTION_MS = 1000;
 
 /**
- * Puffer für die Darstellung anderer Spieler und der Projektile (013): Gerendert wird leicht in der Vergangenheit,
+ * Puffer für die Darstellung anderer Spieler: Gerendert wird leicht in der Vergangenheit,
  * zwischen den zwei Snapshots, die diesen Zeitpunkt einschließen.
  */
 export class SnapshotBuffer<T extends Interpolatable = RemotePlayer> {

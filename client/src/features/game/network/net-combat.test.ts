@@ -45,8 +45,8 @@ describe("connect: Angriff (013)", () => {
   });
 });
 
-describe("createReceiver: Ziele und Projektile im Snapshot (013)", () => {
-  it("reicht beide unverändert an onSnapshot weiter", () => {
+describe("createReceiver: Ziele im Snapshot (013)", () => {
+  it("reicht sie unverändert an onSnapshot weiter", () => {
     const r = recorder();
     createReceiver(r.handlers).message(
       serverBytes({
@@ -54,11 +54,9 @@ describe("createReceiver: Ziele und Projektile im Snapshot (013)", () => {
         value: {
           tick: 1,
           targets: [{ id: "dummy", kind: TargetState_Kind.TRAINING_DUMMY, x: 0, y: -128, hp: 60, maxHp: 100 }],
-          projectiles: [{ id: 7, x: 1, y: 2 }],
         },
       }),
     );
     expect(r.snapshots[0]?.targets[0]).toMatchObject({ id: "dummy", x: 0, y: -128, hp: 60, maxHp: 100 });
-    expect(r.snapshots[0]?.projectiles[0]).toMatchObject({ id: 7, x: 1, y: 2 });
   });
 });
