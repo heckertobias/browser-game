@@ -38,7 +38,7 @@ internal sealed class PlayerConnection(
 }
 
 /// <summary>
-/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, simulieren, Angriffe ausführen und Projektil-Ereignisse melden (013), Snapshots verschicken.
+/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, simulieren, Angriffe ausführen und bestätigen, Projektil-Ereignisse melden (013), Snapshots verschicken.
 /// Dazu Nachlauf getrennter Figuren, Übernahme und Rauswurf (003 AK-12, AK-20–22); Positionen an den PositionStore (AK-18, AK-19).
 /// </summary>
 public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null) : BackgroundService
@@ -398,9 +398,10 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     }
 
     /// <summary>
-    /// Angriffe aller Verbindungen nach der Bewegung (Positionen und Blickrichtung aktuell) ausführen (013). Nicht in Reichweite,
-    /// nicht in Blickrichtung und zu wenig Mana bekommt der Angreifer gemeldet (AK-5, AK-8, AK-9, AK-19, AK-20); Cooldown,
-    /// unbekannte Angriffsart und ungültiges Ziel bleiben still (plan.md Entscheidung 4).
+    /// Angriffe aller Verbindungen nach der Bewegung (Positionen und Blickrichtung aktuell) ausführen (013). Ein ausgeführter
+    /// Angriff wird dem Angreifer mit der Abklingzeit bestätigt (AK-11, AK-22). Nicht in Reichweite, nicht in Blickrichtung und
+    /// zu wenig Mana bekommt der Angreifer gemeldet (AK-5, AK-8, AK-9, AK-19, AK-20); Cooldown, unbekannte Angriffsart und
+    /// ungültiges Ziel bleiben still (plan.md Entscheidung 4).
     /// </summary>
     private void ProcessAttacks()
     {
@@ -413,20 +414,25 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                     continue;
                 }
 
-                var rejection = _combat.TryAttack(attacker, attack.Kind, attack.TargetId, _tick) switch
+                var reply = _combat.TryAttack(attacker, attack.Kind, attack.TargetId, _tick) switch
                 {
+                    AttackResult.Ok => AttackAcceptedMessage(),
                     AttackResult.OutOfRange => AttackOutOfRange,
                     AttackResult.NotEnoughMana => AttackNotEnoughMana,
                     AttackResult.NotFacing => AttackNotFacing,
                     _ => null,
                 };
-                if (rejection is not null)
+                if (reply is not null)
                 {
-                    connection.Outbox.SendRequired(rejection);
+                    connection.Outbox.SendRequired(reply);
                 }
             }
         }
     }
+
+    /// <summary>Bestätigung für den Angreifer mit der tatsächlichen Abklingzeit (013 AK-22); höchstens eine je Spieler und Cooldown.</summary>
+    private byte[] AttackAcceptedMessage() =>
+        new ServerMessage { AttackAccepted = new AttackAccepted { CooldownSeconds = (float)_combat.GlobalCooldownSeconds } }.ToByteArray();
 
     /// <summary>
     /// Starts und Einschläge dieses Ticks an alle (013 AK-21), als Pflichtnachricht vor dem Snapshot desselben Ticks: So kennt

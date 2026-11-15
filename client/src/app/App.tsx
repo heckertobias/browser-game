@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Kicked_Reason, type Attack_Kind } from "@/generated/browsergame/v1/game_pb";
-import { AttackButtons } from "@/features/game/combat/AttackButtons";
+import { AttackButtons, type CooldownFeed } from "@/features/game/combat/AttackButtons";
 import { AttackHint, NO_TARGET, type HintFeed } from "@/features/game/combat/AttackHint";
 import { Chat, type ChatFeed } from "@/features/game/chat/Chat";
 import { Game, type ConnectionStatus, type PlayerVitals } from "@/features/game/engine/game";
@@ -47,6 +47,7 @@ export function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chatRef = useRef<ChatFeed>(null);
   const hintRef = useRef<HintFeed>(null);
+  const cooldownRef = useRef<CooldownFeed>(null);
   const gameRef = useRef<Game | null>(null);
   const sendChat = useCallback((text: string) => gameRef.current?.sendChat(text) ?? false, []);
   const attack = useCallback((kind: Attack_Kind) => { gameRef.current?.attack(kind); }, []);
@@ -83,6 +84,7 @@ export function App() {
       onTarget: setTarget,
       onAttackRejected: (reason) => { hintRef.current?.show(reason); },
       onNoTarget: () => { hintRef.current?.show(NO_TARGET); },
+      onCooldown: (durationMs) => { cooldownRef.current?.start(durationMs); },
       onChatHistory: (messages) => { chatRef.current?.onChatHistory(messages); },
       onChatMessage: (message) => { chatRef.current?.onChatMessage(message); },
       onChatRejected: (reason) => { chatRef.current?.onChatRejected(reason); },
@@ -140,7 +142,7 @@ export function App() {
           <button type="button" className="btn min-h-11 rounded-none font-mono uppercase pointer-events-auto ml-auto" data-testid="menu-button" onClick={() => { setMenuOpen(true); }}>{t.menu}</button>
           {vitals && <Vitals vitals={vitals} />}
         </div>
-        <AttackButtons hasTarget={target !== null} onAttack={attack} />
+        <AttackButtons ref={cooldownRef} hasTarget={target !== null} onAttack={attack} />
         <Chat ref={chatRef} sendChat={sendChat} inGame={status === "connected" && !menuShown} />
         <AttackHint ref={hintRef} />
         {status === "disconnected" && (

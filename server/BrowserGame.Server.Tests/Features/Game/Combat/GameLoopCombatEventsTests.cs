@@ -81,9 +81,11 @@ public sealed class GameLoopCombatEventsTests
         var messages = Drain(a);
         var observed = Drain(observer);
 
-        Assert.Equal([ServerMessage.PayloadOneofCase.CombatEvents, ServerMessage.PayloadOneofCase.Snapshot], Payloads(messages));
+        Assert.Equal(
+            [ServerMessage.PayloadOneofCase.AttackAccepted, ServerMessage.PayloadOneofCase.CombatEvents, ServerMessage.PayloadOneofCase.Snapshot],
+            Payloads(messages));
         Assert.Equal([ServerMessage.PayloadOneofCase.CombatEvents, ServerMessage.PayloadOneofCase.Snapshot], Payloads(observed));
-        var started = messages[0].CombatEvents;
+        var started = messages[1].CombatEvents;
         var launch = Assert.Single(started.Launched);
         Assert.Empty(started.Hits);
         Assert.NotEqual(0u, launch.ProjectileId);
@@ -138,6 +140,6 @@ public sealed class GameLoopCombatEventsTests
         game.Tick();
 
         Assert.Equal([ServerMessage.PayloadOneofCase.Snapshot], Payloads(Drain(observer)));
-        Assert.Equal([ServerMessage.PayloadOneofCase.Snapshot], Payloads(Drain(a)));
+        Assert.Equal([ServerMessage.PayloadOneofCase.AttackAccepted, ServerMessage.PayloadOneofCase.Snapshot], Payloads(Drain(a)));
     }
 }

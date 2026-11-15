@@ -86,6 +86,12 @@ internal sealed class Combat(
     public uint GlobalCooldownTicks { get; } = ToTicks(globalCooldownSeconds, tickRateHz);
     public uint DummyRespawnTicks { get; } = ToTicks(dummyRespawnSeconds, tickRateHz);
 
+    /// <summary>
+    /// Tatsächliche Dauer des Cooldowns in Sekunden: <see cref="GlobalCooldownTicks"/> durch die Tickrate, also auf ganze Ticks
+    /// aufgerundet. Geht mit <c>AttackAccepted</c> an den Angreifer (013 AK-22, Constitution §8).
+    /// </summary>
+    public double GlobalCooldownSeconds => (double)GlobalCooldownTicks / TickRateHz;
+
     /// <summary>Strecke eines Projektils pro Tick.</summary>
     public double ProjectileStepDistance => ProjectileSpeed / TickRateHz;
 

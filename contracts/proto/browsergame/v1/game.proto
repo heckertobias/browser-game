@@ -87,6 +87,8 @@ message ServerMessage {
     // 8: CommandRejected (015), 9: ToggleFacingArrows (017)
     // An alle, höchstens eine pro Tick und vor dem Snapshot desselben Ticks: Projektile gestartet und eingeschlagen (013).
     CombatEvents combat_events = 10;
+    // Nur an den Angreifer: Angriff ausgeführt, die Abklingzeit läuft (013 AK-11, AK-22).
+    AttackAccepted attack_accepted = 11;
   }
 }
 
@@ -179,6 +181,12 @@ message AttackRejected {
     REASON_OUT_OF_RANGE = 3;
   }
   Reason reason = 1;
+}
+
+// Angriff ausgeführt (013 AK-11, AK-22). Der Client zeigt damit die Abklingzeit auf den Angriffs-Buttons.
+message AttackAccepted {
+  // Dauer der Abklingzeit in Sekunden, auf ganze Server-Ticks aufgerundet.
+  float cooldown_seconds = 1;
 }
 
 // Zielbares Objekt mit HP (013: Trainings-Dummy; 014: Gegner).

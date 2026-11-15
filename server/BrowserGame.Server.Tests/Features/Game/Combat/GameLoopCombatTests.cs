@@ -104,7 +104,7 @@ public sealed class GameLoopCombatTests
         game.Tick();
         var messages = Drain(a);
 
-        Assert.Equal([ServerMessage.PayloadOneofCase.Snapshot], Payloads(messages));
+        Assert.Equal([ServerMessage.PayloadOneofCase.AttackAccepted, ServerMessage.PayloadOneofCase.Snapshot], Payloads(messages));
         var snapshot = LastSnapshot(messages);
         Assert.Equal(DummyMaxHp - (float)GameSettings.MeleeDamage, Dummy(snapshot).Hp);
         Assert.Equal(MaxMana, snapshot.Mana);
@@ -181,7 +181,7 @@ public sealed class GameLoopCombatTests
         game.Tick();
 
         var messagesA = Drain(a);
-        Assert.Equal([ServerMessage.PayloadOneofCase.Snapshot], Payloads(messagesA));
+        Assert.Equal([ServerMessage.PayloadOneofCase.AttackAccepted, ServerMessage.PayloadOneofCase.Snapshot], Payloads(messagesA));
         Assert.Equal(DummyMaxHp - (float)GameSettings.MeleeDamage, Dummy(LastSnapshot(messagesA)).Hp);
     }
 

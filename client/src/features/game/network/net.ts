@@ -6,6 +6,7 @@ import {
   Kicked_Reason,
   ServerMessageSchema,
   type Attack,
+  type AttackAccepted,
   type ChatMessage,
   type CombatEvents,
   type KeyBindings,
@@ -33,6 +34,8 @@ export interface ConnectionHandlers {
   onClose(): void;
   /** Nur an den Angreifer: Angriff nicht ausgeführt (013 AK-5, AK-8, AK-9, AK-19). */
   onAttackRejected?(reason: AttackRejectReason): void;
+  /** Nur an den Angreifer: Angriff ausgeführt, die Abklingzeit läuft (013 AK-11, AK-22). */
+  onAttackAccepted?(accepted: AttackAccepted): void;
   /** An alle: Projektile gestartet und eingeschlagen, vor dem Snapshot desselben Ticks (013 AK-21). */
   onCombatEvents?(events: CombatEvents): void;
 }
@@ -106,6 +109,9 @@ export function createReceiver(handlers: ConnectionHandlers & Partial<ChatHandle
           }
           break;
         }
+        case "attackAccepted":
+          handlers.onAttackAccepted?.(message.payload.value);
+          break;
         case "combatEvents":
           handlers.onCombatEvents?.(message.payload.value);
           break;

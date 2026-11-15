@@ -40,6 +40,8 @@ export interface GameEvents extends ChatHandlers {
   onAttackRejected?(reason: AttackRejectReason): void;
   /** Angriff ausgelöst, aber kein Ziel gewählt (AK-2): nichts geschickt, nur Hinweis (AK-20). */
   onNoTarget?(): void;
+  /** Der Server hat einen eigenen Angriff ausgeführt (013 AK-22): Abklingzeit in ms für den Sweep. Nicht beim Senden, nicht bei Ablehnung. */
+  onCooldown?(durationMs: number): void;
 }
 
 /** Nach längerer Pause (Tab im Hintergrund) höchstens so viel Zeit nachholen. */
@@ -101,6 +103,7 @@ export class Game {
       onChatMessage: (message) => { this.events.onChatMessage(message); },
       onChatRejected: (reason) => { this.events.onChatRejected(reason); },
       onAttackRejected: (reason) => { this.events.onAttackRejected?.(reason); },
+      onAttackAccepted: (accepted) => { this.events.onCooldown?.(accepted.cooldownSeconds * 1000); },
     });
     this.lastFrame = performance.now();
     this.frameHandle = requestAnimationFrame(this.frame);

@@ -37,7 +37,7 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
   sichtbaren Einschlag; Verträge, Server, Client, Tests.
 
 ## Nachtrag nach dem zweiten RC
-- [ ] **T10** (AK-11, AK-22): Cooldown-Anzeige als Sweep auf beiden Angriffs-Buttons (plan.md Entscheidung 13):
+- [x] **T10** (AK-11, AK-22): Cooldown-Anzeige als Sweep auf beiden Angriffs-Buttons (plan.md Entscheidung 13):
   Server bestätigt den erfolgreichen Angriff und meldet die Dauer; Client startet den Sweep erst mit der
   Bestätigung; Verträge, Server, Client, Tests.
 
