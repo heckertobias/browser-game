@@ -36,11 +36,17 @@ Erst beginnen, wenn 012 und 016 umgesetzt sind.
   und Treffer, Projektiltempo im `Welcome`; Client spielt den Effekt ab und senkt die angezeigten HP erst beim
   sichtbaren Einschlag; Verträge, Server, Client, Tests.
 
+## Nachtrag nach dem zweiten RC
+- [ ] **T10** (AK-11, AK-22): Cooldown-Anzeige als Sweep auf beiden Angriffs-Buttons (plan.md Entscheidung 13):
+  Server bestätigt den erfolgreichen Angriff und meldet die Dauer; Client startet den Sweep erst mit der
+  Bestätigung; Verträge, Server, Client, Tests.
+
 ## Tests / Prüfung
-- [ ] **T10**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
+- [ ] **T11**: Manuelle Prüfung in der Testumgebung (PC mit Maus und Tasten, Handy hochkant/quer):
   - Dummy anwählen, Nah- und Fernkampf, außer Reichweite (Hinweis), Mana leer schießen (Hinweis), ohne Ziel (Hinweis)
   - Hinweise gut sichtbar mittig oben
   - mit dem Rücken zum Dummy: kein Angriff, Hinweis; nach einem Schritt auf ihn zu: Angriff geht
+  - Cooldown als Sweep auf beiden Buttons sichtbar (nach Taste und nach Button), nicht nach abgelehntem Versuch
   - Cooldown spürbar, Dummy stirbt und kommt nach 5 s wieder, Auswahl wird dabei aufgehoben
   - zweites Gerät sieht Projektile und HP-Balken
   - HP-Balken sinkt genau beim sichtbaren Einschlag, auf beiden Geräten

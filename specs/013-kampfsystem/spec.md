@@ -75,6 +75,10 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
 - **AK-12:** Gegeben ein Angriffsversuch schlägt fehl, weil kein Ziel anvisiert ist (AK-2), nicht in
   Reichweite (AK-5 / AK-9), nicht in Blickrichtung (AK-19) oder zu wenig Mana (AK-8), dann startet keine Abklingzeit: Ein
   fehlgeschlagener Versuch sperrt mich nicht aus.
+- **AK-22:** Gegeben ein Angriff wurde ausgeführt (AK-11), dann sehe ich die laufende Abklingzeit auf beiden
+  Angriffs-Buttons: Sie sind abgedunkelt, und die dunkle Fläche läuft im Uhrzeigersinn ab, bis der nächste Angriff
+  möglich ist. Ein Angriffsversuch während der Abklingzeit bleibt ohne weiteren Hinweis (die Anzeige genügt).
+  Ein fehlgeschlagener Versuch (AK-12) zeigt keine Abklingzeit.
 
 ### Blickrichtung
 - **AK-19:** Gegeben ich habe ein Ziel in Reichweite markiert, das nicht grob in meiner Blickrichtung

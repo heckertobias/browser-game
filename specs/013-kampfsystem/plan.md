@@ -69,6 +69,11 @@ Die Kampfregeln sind reine Logik ohne Netzwerk und DB (Constitution §7). Ziele 
     sofort. Das Projektiltempo bekommt der Client vom Server (Constitution §8). Wie Start und Treffer im Vertrag
     gemeldet werden, legt der Task-Plan zu T9 fest. Verworfen: Ziele über den verzögerten Puffer zu zeichnen
     (gleicher Effekt, aber die Projektile wären weiter Server-Zustand statt Kosmetik).
+13. **Cooldown-Anzeige (AK-22, nach dem zweiten RC):** Der Server bleibt Quelle des Cooldowns (Constitution §2).
+    Der Client zeigt den Sweep erst, wenn der Server einen erfolgreichen Angriff bestätigt hat, nicht schon beim
+    Senden; sonst zeigte ein abgelehnter Versuch (AK-12) fälschlich eine Abklingzeit. Die Dauer bekommt der Client
+    vom Server (Constitution §8). Wie Bestätigung und Dauer im Vertrag gemeldet werden, legt der Task-Plan zu T10
+    fest.
 11. **Ziel-Modell allgemein:** `Target` (ID, Art, Position, HP, Max-HP) im Domain-Code; 014 hängt Gegner als weitere
     Art ein. Spieler sind keine Ziele (Out of Scope).
 
@@ -243,6 +248,7 @@ message ProjectileHit {
 | 9 | Reichweite beim Start | Unit: Abstand 161 → `OutOfRange` |
 | 20 | Hinweise | Integration: `OutOfRange` → nur Angreifer bekommt `AttackRejected` mit `REASON_OUT_OF_RANGE`; Vitest: Hinweis je Grund inkl. „kein Ziel“ ohne Senden, Lage (oben mittig), 2 s, neuer ersetzt alten; **manuell:** gut sichtbar |
 | 21 | Kosmetisches Projektil, Schaden beim Einschlag | Vitest: angezeigte HP sinken erst beim Einschlag des Effekts, Nahkampf sofort; Integration: `ProjectileLaunched` an alle, `ProjectileHit` mit abgezogenen HP vor dem Snapshot; **manuell:** auf zwei Geräten |
+| 22 | Cooldown-Anzeige | Vitest: Sweep startet erst mit der Bestätigung des Servers, nicht bei Ablehnung; läuft über die vom Server gemeldete Dauer ab; beide Buttons; Details im Task-Plan T10; **manuell:** am PC und auf dem Handy |
 | 10 | Mana-Abzug | Unit: Mana 100 → 80 |
 | 11 | `NextAttackTick` | Unit: zweiter Angriff im selben Takt → `Cooldown`; nach 20 Ticks ok; gilt über Angriffsarten hinweg |
 | 12 | Fehler setzt keinen Cooldown | Unit: `OutOfRange`, dann gültiger Angriff im nächsten Tick → `Ok` |
