@@ -25,7 +25,7 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
   `sprites/direction.ts` (`spriteDirection`); Vitest `rig.test.ts`, `direction.test.ts` inkl. 45°-Fällen als float32
   und aller Regelverletzungen in `parseRig`.
 - [ ] **T5** (AK-2, AK-9, AK-14, AK-15, AK-18–20): `sprites/compose.ts` (`tint`, `compose`, `greyscale`),
-  `sprites/spriteSet.ts` (`Appearance`, `playerAppearance`, `SpriteSet` mit Cache, `loadSpriteSet` mit `null` bei
+  `sprites/spriteSet.ts` (`Appearance`, `playerAppearance`, `appearanceKey`, `SpriteSet` mit Cache, `loadSpriteSet` mit `null` bei
   Fehler), `sprites/browser.ts`; Vitest mit synthetischen Pixeln, eigenem Test-Rig (zweites Kleidungsteil, dritter
   Slot, Pixel in den Zell-Ecken) und gefälschtem `toSource`.
 - [ ] **T6** (AK-7, AK-8): `Predictor.moving`; `SnapshotBuffer.moving` (gemeinsame Suche mit `sample`, dessen Ergebnis

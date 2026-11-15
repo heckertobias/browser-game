@@ -84,6 +84,19 @@ tauschbar sein sollen. Der Code kennt deshalb nie den Aufbau des Packs, sondern 
 ändern): Zeichenreihenfolge je Richtung (Waffe hinter dem Körper beim Blick nach oben), Ankerpunkte für Waffen,
 Teile bei Bedarf nachladen, Aussehen vom Server (Vertrag), weitere Rigs (Gegner).
 
+**Ausweichlösung: Zusammensetzen auf dem Server.** Zuerst setzt der Client zusammen. Zeigt sich das als Problem
+(zu viele Teile zum Laden, Figuren außerhalb des Spiels), setzt der Server je Aussehen einmal zusammen, speichert das
+fertige Blatt und liefert es per HTTP aus; der Client cacht die Datei. Damit dieser Weg offen bleibt, gilt:
+
+- Das Format bleibt reine Daten (`rig.json`, PNGs) ohne Annahmen über den Browser.
+- Zusammensetzen und Einfärben sind reine Funktionen über Pixel (`compose`, `tint`), nach den Regeln 6 und 7 genau
+  festgelegt. Ein zweiter Nachbau in C# liefert dasselbe Bild.
+- Zeichnen und Zusammensetzen sind getrennt: `render` bekommt ein fertiges Blatt und weiß nicht, woher es kommt.
+- Ein Aussehen hat einen stabilen Schlüssel (`appearanceKey`), der später als Dateiname dienen kann.
+
+Nicht in Frage kommt, dass ein Client sein fertiges Blatt hochlädt: Der Server würde ihm ein Bild glauben, das alle
+sehen (Constitution §2).
+
 Boden (018) und Deko (019) folgen demselben Grundsatz mit einem **Atlas**: ein Bild plus Beschreibung mit benannten
 Einträgen. ADR 0017 nennt beide Formen; der Atlas wird in 018 gebaut.
 
@@ -239,6 +252,8 @@ Alles in `Features/Game/Commands/Application/` aus 015.
 ### `sprites/spriteSet.ts` (neu)
 - `type Appearance = Readonly<Record<string, { readonly part: string; readonly tint?: number }>>` (Slot → Teil).
 - `playerAppearance(color: number): Appearance` (Entscheidung 5); je Farbe dasselbe Objekt.
+- `appearanceKey(appearance: Appearance, slots: readonly string[]): string` – stabiler Schlüssel in
+  Slot-Reihenfolge (Teil und Farbe je Slot); gleiche Aussehen ergeben denselben Schlüssel. Dient dem Cache.
 - `class SpriteSet`: `constructor(rig: Rig, parts: ReadonlyMap<string, Pixels>, toSource: (p: Pixels) =>
   CanvasImageSource)`; `readonly rig`; `sheet(appearance: Appearance, away: boolean): CanvasImageSource` setzt beim
   ersten Aufruf je `(Aussehen, away)` zusammen (Slots in `rig.slots`-Reihenfolge, `tint` nur bei `tint: true`,
@@ -310,7 +325,8 @@ Alles in `Features/Game/Commands/Application/` aus 015.
   zweite Form. Kontext: tauschbare Kleidung, Frisuren, Waffen. Alternativen: Pack-Blätter unverändert mit Konstanten
   im Code (bisheriger Plan; ein Teiletausch wäre ein Umbau), Einfärben über exakte Farbwerte (bricht bei jeder neuen
   Figur), Ankerpunkte statt voller Blätter (weniger Zeichenarbeit, mehr Logik; später möglich), eine
-  Spiele-Bibliothek (neue Abhängigkeit ohne Bedarf, Canvas 2D reicht).
+  Spiele-Bibliothek (neue Abhängigkeit ohne Bedarf, Canvas 2D reicht), Zusammensetzen auf dem Server (als
+  Ausweichlösung festgehalten, siehe oben), Hochladen fertiger Blätter durch den Client (verworfen, §2).
 - `docs/project-structure.md`: `client/src/assets/` und `features/game/sprites/` in den Client-Baum,
   `client/scripts/import-sprites.mjs`; ADR-Zähler „0001–0017“.
 
@@ -370,7 +386,8 @@ Alles in `Features/Game/Commands/Application/` aus 015.
 - **Das Pack hat keine Teile.** Jedes weitere Kleidungsstück, jede Frisur und jede Waffe ist Zeichenarbeit in allen
   Bildern. Tauschbare Kleidung braucht außerdem einen gezeichneten Körper darunter (Entscheidung 2).
 - **Zellgröße ändern** heißt alle Teile des Rigs neu exportieren. Deshalb ist sie von Anfang an 48×48.
-- **Alle Teile werden beim Start geladen.** Bei vielen Teilen kommt Nachladen bei Bedarf dazu (eigene Spec).
+- **Alle Teile werden beim Start geladen.** Bei vielen Teilen kommt Nachladen bei Bedarf dazu (eigene Spec); reicht
+  das nicht, greift die Ausweichlösung „Zusammensetzen auf dem Server“ (Abschnitt Sprite-Format).
 - **Palette:** Die eingefärbte Kleidung nutzt die Spielerfarben aus 001, nicht die Palette des Packs (Frage an den
   User).
 - **AK-15 braucht 50 laufende Figuren.** Ohne Bots gibt es die nicht mit einem Gerät (Frage an den User).
