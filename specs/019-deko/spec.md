@@ -7,7 +7,8 @@ Setzt voraus: [018 – Boden statt Gitter](../018-boden/spec.md)
 ## Ziel
 
 In der Welt stehen **Objekte** wie Bäume, Steine oder Büsche. Grafiken stammen aus Ninja Adventure oder
-folgen seinem Stil (017).
+folgen seinem Stil und liegen im eigenen Format aus 017: Jedes Objekt hat einen Namen und eine Beschreibung,
+unabhängig vom Aufbau des Packs.
 
 ## User Stories
 

@@ -2,12 +2,13 @@
 
 **Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
-Setzt voraus: [017 – Spielfigur als Pixel-Art](../017-spielfigur/spec.md) (Asset-Pack, Lizenzregel)
+Setzt voraus: [017 – Spielfigur als Pixel-Art](../017-spielfigur/spec.md) (eigenes Grafik-Format, Lizenzregel)
 
 ## Ziel
 
 Die Welt hat einen **Boden** aus Pixel-Art (z. B. Gras, Wege) statt des Gitters auf einfarbigem Grund.
-Grafiken stammen aus Ninja Adventure oder folgen seinem Stil (017).
+Grafiken stammen aus Ninja Adventure oder folgen seinem Stil und liegen im eigenen Format aus 017: Der Boden
+ist über benannte Bodenstücke beschrieben, nicht über den Aufbau des Packs.
 
 ## User Stories
 
