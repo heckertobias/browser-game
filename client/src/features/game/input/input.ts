@@ -1,6 +1,6 @@
 import { POINTER_DEAD_ZONE } from "@/features/game/core/constants";
 import { clampDirection, ZERO, type Vec } from "@/features/game/core/vector";
-import { Action } from "@/generated/browsergame/v1/game_pb";
+import { Action, Attack_Kind } from "@/generated/browsergame/v1/game_pb";
 import { DEFAULT_BINDINGS, type Bindings } from "./bindings";
 
 /** Aktionen, deren Tasten gerade gedrückt sind; jeder Platz einer Aktion löst sie aus. */
@@ -28,9 +28,25 @@ export function pointerDirection(pointer: Vec, player: Vec): Vec {
   return distance <= POINTER_DEAD_ZONE ? ZERO : { x: dx / distance, y: dy / distance };
 }
 
+const MOVE_ACTIONS: ReadonlySet<Action> = new Set([Action.MOVE_UP, Action.MOVE_DOWN, Action.MOVE_LEFT, Action.MOVE_RIGHT]);
+
+const ATTACK_KINDS: ReadonlyMap<Action, Attack_Kind> = new Map([
+  [Action.ATTACK_MELEE, Attack_Kind.MELEE],
+  [Action.ATTACK_RANGED, Attack_Kind.RANGED],
+]);
+
+/** Angriffsart der Taste nach der Belegung oder null (nicht belegt oder keine Angriffsaktion, 013). */
+export function attackKindFor(code: string, bindings: Bindings): Attack_Kind | null {
+  for (const [action, codes] of bindings) {
+    const kind = ATTACK_KINDS.get(action);
+    if (kind !== undefined && codes.includes(code)) return kind;
+  }
+  return null;
+}
+
 /** Sobald eine Bewegungstaste gedrückt ist, hat die Tastatur Vorrang vor dem Zeiger. */
 export function combinedDirection(actions: ReadonlySet<Action>, pointer: Vec | null, player: Vec): Vec {
-  if (actions.size > 0) {
+  if ([...actions].some((action) => MOVE_ACTIONS.has(action))) {
     return keyboardDirection(actions);
   }
   return pointer ? pointerDirection(pointer, player) : ZERO;
@@ -47,9 +63,14 @@ export class PointerHold {
   private pointerId: number | null = null;
   private client: { x: number; y: number } | null = null;
 
+  /** Startet dieser Zeiger etwas? Nur der primäre mit Haupttaste, solange kein anderer hält. */
+  accepts(e: Pick<PointerSample, "isPrimary" | "button">): boolean {
+    return this.pointerId === null && e.isPrimary && e.button === 0;
+  }
+
   /** true, wenn dieser Zeiger das Halten startet – dann Capture setzen und preventDefault. */
   down(e: PointerSample): boolean {
-    if (this.pointerId !== null || !e.isPrimary || e.button !== 0) return false;
+    if (!this.accepts(e)) return false;
     this.pointerId = e.pointerId;
     this.client = { x: e.clientX, y: e.clientY };
     return true;
@@ -82,6 +103,14 @@ export function isEditableTarget(target: EventTarget | null): boolean {
   return element?.isContentEditable === true || EDITABLE_TAGS.has(element?.tagName ?? "");
 }
 
+/** Rückfragen des InputTrackers an das Spiel (013). Beide optional. */
+export interface InputCallbacks {
+  /** Liegt unter dem Druck ein Ziel, wählt der Aufrufer es aus und gibt true zurück; dann startet kein Halten. */
+  pickTarget?(clientX: number, clientY: number): boolean;
+  /** Eine belegte Angriffstaste wurde gedrückt (einmal je Druck, ohne Wiederholung). */
+  onAttack?(kind: Attack_Kind): void;
+}
+
 /** Hält gedrückte Tasten und den gedrückten Zeiger (Maus und Touch einheitlich über Pointer Events). */
 export class InputTracker {
   private readonly pressedKeys = new Set<string>();
@@ -90,9 +119,18 @@ export class InputTracker {
   private bindings: Bindings = DEFAULT_BINDINGS;
   private suspended = false;
 
-  constructor(private readonly canvas: HTMLCanvasElement) {
+  constructor(
+    private readonly canvas: HTMLCanvasElement,
+    private readonly callbacks: InputCallbacks = {},
+  ) {
     const signal = this.abort.signal;
-    window.addEventListener("keydown", (e) => { if (!this.suspended && !isEditableTarget(e.target)) this.pressedKeys.add(e.code); }, { signal });
+    window.addEventListener("keydown", (e) => {
+      if (this.suspended || isEditableTarget(e.target)) return;
+      this.pressedKeys.add(e.code);
+      if (e.repeat) return;
+      const kind = attackKindFor(e.code, this.bindings);
+      if (kind !== null) this.callbacks.onAttack?.(kind);
+    }, { signal });
     window.addEventListener("keyup", (e) => { this.pressedKeys.delete(e.code); }, { signal });
     // Nur die Tasten, nicht reset(): ein gehaltener Zeiger läuft weiter.
     window.addEventListener("focusin", (e) => { if (isEditableTarget(e.target)) this.pressedKeys.clear(); }, { signal });
@@ -100,12 +138,15 @@ export class InputTracker {
     document.addEventListener("visibilitychange", () => { if (document.hidden) this.reset(); }, { signal });
 
     canvas.addEventListener("pointerdown", (e) => {
-      if (this.suspended || !this.hold.down(e)) return;
+      if (this.suspended || !this.hold.accepts(e)) return;
       // preventDefault unten verhindert auch den Fokuswechsel; das Feld behielte den Fokus und die Tasten blieben tot.
       const active = document.activeElement;
       if (isEditableTarget(active)) (active as HTMLElement).blur();
-      canvas.setPointerCapture(e.pointerId);
       e.preventDefault();
+      // Ein Ziel unter dem Zeiger wird ausgewählt statt hinzulaufen (013, plan.md Entscheidung 7).
+      if (this.callbacks.pickTarget?.(e.clientX, e.clientY) === true) return;
+      this.hold.down(e);
+      canvas.setPointerCapture(e.pointerId);
     }, { signal });
     canvas.addEventListener("pointermove", (e) => { this.hold.move(e); }, { signal });
     const release = (e: PointerEvent) => { this.hold.release(e.pointerId); };

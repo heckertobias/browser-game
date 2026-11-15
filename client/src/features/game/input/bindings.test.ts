@@ -26,7 +26,14 @@ function serverAccepts(kb: KeyBindings): boolean {
   if (kb.bindings.length === 0) {
     return true;
   }
-  const known = [Action.MOVE_UP, Action.MOVE_DOWN, Action.MOVE_LEFT, Action.MOVE_RIGHT];
+  const known = [
+    Action.MOVE_UP,
+    Action.MOVE_DOWN,
+    Action.MOVE_LEFT,
+    Action.MOVE_RIGHT,
+    Action.ATTACK_MELEE,
+    Action.ATTACK_RANGED,
+  ];
   const reserved = ["Escape", "Enter", "NumpadEnter"];
   const actions = new Set<Action>();
   const codes = new Set<string>();
@@ -49,17 +56,19 @@ function serverAccepts(kb: KeyBindings): boolean {
 }
 
 describe("Standard (002 AK-10)", () => {
-  it("DEFAULT_BINDINGS ist WASD mit leerem zweiten Platz", () => {
+  it("DEFAULT_BINDINGS ist WASD, Angriffe auf 1 und 2, zweiter Platz leer", () => {
     expect([...DEFAULT_BINDINGS]).toEqual([
       [UP, ["KeyW"]],
       [DOWN, ["KeyS"]],
       [LEFT, ["KeyA"]],
       [RIGHT, ["KeyD"]],
+      [Action.ATTACK_MELEE, ["Digit1"]],
+      [Action.ATTACK_RANGED, ["Digit2"]],
     ]);
   });
 
-  it("ACTIONS enthält jede Bewegungsaktion", () => {
-    expect(ACTIONS).toEqual([UP, DOWN, LEFT, RIGHT]);
+  it("ACTIONS enthält jede Aktion in Anzeigereihenfolge", () => {
+    expect(ACTIONS).toEqual([UP, DOWN, LEFT, RIGHT, Action.ATTACK_MELEE, Action.ATTACK_RANGED]);
   });
 
   it("RESERVED_CODES entspricht dem Server (002 AK-8)", () => {
@@ -79,6 +88,8 @@ describe("toProto und isDefault (002 AK-10)", () => {
       [DOWN, ["KeyS"]],
       [LEFT, ["KeyA"]],
       [RIGHT, ["KeyD"]],
+      [Action.ATTACK_MELEE, ["Digit1"]],
+      [Action.ATTACK_RANGED, ["Digit2"]],
     ]);
     expect(isDefault(same)).toBe(true);
     expect(toProto(same).bindings).toEqual([]);
@@ -118,6 +129,8 @@ describe("fromProto", () => {
       [DOWN, ["ArrowDown"]],
       [LEFT, ["ArrowLeft"]],
       [RIGHT, ["ArrowRight"]],
+      [Action.ATTACK_MELEE, ["Digit1"]],
+      [Action.ATTACK_RANGED, ["Digit2"]],
     ]);
   });
 
@@ -133,6 +146,8 @@ describe("fromProto", () => {
       [DOWN, ["KeyS"]],
       [LEFT, ["KeyA"]],
       [RIGHT, []],
+      [Action.ATTACK_MELEE, ["Digit1"]],
+      [Action.ATTACK_RANGED, ["Digit2"]],
     ]);
     expect(serverAccepts(toProto(result))).toBe(true);
   });
@@ -154,6 +169,8 @@ describe("fromProto", () => {
       [DOWN, ["KeyS"]],
       [LEFT, ["KeyA", "KeyJ"]],
       [RIGHT, ["KeyD"]],
+      [Action.ATTACK_MELEE, ["Digit1"]],
+      [Action.ATTACK_RANGED, ["Digit2"]],
     ]);
     expect(serverAccepts(toProto(result))).toBe(true);
   });

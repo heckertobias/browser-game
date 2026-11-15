@@ -19,12 +19,14 @@ export const MAX_CODES_PER_ACTION = 2;
 /** Esc öffnet das Menü, Enter (beide Tasten) den Chat. Gleich `KeyBindingRules.ReservedCodes` (Server). */
 export const RESERVED_CODES: readonly string[] = ["Escape", "Enter", "NumpadEnter"];
 
-/** WASD, zweiter Platz leer. Neue Aktionen späterer Specs kommen hier mit ihrem Standard dazu (auch leer). */
+/** WASD, Nah- und Fernkampf auf 1 und 2 (013), zweiter Platz leer. Neue Aktionen späterer Specs kommen hier mit ihrem Standard dazu (auch leer). */
 export const DEFAULT_BINDINGS: Bindings = new Map<Action, readonly string[]>([
   [Action.MOVE_UP, ["KeyW"]],
   [Action.MOVE_DOWN, ["KeyS"]],
   [Action.MOVE_LEFT, ["KeyA"]],
   [Action.MOVE_RIGHT, ["KeyD"]],
+  [Action.ATTACK_MELEE, ["Digit1"]],
+  [Action.ATTACK_RANGED, ["Digit2"]],
 ]);
 
 /** Alle belegbaren Aktionen in Anzeigereihenfolge. */

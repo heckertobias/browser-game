@@ -10,6 +10,7 @@ message ClientMessage {
     Input input = 1;
     SendChat send_chat = 2;
     SaveKeyBindings save_key_bindings = 3;
+    Attack attack = 4;
   }
 }
 
@@ -36,6 +37,8 @@ enum Action {
   ACTION_MOVE_DOWN = 2;
   ACTION_MOVE_LEFT = 3;
   ACTION_MOVE_RIGHT = 4;
+  ACTION_ATTACK_MELEE = 5;
+  ACTION_ATTACK_RANGED = 6;
 }
 
 message KeyBinding {
@@ -54,6 +57,18 @@ message SaveKeyBindings {
   KeyBindings key_bindings = 1;
 }
 
+// Angriff auf ein Ziel (013). Der Server prüft Ziel, Cooldown, Reichweite, Blickrichtung und Mana.
+message Attack {
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    KIND_MELEE = 1;
+    KIND_RANGED = 2;
+  }
+  Kind kind = 1;
+  // ID aus TargetState.id.
+  string target_id = 2;
+}
+
 // Server → Client
 message ServerMessage {
   oneof payload {
@@ -67,6 +82,13 @@ message ServerMessage {
     ChatMessage chat_message = 5;
     // Nur an den Absender: Nachricht nicht angenommen.
     ChatRejected chat_rejected = 6;
+    // Nur an den Angreifer: Angriff nicht ausgeführt (013).
+    AttackRejected attack_rejected = 7;
+    // 8: CommandRejected (015), 9: ToggleFacingArrows (017)
+    // An alle, höchstens eine pro Tick und vor dem Snapshot desselben Ticks: Projektile gestartet und eingeschlagen (013).
+    CombatEvents combat_events = 10;
+    // Nur an den Angreifer: Angriff ausgeführt, die Abklingzeit läuft (013 AK-11, AK-22).
+    AttackAccepted attack_accepted = 11;
   }
 }
 
@@ -94,6 +116,8 @@ message Welcome {
   float max_mana = 7;
   // Kürzere Richtungsvektoren ändern die Blickrichtung nicht (016).
   float min_facing_input = 8;
+  // Welteinheiten pro Sekunde; der Client fliegt damit den Effekt eines Fernkampf-Projektils (013).
+  float projectile_speed = 9;
 }
 
 message Snapshot {
@@ -104,6 +128,11 @@ message Snapshot {
   // Pro Empfänger: eigene aktuelle Werte (012).
   float hp = 4;
   float mana = 5;
+  // Lebende Ziele (013: Trainings-Dummy; 014: Gegner). Fehlt eine ID, ist das Ziel weg.
+  repeated TargetState targets = 6;
+  // 7 war die Liste fliegender Projektile (013, vor T9); Projektile meldet jetzt CombatEvents.
+  reserved 7;
+  reserved "projectiles";
 }
 
 message PlayerState {
@@ -139,4 +168,59 @@ message ChatRejected {
     REASON_TOO_FAST = 1;
   }
   Reason reason = 1;
+}
+
+message AttackRejected {
+  enum Reason {
+    REASON_UNSPECIFIED = 0;
+    // Zu wenig Mana für den Fernkampf (AK-8).
+    REASON_NOT_ENOUGH_MANA = 1;
+    // Ziel nicht in Blickrichtung (AK-19).
+    REASON_NOT_FACING = 2;
+    // Ziel außerhalb der Reichweite (AK-5, AK-9).
+    REASON_OUT_OF_RANGE = 3;
+  }
+  Reason reason = 1;
+}
+
+// Angriff ausgeführt (013 AK-11, AK-22). Der Client zeigt damit die Abklingzeit auf den Angriffs-Buttons.
+message AttackAccepted {
+  // Dauer der Abklingzeit in Sekunden, auf ganze Server-Ticks aufgerundet.
+  float cooldown_seconds = 1;
+}
+
+// Zielbares Objekt mit HP (013: Trainings-Dummy; 014: Gegner).
+message TargetState {
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    KIND_TRAINING_DUMMY = 1;
+  }
+  string id = 1;
+  Kind kind = 2;
+  float x = 3;
+  float y = 4;
+  float hp = 5;
+  float max_hp = 6;
+}
+
+// Was in einem Tick im Kampf passiert ist (013). Der Server rechnet Flug, Treffer und Schaden; der Client spielt nur Effekte ab.
+message CombatEvents {
+  repeated ProjectileLaunched launched = 1;
+  repeated ProjectileHit hits = 2;
+}
+
+message ProjectileLaunched {
+  // Eindeutig, solange der Server läuft; nie 0.
+  uint32 projectile_id = 1;
+  // PlayerState.id des Schützen.
+  string shooter_id = 2;
+  // TargetState.id des Ziels.
+  string target_id = 3;
+}
+
+message ProjectileHit {
+  uint32 projectile_id = 1;
+  string target_id = 2;
+  // Tatsächlich abgezogene HP (höchstens die HP vor dem Treffer).
+  float damage = 3;
 }

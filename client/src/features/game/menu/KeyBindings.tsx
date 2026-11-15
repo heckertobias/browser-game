@@ -24,6 +24,8 @@ const ACTION_NAMES: ReadonlyMap<Action, string> = new Map([
   [Action.MOVE_DOWN, t.actionMoveDown],
   [Action.MOVE_LEFT, t.actionMoveLeft],
   [Action.MOVE_RIGHT, t.actionMoveRight],
+  [Action.ATTACK_MELEE, t.actionAttackMelee],
+  [Action.ATTACK_RANGED, t.actionAttackRanged],
 ]);
 
 export function actionName(action: Action): string {

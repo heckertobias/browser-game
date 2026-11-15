@@ -1,6 +1,6 @@
 # 013 – Rudimentäres Kampfsystem
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [012 – HP & Mana](../012-hp-mana/spec.md) · [016 – Blickrichtung](../016-blickrichtung/spec.md)
 Voraussetzung für: [014 – Gegner](../014-gegner/spec.md) (geplant)
@@ -39,7 +39,8 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
   (Handy) bzw. anklicke (PC), dann wird es zu meinem aktiven Ziel und visuell hervorgehoben
   (z. B. umrandet).
 - **AK-2:** Gegeben es ist kein Ziel markiert, wenn ich einen Angriff (Nah- oder Fernkampf) auslöse,
-  dann passiert nichts: es entsteht kein Angriff.
+  dann passiert nichts: es entsteht kein Angriff. Ich erhalte einen kurzen Hinweis (AK-20, z. B. „Kein
+  Ziel gewählt“).
 - **AK-3:** Gegeben ich habe ein Ziel markiert, wenn ich ein anderes zielbares Objekt anwähle, dann
   wird das neue zum aktiven Ziel; es gibt jederzeit höchstens ein aktives Ziel.
 
@@ -48,7 +49,8 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
   in der festen Nahkampfreichweite (Konstante im Plan) und in Blickrichtung (AK-19) ist, dann erleidet das Ziel sofort den
   Nahkampfschaden (feste Konstante im Plan).
 - **AK-5:** Gegeben ich habe ein Ziel markiert, wenn ich den Nahkampf auslöse und das Ziel außerhalb
-  der Nahkampfreichweite ist, dann passiert nichts (kein Schaden).
+  der Nahkampfreichweite ist, dann passiert nichts (kein Schaden). Ich erhalte einen kurzen Hinweis
+  (AK-20, z. B. „Ziel nicht in Reichweite“).
 - **AK-6:** Gegeben ich löse einen Nahkampf aus, dann wird kein Mana verbraucht.
 
 ### Fernkampf
@@ -61,7 +63,7 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
   (Feedback, z. B. kurzes Icon/Text „zu wenig Mana") und mein Mana wird nicht verändert.
 - **AK-9:** Gegeben ich habe ein Ziel markiert, wenn ich den Fernkampf auslöse und das Ziel
   außerhalb der Maximalreichweite (Konstante im Plan) ist, dann wird kein Projektil gestartet (kein
-  Schaden).
+  Schaden). Ich erhalte einen kurzen Hinweis (AK-20, z. B. „Ziel nicht in Reichweite“).
 - **AK-10:** Gegeben ein Fernkampf greift zu, dann wird eine feste Mana-Menge (Konstante im Plan)
   verbraucht.
 
@@ -73,6 +75,10 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
 - **AK-12:** Gegeben ein Angriffsversuch schlägt fehl, weil kein Ziel anvisiert ist (AK-2), nicht in
   Reichweite (AK-5 / AK-9), nicht in Blickrichtung (AK-19) oder zu wenig Mana (AK-8), dann startet keine Abklingzeit: Ein
   fehlgeschlagener Versuch sperrt mich nicht aus.
+- **AK-22:** Gegeben ein Angriff wurde ausgeführt (AK-11), dann sehe ich die laufende Abklingzeit auf beiden
+  Angriffs-Buttons: Sie sind abgedunkelt, und die dunkle Fläche läuft im Uhrzeigersinn ab, bis der nächste Angriff
+  möglich ist. Ein Angriffsversuch während der Abklingzeit bleibt ohne weiteren Hinweis (die Anzeige genügt).
+  Ein fehlgeschlagener Versuch (AK-12) zeigt keine Abklingzeit.
 
 ### Blickrichtung
 - **AK-19:** Gegeben ich habe ein Ziel in Reichweite markiert, das nicht grob in meiner Blickrichtung
@@ -80,6 +86,13 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
   Fernangriff auslöse, dann passiert nichts: kein Schaden, kein Projektil, kein Mana-Abzug. Ich
   erhalte einen kurzen Hinweis (wie bei AK-8, z. B. „Ziel nicht vor dir“). Meine Figur dreht sich
   dabei nicht von selbst zum Ziel.
+
+### Hinweise
+- **AK-20:** Gegeben ein Angriffsversuch scheitert, weil kein Ziel gewählt ist (AK-2), das Ziel nicht
+  in Reichweite ist (AK-5 / AK-9), nicht vor mir liegt (AK-19) oder das Mana nicht reicht (AK-8), dann
+  erscheint der Hinweis gut sichtbar mittig im oberen Teil des Spielfelds, groß und kontrastreich,
+  für kurze Zeit; ein neuer Hinweis ersetzt den alten. Ein Versuch während der Abklingzeit bleibt
+  still.
 
 ### Trainings-Dummy
 - **AK-13:** Gegeben der Spieler ist im Spiel, dann ist genau ein Trainings-Dummy an einem festen Ort
@@ -94,6 +107,9 @@ hier noch **keinen Schaden** nehmen – das kommt mit den Gegnern in 014.
   wird nicht gespeichert.
 - **AK-18:** Gegeben der Trainings-Dummy ist sichtbar, dann ist sein aktueller HP-Wert erkennbar
   (z. B. ein Balken über ihm), damit der Spieler sieht, ob ein Angriff etwas gewirkt hat.
+- **AK-21:** Gegeben ein Fernkampf-Projektil ist unterwegs, dann sinkt der angezeigte HP-Wert des Ziels
+  erst, wenn das sichtbare Projektil einschlägt – nicht vorher. Das Projektil im Client ist reine
+  Darstellung; ob und wann es trifft, entscheidet der Server.
 
 ## Out of Scope
 

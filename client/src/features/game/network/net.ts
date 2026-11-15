@@ -1,10 +1,14 @@
 import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import {
+  AttackRejected_Reason,
   ChatRejected_Reason,
   ClientMessageSchema,
   Kicked_Reason,
   ServerMessageSchema,
+  type Attack,
+  type AttackAccepted,
   type ChatMessage,
+  type CombatEvents,
   type KeyBindings,
   type Snapshot,
   type Welcome,
@@ -17,11 +21,23 @@ export type KickReason = Kicked_Reason.SIGNED_IN_ELSEWHERE | Kicked_Reason.SIGNE
 /** Gründe, aus denen der Server eine Chatnachricht ablehnt (AK-13). */
 export type ChatRejectReason = ChatRejected_Reason.TOO_FAST;
 
+/** Gründe, aus denen der Server einen Angriff meldet (013 AK-5, AK-8, AK-9, AK-19); alles andere scheitert still. */
+export type AttackRejectReason =
+  | AttackRejected_Reason.NOT_ENOUGH_MANA
+  | AttackRejected_Reason.NOT_FACING
+  | AttackRejected_Reason.OUT_OF_RANGE;
+
 export interface ConnectionHandlers {
   onWelcome(welcome: Welcome): void;
   onSnapshot(snapshot: Snapshot): void;
   onKicked(reason: KickReason): void;
   onClose(): void;
+  /** Nur an den Angreifer: Angriff nicht ausgeführt (013 AK-5, AK-8, AK-9, AK-19). */
+  onAttackRejected?(reason: AttackRejectReason): void;
+  /** Nur an den Angreifer: Angriff ausgeführt, die Abklingzeit läuft (013 AK-11, AK-22). */
+  onAttackAccepted?(accepted: AttackAccepted): void;
+  /** An alle: Projektile gestartet und eingeschlagen, vor dem Snapshot desselben Ticks (013 AK-21). */
+  onCombatEvents?(events: CombatEvents): void;
 }
 
 export interface ChatHandlers {
@@ -36,6 +52,8 @@ export interface GameConnection {
   sendChat(text: string): boolean;
   /** Schickt die Belegung (leer = Standard). `false`: Verbindung nicht offen, nichts gesendet. */
   saveKeyBindings(keyBindings: KeyBindings): boolean;
+  /** Schickt einen Angriffswunsch (013); der Server entscheidet. Bei nicht offener Verbindung geht er verloren. */
+  sendAttack(attack: Attack): void;
   close(): void;
 }
 
@@ -80,6 +98,23 @@ export function createReceiver(handlers: ConnectionHandlers & Partial<ChatHandle
           if (reason === ChatRejected_Reason.TOO_FAST) handlers.onChatRejected?.(reason);
           break;
         }
+        case "attackRejected": {
+          const { reason } = message.payload.value;
+          if (
+            reason === AttackRejected_Reason.NOT_ENOUGH_MANA ||
+            reason === AttackRejected_Reason.NOT_FACING ||
+            reason === AttackRejected_Reason.OUT_OF_RANGE
+          ) {
+            handlers.onAttackRejected?.(reason);
+          }
+          break;
+        }
+        case "attackAccepted":
+          handlers.onAttackAccepted?.(message.payload.value);
+          break;
+        case "combatEvents":
+          handlers.onCombatEvents?.(message.payload.value);
+          break;
         case undefined:
           break;
       }
@@ -117,6 +152,11 @@ export function connect(url: string, handlers: ConnectionHandlers & ChatHandlers
       const message = create(ClientMessageSchema, { payload: { case: "saveKeyBindings", value: { keyBindings } } });
       socket.send(toBinary(ClientMessageSchema, message));
       return true;
+    },
+    sendAttack(attack) {
+      if (socket.readyState !== WebSocket.OPEN) return;
+      const message = create(ClientMessageSchema, { payload: { case: "attack", value: attack } });
+      socket.send(toBinary(ClientMessageSchema, message));
     },
     close() {
       socket.close();
