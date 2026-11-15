@@ -97,6 +97,14 @@ fertige Blatt und liefert es per HTTP aus; der Client cacht die Datei. Damit die
 Nicht in Frage kommt, dass ein Client sein fertiges Blatt hochlädt: Der Server würde ihm ein Bild glauben, das alle
 sehen (Constitution §2).
 
+**Später: Figuren außerhalb des Spiels über ein eigenes Paket.** Soll eine Figur auf einer Webseite erscheinen
+(Profil, Startseite), wird `sprites/` als eigenes Paket herausgelöst und dort genauso eingebunden wie im Spiel. Das
+ist der bevorzugte Weg für alles, was im Browser läuft; die Ausweichlösung auf dem Server bleibt für Orte ohne
+JavaScript (Mails, Vorschaubilder). Damit das Herauslösen einfach bleibt, gilt ab jetzt: Code in `sprites/`
+importiert nichts aus dem übrigen Spiel (kein Zustand, kein Netz, kein React, keine Konstanten aus `core/`). Nur
+`sprites/browser.ts` nutzt das DOM. Spielbezogen und beim Herauslösen im Spiel zu lassen sind `playerAppearance`,
+`HUMANOID_RIG`, `HUMANOID_IMAGES` und `assets.test.ts`.
+
 Boden (018) und Deko (019) folgen demselben Grundsatz mit einem **Atlas**: ein Bild plus Beschreibung mit benannten
 Einträgen. ADR 0017 nennt beide Formen; der Atlas wird in 018 gebaut.
 
@@ -111,7 +119,7 @@ Alle Werte sind reine Darstellung (Constitution §8, „nicht gemeint“) und st
 | `origin` | 24, 24 | `rig.json` | Punkt der Zelle auf der Weltposition der Figur |
 | `walk.frames` | 4 | `rig.json` | Bilder der Laufanimation |
 | `walk.frameMs` | 100 | `rig.json` | Dauer eines Laufbilds (AK-7); bei der manuellen Prüfung nachstellbar |
-| `FACING_TIE_EPSILON` | 1e-4 | `core/constants.ts` | Toleranz für „genau schräg“ (AK-5); fängt float32-Rundung der Blickrichtung ab |
+| `FACING_TIE_EPSILON` | 1e-4 | `sprites/direction.ts` | Toleranz für „genau schräg“ (AK-5); fängt float32-Rundung der Blickrichtung ab |
 | `AWAY_ALPHA` | 0,5 | `render/render.ts` (besteht) | Transparenz wartender Figuren (AK-9) |
 | `PACK_CELL`, `PACK_COLUMNS`, `PACK_WALK_ROWS` | 16; unten/oben/links/rechts; 0–3 | `client/scripts/import-sprites.mjs` | Aufbau des Pack-Blatts; nur das Import-Skript kennt ihn (am Asset prüfen) |
 
@@ -226,9 +234,6 @@ Alles in `Features/Game/Commands/Application/` aus 015.
   Kleidungspixel und ihre Originalfarben aus (für `LICENSES.md`).
 - Neue Abhängigkeit **`pngjs`** (devDependency, PNG lesen und schreiben in Node), dazu `@types/pngjs` für den Test.
 
-### `core/constants.ts`
-- `FACING_TIE_EPSILON` (Tabelle oben) mit kurzem Kommentar.
-
 ### `sprites/rig.ts` (neu, rein)
 - `type SpriteDirection = "down" | "up" | "left" | "right"`.
 - `interface Rig { cell; origin; directions; animations; slots; parts }` wie `rig.json`, alles `readonly`.
@@ -242,6 +247,8 @@ Alles in `Features/Game/Commands/Application/` aus 015.
 
 ### `sprites/direction.ts` (neu, rein)
 - `spriteDirection(facing: number): SpriteDirection` nach Entscheidung 4.
+- `FACING_TIE_EPSILON` (Tabelle oben) mit kurzem Kommentar; steht hier, nicht in `core/`, weil `sprites/` nichts aus
+  dem übrigen Spiel importiert.
 
 ### `sprites/compose.ts` (neu, rein)
 - `interface Pixels { readonly width: number; readonly height: number; readonly data: Uint8ClampedArray }`.
@@ -326,7 +333,8 @@ Alles in `Features/Game/Commands/Application/` aus 015.
   im Code (bisheriger Plan; ein Teiletausch wäre ein Umbau), Einfärben über exakte Farbwerte (bricht bei jeder neuen
   Figur), Ankerpunkte statt voller Blätter (weniger Zeichenarbeit, mehr Logik; später möglich), eine
   Spiele-Bibliothek (neue Abhängigkeit ohne Bedarf, Canvas 2D reicht), Zusammensetzen auf dem Server (als
-  Ausweichlösung festgehalten, siehe oben), Hochladen fertiger Blätter durch den Client (verworfen, §2).
+  Ausweichlösung festgehalten, siehe oben), Hochladen fertiger Blätter durch den Client (verworfen, §2). Ausblick: `sprites/` als eigenes Paket für
+  Webseiten (siehe oben).
 - `docs/project-structure.md`: `client/src/assets/` und `features/game/sprites/` in den Client-Baum,
   `client/scripts/import-sprites.mjs`; ADR-Zähler „0001–0017“.
 
