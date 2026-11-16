@@ -124,7 +124,7 @@ message CommandRejected {
 | 7 | `resetPosition` → `ResetToStart` | Unit: Position (500, 500) → im `SpawnRadius`, HP unverändert, `SpawnSeq + 1` |
 | 8 | Snapshot an alle | Integration: B sieht die neue Position von A im nächsten Snapshot (< 1 s), mit neuem `spawn_seq` |
 | 9 | keine Rechteprüfung | Unit: Registry hat keinen Rechte-Parameter; Integration: frisch registrierter Account darf beide Commands |
-| 10 | keine Konfiguration | Code-Review (Registry fest im Code); Integration: Commands auch mit `Environment=Production` |
+| 10 | keine Konfiguration | Code-Review (Registry fest im Code); Unit: Registry und Dispatcher ohne Konfiguration und Umgebung |
 | 11 | `CommandContext` nur mit `Self` | Unit: zwei Figuren, `fullHealth` auf A → B unverändert; `resetPosition` auf A → B unverändert |
 
 ## Constitution-Check
