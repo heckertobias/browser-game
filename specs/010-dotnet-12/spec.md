@@ -21,7 +21,9 @@ Spiel und Admin laufen auf .NET 12, der nächsten Version mit Langzeit-Support. 
 - **AK-1:** Gegeben der Wechsel ist ausgerollt, dann funktionieren alle bisherigen Abläufe von Spiel und Admin
   unverändert (alle bestehenden automatischen Tests grün, Sichtprüfung im Release Candidate in der Testumgebung).
 - **AK-2:** Gegeben die Regeln aus 009 (Mindestalter von Paketen, gehärtete Images), dann gelten sie unverändert weiter.
-- **AK-3:** Gegeben .NET 11 ist nicht mehr unterstützt, dann läuft zu diesem Zeitpunkt nichts mehr darauf.
+- **AK-3:** Gegeben .NET 12 ist veröffentlicht, dann ist der Wechsel spätestens 4 Wochen danach ausgerollt
+  (die 7 Tage Wartezeit aus ADR 0002 liegen innerhalb dieser 4 Wochen).
+- **AK-4:** Gegeben .NET 11 ist nicht mehr unterstützt, dann läuft zu diesem Zeitpunkt nichts mehr darauf.
 
 ## Out of Scope
 
@@ -29,6 +31,13 @@ Spiel und Admin laufen auf .NET 12, der nächsten Version mit Langzeit-Support. 
 
 ## Offene Fragen
 
-- [ ] Zeitplan: Wann endet der Support von .NET 11 genau, und wie viel Puffer planen wir vor dem Ende ein?
+_Keine._
+
+## Entschiedene Fragen
+
+- **Zeitplan:** Wechsel spätestens 4 Wochen nach Erscheinen von .NET 12 (AK-3). .NET 11 hat als Version mit
+  Standard-Support 24 Monate Support, also voraussichtlich bis November 2028. .NET 12 erscheint voraussichtlich im
+  November 2027. Damit bleibt rund ein Jahr Puffer bis zum Supportende; das genaue Datum aus Microsofts
+  Support-Übersicht wird im Plan festgehalten.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
