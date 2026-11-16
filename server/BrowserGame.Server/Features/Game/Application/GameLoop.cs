@@ -38,7 +38,7 @@ internal sealed class PlayerConnection(
 }
 
 /// <summary>
-/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, simulieren, Angriffe ausführen und bestätigen, Projektil-Ereignisse melden (013), Snapshots verschicken.
+/// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, Commands ausführen (015), simulieren, Angriffe ausführen und bestätigen, Projektil-Ereignisse melden (013), Snapshots verschicken.
 /// Dazu Nachlauf getrennter Figuren, Übernahme und Rauswurf (003 AK-12, AK-20–22); Positionen an den PositionStore (AK-18, AK-19).
 /// </summary>
 public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null) : BackgroundService
@@ -76,6 +76,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         GameSettings.RangedRange, GameSettings.RangedDamage, GameSettings.RangedManaCost, GameSettings.ProjectileSpeed,
         GameSettings.GlobalCooldownSeconds, GameSettings.DummyX, GameSettings.DummyY, GameSettings.DummyMaxHp,
         GameSettings.DummyRespawnSeconds);
+    // Slash-Commands (015): fest im Code, ohne Rechte und Schalter; laufen auf dem Tick-Thread wie der Chat.
+    private readonly CommandDispatcher _commands = new(new CommandRegistry());
     private readonly uint _lingerTicks = GameSettings.ToTicks(configuration.GetValue(GameSettings.LingerSecondsKey, GameSettings.LingerSeconds));
 
     // Mindestens 1 Tick, sonst Division durch 0 im Speicher-Takt.
@@ -377,6 +379,13 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             return;
         }
 
+        // Slash-Command (015): nie verteilt, nie im Verlauf oder Speicher (AK-1, AK-5). Erfolg bleibt ohne Antwort.
+        if (text.StartsWith('/'))
+        {
+            RunCommand(sender, text);
+            return;
+        }
+
         var senderName = _world.GetPlayer(sender.PlayerId)?.Name ?? sender.Name;
         var entry = new ChatHistoryEntry(sender.PlayerId, senderName, text, now);
         _chatHistory.Add(entry);
@@ -394,6 +403,23 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         foreach (var connection in _connections.Values)
         {
             connection.Outbox.SendRequired(bytes);
+        }
+    }
+
+    /// <summary>
+    /// Führt einen Slash-Command für den Absender aus (015). Nur der Absender bekommt eine Antwort, und nur bei Ablehnung
+    /// (AK-4); andere Figuren erreicht der Command nicht (AK-11).
+    /// </summary>
+    private void RunCommand(PlayerConnection sender, string text)
+    {
+        if (_world.GetPlayer(sender.PlayerId) is not { } self)
+        {
+            return;
+        }
+
+        if (_commands.Execute(text, new CommandContext(_world, self, _tick)) is { } reason)
+        {
+            sender.Outbox.SendRequired(new ServerMessage { CommandRejected = new CommandRejected { Reason = reason } }.ToByteArray());
         }
     }
 

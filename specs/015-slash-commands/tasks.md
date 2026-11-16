@@ -12,7 +12,7 @@ Erst beginnen, wenn 011 und 012 umgesetzt sind.
 - [x] **T2** (AK-3, AK-4): `CommandParser` mit Unit-Tests (gültige Formen, Parameter, Fehlerfälle).
 - [x] **T3** (AK-6, AK-7, AK-9–11): `World.ResetToStart` (gemeinsam mit dem Respawn aus 012); `CommandContext`,
   `CommandRegistry` (`fullHealth`, `resetPosition`), `CommandDispatcher`; Unit-Tests.
-- [ ] **T4** (AK-1, AK-2, AK-4, AK-5, AK-8): Abfangen im `GameLoop` nach `Normalize` und Tempo-Limit, `CommandRejected`
+- [x] **T4** (AK-1, AK-2, AK-4, AK-5, AK-8): Abfangen im `GameLoop` nach `Normalize` und Tempo-Limit, `CommandRejected`
   an den Absender; Integrationstests (WS).
 
 ## Client
