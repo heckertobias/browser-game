@@ -23,12 +23,14 @@ Hindernis.
 ## Out of Scope
 
 - Schwimmen.
-- Kollision mit Deko-Objekten ([019](../019-deko/spec.md)), anderen Spielern oder Gegnern.
+- Kollision mit anderen Spielern oder Gegnern.
 
 ## Offene Fragen
 
 - [ ] Gleitet die Figur an einem Hindernis entlang, wenn sie schräg dagegen läuft, oder bleibt sie ganz stehen?
 - [ ] Was passiert mit Figuren, deren gespeicherte Position (003) in einem Berg oder im See liegt?
+- [ ] Blockieren Deko-Objekte ([019](../019-deko/spec.md)) schon in dieser Spec (je Objektart), oder erst in einer
+  Folge-Spec?
 - [ ] Gilt die Kollision auch für Gegner (014) und Fernkampf-Geschosse (013)?
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->

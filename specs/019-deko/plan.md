@@ -2,7 +2,10 @@
 
 Gehört zu: [spec.md](spec.md)
 
-> **Vorläufig.** Die Spec hat noch offene Fragen. Der Plan geht von den Empfehlungen unten aus (Variante A) und
+> **Veraltet.** Die offenen Fragen sind beantwortet (Objekte in der Karte aus 018, Verdeckung ganz oder teilweise je
+> Objektart). Dieser Plan beruht noch auf „Regeln statt Karte“ und muss vor `bereit` neu geschrieben werden.
+>
+> Ursprünglich: Die Spec hatte noch offene Fragen. Der Plan geht von den Empfehlungen unten aus (Variante A) und
 > markiert abhängige Stellen mit **⚠ F-n**. Ändert eine Antwort die Variante, wird der Plan vor `bereit` angepasst.
 
 ## Überblick
