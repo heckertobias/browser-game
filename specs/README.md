@@ -97,7 +97,7 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 16 | [018 – Boden statt Gitter](018-boden/spec.md) | entwurf | 017 |
 | 17 | [019 – Deko-Objekte](019-deko/spec.md) | entwurf | 018 |
 | 18 | [021 – Kollision](021-kollision/spec.md) | entwurf | 018 |
-| 19 | [020 – Pixel-Schrift](020-pixel-schrift/spec.md) | entwurf | 001 |
+| 19 | [020 – Pixel-Schrift](020-pixel-schrift/spec.md) | entwurf | 001, 015 |
 | später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |
 | später | [008 – Push-Benachrichtigungen](008-push/spec.md) | entwurf | 007, Haus |
 | nach Release | [010 – Wechsel auf .NET 12](010-dotnet-12/spec.md) | entwurf | 009, .NET 12 GA + 7 Tage |

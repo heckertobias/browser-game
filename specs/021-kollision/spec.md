@@ -19,6 +19,8 @@ Hindernis.
   die Fläche nicht.
 - **AK-2:** Gegeben ich bin im Spiel, dann kann ich das Gebiet nicht über den Bergrand verlassen.
   ([001](../001-walking-skeleton/spec.md) AK-7 „keine Grenze“ wird damit angepasst.)
+- **AK-3:** Gegeben ich laufe schräg gegen ein Hindernis, dann gleitet meine Figur am Hindernis entlang, statt
+  stehen zu bleiben.
 
 ## Out of Scope
 
@@ -27,10 +29,13 @@ Hindernis.
 
 ## Offene Fragen
 
-- [ ] Gleitet die Figur an einem Hindernis entlang, wenn sie schräg dagegen läuft, oder bleibt sie ganz stehen?
 - [ ] Was passiert mit Figuren, deren gespeicherte Position (003) in einem Berg oder im See liegt?
 - [ ] Blockieren Deko-Objekte ([019](../019-deko/spec.md)) schon in dieser Spec (je Objektart), oder erst in einer
   Folge-Spec?
 - [ ] Gilt die Kollision auch für Gegner (014) und Fernkampf-Geschosse (013)?
+
+## Entschiedene Fragen
+
+- **Gleiten:** Läuft die Figur schräg gegen ein Hindernis, gleitet sie daran entlang (AK-3).
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
