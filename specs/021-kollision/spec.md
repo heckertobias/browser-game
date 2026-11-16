@@ -2,12 +2,14 @@
 
 **Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
-Setzt voraus: [018 – Boden statt Gitter](../018-boden/spec.md) (feste Karte mit Bergen und See)
+Setzt voraus: [018 – Boden statt Gitter](../018-boden/spec.md) (feste Karte mit Bergen und See),
+[019 – Deko-Objekte](../019-deko/spec.md) (blockierende Objekte), [013](../013-kampfsystem/spec.md) und
+[014](../014-gegner/spec.md) (Geschosse und Gegner)
 
 ## Ziel
 
-Berge und Wasser lassen sich nicht mehr betreten. Damit hat das Gebiet aus 018 echte Grenzen, und der See ist ein
-Hindernis.
+Berge, Wasser und blockierende Deko-Objekte lassen sich nicht mehr betreten. Damit hat das Gebiet aus 018 echte
+Grenzen, und der See und z. B. Baumstämme sind Hindernisse – für Spieler, Gegner und Geschosse gleichermaßen.
 
 ## User Stories
 
@@ -24,6 +26,12 @@ Hindernis.
 - **AK-4:** Gegeben meine gespeicherte Position (003) liegt auf einer nicht begehbaren Fläche (Berg, Wasser oder
   jenseits des Kartenrands), wenn ich das Spiel betrete, dann stehe ich am Startpunkt.
 
+- **AK-5:** Gegeben ein Deko-Objekt einer blockierenden Art (z. B. Baumstamm), dann kann ich es nicht betreten;
+  Objekte einer nicht blockierenden Art (z. B. hohes Gras) kann ich weiter durchlaufen.
+- **AK-6:** Gegeben ein Gegner (014) bewegt sich, dann gelten für ihn dieselben Hindernisse wie für mich.
+- **AK-7:** Gegeben ein Fernkampf-Geschoss (013) trifft auf ein Hindernis, dann endet es dort und trifft nichts
+  dahinter.
+
 ## Out of Scope
 
 - Schwimmen.
@@ -31,14 +39,14 @@ Hindernis.
 
 ## Offene Fragen
 
-- [ ] Blockieren Deko-Objekte ([019](../019-deko/spec.md)) schon in dieser Spec (je Objektart), oder erst in einer
-  Folge-Spec?
-- [ ] Gilt die Kollision auch für Gegner (014) und Fernkampf-Geschosse (013)?
+_Keine._
 
 ## Entschiedene Fragen
 
 - **Gleiten:** Läuft die Figur schräg gegen ein Hindernis, gleitet sie daran entlang (AK-3).
 - **Ungültige gespeicherte Position:** Die Figur wird beim Betreten des Spiels zum Startpunkt versetzt (AK-4). Das
   gilt für alte Positionen aus der Zeit ohne Karte genauso wie nach späteren Kartenänderungen.
+- **Alles gleich mit:** Deko-Objekte blockieren je Objektart schon in dieser Spec (AK-5); Gegner und Geschosse
+  unterliegen denselben Hindernissen (AK-6, AK-7). Spieler und Gegner blockieren einander weiterhin nicht.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->

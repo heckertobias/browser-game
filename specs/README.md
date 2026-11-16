@@ -96,7 +96,7 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 15 | [017 – Spielfigur als Pixel-Art](017-spielfigur/spec.md) | entwurf | 001, 003, 015, 016 |
 | 16 | [018 – Boden statt Gitter](018-boden/spec.md) | entwurf | 017 |
 | 17 | [019 – Deko-Objekte](019-deko/spec.md) | entwurf | 018 |
-| 18 | [021 – Kollision](021-kollision/spec.md) | entwurf | 018 |
+| 18 | [021 – Kollision](021-kollision/spec.md) | entwurf | 013, 014, 018, 019 |
 | 19 | [020 – Pixel-Schrift](020-pixel-schrift/spec.md) | entwurf | 001, 015 |
 | später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |
 | später | [008 – Push-Benachrichtigungen](008-push/spec.md) | entwurf | 007, Haus |
