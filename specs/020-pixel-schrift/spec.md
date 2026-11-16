@@ -2,7 +2,7 @@
 
 **Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
-Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) (Namen über Figuren),
+Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) (Namen über Figuren) ·
 [015 – Slash-Commands](../015-slash-commands/spec.md) (Umschalten der Schrift zum Testen)
 
 ## Ziel
