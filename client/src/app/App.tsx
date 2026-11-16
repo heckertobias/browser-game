@@ -88,6 +88,7 @@ export function App() {
       onChatHistory: (messages) => { chatRef.current?.onChatHistory(messages); },
       onChatMessage: (message) => { chatRef.current?.onChatMessage(message); },
       onChatRejected: (reason) => { chatRef.current?.onChatRejected(reason); },
+      onCommandRejected: (reason) => { chatRef.current?.onCommandRejected(reason); },
     });
     gameRef.current = game;
     game.start();
