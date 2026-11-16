@@ -21,6 +21,8 @@ Hindernis.
   ([001](../001-walking-skeleton/spec.md) AK-7 „keine Grenze“ wird damit angepasst.)
 - **AK-3:** Gegeben ich laufe schräg gegen ein Hindernis, dann gleitet meine Figur am Hindernis entlang, statt
   stehen zu bleiben.
+- **AK-4:** Gegeben meine gespeicherte Position (003) liegt auf einer nicht begehbaren Fläche (Berg, Wasser oder
+  jenseits des Kartenrands), wenn ich das Spiel betrete, dann stehe ich am Startpunkt.
 
 ## Out of Scope
 
@@ -29,7 +31,6 @@ Hindernis.
 
 ## Offene Fragen
 
-- [ ] Was passiert mit Figuren, deren gespeicherte Position (003) in einem Berg oder im See liegt?
 - [ ] Blockieren Deko-Objekte ([019](../019-deko/spec.md)) schon in dieser Spec (je Objektart), oder erst in einer
   Folge-Spec?
 - [ ] Gilt die Kollision auch für Gegner (014) und Fernkampf-Geschosse (013)?
@@ -37,5 +38,7 @@ Hindernis.
 ## Entschiedene Fragen
 
 - **Gleiten:** Läuft die Figur schräg gegen ein Hindernis, gleitet sie daran entlang (AK-3).
+- **Ungültige gespeicherte Position:** Die Figur wird beim Betreten des Spiels zum Startpunkt versetzt (AK-4). Das
+  gilt für alte Positionen aus der Zeit ohne Karte genauso wie nach späteren Kartenänderungen.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
