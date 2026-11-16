@@ -209,8 +209,11 @@ internal sealed class World(
         }
     }
 
-    /// <summary>Tote Figur erscheint am Startpunkt der Welt mit vollen Werten (012 AK-8).</summary>
-    private void Respawn(Player player)
+    /// <summary>
+    /// Setzt die Figur an den Startpunkt der Welt wie beim ersten Start (003 AK-17), ohne HP und Mana zu ändern (015 AK-7).
+    /// Neuer <see cref="Player.SpawnSeq"/>, damit andere nicht gleiten (012 AK-8); Richtung und offene Eingaben verfallen.
+    /// </summary>
+    public void ResetToStart(Player player)
     {
         (player.X, player.Y) = RandomStartPosition();
         player.SpawnSeq++;
@@ -219,7 +222,12 @@ internal sealed class World(
         player.LastProcessedSeq = player.LastQueuedSeq;
         player.TicksWithoutInput = 0;
         (player.DirX, player.DirY) = (0, 0);
+    }
 
+    /// <summary>Tote Figur erscheint am Startpunkt der Welt mit vollen Werten (012 AK-8).</summary>
+    private void Respawn(Player player)
+    {
+        ResetToStart(player);
         player.Hp = MaxHp;
         player.Mana = MaxMana;
     }
