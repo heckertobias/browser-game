@@ -2,131 +2,169 @@
 
 Gehört zu: [spec.md](spec.md)
 
-> **Veraltet.** Die offenen Fragen sind beantwortet: nur Namen über Figuren, keine öffentlichen Seiten, OFL für
-> Schriften zulässig (Lizenz-ADR aus 017 bekommt diese Ausnahme). Der Plan muss vor `bereit` auf den kleineren
-> Umfang angepasst werden.
->
-> **Vorläufig.** Die Spec hat noch offene Fragen. Der Plan geht von den Empfehlungen unten aus und markiert abhängige
-> Stellen mit **⚠ F-n**. Ändert eine Antwort den Umfang, wird der Plan vor `bereit` angepasst.
-
 ## Überblick
 
 ```
-Client  ── client/src/assets/<schrift>.ttf      Pixel-Schrift (CC0) + Zeile in LICENSES.md
-        ── render/pixelFont.ts                  Name der Schrift, Größe, geprüfter Zeichenvorrat
-        ── render/render.ts                     Namen über Figuren in der Pixel-Schrift, auf ganze Pixel ausgerichtet
-        ── styles/global.css                    @font-face; Tailwind-Variable --font-mono → Pixel-Schrift (HUD, Chat, Menü) ⚠ F-1, F-4
-        ── app/App.tsx                          Schrift beim Start laden (für das Canvas)
-Server  ── nur bei F-2 = ja: landing.css + Kopie der Schrift nach wwwroot/fonts/ (Razor-Seiten)
+Client  ── client/src/assets/fonts/<schrift>/   5–6 Kandidaten (TTF wie geliefert) + bei OFL die Lizenzdatei; Zeilen in LICENSES.md
+        ── render/nameFonts.ts                  Tabelle der Kandidaten (Familie, Datei, native Größe, Abstand), aktuelle Schrift
+        ── render/render.ts                     Namen über Figuren in der aktuellen Schrift, auf ganze Pixel ausgerichtet
+        ── engine/game.ts, network/net.ts       NextNameFont → nächste Schrift, Hinweis mit ihrem Namen
+        ── app/App.tsx                          alle Kandidaten beim Start laden (für das Canvas)
+Server  ── Commands (015): /run nameFont() → NextNameFont nur an den Absender
+Vertrag ── game.proto: ServerMessage 12 = NextNameFont (nach der Wahl wieder entfernt)
+Doku    ── Lizenz-ADR aus 017 (ADR 0016): Ausnahme OFL für Schriften
 ```
 
-Spiel-UI und Razor-Seiten nutzen heute `font-mono` (Tailwind) als Pixel-Akzent; das Canvas zeichnet Namen in
-`8px monospace`. Die Pixel-Schrift ersetzt beides an je einer Stelle.
+Nur die **Namen über den Figuren** (Canvas) nutzen die Pixel-Schrift. HUD, Chat, Menüs, öffentliche Seiten und Admin
+bleiben, wie sie sind.
 
-**Voraussetzung:** 001. Aus 017 kommen ADR 0016 und `client/src/assets/` mit Register und Test; ist 017 noch nicht
-umgesetzt, legt T1 hier beides an (wie in 017 T1 beschrieben).
+Die Spec läuft in zwei Phasen: Erst sind alle Kandidaten eingebaut und im Spiel umschaltbar (AK-3). Dann wählt der
+User im Spiel eine, und die übrigen samt Umschalten werden entfernt (AK-4).
 
-## Offene Fragen der Spec und Empfehlung
+**Voraussetzung:** 001, 015 (`CommandRegistry`, `CommandContext`, Abfangen im `GameLoop`, Hinweis über dem Chat-Feld).
+Aus 017 kommen ADR 0016, `client/src/assets/` mit `LICENSES.md` und `licenses.test.ts` sowie `CommandContext.Reply`;
+ist 017 noch nicht umgesetzt, legt T1 bzw. T3 hier das Nötige an (wie in 017 T1 und T3 beschrieben).
 
-| | Frage (spec.md) | Empfehlung | Begründung |
+## Kandidaten
+
+Vorauswahl nach Lesbarkeit bei kleiner Größe, Lizenz und Zeichenvorrat. T1 prüft jeden am Original (Lizenzdatei,
+Herkunft, Glyphen). Fällt einer durch, fliegt er raus; es bleiben mindestens fünf.
+
+| Schrift | Urheber | Lizenz (zu prüfen) | native Größe |
 |---|---|---|---|
-| F-1 | Wo gilt die Schrift? | **Namen über Figuren und die ganze Spiel-UI** (HUD, Chat, Menüs) | Vision: „Menüs und HUD … mit pixeliger Schrift“; technisch eine Variable (`--font-mono`) |
-| F-2 | Auch öffentliche Seiten? | **Ja, nur dort, wo heute `font-mono` steht** (Titel, Spielname, Buttons) | Gleiche Optik wie im Spiel; Admin bleibt sachlich (005) |
-| F-3 | Welche Schrift, welche Lizenz? | **Streng CC0**, ADR 0016 bleibt. Kandidaten: die Schriften aus Ninja Adventure (CC0 über das Pack) oder *Pixel Operator* (Jayvee Enaguas, CC0, Stand 2018) | Beide CC0. Gewählt wird die, die ä ö ü Ä Ö Ü ß und alle Zeichen der Texte (006) enthält. OFL nur, wenn keine passt |
-| F-4 | Lesbar genug für Chat? | **Ja, in nativer Größe**; die manuelle Prüfung entscheidet | Fällt sie durch, behält nur der Chat-Text die Systemschrift (eine Klasse) |
+| Pixel Operator | Jayvee Enaguas | CC0 1.0 | 8 bzw. 16 |
+| monogram | datagoblin | CC0 1.0 | 16 (Glyphen ~7 hoch) |
+| Press Start 2P | CodeMan38 | OFL 1.1 | 8 |
+| Silkscreen | Jason Kottke | OFL 1.1 | 8 |
+| Pixelify Sans | Stefie Justprince | OFL 1.1 | 16 (am Original prüfen) |
+| Tiny5 | Stefan Schmidt | OFL 1.1 | 5 bzw. 10 |
+
+Muss enthalten: `A–Z`, `a–z` (Namensregel aus 003) und `ä ö ü Ä Ö Ü ß` (spätere Ausweitung, Spec).
 
 ## Konstanten
 
-Reine Darstellung, Client (`render/pixelFont.ts`).
+Reine Darstellung, Client (`render/nameFonts.ts`).
 
 | Name | Wert | Bedeutung |
 |---|---|---|
-| `PIXEL_FONT_FAMILY` | `"PixelFont"` | Name der Schrift in `@font-face` und im Canvas |
-| `NAME_FONT_SIZE` | native Größe der Schrift in Weltpixeln (z. B. 8) | Namen über Figuren (AK-1); am gewählten Font festlegen |
-| `NAME_BASELINE_GAP` | 2 + Unterlänge der Schrift | Abstand Grundlinie → Oberkante der Figur, ganzzahlig |
-| `UI_FONT_SIZE` | native Größe oder ein Vielfaches (z. B. 16 CSS-Pixel) | Textgröße in HUD, Chat, Menü (⚠ F-1, F-4) |
-| `PIXEL_FONT_CHARSET` | geprüfter Zeichenvorrat | Zeichen, die die Schrift sicher enthält (AK-2) |
+| `NAME_FONTS` | Tabelle je Kandidat: `id`, `family`, `url`, `size`, `baselineGap` | Größe = native Größe der Schrift in Weltpixeln, damit jedes Glyphen-Pixel auf genau `k×k` Gerätepixeln liegt; `baselineGap` = Abstand Grundlinie → Oberkante der Figur (2 + Unterlänge), ganzzahlig |
+| `NAME_FONT_FALLBACK` | `"monospace"` | letzte Schrift im Font-Stack (fehlendes Zeichen, Schrift noch nicht geladen) |
+
+Nach der Wahl (AK-4) schrumpft `NAME_FONTS` auf einen Eintrag und heißt `NAME_FONT`.
 
 ## Entschiedene Fragen (Plan)
 
-1. **Eine Schrift, TTF wie geliefert.** Keine Umwandlung nach WOFF2 (das wäre ein Werkzeug mehr); TTF-Pixelschriften
-   sind klein. Liegt eine Bold- oder 8-px-Variante bei, kommt nur die genutzte ins Repo.
-2. **Canvas** (AK-1): `ctx.font = nameFont()` (`"<NAME_FONT_SIZE>px PixelFont, monospace"`), `textAlign = "left"`,
-   `textBaseline = "alphabetic"`. x = `Math.round(player.x − ctx.measureText(name).width / 2)`, y =
-   `top − NAME_BASELINE_GAP` (ganzzahlig). Mit ganzzahligem `k` liegen die Pixel der Schrift dann auf Gerätepixeln.
-3. **Laden fürs Canvas:** `App` ruft beim Start `document.fonts.load(nameFont())` (Promise mit `void`, Fehler still).
-   Bis die Schrift da ist, zeichnet das Canvas mit `monospace` weiter; danach von selbst in der Pixel-Schrift.
-4. **Spiel-UI** (⚠ F-1): In `global.css` `@font-face` (`font-display: swap`) und
-   `@theme { --font-mono: "PixelFont", ui-monospace, monospace; }`. Alle bestehenden `font-mono`-Klassen in `App.tsx`,
-   `Chat.tsx`, `Menu.tsx`, `KeyBindings.tsx` nutzen damit die Pixel-Schrift. Textgrößen dort auf `UI_FONT_SIZE`
-   (z. B. `text-sm` → `text-base`), damit die Schrift nicht verschmiert.
-5. **Fehlende Zeichen** (AK-2): Browser und Canvas nehmen für ein Zeichen, das die Schrift nicht hat, die nächste
-   Schrift der Liste (`monospace`). Damit wird jedes Zeichen dargestellt, auch Chat-Text mit Zeichen außerhalb von
-   Deutsch/Englisch. Für alle Texte aus 006 muss die Pixel-Schrift die Zeichen selbst haben (Test).
-6. **Razor-Seiten** (⚠ F-2): `build:landing` kopiert die Schrift nach `server/BrowserGame.Server/wwwroot/fonts/`
-   (gitignored, wie `css/site.css`); `landing.css` bekommt dasselbe `@font-face` mit `url("/fonts/<schrift>.ttf")` und
-   dieselbe `--font-mono`-Variable. Admin (005) bleibt unberührt.
+1. **TTF wie geliefert.** Keine Umwandlung nach WOFF2 (ein Werkzeug mehr); Pixelschriften sind klein. Je Kandidat nur
+   die genutzte Datei (z. B. Regular), in eigenem Ordner `assets/fonts/<id>/` mit der Lizenzdatei.
+2. **Canvas** (AK-1): `ctx.font = "<size>px <family>, monospace"`, `textAlign = "left"`, `textBaseline =
+   "alphabetic"`. x = `Math.round(player.x − ctx.measureText(name).width / 2)`, y = `top − baselineGap`. Mit
+   ganzzahligem `k` liegen die Pixel der Schrift auf Gerätepixeln.
+3. **Laden fürs Canvas:** `App` legt je Kandidat ein `FontFace` an, fügt es zu `document.fonts` hinzu und lädt es
+   (Fehler still). Bis eine Schrift da ist, zeichnet das Canvas mit `monospace`; danach von selbst in der Pixel-Schrift.
+4. **Umschalten über den Server** (AK-3), wie der Pfeil-Schalter in 017: `/run nameFont()` ist ein Command ohne
+   Parameter. Er schickt `NextNameFont` nur an den Absender; der Client nimmt die nächste Schrift aus `NAME_FONTS`
+   (nach der letzten wieder die erste) und zeigt über dem Chat-Feld kurz „Namensschrift 3/6: Silkscreen“, mit dem
+   Mechanismus, der in 015 `CommandRejected` zeigt. Kein Parameter: Der Server muss die Kandidaten nicht kennen, und
+   sechs Schritte sind schnell durchgeklickt. Nur auf diesem Gerät, nicht gespeichert; nach Neuladen gilt der erste
+   Kandidat.
+5. **Wahl und Aufräumen** (AK-4): Die Wahl trifft der User im Spiel (Testumgebung) und trägt sie in `tasks.md` ein.
+   Danach: übrige Schriften und Lizenzdateien aus `assets/fonts/` und `LICENSES.md` löschen, Command `nameFont`
+   entfernen, `NextNameFont` aus dem Proto entfernen und Feld 12 sowie den Namen als `reserved` markieren, Hinweistext
+   und Umschalt-Code im Client entfernen. Was bleibt: eine Schrift, `NAME_FONT`, das Laden im `App`, die Namen im
+   Canvas.
+6. **Fehlende Zeichen** (AK-2): Browser und Canvas nehmen für ein fehlendes Zeichen die nächste Schrift der Liste
+   (`monospace`). Für Namen muss die Pixel-Schrift die Zeichen selbst haben; das prüft ein Test an der Datei
+   (Entscheidung 7).
+7. **Zeichenvorrat aus der Datei:** Ein Vitest liest jede TTF unter `assets/fonts/` und prüft über die `cmap`-Tabelle
+   (Format 4, sonst 12), dass alle Pflichtzeichen eine Glyphe haben. Der Leser ist eine kleine Testhilfe (~60 Zeilen,
+   kein Paket). So beruht AK-2 nicht auf einer abgeschriebenen Liste.
+8. **Lizenz** (AK-5): `LICENSES.md` nennt je Datei Herkunft, Stand und Lizenz (`CC0 1.0` oder `OFL-1.1`).
+   `licenses.test.ts` (017) lässt `OFL-1.1` nur für Dateien unter `assets/fonts/` zu und verlangt dann `OFL.txt` im
+   selben Ordner. Die Lizenzdatei wird mit dem Client gebaut und ausgeliefert (Vite kopiert sie neben die Schrift). ADR
+   0016 bekommt den Absatz „Schriften dürfen auch unter der SIL Open Font License 1.1 stehen: Lizenztext mitliefern,
+   nicht einzeln verkaufen, geänderte Fassungen nicht unter dem reservierten Namen.“
 
 ## Verträge
 
-Keine Änderung.
+**Protobuf** (`contracts/proto/browsergame/v1/game.proto`), abwärtskompatibel. `ServerMessage` 12 ist frei (8 = 015,
+9 = 017, 10–11 = 013). Keine Eingabe vom Client: Der Command kommt als `SendChat` (011/015).
+
+```proto
+message ServerMessage {
+  oneof payload {
+    // … 1–11
+    // Nur an den Absender von /run nameFont(): nächste Kandidaten-Schrift für Namen (020, nur während der Erprobung).
+    NextNameFont next_name_font = 12;
+  }
+}
+
+// Leer. Der Client wechselt nur seine eigene Anzeige; der Server merkt sich nichts (020 AK-3).
+message NextNameFont {}
+```
+
+Nach der Wahl (Entscheidung 5): `reserved 12; reserved "next_name_font";` in `ServerMessage`, `NextNameFont` entfällt.
+
+**OpenAPI:** keine Änderung.
 
 ## Server
 
-Keine Logik. Nur bei F-2 = ja: neue gebaute Datei unter `wwwroot/fonts/` (Static Files, CSP `default-src 'self'`
-erlaubt sie schon).
+- `nameFont` (0 Parameter) im `CommandRegistry` (015): `context.Reply(new ServerMessage { NextNameFont = new() })`
+  (Reply aus 017). Keine Wirkung auf die `World`.
+- Nach der Wahl: Command entfernen.
 
 ## Client
 
 ### Assets
-- `client/src/assets/<schrift>.ttf` (Name wie geliefert); Zeile in `LICENSES.md` mit Herkunft, Stand, `CC0 1.0` und
-  „geprüft: ä ö ü Ä Ö Ü ß … ·“.
+- `client/src/assets/fonts/<id>/<Datei>.ttf` und bei OFL `OFL.txt`; Zeilen in `LICENSES.md` mit Herkunft, Stand,
+  Lizenz und „geprüft: A–Z a–z ä ö ü Ä Ö Ü ß“.
 
-### `render/pixelFont.ts` (neu)
-- `PIXEL_FONT_FAMILY`, `NAME_FONT_SIZE`, `NAME_BASELINE_GAP`, `PIXEL_FONT_CHARSET` (Tabelle oben).
-- `nameFont(): string` → `"<size>px PixelFont, monospace"`.
+### `render/nameFonts.ts` (neu)
+- `NAME_FONTS` (Tabelle oben), `nameFontCss(font): string` → `"<size>px <family>, monospace"`.
+- `class NameFontChoice { current; next(): NameFont }` – reiner Zustand, ohne DOM.
 
 ### `render/render.ts`
-- Namen nach Entscheidung 2.
+- `RenderOptions.nameFont?: NameFont` (fehlt → `8px monospace` wie bisher, damit bestehende Tests bleiben); Namen nach
+  Entscheidung 2.
 - `fakeContext.ts` (Testhilfe): additiv `measureText(text) → { width: text.length × 5 }` und – falls 017 noch fehlt –
   `fillText` als `text`-Op mit `font`.
 
-### `styles/global.css`, Spiel-UI (⚠ F-1, F-4)
-- Entscheidung 4. Größen in den genannten Komponenten anpassen; keine anderen Stiländerungen.
+### `network/net.ts`, `engine/game.ts`
+- `onNextNameFont`; `Game` ruft `NameFontChoice.next()`, gibt die Schrift an `render` und meldet den Hinweis an die
+  UI (Ereignis wie `CommandRejected` in 015). Text `nameFontHint` in `i18n.ts` (de/en): „Namensschrift {0}/{1}: {2}“ /
+  „Name font {0}/{1}: {2}“.
 
 ### `app/App.tsx`
 - Entscheidung 3.
-
-### Razor-Seiten (⚠ F-2)
-- `client/src/styles/landing.css`, `client/package.json` (`build:landing` kopiert die Schrift), `.gitignore`
-  (`server/BrowserGame.Server/wwwroot/fonts/`).
 
 ## Abdeckung der Akzeptanzkriterien
 
 | AK | Wie erfüllt | Wie getestet |
 |---|---|---|
-| 1 | Pixel-Schrift im Canvas, ganzzahlig ausgerichtet | Vitest `render-names.test.ts`: `text`-Op je sichtbarer Figur mit `font === nameFont()`, x und y ganzzahlig, x = `round(x − Breite/2)`; **manuell:** PC und Handy, Namen scharf und lesbar |
-| 2 | Zeichenvorrat geprüft, Rückfall pro Zeichen | Vitest `pixelFont.test.ts`: jedes Zeichen aller Texte in `dictionaries.de` und `dictionaries.en` (006) liegt in `PIXEL_FONT_CHARSET`; ebenso `A–Z`, `a–z` (Namensregel aus 003); Font-Stack endet auf `monospace`; **manuell:** Sprache Deutsch, Texte mit Umlauten und ß in HUD/Menü, Chat-Nachricht „Größe äöü ÄÖÜ ß“ |
+| 1 | Pixel-Schrift im Canvas, ganzzahlig ausgerichtet | Vitest `render-names.test.ts`: `text`-Op je sichtbarer Figur mit `font === nameFontCss(current)`, x und y ganzzahlig, x = `round(x − Breite/2)`; ohne `nameFont` wie bisher; **manuell:** PC und Handy, Namen scharf und lesbar, für jeden Kandidaten |
+| 2 | Glyphen aus der Datei geprüft | Vitest `fonts.test.ts`: jede TTF unter `assets/fonts/` hat Glyphen für `A–Z`, `a–z`, `ä ö ü Ä Ö Ü ß`; jeder Eintrag in `NAME_FONTS` zeigt auf eine vorhandene Datei; Font-Stack endet auf `monospace` |
+| 3 | Command → NextNameFont → nächste Schrift | xUnit: `nameFont()` antwortet genau einmal, `World` unverändert; Integration (WS): nur der Absender bekommt `NextNameFont`, kein Chat-Echo; Vitest `net`: Nachricht → Handler; Vitest `game-name-font.test.ts`: zweimal → zweiter Kandidat, nach dem letzten der erste, Hinweis mit Nummer und Name, nächstes Bild mit neuer Schrift; Vitest `nameFonts.test.ts`; **manuell:** alle Kandidaten durchschalten |
+| 4 | Aufräumen nach der Wahl | Nach dem Aufräum-Task: Vitest `fonts.test.ts` findet genau eine TTF; xUnit: `/run nameFont()` → `CommandRejected(UNKNOWN_COMMAND)`; `buf breaking` grün mit `reserved 12`; Wahl in `tasks.md` festgehalten |
+| 5 | Register und Lizenzdatei | Vitest `licenses.test.ts`: jede Datei in `LICENSES.md`; `OFL-1.1` nur unter `assets/fonts/` und nur mit `OFL.txt` daneben; Build-Test: `OFL.txt` liegt in der Ausgabe neben der Schrift |
 
 ## Constitution-Check
 
-- [x] **Server ist Autorität:** nicht betroffen (reine Darstellung).
-- [x] **Typen nur aus `contracts/`:** keine Verträge.
+- [x] **Server ist Autorität:** nicht betroffen (reine Darstellung); der Command bestätigt nur.
+- [x] **Typen nur aus `contracts/`:** `NextNameFont` aus dem Proto.
 - [x] **Offline-Fortschritt:** nicht betroffen.
-- [x] **Keine unnötigen neuen Abhängigkeiten:** kein Paket; eine Schriftdatei (CC0), Release mindestens 7 Tage alt
-  (Pixel Operator 2018; Ninja Adventure 2026-03-29).
+- [x] **Keine unnötigen neuen Abhängigkeiten:** kein Paket; Schriftdateien unter CC0 oder OFL (Ausnahme per ADR 0016),
+  Releases deutlich älter als 7 Tage.
 - [x] **Spielwerte:** keine.
-- [x] **KISS:** eine Schrift, eine CSS-Variable, eine Zeile im Canvas.
+- [x] **KISS:** Umschalten ohne Parameter und ohne Speichern; nach der Wahl bleibt eine Schrift und eine Zeile im
+  Canvas.
 
 ## Risiken / Abweichungen
 
-- **Zeichenvorrat ungeprüft:** Für keinen Kandidaten ist belegt, dass er Umlaute, ß, `…` und `·` hat. Das wird bei T1
-  am Font selbst geprüft (Glyphen-Tabelle, z. B. im Browser). Fehlt ein Zeichen aus den Texten, gilt die Schrift als
-  ungeeignet oder der Text wird angepasst (Spec 006).
-- **`PIXEL_FONT_CHARSET` ist eine Behauptung:** Der Test prüft die Texte gegen die Liste, nicht gegen die Datei. Die
-  Liste wird einmal am Font geprüft und bei einem Font-Wechsel neu.
-- **Unschärfe in CSS:** Bei Gerätepixel-Verhältnissen wie 2,625 trifft keine CSS-Größe genau die Pixel der Schrift.
-  AK-1 verlangt Schärfe nur für die Namen (Canvas). HUD und Chat sind „gut lesbar“, nicht pixelgenau.
-- **Layout:** Größere UI-Schrift (Entscheidung 4) kann HUD-Zeilen umbrechen. Prüfung am Handy hochkant.
-- **SIL OFL:** Fällt die Wahl doch auf eine OFL-Schrift, ändert sich ADR 0016 (Ausnahme für Schriften) und
-  `licenses.test.ts` (Lizenz `OFL-1.1` zulassen). Die OFL verlangt die Lizenzdatei neben der Schrift.
+- **Kandidaten ungeprüft:** Lizenz, Urheber und Zeichenvorrat der Tabelle stammen aus der Erinnerung und werden in T1
+  am Original geprüft. Fehlen Downloads im Netz der Sitzung, stellt der User die Dateien bereit.
+- **Native Größe unklar:** Manche Schriften haben mehrere oder keine eindeutige Pixelgröße (Pixelify Sans). Dann wird
+  die kleinste Größe gewählt, bei der Glyphen auf ganzen Pixeln liegen; ist sie für Namen zu groß, fliegt der Kandidat
+  raus.
+- **Umschalt-Code ist Wegwerf-Code:** bewusst klein gehalten (ein Command, eine Nachricht, eine Klasse), damit das
+  Aufräumen (AK-4) schnell geht. Wird die Erprobung vergessen, bleibt der Command harmlos stehen.
+- **Ausweitung später:** HUD, Chat, Menüs und öffentliche Seiten bekommen die Schrift erst mit einer eigenen Spec,
+  wenn sie sich an den Namen bewährt hat.

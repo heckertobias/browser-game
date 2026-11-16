@@ -2,26 +2,42 @@
 
 Gehört zu: [plan.md](plan.md)
 
-Reihenfolge: Assets → Client → Tests/Prüfung. Kein Vertrag, kein Server-Code.
-Erst beginnen, wenn die offenen Fragen beantwortet sind. Tasks mit ⚠ hängen an einer Antwort.
+Reihenfolge: Doku/Assets → Verträge → Server → Client → Prüfung und Wahl → Aufräumen. Jeder Task bringt seine Tests
+mit. Erst beginnen, wenn 015 umgesetzt ist.
 
-## Assets
-- [ ] **T1** (AK-2): Schrift wählen und ihren Zeichenvorrat prüfen (⚠ F-3); `client/src/assets/<schrift>.ttf`, Zeile
-  in `LICENSES.md`; `licenses.test.ts` grün. Fehlen ADR 0016 und Register aus 017 noch, hier anlegen.
+## Doku / Assets
+- [ ] **T1** (AK-2, AK-5): Kandidaten am Original prüfen (Lizenz, Urheber, Stand, Glyphen, native Größe; Plan-Abschnitt
+  „Kandidaten“); mindestens fünf nach `client/src/assets/fonts/<id>/` mit `OFL.txt` bei OFL; Zeilen in `LICENSES.md`;
+  ADR 0016 um die OFL-Ausnahme ergänzen und `licenses.test.ts` anpassen (fehlen ADR und Register aus 017 noch, hier
+  anlegen); Testhilfe `cmap`-Leser und Vitest `fonts.test.ts`.
+
+## Verträge
+- [ ] **T2** (AK-3): `game.proto`: `NextNameFont` (`ServerMessage` Feld 12); `buf lint` und `buf breaking` grün.
+
+## Server
+- [ ] **T3** (AK-3): Command `nameFont` im `CommandRegistry` mit `context.Reply` (fehlt `Reply` aus 017 noch, hier
+  anlegen wie in 017 T3). Unit-Test (Reply genau einmal, `World` unverändert) und Integrationstest (WS: nur der
+  Absender bekommt die Nachricht, kein Chat-Echo).
 
 ## Client
-- [ ] **T2** (AK-1, AK-2): `render/pixelFont.ts`; Namen im Canvas nach Plan-Entscheidung 2; `fakeContext.ts` additiv
-  (`measureText`); Laden im `App`; Vitest `render-names.test.ts`, `pixelFont.test.ts`.
-- [ ] **T3** (AK-2): `global.css` `@font-face` und `--font-mono`; Textgrößen in HUD, Chat, Menü, Tastenbelegung.
-  ⚠ F-1, F-4
-- [ ] **T4** (AK-2): Razor-Seiten: `landing.css`, Kopie der Schrift in `build:landing`, `.gitignore`. ⚠ F-2 (entfällt
-  bei „nein“)
+- [ ] **T4** (AK-1, AK-2): `render/nameFonts.ts` (`NAME_FONTS`, `nameFontCss`, `NameFontChoice`); Namen im Canvas nach
+  Plan-Entscheidung 2 mit `RenderOptions.nameFont`; `fakeContext.ts` additiv (`measureText`); Laden aller Kandidaten im
+  `App`; Vitest `nameFonts.test.ts`, `render-names.test.ts`.
+- [ ] **T5** (AK-3): `net.ts` (`onNextNameFont`); `Game` wechselt die Schrift und meldet den Hinweis; Text
+  `nameFontHint` (de/en); Hinweis über dem Chat-Feld; Vitest `net`, `game-name-font.test.ts`.
+
+## Prüfung und Wahl
+- [ ] **T6** (AK-1, AK-3): Manuelle Prüfung in der Testumgebung (PC mit DPR 1 und 2, Handy hochkant/quer, mehrere
+  Figuren mit kurzen und langen Namen): `/run nameFont()` schaltet durch alle Kandidaten, Hinweis zeigt Nummer und
+  Namen; jede Schrift scharf. **Der User wählt eine Schrift**; Wahl und Begründung hier eintragen: _…_
+
+## Aufräumen
+- [ ] **T7** (AK-4, AK-5): Nach Plan-Entscheidung 5: übrige Schriften, Lizenzdateien und Zeilen in `LICENSES.md`
+  entfernen; `NAME_FONTS` → `NAME_FONT`; Command `nameFont`, `NextNameFont` (`reserved 12`), `onNextNameFont`,
+  `NameFontChoice` und `nameFontHint` entfernen; Tests anpassen (eine TTF, `/run nameFont()` unbekannt).
 
 ## Tests / Prüfung
-- [ ] **T5**: Manuelle Prüfung in der Testumgebung (PC mit DPR 1 und 2, Handy hochkant/quer, Deutsch und Englisch):
-  - Namen über Figuren scharf und lesbar
-  - HUD, Chat, Menü in der Pixel-Schrift; Umlaute und ß in Texten und im Chat; nichts bricht unschön um
-  - Chat-Verlauf über längere Zeit lesbar (sonst Chat-Text in Systemschrift, F-4)
-  - Startseite und Anmeldung (bei F-2 = ja), Admin unverändert
+- [ ] **T8**: Abschlussprüfung in der Testumgebung: Namen in der gewählten Schrift, scharf und lesbar auf PC und
+  Handy; `/run nameFont()` ist unbekannt; HUD, Chat, Menüs und öffentliche Seiten unverändert.
 
   Danach alle AKs abhaken, Spec-Status auf `umgesetzt`, Roadmap aktualisieren.

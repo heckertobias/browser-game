@@ -19,7 +19,8 @@ mit Pixel-Akzenten. Die Lizenzregel aus [017](../017-spielfigur/spec.md) gilt au
 
 - **AK-1:** Gegeben eine Figur ist sichtbar, dann steht ihr Name in der Pixel-Schrift über ihr und ist
   scharf und gut lesbar.
-- **AK-2:** Gegeben ein Name mit Umlauten oder ß, dann werden alle Zeichen dargestellt.
+- **AK-2:** Gegeben ein beliebiger zulässiger Spielername (003), dann werden alle seine Zeichen in der
+  Pixel-Schrift dargestellt.
 - **AK-3:** Gegeben ich bin im Spiel, wenn ich per Slash-Command eine der 5–6 Kandidaten-Schriften wähle, dann
   erscheinen die Namen sofort in dieser Schrift.
 - **AK-4:** Gegeben die Erprobung ist abgeschlossen, dann ist genau eine Schrift festgelegt; die übrigen Kandidaten
@@ -48,7 +49,7 @@ _Keine._
   Schrift nicht einzeln verkaufen, geänderte Fassungen nicht unter dem Originalnamen). Die Lizenzregel aus 017
   (dort als ADR geplant) bekommt dafür diese Ausnahme.
 - **Auswahl im Spiel statt am Beispieltext:** Die 5–6 vielversprechendsten Schriften werden eingebaut und sind per
-  Slash-Command umschaltbar. Am Ende der Spec wird im Spiel eine gewählt (AK-4); Kandidaten müssen alle nötigen
-  Zeichen haben.
+  Slash-Command umschaltbar. Am Ende der Spec wird im Spiel eine gewählt (AK-4). Kandidaten müssen neben den
+  Zeichen der Namen auch Umlaute und ß haben, damit eine spätere Ausweitung auf HUD und Chat möglich bleibt.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->
