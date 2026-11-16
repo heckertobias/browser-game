@@ -2,6 +2,10 @@
 
 Gehört zu: [spec.md](spec.md)
 
+> **Veraltet.** Die offenen Fragen sind beantwortet: nur Namen über Figuren, keine öffentlichen Seiten, OFL für
+> Schriften zulässig (Lizenz-ADR aus 017 bekommt diese Ausnahme). Der Plan muss vor `bereit` auf den kleineren
+> Umfang angepasst werden.
+>
 > **Vorläufig.** Die Spec hat noch offene Fragen. Der Plan geht von den Empfehlungen unten aus und markiert abhängige
 > Stellen mit **⚠ F-n**. Ändert eine Antwort den Umfang, wird der Plan vor `bereit` angepasst.
 
