@@ -1,6 +1,6 @@
 # 018 – Boden statt Gitter
 
-**Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [017 – Spielfigur als Pixel-Art](../017-spielfigur/spec.md) (eigenes Grafik-Format, Lizenzregel)
 

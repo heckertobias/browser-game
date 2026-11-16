@@ -1,6 +1,6 @@
 # 010 – Wechsel auf .NET 12
 
-**Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [009 – Wechsel auf .NET 11](../009-dotnet-11/spec.md) · Veröffentlichung von .NET 12 (voraussichtlich
 November 2027) plus 7 Tage Wartezeit (ADR 0002)
@@ -36,8 +36,7 @@ _Keine._
 ## Entschiedene Fragen
 
 - **Zeitplan:** Wechsel spätestens 4 Wochen nach Erscheinen von .NET 12 (AK-3). .NET 11 hat als Version mit
-  Standard-Support 24 Monate Support, also voraussichtlich bis November 2028. .NET 12 erscheint voraussichtlich im
-  November 2027. Damit bleibt rund ein Jahr Puffer bis zum Supportende; das genaue Datum aus Microsofts
-  Support-Übersicht wird im Plan festgehalten.
+  Standard-Support 24 Monate Support, bis 2028-11-14 (siehe Plan von 009). .NET 12 erscheint voraussichtlich im
+  November 2027. Damit bleibt rund ein Jahr Puffer bis zum Supportende; die genauen Daten hält der Plan fest.
 
 <!-- Keine Technik in dieser Datei. Das gehört in plan.md. -->

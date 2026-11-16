@@ -1,6 +1,6 @@
 # 019 – Deko-Objekte
 
-**Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [018 – Boden statt Gitter](../018-boden/spec.md)
 

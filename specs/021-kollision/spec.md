@@ -1,6 +1,6 @@
 # 021 – Kollision
 
-**Status:** entwurf  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [018 – Boden statt Gitter](../018-boden/spec.md) (feste Karte mit Bergen und See) ·
 [019 – Deko-Objekte](../019-deko/spec.md) (blockierende Objekte) · [013 – Kampfsystem](../013-kampfsystem/spec.md)
