@@ -16,7 +16,7 @@ Erst beginnen, wenn 011 und 012 umgesetzt sind.
   an den Absender; Integrationstests (WS).
 
 ## Client
-- [ ] **T5** (AK-4): `commandRejected` in `net.ts`/`game.ts`; Hinweis in `Chat.tsx`, letzten Command wieder einsetzen;
+- [ ] **T5** (AK-4): `commandRejected` in `net.ts`/`game.ts`; Hinweis in `Chat.tsx`;
   i18n de/en.
 
 ## Tests / Prüfung

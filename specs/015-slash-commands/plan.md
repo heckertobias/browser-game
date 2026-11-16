@@ -105,9 +105,9 @@ message CommandRejected {
 
 - **`net.ts` / `game.ts`:** `commandRejected` → `GameEvents.onCommandRejected(reason)`.
 - **`Chat.tsx` (011):** derselbe kurze Hinweis wie bei „zu schnell“: „Unbekannter Befehl“ bzw. „Befehl fehlerhaft“.
+  Er bleibt so lange wie „zu schnell“; es steht immer nur ein Hinweis da, ein neuer ersetzt den alten.
   Das Feld wird beim Absenden geleert wie bei einer Nachricht (der Client weiß nicht, ob ein Command gelingt,
-  Entscheidung 5). Bei `CommandRejected` setzt er den zuletzt gesendeten Command wieder ein, damit man ihn korrigieren
-  kann.
+  Entscheidung 5). Bei `CommandRejected` bleibt es, wie es ist; der Command wird nicht wieder eingesetzt.
 - Der Client kennt die Commands nicht und prüft nichts außer dem, was 011 schon prüft (leer, Länge).
 - **`i18n.ts`:** `commandUnknown`, `commandInvalid` (de/en).
 
@@ -141,5 +141,3 @@ message CommandRejected {
   ohne echten Kampfdruck ist das harmlos; vor einem öffentlichen Start braucht es die Rechte-Spec. Das steht so auch in
   der Spec.
 - **Reihenfolge der Specs:** 015 setzt 011 voraus, das selbst noch nicht umgesetzt ist (siehe Roadmap).
-- **Feld wieder füllen:** Kommt `CommandRejected` erst nach einer weiteren Eingabe an (sehr langsame Verbindung), wird
-  der zuletzt gesendete Command nur eingesetzt, wenn das Feld noch leer ist.
