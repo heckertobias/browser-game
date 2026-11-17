@@ -14,9 +14,13 @@ Spieler sind keine farbigen Quadrate mehr, sondern **Pixel-Art-Figuren**. Sie sc
 **vier Richtungen**, laufen sichtbar und stehen still, wenn sie stehen. Die bisherige **Spielerfarbe**
 bleibt an der Figur erkennbar (z. B. an der Kleidung), damit man Spieler weiter unterscheiden kann.
 
-Grundlage ist das Asset-Pack **Ninja Adventure** (CC0). Eigene oder abgeleitete Grafiken folgen seinem
-Raster und seiner Palette. Der Pfeil aus 016 verschwindet aus dem normalen Spielbild und lässt sich als
-Entwickleroption per Command einschalten.
+Die Grafiken sind aus dem Asset-Pack **Ninja Adventure** (CC0) abgeleitet. Sie liegen aber nicht im Aufbau
+des Packs vor, sondern in einem **eigenen Format**: Eine Figur besteht aus **Teilen**, im ersten Lauf aus
+Körper und Kleidung. So lassen sich später Kleidung, Frisuren und Waffen tauschen, ohne die Darstellung
+umzubauen. Eigene oder abgeleitete Grafiken folgen Raster und Palette des Packs.
+
+Der Pfeil aus 016 verschwindet aus dem normalen Spielbild und lässt sich als Entwickleroption per Command
+einschalten.
 
 Dies ist die erste von vier Grafik-Specs: danach [018 – Boden](../018-boden/spec.md),
 [019 – Deko-Objekte](../019-deko/spec.md) und [020 – Pixel-Schrift](../020-pixel-schrift/spec.md).
@@ -31,6 +35,9 @@ Dies ist die erste von vier Grafik-Specs: danach [018 – Boden](../018-boden/sp
   Charakterauswahl gibt.
 - Als **Entwickler** möchte ich den genauen Blickwinkel aus 016 bei Bedarf einblenden, damit ich
   Blickrichtung und Gegner-Spawn (014) prüfen kann.
+- Als **Entwickler** möchte ich ein neues Teil (z. B. ein Kleidungsstück) als Grafik mit Beschreibung
+  hinzufügen, ohne die Darstellung umzubauen, damit personalisierbare Figuren später nur noch Grafikarbeit
+  sind.
 - Als **Betreiber** möchte ich, dass jede Grafik eine Lizenz ohne Auflagen hat und ihre Herkunft
   dokumentiert ist, damit das Spiel rechtlich sauber bleibt.
 
@@ -88,10 +95,21 @@ Dies ist die erste von vier Grafik-Specs: danach [018 – Boden](../018-boden/sp
 - **AK-17:** Gegeben eine abgeleitete oder eigene Figur (z. B. mit einfärbbarer Kleidung), dann folgt sie
   Raster und Palette von Ninja Adventure.
 
+### Aufbau aus Teilen
+
+- **AK-18:** Gegeben eine Figur, dann ist sie aus getrennten Teilen zusammengesetzt (Körper und Kleidung);
+  die Spielerfarbe färbt nur die Kleidung.
+- **AK-19:** Gegeben ein weiteres Teil liegt als Grafik mit Beschreibung vor (z. B. ein zweites
+  Kleidungsstück), dann kann eine Figur es tragen, ohne dass die Darstellung umgebaut wird.
+- **AK-20:** Gegeben ein Teil ragt über den Körper der Figur hinaus (z. B. ein Hut oder eine Waffe in der
+  Hand), dann wird es vollständig dargestellt, nicht abgeschnitten.
+
 ## Out of Scope
 
 - **Charakterauswahl** (mehrere Figuren zur Wahl) – eigene spätere Spec.
-- **Personalisierbare Figuren** (Haare, Rüstung, Waffen) – eigene spätere Spec.
+- **Personalisierbare Figuren** (Haare, Rüstung, Waffen) – eigene spätere Spec. Hier entsteht nur der Aufbau
+  aus Teilen. Weitere Teile, ihre Auswahl durch den Spieler und was andere davon sehen, kommen dort.
+- Ein **Editor** für Teile oder Figuren.
 - **Acht Richtungen** oder stufenlos gedrehte Figuren.
 - Weitere Animationen: Angriff, Treffer, Tod, Zaubern, Hinsetzen für wartende Figuren.
 - Grafik für Gegner und Trainings-Dummy (013/014).
@@ -107,8 +125,15 @@ _Keine._
 
 - **Asset-Pack:** Ninja Adventure (CC0, 16×16, Figuren mit vier Richtungen, Stand und Lauf). Es deckt auch
   Boden, Deko und Gegner im selben Stil ab und hat genug Figuren für eine spätere Charakterauswahl.
-- **Abgeleitete Grafiken sind erlaubt:** CC0 erlaubt Änderungen. Für die Spielerfarbe braucht es eine
-  abgeleitete Figur mit einfärbbarer Fläche.
+- **Das Pack ist die Quelle, nicht das Format:** Ein festes Grafikpack reicht nicht, sobald Kleidung,
+  Frisuren und Waffen tauschbar sein sollen. Die Grafiken werden deshalb in ein eigenes Format überführt.
+  Der Plan hält das Format als ADR fest; Boden (018) und Deko (019) folgen demselben Grundsatz.
+- **Figur aus Teilen:** Im ersten Lauf gibt es genau zwei Teile, Körper und Kleidung. Das Pack selbst hat
+  keine getrennten Teile; beide werden aus einer Pack-Figur abgeleitet.
+- **Platz um die Figur:** Jedes Teil hat von Anfang an Platz rund um den Körper, damit spätere Teile
+  (Waffen, Hüte) hinausragen können, ohne dass alle Grafiken neu angelegt werden müssen.
+- **Abgeleitete Grafiken sind erlaubt:** CC0 erlaubt Änderungen. Für die Spielerfarbe ist die Kleidung ein
+  eigenes, einfärbbares Teil.
 - **Vier Richtungen:** Die Figur zeigt die nächstliegende Richtung; genau schräg gewinnt die Seitenansicht.
   Die Blickrichtung selbst bleibt der freie Winkel aus 016.
 - **Pfeil nur für Entwickler:** Der Pfeil aus 016 ist standardmäßig aus und per
