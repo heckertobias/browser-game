@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace BrowserGame.Server.Features.Accounts;
 
+/// <summary>Ergebnis von <see cref="PlayerNames.TryNormalize"/>; <see cref="PlayerNameMessages"/> liefert den Text dazu.</summary>
 internal enum PlayerNameError
 {
     None,

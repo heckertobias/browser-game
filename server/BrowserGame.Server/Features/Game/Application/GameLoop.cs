@@ -100,6 +100,10 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     internal void LoadChatHistory(IReadOnlyList<ChatHistoryEntry> messages) =>
         _changes.Writer.TryWrite(new Change(ChangeKind.ChatHistoryLoaded, "", null, messages));
 
+    /// <summary>
+    /// Meldet eine neue Verbindung an; sie zählt ab dem nächsten Tick. Dort wird eine wartende Figur übernommen oder eine
+    /// neue angelegt (003 AK-12, AK-21). <paramref name="abort"/> trennt die Verbindung, wenn der Client nicht mehr liest.
+    /// </summary>
     internal PlayerConnection Join(
         string accountId, string name, (double X, double Y)? savedPosition, System.Action? abort = null, KeyBindings? keyBindings = null)
     {
@@ -112,6 +116,10 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         return connection;
     }
 
+    /// <summary>
+    /// Verbindung beendet: Die Sendeschleife endet sofort, die Figur wartet ab dem nächsten Tick (003 AK-20). Hat eine
+    /// neuere Verbindung die Figur schon übernommen, bleibt sie unberührt.
+    /// </summary>
     internal void Leave(PlayerConnection connection)
     {
         connection.Outbox.Close();
@@ -400,8 +408,9 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     /// <summary>
     /// Angriffe aller Verbindungen nach der Bewegung (Positionen und Blickrichtung aktuell) ausführen (013). Ein ausgeführter
     /// Angriff wird dem Angreifer mit der Abklingzeit bestätigt (AK-11, AK-22). Nicht in Reichweite, nicht in Blickrichtung und
-    /// zu wenig Mana bekommt der Angreifer gemeldet (AK-5, AK-8, AK-9, AK-19, AK-20); Cooldown, unbekannte Angriffsart und
-    /// ungültiges Ziel bleiben still (plan.md Entscheidung 4).
+    /// zu wenig Mana bekommt der Angreifer gemeldet (AK-5, AK-8, AK-9, AK-19, AK-20). Still bleiben: Cooldown (sonst
+    /// blitzte bei jedem Tastendruck in der Abklingzeit ein Hinweis auf), unbekannte Angriffsart und ein inzwischen totes
+    /// Ziel, dessen Auswahl der Client mit dem nächsten Snapshot ohnehin aufhebt (013 plan.md Entscheidung 4).
     /// </summary>
     private void ProcessAttacks()
     {
@@ -475,7 +484,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             })
             .ToList();
 
-        // Ziele sehen alle gleich; tote Ziele fehlen (013, plan.md Entscheidung 2).
+        // Ziele sehen alle gleich. Tote Ziele fehlen; daran erkennt der Client, dass er die Auswahl aufheben muss
+        // (013 plan.md Entscheidung 2).
         var targets = _combat.AliveTargets
             .Select(t => new TargetState
             {

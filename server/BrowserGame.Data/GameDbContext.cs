@@ -10,7 +10,8 @@ public sealed class Account : IdentityUser
 {
     /// <summary>
     /// Sprache des Spielers (006), z. B. „de“ oder „en“; gültige Werte prüft der Server.
-    /// Standard „de“: Bestehende Accounts haben sich auf Deutsch registriert.
+    /// Standard „de“ (nicht die Standardsprache „en“ des Spiels): Accounts, die vor 006 angelegt wurden, haben sich auf
+    /// Deutsch registriert, und die Migration setzt für sie diesen Wert. Neue Accounts setzen die Sprache immer selbst.
     /// </summary>
     public string Language { get; set; } = "de";
 
@@ -73,6 +74,7 @@ public abstract class GameDbContext(DbContextOptions options) : IdentityDbContex
 
         builder.Entity<ChatMessageEntry>(message =>
         {
+            // Wie GameSettings.ChatMaxLength im Spielserver (011 AK-9); die Datenschicht kennt den Spielserver nicht.
             message.Property(m => m.Text).HasMaxLength(200);
             // SQLite kann DateTimeOffset in EF Core weder vergleichen noch sortieren. Als Unix-Millisekunden geht beides überall.
             message.Property(m => m.SentAt).HasConversion(

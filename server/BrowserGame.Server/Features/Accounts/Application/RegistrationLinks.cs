@@ -5,7 +5,8 @@ namespace BrowserGame.Server.Features.Accounts;
 
 /// <summary>
 /// Code im Registrierungslink (003 AK-2, AK-3): E-Mail-Adresse und Ablaufzeit, geschützt per Data Protection; in der DB
-/// entsteht nichts. Einladungslinks sollen später denselben Code mit längerer Dauer nutzen.
+/// entsteht nichts. Die Gültigkeit ist ein Parameter von <see cref="CreateCode"/>, damit andere Links (z. B. Einladungen)
+/// denselben Code mit eigener Dauer nutzen können.
 /// </summary>
 public sealed class RegistrationLinks(IDataProtectionProvider dataProtection, IConfiguration configuration)
 {

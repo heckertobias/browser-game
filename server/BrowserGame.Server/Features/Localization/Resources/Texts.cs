@@ -7,6 +7,6 @@ public sealed class Texts
 {
     internal const string BaseName = "BrowserGame.Server.Features.Localization.Resources.Texts";
 
-    // Statischer Zugriff für Code ohne DI (PlayerNames, später Mails).
+    // Statischer Zugriff für Code ohne DI (PlayerNameMessages, GameEmailSender).
     internal static ResourceManager ResourceManager { get; } = new(BaseName, typeof(Texts).Assembly);
 }

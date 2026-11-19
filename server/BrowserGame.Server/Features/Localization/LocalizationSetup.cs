@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Localization;
 
 namespace BrowserGame.Server.Features.Localization;
 
+/// <summary>Sprachwahl der Spielerseiten (006, ADR 0008): Cookie vor <c>Accept-Language</c>, nur unterstützte Sprachen.</summary>
 internal static class LocalizationSetup
 {
     public static void AddGameLocalization(this IServiceCollection services) =>

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Localization;
 
 namespace BrowserGame.Admin.Pages;
 
+/// <summary>Schritt der Einrichtung, den die Seite zeigt; <see cref="InviteModel"/> leitet ihn aus Einladung und Account ab.</summary>
 public enum InviteStep
 {
     Invalid,
@@ -143,6 +144,8 @@ public sealed partial class InviteModel(
             }
         }
 
+        // Jeder Durchlauf dieses Schritts bekommt einen neuen Schlüssel: Nur der zuletzt angezeigte QR-Code gilt, ein Schlüssel
+        // aus einem abgebrochenen Versuch nicht mehr.
         await users.ResetAuthenticatorKeyAsync(pending.User);
         return await ShowAsync();
     }

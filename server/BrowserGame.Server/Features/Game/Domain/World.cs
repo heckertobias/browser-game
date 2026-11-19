@@ -3,6 +3,7 @@ namespace BrowserGame.Server.Features.Game;
 /// <summary>Gewünschte Laufrichtung eines Spielers für genau einen Tick.</summary>
 internal readonly record struct MoveInput(uint Seq, float DirX, float DirY);
 
+/// <summary>Figur eines Accounts in der <see cref="World"/>; nur der Tick-Thread liest und schreibt sie.</summary>
 internal sealed class Player(string id, string name, uint color, double x, double y)
 {
     public string Id { get; } = id;
@@ -10,6 +11,7 @@ internal sealed class Player(string id, string name, uint color, double x, doubl
     public uint Color { get; } = color;
     public double X { get; set; } = x;
     public double Y { get; set; } = y;
+    /// <summary>Sequenznummer der zuletzt angewandten Eingabe; der Client gleicht seine Vorhersage daran ab (001).</summary>
     public uint LastProcessedSeq { get; set; }
 
     /// <summary>Aktuelle HP, zwischen 0 und <see cref="World.MaxHp"/> (012 AK-1).</summary>
@@ -35,10 +37,19 @@ internal sealed class Player(string id, string name, uint color, double x, doubl
     /// <summary>Tick, ab dem die Figur wartet.</summary>
     internal uint? AwaySince { get; set; }
 
+    /// <summary>Höchste angenommene Sequenznummer; ältere oder doppelte Eingaben werden verworfen.</summary>
     internal uint LastQueuedSeq { get; set; }
+
+    /// <summary>Zuletzt angewandte Laufrichtung, Länge ≤ 1; gilt bis zu <see cref="World.MaxCoastTicks"/> Ticks weiter.</summary>
     internal double DirX { get; set; }
+
+    /// <inheritdoc cref="DirX"/>
     internal double DirY { get; set; }
+
+    /// <summary>Ticks seit der letzten angewandten Eingabe, für das Auslaufen nach <see cref="World.MaxCoastTicks"/>.</summary>
     internal int TicksWithoutInput { get; set; }
+
+    /// <summary>Angenommene, noch nicht angewandte Eingaben; je Tick wird höchstens eine angewandt.</summary>
     internal Queue<MoveInput> PendingInputs { get; } = new();
 }
 
@@ -67,12 +78,13 @@ internal sealed class World(
     /// </summary>
     public const int MaxCoastTicks = 2;
 
+    /// <summary>Neue und wiederbelebte Figuren erscheinen zufällig in diesem Radius um (0,0) (003 AK-17, 012 AK-8).</summary>
     public const double SpawnRadius = 64;
 
     public const double DefaultMaxHp = 100;
     public const double DefaultMaxMana = 100;
 
-    /// <summary>Leer bis voll in 20 s (012 AK-3).</summary>
+    /// <summary>Mit <see cref="DefaultMaxMana"/> leer bis voll in 20 s (012 AK-3).</summary>
     public const double DefaultManaRegenPerSecond = 5;
 
     /// <summary>Blickrichtung neuer Figuren: nach unten, zur Kamera (016 AK-4).</summary>
@@ -101,6 +113,7 @@ internal sealed class World(
         return AddPlayer(id, name, color, x, y);
     }
 
+    /// <summary>Neue Figur an einer gespeicherten Position (003 AK-18), mit vollen HP und Mana und Start-Blickrichtung.</summary>
     public Player AddPlayer(string id, string name, uint color, double x, double y)
     {
         var player = new Player(id, name, color, x, y) { Hp = MaxHp, Mana = MaxMana, Facing = StartFacing };
@@ -232,6 +245,11 @@ internal sealed class World(
         return (Math.Cos(angle) * radius, Math.Sin(angle) * radius);
     }
 
+    /// <summary>
+    /// Merkt eine Eingabe für die nächsten Ticks vor. Ignoriert werden unbekannte und wartende Figuren sowie Eingaben, deren
+    /// Sequenznummer nicht größer ist als die letzte angenommene (doppelt oder veraltet). Mehr als
+    /// <see cref="MaxQueuedInputs"/> wartende Eingaben verdrängen die ältesten.
+    /// </summary>
     public void EnqueueInput(string playerId, MoveInput input)
     {
         if (!_players.TryGetValue(playerId, out var player) || player.Away || input.Seq <= player.LastQueuedSeq)
@@ -247,6 +265,11 @@ internal sealed class World(
         }
     }
 
+    /// <summary>
+    /// Ein Tick: Mana wächst bei allen Figuren, auch wartenden (012 AK-3). Jede verbundene Figur wendet höchstens eine
+    /// Eingabe an; ohne neue Eingabe läuft sie <see cref="MaxCoastTicks"/> Ticks mit der letzten Richtung weiter und bleibt
+    /// dann stehen. Danach folgen Blickrichtung (016) und Position.
+    /// </summary>
     public void Step()
     {
         foreach (var player in _players.Values)

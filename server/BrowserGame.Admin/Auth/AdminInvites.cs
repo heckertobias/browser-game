@@ -16,6 +16,7 @@ public sealed partial class AdminInvites(
 {
     public static readonly TimeSpan Lifetime = TimeSpan.FromHours(48);
 
+    /// <summary>Neue Einladung, <see cref="Lifetime"/> gültig; der Link enthält das einzige Exemplar des Tokens.</summary>
     public async Task<(AdminInvite Invite, string Link)> CreateAsync(string createdBy, string? email, CancellationToken cancellationToken = default)
     {
         var token = WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
@@ -94,6 +95,8 @@ public sealed partial class AdminInvites(
         var baseUrl = configuration["App:PublicUrl"];
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
+            // Nur in der Entwicklung erreichbar (sonst bricht AddAdminAuth beim Start ab). Beim Start gibt es keine Anfrage;
+            // dann gilt die Adresse aus launchSettings.json.
             var request = http.HttpContext?.Request;
             baseUrl = environment.IsDevelopment() && request is not null ? $"{request.Scheme}://{request.Host}" : "http://localhost:5090";
         }
