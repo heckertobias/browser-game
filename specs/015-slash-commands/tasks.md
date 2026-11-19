@@ -20,7 +20,7 @@ Erst beginnen, wenn 011 und 012 umgesetzt sind.
   i18n de/en.
 
 ## Tests / Prüfung
-- [ ] **T6**: Manuelle Prüfung in der Testumgebung mit zwei Geräten:
+- [x] **T6**: Manuelle Prüfung in der Testumgebung mit zwei Geräten:
   - `/run fullHealth()` nach Mana-Verbrauch (013) bzw. Schaden; `/run resetPosition()` – das andere Gerät sieht den Sprung
   - `/xyz` und `/run nope()` → Hinweis; normaler Chat unverändert, kein Echo der Commands
 
