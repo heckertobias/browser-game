@@ -86,7 +86,7 @@ const step = () => {
 };
 const lastInput = (socket: FakeWebSocket) => socket.sentInputs().at(-1);
 
-describe("Game: Belegung aus Welcome (AK-9)", () => {
+describe("Game: Belegung aus Welcome (002 AK-9)", () => {
   it("übernimmt die gespeicherte Belegung und meldet sie", () => {
     const { bindings, socket } = setup();
     socket.receive(welcomeWith(custom));
@@ -130,7 +130,7 @@ describe("Game: Belegung aus Welcome (AK-9)", () => {
   });
 });
 
-describe("Game.saveKeyBindings (AK-5, AK-9)", () => {
+describe("Game.saveKeyBindings (002 AK-5, AK-9)", () => {
   it("wirkt sofort, meldet und schickt die Belegung", () => {
     const { game, bindings, socket } = setup();
     socket.receive(welcomeWith());
@@ -166,7 +166,7 @@ describe("Game.saveKeyBindings (AK-5, AK-9)", () => {
   });
 });
 
-describe("Game.setMenuOpen (AK-4)", () => {
+describe("Game.setMenuOpen (002 AK-4)", () => {
   it("offenes Menü hält die Figur an und schickt weiter Eingaben", () => {
     const { game, socket } = setup();
     socket.receive(welcomeWith());

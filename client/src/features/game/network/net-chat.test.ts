@@ -30,7 +30,7 @@ const welcome = { case: "welcome", value: { playerId: "a", name: "n", speed: 100
 const chat = (text: string) =>
   serverBytes({ case: "chatMessage", value: { senderName: "A", text, sentAtUnixMs: 1n } });
 
-describe("createReceiver: Chat", () => {
+describe("createReceiver: Chat (011)", () => {
   it("reicht den Verlauf in Server-Reihenfolge mit allen Feldern weiter", () => {
     const r = recorder();
     const receiver = createReceiver(r.handlers);
@@ -132,7 +132,7 @@ describe("createReceiver: Chat", () => {
   });
 });
 
-describe("connect: Chat", () => {
+describe("connect: Chat (011)", () => {
   beforeEach(() => {
     FakeWebSocket.instances.length = 0;
     vi.stubGlobal("WebSocket", FakeWebSocket);

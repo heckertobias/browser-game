@@ -28,7 +28,7 @@ function recorder() {
   return { receiver, welcomes, snapshots, kicks, closes: () => closes };
 }
 
-describe("createReceiver", () => {
+describe("createReceiver: Verbindung (003)", () => {
   it("Kicked (anderes Gerät) meldet den Grund und kein Schließen danach (AK-12)", () => {
     const r = recorder();
     r.receiver.message(bytes({ case: "kicked", value: { reason: Kicked_Reason.SIGNED_IN_ELSEWHERE } }));

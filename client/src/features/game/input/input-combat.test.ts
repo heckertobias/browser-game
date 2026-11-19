@@ -8,7 +8,7 @@ const withAttacks = new Map(DEFAULT_BINDINGS)
   .set(Action.ATTACK_RANGED, ["Digit2", "KeyQ"]);
 const ORIGIN = { x: 0, y: 0 };
 
-describe("attackKindFor (plan.md Entscheidung 8)", () => {
+describe("attackKindFor (013 plan.md Entscheidung 8)", () => {
   it("ordnet die Tasten ihrer Angriffsart zu", () => {
     expect(attackKindFor("Digit1", withAttacks)).toBe(Attack_Kind.MELEE);
     expect(attackKindFor("Digit2", withAttacks)).toBe(Attack_Kind.RANGED);

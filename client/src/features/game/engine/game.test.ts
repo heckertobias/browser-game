@@ -52,7 +52,7 @@ const welcome = serverBytes({
   value: { playerId: "a", name: "Tobias", speed: 100, tickRateHz: 20 },
 });
 
-describe("Game: Chat", () => {
+describe("Game: Chat (011)", () => {
   it("reicht Verlauf, Nachricht und Ablehnung in Reihenfolge an GameEvents weiter", () => {
     const { log, socket } = startGame();
     socket.receive(welcome);
