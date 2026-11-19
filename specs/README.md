@@ -91,13 +91,17 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 10 | [016 – Blickrichtung](016-blickrichtung/spec.md) | umgesetzt | 001 |
 | 11 | [009 – Wechsel auf .NET 11](009-dotnet-11/spec.md) | bereit | .NET 11 und Npgsql 11 je 7 Tage alt (ab 2026-11-17) |
 | 12 | [013 – Rudimentäres Kampfsystem](013-kampfsystem/spec.md) | umgesetzt | 012, 016 |
-| 13 | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | bereit | 011, 012, 003 |
-| 14 | [014 – Gegner (erstes Ziel, das HP hat und zurückwirkt)](014-gegner/spec.md) | bereit | 012, 013, 015, 016 |
-| 15 | [017 – Spielfigur als Pixel-Art](017-spielfigur/spec.md) | entwurf | 001, 003, 015, 016 |
-| 16 | [018 – Boden statt Gitter](018-boden/spec.md) | bereit | 017 |
-| 17 | [019 – Deko-Objekte](019-deko/spec.md) | bereit | 018 |
-| 18 | [021 – Kollision](021-kollision/spec.md) | bereit | 013, 014, 018, 019 |
-| 19 | [020 – Pixel-Schrift](020-pixel-schrift/spec.md) | bereit | 001, 015 |
+| 13 | [025 – Spieltakt nach Features aufteilen](025-spieltakt/spec.md) | bereit | 011, 013 |
+| 14 | [022 – Startbereich als Spielwert](022-startbereich/spec.md) | bereit | 003, 012 |
+| 15 | [023 – Chat-Höchstlänge vom Server](023-chat-laenge/spec.md) | bereit | 011 |
+| 16 | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | bereit | 011, 012, 003 |
+| 17 | [014 – Gegner (erstes Ziel, das HP hat und zurückwirkt)](014-gegner/spec.md) | bereit | 012, 013, 015, 016 |
+| 18 | [017 – Spielfigur als Pixel-Art](017-spielfigur/spec.md) | entwurf | 001, 003, 015, 016 |
+| 19 | [018 – Boden statt Gitter](018-boden/spec.md) | bereit | 017 |
+| 20 | [019 – Deko-Objekte](019-deko/spec.md) | bereit | 018 |
+| 21 | [021 – Kollision](021-kollision/spec.md) | bereit | 013, 014, 018, 019 |
+| 22 | [020 – Pixel-Schrift](020-pixel-schrift/spec.md) | bereit | 001, 015 |
 | später | Haus des Spielers / Offline-Produktion | noch keine Spec | 003 |
 | später | [008 – Push-Benachrichtigungen](008-push/spec.md) | entwurf | 007, Haus |
+| offen | [024 – Spielregeln ohne Nachrichtentypen](024-regeln-ohne-nachrichtentypen/spec.md) | entwurf | 002, 013 |
 | nach Release | [010 – Wechsel auf .NET 12](010-dotnet-12/spec.md) | bereit | 009, .NET 12 GA + 7 Tage |
