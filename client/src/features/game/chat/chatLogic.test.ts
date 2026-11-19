@@ -37,7 +37,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("Konstanten", () => {
+describe("Konstanten (011)", () => {
   it("haben die festgelegten Werte", () => {
     expect(CHAT_FLUSH_MS).toBe(100);
     expect(CHAT_COLLAPSED_KEY).toBe("bg.chat.collapsed");
@@ -318,7 +318,7 @@ describe("Enter im Feld (011 AK-5)", () => {
 });
 /* oxlint-enable typescript/no-deprecated */
 
-describe("chatReducer", () => {
+describe("chatReducer (011)", () => {
   const texts = (state: ChatState) => state.lines.map((line) => line.message.text);
   const run = (state: ChatState, ...actions: ChatAction[]) => actions.reduce(chatReducer, state);
   const open = () => initialChatState(false);
@@ -414,7 +414,7 @@ describe("chatReducer", () => {
   });
 });
 
-describe("MessageBatcher", () => {
+describe("MessageBatcher (011)", () => {
   const setup = (maxItems = 1000) => {
     vi.useFakeTimers();
     const flush = vi.fn<(items: readonly number[]) => void>();

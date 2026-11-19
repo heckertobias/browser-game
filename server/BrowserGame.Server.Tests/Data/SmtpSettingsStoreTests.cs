@@ -3,6 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// SMTP-Einstellungen in der Datenbank (004 AK-7, AK-8, AK-12; 005 AK-18): Passwort nur verschlüsselt, leeres Feld
+/// heißt unverändert, das Protokoll nennt Felder ohne Werte.
+/// </summary>
 public sealed class SmtpSettingsStoreTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static readonly SmtpSettings Settings = new("mx.example.net", 465, SmtpSecurity.SslOnConnect, "game@example.net", "geheim-123", "noreply@example.net", "Browser Game");

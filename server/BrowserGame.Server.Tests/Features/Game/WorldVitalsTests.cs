@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// HP und Mana in der <see cref="World"/> (012 AK-1–AK-4): Startwerte, Mana-Regeneration bis zum Maximum, auch für
+/// wartende Figuren; HP regenerieren nicht.
+/// </summary>
 public sealed class WorldVitalsTests
 {
     private const double MaxHp = 80;

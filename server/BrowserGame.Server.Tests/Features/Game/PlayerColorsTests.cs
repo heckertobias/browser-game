@@ -2,6 +2,9 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Spielerfarbe aus der Account-ID: auf jedem Gerät und nach jedem Neustart gleich, über Accounts verteilt.
+/// </summary>
 public sealed class PlayerColorsTests
 {
     [Theory]

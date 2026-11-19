@@ -6,6 +6,10 @@ using Microsoft.Extensions.FileProviders;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Links in Mails und Rücksprungziele (003 AK-1, AK-3): Token-Kodierung, nur lokale Rücksprünge, Basis-URL aus
+/// <c>App:PublicUrl</c>.
+/// </summary>
 public class AccountLinksTests
 {
     private sealed class Environment(string name) : IWebHostEnvironment

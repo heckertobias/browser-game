@@ -1,6 +1,12 @@
+// Erkennt nach einem Verbindungsabbruch, ob inzwischen eine neue Version läuft (007 AK-16, AK-17).
+
+/** Was die Abfrage von `/play` ergibt: Server weg, dieselbe Version oder eine neue. */
 export type ServerState = "unreachable" | "same" | "update";
+/** Einstiegsseite des Spiels; ihr Modul-Skript trägt einen Inhalts-Hash und verrät so die Version. */
 export const PLAY_PATH = "/play";
+/** Abstand zwischen zwei Abfragen. */
 export const SERVER_POLL_MS = 5000;
+/** Eine hängende Abfrage wird nach dieser Zeit abgebrochen und gilt als „Server weg“. */
 export const SERVER_TIMEOUT_MS = 5000;
 
 const SCRIPT_TAG = /<script\b[^>]*>/gi;
@@ -17,6 +23,10 @@ export function entryScript(html: string): string | null {
   return null;
 }
 
+/**
+ * Bewertet die Antwort auf `/play`. Kein Erfolg (z. B. 404, 502–504 beim Deploy) heißt „Server weg“. Eine Weiterleitung
+ * gilt als „dieselbe Version“. Sonst ist es ein Update, wenn das Einstiegsskript ein anderes ist als das geladene.
+ */
 export function classifyServer(
   current: string | null,
   response: { ok: boolean; redirected: boolean },
@@ -28,6 +38,7 @@ export function classifyServer(
   return current !== null && served !== null && served !== current ? "update" : "same";
 }
 
+/** Teil von `fetch`, den `ServerWatch` braucht (in Tests gefälscht). */
 export type FetchPage = (
   url: string,
   init: RequestInit,
@@ -49,7 +60,10 @@ export interface ServerWatchDeps {
   win: WatchTarget;
 }
 
-/** Fragt bei getrennter Verbindung /play ab, bis eine neue Version läuft (AK-17); nur sichtbar, nie parallel. */
+/**
+ * Fragt bei getrennter Verbindung `/play` ab, bis eine neue Version läuft (AK-17); dann meldet sie `onUpdate` einmal und
+ * endet. Abgefragt wird nur bei sichtbarer Seite und nie parallel; Sichtbarwerden und `online` lösen sofort eine Abfrage aus.
+ */
 export class ServerWatch {
   private abort: AbortController | null = null;
   private timer: number | null = null;

@@ -6,6 +6,10 @@ using Google.Protobuf;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Der Durchstich über HTTP und echte WebSockets (001 AK-1–AK-5): Startseite, <c>/play</c> nur angemeldet, Welcome und
+/// Snapshots, Begrenzung zu großer Eingaben und Nachrichten.
+/// </summary>
 public sealed class GameServerTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static readonly TimeSpan OneSecond = TimeSpan.FromSeconds(1);

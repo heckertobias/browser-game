@@ -1,11 +1,13 @@
 import { lerpAngle } from "@/features/game/core/vector";
 
+/** Andere Figur aus dem Snapshot, so wie sie gezeichnet wird. */
 export interface RemotePlayer {
   id: string;
   name: string;
   color: number;
   x: number;
   y: number;
+  /** Verbindung verloren, Figur wartet noch (003 AK-20). */
   away?: boolean;
   /** Zählt Sprünge der Figur (Respawn); ändert er sich, wird nicht interpoliert (012 AK-8). */
   spawnSeq?: number;
@@ -13,47 +15,44 @@ export interface RemotePlayer {
   facing?: number;
 }
 
-/** Was der Puffer interpoliert: Spieler (001); IDs dürfen auch Zahlen sein. */
-export interface Interpolatable {
-  id: string | number;
-  x: number;
-  y: number;
-  spawnSeq?: number;
-  facing?: number;
-}
-
-interface TimedSnapshot<T extends Interpolatable> {
+interface TimedSnapshot {
   time: number;
-  items: Map<T["id"], T>;
+  players: Map<string, RemotePlayer>;
 }
 
 /** Wie lange Snapshots aufbewahrt werden (ms). */
 const RETENTION_MS = 1000;
 
 /**
- * Puffer für die Darstellung anderer Spieler: Gerendert wird leicht in der Vergangenheit,
- * zwischen den zwei Snapshots, die diesen Zeitpunkt einschließen.
+ * Puffer für die Darstellung anderer Spieler (001 AK-3): Gerendert wird leicht in der Vergangenheit,
+ * zwischen den zwei Snapshots, die diesen Zeitpunkt einschließen. So bewegen sich andere Figuren flüssig,
+ * obwohl Snapshots nur im Server-Takt kommen.
  */
-export class SnapshotBuffer<T extends Interpolatable = RemotePlayer> {
-  private snapshots: TimedSnapshot<T>[] = [];
+export class SnapshotBuffer {
+  private snapshots: TimedSnapshot[] = [];
 
-  push(time: number, items: Iterable<T>): void {
-    this.snapshots.push({ time, items: new Map([...items].map((item) => [item.id, item])) });
+  /** Neuer Snapshot zur Empfangszeit `time`; ältere als `RETENTION_MS` fallen weg, soweit sie keiner Interpolation mehr dienen. */
+  push(time: number, players: Iterable<RemotePlayer>): void {
+    this.snapshots.push({ time, players: new Map([...players].map((player) => [player.id, player])) });
     const cutoff = time - RETENTION_MS;
     while (this.snapshots.length > 2 && (this.snapshots[1]?.time ?? Infinity) < cutoff) {
       this.snapshots.shift();
     }
   }
 
-  /** Spieler zum Zeitpunkt `renderTime`. Wer im späteren Snapshot fehlt, ist weg (AK-4). Wer gesprungen ist (anderer `spawnSeq`), steht sofort an der neuen Position (012 AK-8). Die Blickrichtung wird über den kürzeren Bogen interpoliert (016 AK-7). */
-  sample(renderTime: number): T[] {
+  /**
+   * Spieler zum Zeitpunkt `renderTime`. Wer im späteren Snapshot fehlt, ist weg (001 AK-4). Wer gesprungen ist (anderer
+   * `spawnSeq`), steht sofort an der neuen Position (012 AK-8). Die Blickrichtung wird über den kürzeren Bogen
+   * interpoliert (016 AK-7).
+   */
+  sample(renderTime: number): RemotePlayer[] {
     const later = this.snapshots.findIndex((s) => s.time >= renderTime);
     const newest = this.snapshots.at(-1);
     if (!newest) {
       return [];
     }
     if (later === -1) {
-      return [...newest.items.values()];
+      return [...newest.players.values()];
     }
 
     const to = this.snapshots[later];
@@ -62,13 +61,13 @@ export class SnapshotBuffer<T extends Interpolatable = RemotePlayer> {
       return [];
     }
     if (!from) {
-      return [...to.items.values()];
+      return [...to.players.values()];
     }
 
     const span = to.time - from.time;
     const t = span > 0 ? (renderTime - from.time) / span : 1;
-    return [...to.items.values()].map((target): T => {
-      const start = from.items.get(target.id);
+    return [...to.players.values()].map((target): RemotePlayer => {
+      const start = from.players.get(target.id);
       if (!start || start.spawnSeq !== target.spawnSeq) {
         return target;
       }

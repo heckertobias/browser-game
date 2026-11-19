@@ -9,6 +9,10 @@ using BrowserGame.Server.Features.Localization.Resources;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Die Ressourcen der Identity-Fehlertexte (ADR 0008): Englisch und Deutsch mit denselben Schlüsseln und Platzhaltern,
+/// genau einer je überschriebener Methode von <see cref="LocalizedIdentityErrorDescriber"/>.
+/// </summary>
 public sealed partial class IdentityErrorsResourcesTests
 {
     private const string IdentityErrors = "BrowserGame.Data.Resources.IdentityErrors";

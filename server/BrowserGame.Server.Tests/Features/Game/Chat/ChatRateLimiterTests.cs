@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Tempolimit des Chats ohne Netz (011 AK-13): fünf Nachrichten je gleitendem 10-Sekunden-Fenster und Account; inaktive
+/// Accounts werden vergessen, damit der Speicher nicht wächst.
+/// </summary>
 public sealed class ChatRateLimiterTests
 {
     private static readonly DateTimeOffset Start = new(2026, 11, 3, 12, 0, 0, TimeSpan.Zero);

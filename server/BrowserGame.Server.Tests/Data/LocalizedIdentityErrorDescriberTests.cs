@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Identity-Fehlertexte für Spieler in der Sprache der Anfrage (006); eine doppelte E-Mail-Adresse wird dabei nicht
+/// verraten (003 AK-3).
+/// </summary>
 public sealed class LocalizedIdentityErrorDescriberTests
 {
     private static readonly LocalizedIdentityErrorDescriber Describer = new();

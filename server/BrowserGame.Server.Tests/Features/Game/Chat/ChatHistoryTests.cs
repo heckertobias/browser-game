@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Chat-Verlauf im Speicher ohne Datenbank (011 AK-15–AK-17): höchstens 50 Nachrichten in Eingangsreihenfolge, jünger
+/// als 24 Stunden, Entfernen eines gelöschten Accounts.
+/// </summary>
 public sealed class ChatHistoryTests
 {
     private static readonly DateTimeOffset Now = new(2026, 11, 3, 12, 0, 0, TimeSpan.Zero);

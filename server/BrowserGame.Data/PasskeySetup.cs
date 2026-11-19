@@ -6,10 +6,14 @@ namespace BrowserGame.Data;
 /// <summary>
 /// Passkey-Einstellungen für Spiel und Admin. Die Herkunftsprüfung vergleicht mit <c>App:PublicUrl</c> statt mit dem
 /// <c>Origin</c>-Header der Anfrage: Wegen <c>Referrer-Policy: no-referrer</c> schicken Browser bei Formular-POSTs
-/// <c>Origin: null</c>, die Standardprüfung von Identity schlüge dann immer fehl (gefunden in 0.2.1 in der Testumgebung).
+/// <c>Origin: null</c>, die Standardprüfung von Identity schlüge dann immer fehl.
 /// </summary>
 public static class PasskeySetup
 {
+    /// <summary>
+    /// Passkey-Optionen: optional eigene Server-Domain (<c>Passkeys:ServerDomain</c>), Herkunft gleich <c>App:PublicUrl</c>.
+    /// Ohne <c>App:PublicUrl</c> gilt in der Entwicklung die Adresse der Anfrage, sonst wird jede Herkunft abgelehnt.
+    /// </summary>
     public static IServiceCollection AddPasskeyOptions(this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
         var publicUrl = configuration["App:PublicUrl"];

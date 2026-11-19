@@ -28,10 +28,12 @@ const ACTION_NAMES: ReadonlyMap<Action, string> = new Map([
   [Action.ATTACK_RANGED, t.actionAttackRanged],
 ]);
 
+/** Anzeigename einer Aktion; unbekannte zeigen ihren Enum-Namen statt nichts. */
 export function actionName(action: Action): string {
   return ACTION_NAMES.get(action) ?? Action[action];
 }
 
+/** DOM-ID eines Platz-Buttons; darüber bekommt er nach dem Leeren den Fokus zurück. */
 export function slotId(action: Action, slot: Slot): string {
   return `binding-slot-${String(action)}-${String(slot)}`;
 }
@@ -54,6 +56,7 @@ export interface KeyBindingsViewProps {
   onEvent: (event: KeyBindingsEvent) => void;
 }
 
+/** Darstellung der Tastenbelegung ohne Zustand (testbar); ohne Belegung (vor dem Welcome) nur der Verbindungsstatus. */
 export function KeyBindingsView({ bindings, state, layout, onEvent }: KeyBindingsViewProps) {
   return (
     <div data-testid="key-bindings" className="flex w-full flex-col gap-4">
@@ -126,6 +129,10 @@ export interface KeyBindingsProps {
   onSave: (bindings: Bindings) => void;
 }
 
+/**
+ * Seite „Tastenbelegung“ im Menü (002 AK-5–AK-11). Beim Aufnehmen fängt ein Capture-Listener jede Taste ab, bevor Menü,
+ * Chat oder Buttons sie sehen.
+ */
 export function KeyBindings({ bindings, onSave }: KeyBindingsProps) {
   const [state, setState] = useState<KeyBindingsState>(IDLE);
   const [layout, setLayout] = useState<KeyLayout | undefined>(undefined);

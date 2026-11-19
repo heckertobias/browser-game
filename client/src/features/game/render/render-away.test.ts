@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { desaturate } from "./render";
 
-describe("desaturate (AK-20)", () => {
+describe("desaturate (003 AK-20)", () => {
   it.each([
     [0xff0000, 0x4c4c4c],
     [0x00ff00, 0x969696],

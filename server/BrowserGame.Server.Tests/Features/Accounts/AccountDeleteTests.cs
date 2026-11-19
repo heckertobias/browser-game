@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>Account löschen mit Passwort (003 AK-16): Daten und Name werden frei, andere Sitzungen enden.</summary>
 public sealed class AccountDeleteTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static Task<(HttpResponseMessage Response, string Html)> DeleteAsync(FormClient client, string password) =>

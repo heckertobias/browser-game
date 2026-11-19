@@ -6,6 +6,7 @@ import type { MenuPage } from "./menuLogic";
 // my-auto im Inhalt statt justify-center: Wird der Inhalt höher als der Schirm (Handy quer), bleibt er scrollbar.
 const OVERLAY =
   "absolute inset-0 flex flex-col items-center overflow-y-auto overscroll-contain touch-pan-y bg-black/60 text-center font-mono text-sm uppercase pb-[max(0.5rem,env(safe-area-inset-bottom))] pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] pt-[max(0.5rem,env(safe-area-inset-top))]";
+/** Klassen eines Menüeintrags; auch die Tastenbelegung nutzt sie für „Standard wiederherstellen“. */
 export const ENTRY = "btn btn-lg min-h-11 w-full rounded-none font-mono uppercase";
 
 export interface MenuViewProps {
@@ -18,6 +19,7 @@ export interface MenuViewProps {
   keyBindings?: ReactNode;
 }
 
+/** Darstellung des Menüs ohne Zustand (testbar): Hauptseite oder Seite der Tastenbelegung. */
 export function MenuView({ page, focusRef, onContinue, onShowKeyBindings, onBack, keyBindings }: MenuViewProps) {
   return (
     <div className={OVERLAY} role="dialog" aria-modal="true" aria-label={t.menu} data-testid="menu">
@@ -40,6 +42,7 @@ export function MenuView({ page, focusRef, onContinue, onShowKeyBindings, onBack
   );
 }
 
+/** Spielmenü (002 AK-3): öffnet auf der Hauptseite; der erste Eintrag jeder Seite bekommt den Fokus für die Tastatur. */
 export function Menu({ onClose, keyBindings }: { onClose: () => void; keyBindings?: ReactNode }) {
   const [page, setPage] = useState<MenuPage>("main");
   const focusRef = useRef<HTMLButtonElement>(null);

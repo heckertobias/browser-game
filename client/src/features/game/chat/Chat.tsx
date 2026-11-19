@@ -39,16 +39,20 @@ const CHAT_ROOT =
 const CHAT_PANEL =
   "flex h-1/3 min-h-40 w-[min(24rem,calc(100%-max(0.5rem,env(safe-area-inset-left))-max(0.5rem,env(safe-area-inset-right))))] flex-col bg-black/50";
 
+/** Was das Spiel dem Chat meldet: Server-Nachrichten und den Beginn einer Sitzung (Welcome leert die Liste). */
 export interface ChatFeed extends ChatHandlers {
   onWelcome(): void;
 }
 
 export interface ChatProps {
   ref?: Ref<ChatFeed>;
+  /** Schickt einen Text; `false`, wenn die Verbindung nicht offen ist (der Entwurf bleibt dann stehen). */
   sendChat: (text: string) => boolean;
+  /** Verbunden und kein Menü offen: Nur dann öffnet Enter den Chat. */
   inGame: boolean;
 }
 
+/** Eine Nachricht: Uhrzeit, Absender, Text. Der Text bleibt reiner Text, auch wenn er wie HTML aussieht (011 AK-12). */
 export const ChatRow = memo(function ChatRow({ line }: { line: ChatLine }) {
   return (
     <li data-testid="chat-line" className="whitespace-pre-wrap wrap-anywhere">
@@ -71,6 +75,7 @@ export interface ChatViewProps {
   onInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
 }
 
+/** Darstellung des Chats ohne Zustand und Effekte (testbar): eingeklappt nur ein Button, sonst Liste und Eingabe. */
 export function ChatView({ state, listRef, inputRef, rootRef, onListScroll, onCollapsedChange, onDraft, onSubmit, onInputKeyDown }: ChatViewProps) {
   if (state.collapsed) {
     return (
@@ -138,6 +143,10 @@ export function ChatView({ state, listRef, inputRef, rootRef, onListScroll, onCo
   );
 }
 
+/**
+ * Chatfenster im HUD (011): unten links, ein- und aufklappbar, Enter öffnet es. Neue Nachrichten kommen gebündelt
+ * (`MessageBatcher`), die Liste folgt dem Ende, solange der Spieler nicht hochgescrollt hat.
+ */
 export const Chat = memo(function Chat({ ref, sendChat, inGame }: ChatProps) {
   const [state, dispatch] = useReducer(chatReducer, null, () => initialChatState(loadCollapsed(chatStorage(), deviceDefaultCollapsed)));
   const listRef = useRef<HTMLOListElement>(null);

@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>Hilfen, um Texte in gerendertem HTML zu finden, unabhängig von Tags und HTML-Entitäten.</summary>
 public static partial class HtmlTexts
 {
     /// <summary>Sichtbarer Text einer Seite: ohne Skripte, Styles und Tags, HTML-Entitäten aufgelöst.</summary>

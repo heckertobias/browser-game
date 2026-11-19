@@ -28,17 +28,20 @@ export interface GameEvents extends ChatHandlers {
   onStatus(status: ConnectionStatus): void;
   onWelcome(name: string): void;
   onKicked(reason: KickReason): void;
-  /** Eigene Koordinaten (gerundet, aus der vorhergesagten Position), nur bei Änderung (AK-19b). */
+  /** Eigene Koordinaten (gerundet, aus der vorhergesagten Position), nur bei Änderung (003 AK-19b). */
   onCoordinates(text: string): void;
   /** Eigene HP/Mana (abgerundet), nur bei Änderung (012 AK-6). Ab dem ersten Snapshot mit eigener Figur. */
   onVitals?(vitals: PlayerVitals): void;
-  /** Aktuelle Belegung: nach Welcome (gespeicherte des Accounts, AK-9) und nach `saveKeyBindings`. */
+  /** Aktuelle Belegung: nach Welcome (gespeicherte des Accounts, 002 AK-9) und nach `saveKeyBindings`. */
   onKeyBindings?(bindings: Bindings): void;
-  /** Aktives Ziel nach Antippen/Anklicken oder `null`, wenn es im Snapshot fehlt (013 AK-1, plan.md Entscheidung 2). Nur bei Änderung. */
+  /**
+   * Aktives Ziel nach Antippen/Anklicken oder `null`, wenn es im Snapshot fehlt, also tot ist (013 AK-1,
+   * plan.md Entscheidung 2). Nur bei Änderung.
+   */
   onTarget?(id: string | null): void;
-  /** Angriff abgelehnt: nicht in Reichweite (AK-5, AK-9), nicht vor dir (AK-19) oder zu wenig Mana (AK-8). */
+  /** Angriff abgelehnt: nicht in Reichweite (013 AK-5, AK-9), nicht vor dir (AK-19) oder zu wenig Mana (AK-8). */
   onAttackRejected?(reason: AttackRejectReason): void;
-  /** Angriff ausgelöst, aber kein Ziel gewählt (AK-2): nichts geschickt, nur Hinweis (AK-20). */
+  /** Angriff ausgelöst, aber kein Ziel gewählt (013 AK-2): nichts geschickt, nur Hinweis (AK-20). */
   onNoTarget?(): void;
   /** Der Server hat einen eigenen Angriff ausgeführt (013 AK-22): Abklingzeit in ms für den Sweep. Nicht beim Senden, nicht bei Ablehnung. */
   onCooldown?(durationMs: number): void;
@@ -47,7 +50,10 @@ export interface GameEvents extends ChatHandlers {
 /** Nach längerer Pause (Tab im Hintergrund) höchstens so viel Zeit nachholen. */
 const MAX_FRAME_MS = 250;
 
-/** Verbindet Netzwerk, Eingabe, Prediction und Rendering in einer festen 50-ms-Schrittfolge wie der Server. */
+/**
+ * Verbindet Netzwerk, Eingabe, Prediction und Rendering. Eingaben laufen in festen Schritten im Takt des Servers
+ * (Tickrate aus `Welcome`); gezeichnet wird in jedem Animation-Frame, dazwischen interpoliert.
+ */
 export class Game {
   private readonly ctx: CanvasRenderingContext2D;
   private readonly input: InputTracker;
@@ -55,6 +61,7 @@ export class Game {
   private connection: GameConnection | null = null;
   private welcome: Welcome | null = null;
   private predictor: Predictor | null = null;
+  /** Länge eines festen Schritts; bis zum Welcome ein Platzhalter, Schritte laufen ohnehin erst mit dem Predictor. */
   private stepMs = 50;
   private accumulator = 0;
   private lastFrame = 0;
@@ -122,13 +129,13 @@ export class Game {
     return this.connection?.sendChat(text) ?? false;
   }
 
-  /** Sofort lokal wirksam (AK-5) und an den Server; bei nicht offener Verbindung geht nur das Senden verloren. */
+  /** Sofort lokal wirksam (002 AK-5) und an den Server; bei nicht offener Verbindung geht nur das Senden verloren. */
   saveKeyBindings(bindings: Bindings): void {
     this.applyKeyBindings(bindings);
     this.connection?.saveKeyBindings(toProto(bindings));
   }
 
-  /** Angriff auf das aktive Ziel (Tasten und Buttons). Ohne Ziel wird nichts geschickt, nur gemeldet (AK-2, AK-20). */
+  /** Angriff auf das aktive Ziel (Tasten und Buttons). Ohne Ziel wird nichts geschickt, nur gemeldet (013 AK-2, AK-20). */
   attack(kind: Attack_Kind): void {
     const request = attackRequest(this.selection, kind);
     if (request === null) {
@@ -138,7 +145,7 @@ export class Game {
     this.connection?.sendAttack(request);
   }
 
-  /** Menü offen: Figur steht (AK-4); Snapshots und Rendern laufen weiter (AK-4b). */
+  /** Menü offen: Figur steht (002 AK-4); Snapshots und Rendern laufen weiter (AK-4b). */
   setMenuOpen(open: boolean): void {
     this.input.setSuspended(open);
   }
@@ -196,7 +203,10 @@ export class Game {
     return other ? { x: other.x, y: other.y } : null;
   }
 
-  /** Liegt unter dem Zeiger ein Ziel, wird es aktiv (AK-1, AK-3); dann läuft die Figur nicht los (plan.md Entscheidung 7). */
+  /**
+   * Liegt unter dem Zeiger ein Ziel, wird es aktiv (013 AK-1, AK-3). Dann startet kein Halten-und-Folgen, sonst liefe die
+   * Figur beim Auswählen auf das Ziel zu (013 plan.md Entscheidung 7).
+   */
   private pickTargetAt(clientX: number, clientY: number): boolean {
     if (!this.viewport) return false;
     const rect = this.canvas.getBoundingClientRect();
@@ -218,6 +228,7 @@ export class Game {
     return true;
   }
 
+  /** Animation-Frame: holt die verstrichene Zeit in festen Schritten nach (höchstens `MAX_FRAME_MS`) und zeichnet. */
   private readonly frame = (now: number): void => {
     this.accumulator += Math.min(now - this.lastFrame, MAX_FRAME_MS);
     this.lastFrame = now;
@@ -231,6 +242,7 @@ export class Game {
     this.frameHandle = requestAnimationFrame(this.frame);
   };
 
+  /** Ein fester Schritt: Wunschrichtung aus der Eingabe lokal vorhersagen und an den Server schicken. */
   private fixedStep(): void {
     if (!this.predictor?.initialized || !this.connection) return;
     const position = { x: this.predictor.x, y: this.predictor.y };
@@ -313,7 +325,7 @@ export class Game {
     return { width: Math.round(this.canvas.clientWidth * dpr), height: Math.round(this.canvas.clientHeight * dpr) };
   }
 
-  /** Übernimmt eine gemeldete Größe im Frame (AK-5); Größe 0 (minimiert) wird nicht übernommen. */
+  /** Übernimmt eine gemeldete Größe im Frame (007 AK-5); Größe 0 (minimiert) wird nicht übernommen. */
   private updateViewport(): void {
     const dpr = window.devicePixelRatio || 1;
     if (dpr !== this.dpr) {

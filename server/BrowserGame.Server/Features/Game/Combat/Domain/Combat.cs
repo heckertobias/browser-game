@@ -24,6 +24,7 @@ internal sealed class Combat(
     double dummyMaxHp = Combat.DefaultDummyMaxHp,
     double dummyRespawnSeconds = Combat.DefaultDummyRespawnSeconds)
 {
+    /// <summary>Feste ID des einzigen Trainings-Dummys; der Client schickt sie als Ziel eines Angriffs.</summary>
     public const string DummyId = "dummy";
 
     /// <summary>Öffnungswinkel nach vorn in Grad (± die Hälfte um die Blickrichtung), für beide Angriffe (013 AK-19).</summary>
@@ -62,7 +63,8 @@ internal sealed class Combat(
     /// <summary>Verzögerung in Sekunden, bis der Dummy mit vollen HP zurückkehrt (013 AK-15).</summary>
     public const double DefaultDummyRespawnSeconds = 5;
 
-    // Rundungstoleranz für den Winkelvergleich, kein Spielwert: „genau auf der Grenze“ zählt als vorn (plan.md Entscheidung 10).
+    // Rundungstoleranz für den Winkelvergleich, kein Spielwert: „genau auf der Grenze“ zählt als vorn, auch wenn atan2 und
+    // IEEERemainder dort minimal daneben liegen (013 plan.md Entscheidung 10).
     private const double AngleTolerance = 1e-9;
 
     private readonly Dictionary<string, Target> _targets = new()
@@ -133,8 +135,9 @@ internal sealed class Combat(
     }
 
     /// <summary>
-    /// Angriffsversuch im Tick <paramref name="tick"/>. Prüft Art → Ziel → Cooldown → Reichweite → Blickrichtung → Mana
-    /// (plan.md Entscheidung 3). Nur bei <see cref="AttackResult.Ok"/> ändert sich etwas: Nahkampf schadet sofort (AK-4, AK-6),
+    /// Angriffsversuch im Tick <paramref name="tick"/>. Prüft Art → Ziel → Cooldown → Reichweite → Blickrichtung → Mana; so
+    /// kommt ein Hinweis erst, wenn alles Vorherige passt (013 plan.md Entscheidung 3). Nur bei
+    /// <see cref="AttackResult.Ok"/> ändert sich etwas: Nahkampf schadet sofort (AK-4, AK-6),
     /// Fernkampf kostet Mana und startet ein Projektil (AK-7, AK-10); der Cooldown beginnt (AK-11). Die Figur dreht sich nie (AK-19).
     /// </summary>
     public AttackResult TryAttack(Player attacker, Attack.Types.Kind kind, string targetId, uint tick)
@@ -213,7 +216,7 @@ internal sealed class Combat(
 
     /// <summary>
     /// Liegt der Vektor (<paramref name="dx"/>, <paramref name="dy"/>) höchstens <see cref="AttackArcDegrees"/>/2 neben
-    /// <paramref name="facing"/>? Abstand 0 zählt als vorn (plan.md Entscheidung 10).
+    /// <paramref name="facing"/>? Abstand 0 zählt als vorn, weil es dann keine Richtung zum Ziel gibt (013 plan.md Entscheidung 10).
     /// </summary>
     private bool IsInFront(double facing, double dx, double dy)
     {

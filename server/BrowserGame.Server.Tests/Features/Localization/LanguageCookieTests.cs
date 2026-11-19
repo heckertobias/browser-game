@@ -6,6 +6,10 @@ using Microsoft.Net.Http.Headers;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Sprach-Cookie (006 AK-4): Standardformat von ASP.NET Core, ein Jahr gültig, für den Client lesbar, <c>Secure</c>
+/// außerhalb der Entwicklung.
+/// </summary>
 public sealed class LanguageCookieTests
 {
     private sealed class Env(string name) : IHostEnvironment

@@ -3,6 +3,9 @@ using static BrowserGame.Admin.Tests.SmtpTestHelpers;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Anzeige, ob ein SMTP-Passwort gespeichert ist, und Warnung bei Benutzername ohne Passwort (005 AK-16).
+/// </summary>
 public sealed class SmtpPasswordStatusTests
 {
     private const string Save = "/Smtp?handler=Save";

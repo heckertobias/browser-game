@@ -3,6 +3,10 @@ using BrowserGame.Data;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Inhalt der Konto-Mails (003 AK-2, AK-14): Link enthalten, Hinweis auf einmalige Gültigkeit, vom Spieler gewählte
+/// Namen im HTML escaped.
+/// </summary>
 public class EmailTests
 {
     private sealed class Captured : GameEmailSender

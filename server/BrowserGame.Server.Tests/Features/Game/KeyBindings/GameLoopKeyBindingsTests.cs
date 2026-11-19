@@ -6,6 +6,9 @@ using ProtoAction = BrowserGame.Contracts.V1.Action;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Tastenbelegung im Welcome des GameLoops (002 AK-9, AK-10), auch nach Übernahme durch ein anderes Gerät.
+/// </summary>
 public sealed class GameLoopKeyBindingsTests
 {
     private static GameLoop NewGame() => new(NullLogger<GameLoop>.Instance, new ConfigurationBuilder().Build());

@@ -5,6 +5,9 @@ using Microsoft.Extensions.Primitives;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Kürzen von Kulturnamen auf die Sprache (006 AK-1), weil es im Invariant-Modus keine Eltern-Kulturen gibt.
+/// </summary>
 public sealed class LanguageOnlyCultureProviderTests
 {
     private static Task<ProviderCultureResult?> Run(ProviderCultureResult? inner) =>
