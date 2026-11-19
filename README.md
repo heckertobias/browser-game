@@ -189,11 +189,12 @@ Die Release-Notes entstehen aus den Commits seit dem letzten echten Release (RCs
 
 ## Repo-Regeln
 
-Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md), [ADR 0009](docs/decisions/0009-spec-branches-rc-und-deploy-per-api.md), [ADR 0011](docs/decisions/0011-branch-namen.md), [ADR 0012](docs/decisions/0012-deploy-ausserhalb-des-repos.md)
+Details und Begründung: [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md), [ADR 0009](docs/decisions/0009-spec-branches-rc-und-deploy-per-api.md), [ADR 0011](docs/decisions/0011-branch-namen.md), [ADR 0012](docs/decisions/0012-deploy-ausserhalb-des-repos.md), [ADR 0016](docs/decisions/0016-specs-von-jedem-branch.md)
 
-- Gearbeitet wird auf Branches mit PR: `spec/NNN-name` (Spec schreiben, Squash), `impl/NNN-name` (Umsetzung,
-  Draft-PR, Merge-Commit), `chore/kurzer-name` (Tooling/Doku, Squash);
+- Gearbeitet wird auf Branches mit PR: `spec/NNN-name` (Spec schreiben, Plan und Tasks anlegen, Squash),
+  `impl/NNN-name` (Umsetzung, Draft-PR, Merge-Commit), `chore/kurzer-name` (Tooling/Doku, Squash);
   `main` nimmt nur PRs mit grüner CI. Commits müssen **signiert** sein.
+- Eine neue Spec darf auf jedem dieser Branches entstehen, damit Ideen und Probleme sofort festgehalten werden.
 - Issues und Pull Requests können nur Collaborators eröffnen.
 - Dependabot-Updates laufen als PR durch die CI; Patch- und Minor-Updates werden automatisch gemergt, Updates ohne wirksamen Cooldown (z. B. Digests) erst nach 7 Tagen (Label `wartet-7-tage`), Sicherheitsupdates (außer Major) sofort.
 - Sicherheitslücken bitte vertraulich melden: [SECURITY.md](SECURITY.md)
