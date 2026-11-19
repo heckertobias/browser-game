@@ -6,6 +6,10 @@ using static BrowserGame.Admin.Tests.SmtpTestHelpers;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Testmail mit dem gespeicherten Stand (005 AK-17): nutzt den gespeicherten Server statt der Formularwerte und
+/// denselben Weg wie die Mails des Spiels.
+/// </summary>
 public sealed class SmtpTestSavedTests
 {
     private const string Save = "/Smtp?handler=Save";

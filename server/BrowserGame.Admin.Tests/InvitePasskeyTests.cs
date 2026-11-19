@@ -2,7 +2,11 @@ using System.Net;
 
 namespace BrowserGame.Admin.Tests;
 
-/// <summary>Regression (0.2.0 in der Testumgebung): Passkey-Schritt meldete „Name/Email field is required“ und verschwieg den Grund.</summary>
+/// <summary>
+/// Ein gescheiterter Passkey im Einrichtungsschritt nennt den Grund (004 AK-4b). Name und E-Mail schickt nur der
+/// Details-Schritt mit; als Pflichtfelder gebunden, verdeckten sie mit „field is required“ die eigentliche Meldung.
+/// Regressionstest: Der Fehler ist in einer Testumgebung aufgetreten.
+/// </summary>
 public sealed class InvitePasskeyTests
 {
     private static async Task<(FormClient Client, string Token, string ChooseMethodHtml)> UpToChooseMethodAsync(AdminFactory factory)
@@ -51,7 +55,10 @@ public sealed class InvitePasskeyTests
     }
 }
 
-/// <summary>Regression: Abgebrochene Einrichtung + Neustart darf die E-Mail nicht blockieren.</summary>
+/// <summary>
+/// Nach einer abgebrochenen Einrichtung und einem Neustart kann sich dieselbe E-Mail-Adresse erneut einrichten (004 AK-1):
+/// Der halb angelegte Admin wird beim Erzeugen des neuen Einrichtungslinks entfernt. Regressionstest.
+/// </summary>
 public sealed class AbandonedSetupTests
 {
     [Fact] // AK-1

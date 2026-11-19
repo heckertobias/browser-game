@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Wartende Figuren in der <see cref="World"/> (003 AK-20, AK-21, AK-23): stehen still, nehmen keine Eingaben an,
+/// verschwinden nach dem Nachlauf.
+/// </summary>
 public class WorldAwayTests
 {
     private static World NewWorld()

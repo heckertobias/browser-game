@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Position über Verlassen, Wiederkommen und Neustart des Servers (003 AK-18, AK-19), mit echter Datenbank.
+/// </summary>
 public class PositionPersistenceTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

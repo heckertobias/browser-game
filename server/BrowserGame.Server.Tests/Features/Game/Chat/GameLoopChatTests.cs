@@ -7,6 +7,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Chat im GameLoop ohne Netz und Datenbank (011 AK-10, AK-11, AK-13): Verteilung an alle in gleicher Reihenfolge,
+/// Tempolimit, Verhalten bei hängenden Clients und vollen Ausgängen.
+/// </summary>
 public sealed class GameLoopChatTests
 {
     private static readonly DateTimeOffset Start = new(2026, 11, 3, 12, 0, 0, TimeSpan.Zero);
@@ -283,7 +287,7 @@ public sealed class GameLoopChatTests
     }
 
     [Fact]
-    public void Without_chat_the_message_sequence_is_unchanged()
+    public void Without_chat_only_welcome_and_snapshots_are_sent()
     {
         var (game, _) = Started();
         using var gameScope = game;
@@ -462,7 +466,8 @@ public sealed class GameLoopChatTests
         Assert.True(last.Players.Single(p => p.Id == "obs").Away);
     }
 
-    [Fact] // AK-10
+    // AK-10: Bei 100 Spielern am Tempolimit wäre Serialisieren je Empfänger der teuerste Teil des Ticks.
+    [Fact]
     public void Message_is_serialized_once_and_shared_between_connections()
     {
         var (game, _) = Started();
@@ -513,6 +518,8 @@ public sealed class GameLoopChatTests
         Assert.True(observer.WasKicked);
     }
 
+    // Der TimeProvider des GameLoops ist ein optionaler Konstruktorparameter. Fände DI ihn nicht, liefe der Chat mit der
+    // Systemuhr, und alle Tests mit FakeClock prüften eine andere Zeit als der Server.
     [Fact]
     public void Container_supplies_registered_clock_to_game_loop()
     {

@@ -3,6 +3,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Start- und Einschlag-Ereignisse von <see cref="Combat"/> für den Projektil-Effekt im Client (013 AK-21): nur bei
+/// ausgeführtem Fernkampf, Einschlag mit den tatsächlich abgezogenen HP.
+/// </summary>
 public sealed class CombatEventsTests
 {
     private const int TickRate = 20;

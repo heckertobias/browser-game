@@ -8,6 +8,10 @@ using ProtoAction = BrowserGame.Contracts.V1.Action;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Tastenbelegung Ende-zu-Ende über echte WebSockets und Datenbank (002 AK-9–AK-11): gespeichert am Account, auf einem
+/// anderen Gerät im Welcome, ungültige und kaputte Daten führen zum Standard.
+/// </summary>
 public sealed class KeyBindingSocketTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

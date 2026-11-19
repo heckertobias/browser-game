@@ -2,6 +2,7 @@ using BrowserGame.Contracts.V1;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>Chat Ende-zu-Ende über echte WebSockets gegen den Testserver (011 AK-10).</summary>
 public sealed class GameChatSocketTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

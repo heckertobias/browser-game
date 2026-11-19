@@ -2,6 +2,9 @@ using System.Globalization;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Führt Code unter einer bestimmten Kultur aus, z. B. um Texte einer Sprache ohne HTTP-Anfrage zu prüfen.
+/// </summary>
 internal static class CultureScope
 {
     /// <summary>Führt <paramref name="f"/> mit der Kultur <paramref name="name"/> aus und stellt die vorherige danach wieder her.</summary>

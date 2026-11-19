@@ -4,6 +4,10 @@ using BrowserGame.Admin.Resources;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Die Razor-Views verwenden nur Textschlüssel, die es in <c>AdminTexts.resx</c> gibt (005 AK-14); ein Tippfehler
+/// zeigte sonst den Schlüssel statt des Texts.
+/// </summary>
 public sealed partial class AdminViewTextsTests
 {
     private static string PagesDirectory()

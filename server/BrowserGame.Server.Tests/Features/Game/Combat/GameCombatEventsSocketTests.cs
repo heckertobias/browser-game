@@ -40,6 +40,10 @@ file static class EventSockets
     public static TargetState Dummy(Snapshot snapshot) => snapshot.Targets.Single(t => t.Id == Combat.DummyId);
 }
 
+/// <summary>
+/// Start und Treffer eines Fernkampfs erreichen Angreifer und Zuschauer über echte WebSockets in dieser Reihenfolge
+/// (013 AK-7, AK-21).
+/// </summary>
 public sealed class GameCombatEventsSocketTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

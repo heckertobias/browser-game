@@ -2,6 +2,9 @@ using BrowserGame.Server.Features.Accounts;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Fehlertexte zu Spielernamen in beiden Sprachen (006); kein Text darf der rohe Ressourcenschlüssel sein.
+/// </summary>
 public sealed class PlayerNameMessagesTests
 {
     private static readonly PlayerNameError[] Errors = [PlayerNameError.Length, PlayerNameError.Characters, PlayerNameError.Blocked];

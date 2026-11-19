@@ -6,6 +6,10 @@ using BrowserGame.Server.Features.Pwa;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Erzeugtes Service-Worker-Skript (007 AK-12, AK-13, AK-16): Precache der Offline-Seite samt Assets, Version aus dem
+/// HTML, keine offenen Platzhalter.
+/// </summary>
 public sealed partial class ServiceWorkerScriptTests
 {
     private const string OfflineHtml =

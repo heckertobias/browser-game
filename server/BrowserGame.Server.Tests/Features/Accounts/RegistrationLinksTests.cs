@@ -4,6 +4,10 @@ using Microsoft.Extensions.Configuration;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Code im Registrierungslink (003 AK-2, AK-3): enthält die Adresse, wird bei Änderung, Ablauf oder fremdem Zweck
+/// abgelehnt.
+/// </summary>
 public class RegistrationLinksTests
 {
     private const string Email = "a@b.de";

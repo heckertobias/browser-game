@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Kampfereignisse im GameLoop (013 AK-21): Projektiltempo im Welcome, Start und Treffer an alle vor dem Snapshot
+/// desselben Ticks, nichts für Nahkampf.
+/// </summary>
 public sealed class GameLoopCombatEventsTests
 {
     private const float DummyMaxHp = (float)GameSettings.DummyMaxHp;

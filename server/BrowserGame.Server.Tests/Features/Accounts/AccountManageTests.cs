@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Seite „Mein Account“ (003 AK-13b, AK-13c): Passkeys auflisten und entfernen, Passwort setzen, die letzte Anmeldeart
+/// bleibt.
+/// </summary>
 public sealed class AccountManageTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     [Fact]

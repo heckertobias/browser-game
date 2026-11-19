@@ -2,6 +2,7 @@ using BrowserGame.Server.Features.Accounts;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>Regel „mindestens eine Anmeldeart bleibt“ (003 AK-13c) ohne Datenbank.</summary>
 public sealed class AccountCredentialsTests
 {
     [Theory] // AK-13c

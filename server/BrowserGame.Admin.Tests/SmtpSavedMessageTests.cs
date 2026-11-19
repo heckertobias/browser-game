@@ -3,6 +3,9 @@ using static BrowserGame.Admin.Tests.SmtpTestHelpers;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Nach dem Speichern der SMTP-Einstellungen steht genau eine Erfolgsmeldung über dem Formular (005 AK-8).
+/// </summary>
 public sealed class SmtpSavedMessageTests
 {
     [Fact] // 005 AK-8

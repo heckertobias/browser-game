@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Figur an gespeicherter Position anlegen (003 AK-18) und Eingaben einer neuen Verbindung, deren Sequenznummern wieder
+/// bei 1 beginnen.
+/// </summary>
 public sealed class WorldJoinTests
 {
     private static World NewWorld() => new(speed: 100, tickRateHz: 20, new Random(1));

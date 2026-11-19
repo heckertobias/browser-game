@@ -2,6 +2,9 @@ using BrowserGame.Data;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Herkunftsprüfung für Passkeys (ADR 0005): nur exakt <c>App:PublicUrl</c> und nie aus einem fremden Frame.
+/// </summary>
 public class PasskeyOriginTests
 {
     private static readonly Uri Admin = new("https://browsergame-admin.example.internal");

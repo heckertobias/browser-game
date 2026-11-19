@@ -61,6 +61,10 @@ file static class CombatSockets
     }
 }
 
+/// <summary>
+/// Angriffe über echte WebSockets (013 AK-5, AK-7, AK-8, AK-19, AK-20): Wirkung auf Mana und Dummy, Ablehnungen nur an
+/// den Angreifer.
+/// </summary>
 public sealed class GameCombatSocketTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private const float MaxMana = (float)GameSettings.MaxMana;
@@ -139,6 +143,10 @@ public sealed class GameCombatSocketTests(GameServerFactory factory) : IClassFix
     }
 }
 
+/// <summary>
+/// Dummy über Serverstarts hinweg (013 AK-13, AK-17): Er steht im ersten Snapshot und kommt nach einem Neustart frisch
+/// zurück; jeder Test startet seinen eigenen Server.
+/// </summary>
 public sealed class GameCombatServerTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

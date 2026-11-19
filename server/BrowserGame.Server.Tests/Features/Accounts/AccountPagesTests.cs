@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Anmelden und Abmelden über die Seiten (003 AK-1, AK-9, AK-13): gleiche Meldung für jeden Fehlversuch, nur lokale
+/// Rücksprünge, Abmelden beendet die Sitzung.
+/// </summary>
 public sealed partial class AccountPagesTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static readonly string[] SessionCookieOnly = ["bg.auth"];

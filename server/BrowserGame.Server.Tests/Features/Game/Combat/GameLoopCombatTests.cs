@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Kampf im GameLoop ohne Netz (013 AK-2, AK-4–AK-9, AK-11, AK-13, AK-19, AK-20): Dummy im Snapshot, Angriffe aus dem
+/// Channel, welche Ablehnungen der Angreifer gemeldet bekommt.
+/// </summary>
 public sealed class GameLoopCombatTests
 {
     private const float DummyX = (float)GameSettings.DummyX;

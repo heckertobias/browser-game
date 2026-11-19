@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Accounts;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Regeln für Spielernamen ohne Datenbank (003 AK-5, AK-6, AK-7b): Länge, nur Buchstaben, einheitliche Schreibweise,
+/// Sperrliste.
+/// </summary>
 public class PlayerNamesTests
 {
     [Theory] // AK-6
@@ -52,7 +56,7 @@ public class PlayerNamesTests
     }
 
     [Fact] // Sperrliste prüft nur ganze Namen (Wortteil-Erkennung ist Out of Scope)
-    public void Names_containing_blocked_words_are_allowed_for_now()
+    public void Names_containing_blocked_words_are_allowed()
     {
         Assert.Equal(PlayerNameError.None, PlayerNames.TryNormalize("Adminton", out _));
     }

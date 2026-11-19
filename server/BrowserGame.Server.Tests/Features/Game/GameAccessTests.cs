@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Origin-Prüfung für <c>/ws</c> (Schutz vor Cross-Site-WebSocket-Hijacking): <c>App:PublicUrl</c>, in der Entwicklung
+/// auch Vite und die Adresse der Anfrage.
+/// </summary>
 public sealed class GameAccessTests
 {
     private static readonly Uri PublicUrl = new("https://game.test");

@@ -2,6 +2,7 @@ using System.Net;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>Admin-Seiten laden nur Bootstrap, nie das Tailwind-CSS des Spiels (005 AK-5, ADR 0007).</summary>
 public sealed class AdminLayoutTests
 {
     private const string BootstrapCss = """href="/lib/bootstrap/bootstrap\.min\.css(\?v=[^"]+)?["]""";
