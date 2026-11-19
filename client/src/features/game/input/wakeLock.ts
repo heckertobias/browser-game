@@ -18,7 +18,7 @@ export interface WakeLockDocument {
 /** Eingaben, nach denen erneut angefordert wird (Browser, die eine Nutzergeste verlangen); Touch zählt erst bei touchend, pointerup nur für Maus und Stift. */
 export const WAKE_LOCK_INPUT_EVENTS = ["pointerup", "touchend", "keydown"] as const;
 
-/** Hält den Bildschirm an, solange das Spiel sichtbar ist (AK-14); ohne Unterstützung oder bei Ablehnung still. */
+/** Hält den Bildschirm an, solange das Spiel sichtbar ist (007 AK-14); ohne Unterstützung oder bei Ablehnung still. */
 export class ScreenWakeLock {
   private sentinel: WakeLockSentinelLike | null = null;
   private pending = false;

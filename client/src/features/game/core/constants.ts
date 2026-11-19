@@ -4,6 +4,7 @@ export const MAX_SHORT_SIDE = 400;
 export const MAX_ASPECT_LONG = 21;
 export const MAX_ASPECT_SHORT = 9;
 
+/** Kantenlänge des Quadrats einer Figur in Weltpixeln. */
 export const PLAYER_SIZE = 16;
 /** Pfeil der Blickrichtung (016) in Weltpixeln: Abstand vom Rand der Figur, Länge der Spitze, Breite der Basis. */
 export const ARROW_GAP = 3;
@@ -11,6 +12,7 @@ export const ARROW_LENGTH = 5;
 export const ARROW_WIDTH = 6;
 /** Culling (ADR 0010): Figur samt Namen (≤ 16 Zeichen) muss das Sichtfeld um diesen Rand in Weltpixeln schneiden. */
 export const CULL_MARGIN = 64;
+/** Abstand der feinen und der groben Gitterlinien in Weltpixeln: Das Muster macht Bewegung sichtbar (001 AK-7). */
 export const GRID_MINOR = 32;
 export const GRID_MAJOR = 256;
 
