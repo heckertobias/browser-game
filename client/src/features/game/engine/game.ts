@@ -102,6 +102,7 @@ export class Game {
       onChatHistory: (messages) => { this.events.onChatHistory(messages); },
       onChatMessage: (message) => { this.events.onChatMessage(message); },
       onChatRejected: (reason) => { this.events.onChatRejected(reason); },
+      onCommandRejected: (reason) => { this.events.onCommandRejected?.(reason); },
       onAttackRejected: (reason) => { this.events.onAttackRejected?.(reason); },
       onAttackAccepted: (accepted) => { this.events.onCooldown?.(accepted.cooldownSeconds * 1000); },
     });

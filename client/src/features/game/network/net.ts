@@ -2,6 +2,7 @@ import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import {
   AttackRejected_Reason,
   ChatRejected_Reason,
+  CommandRejected_Reason,
   ClientMessageSchema,
   Kicked_Reason,
   ServerMessageSchema,
@@ -20,6 +21,9 @@ export type KickReason = Kicked_Reason.SIGNED_IN_ELSEWHERE | Kicked_Reason.SIGNE
 
 /** Gründe, aus denen der Server eine Chatnachricht ablehnt (AK-13). */
 export type ChatRejectReason = ChatRejected_Reason.TOO_FAST;
+
+/** Gründe, aus denen der Server einen Befehl ablehnt (015 AK-4). */
+export type CommandRejectReason = CommandRejected_Reason.UNKNOWN_COMMAND | CommandRejected_Reason.INVALID;
 
 /** Gründe, aus denen der Server einen Angriff meldet (013 AK-5, AK-8, AK-9, AK-19); alles andere scheitert still. */
 export type AttackRejectReason =
@@ -44,6 +48,8 @@ export interface ChatHandlers {
   onChatHistory(messages: readonly ChatMessage[]): void;
   onChatMessage(message: ChatMessage): void;
   onChatRejected(reason: ChatRejectReason): void;
+  /** Nur an den Absender: Befehl nicht ausgeführt (015 AK-4). Bei Erfolg kommt nichts. */
+  onCommandRejected?(reason: CommandRejectReason): void;
 }
 
 export interface GameConnection {
@@ -96,6 +102,13 @@ export function createReceiver(handlers: ConnectionHandlers & Partial<ChatHandle
         case "chatRejected": {
           const { reason } = message.payload.value;
           if (reason === ChatRejected_Reason.TOO_FAST) handlers.onChatRejected?.(reason);
+          break;
+        }
+        case "commandRejected": {
+          const { reason } = message.payload.value;
+          if (reason === CommandRejected_Reason.UNKNOWN_COMMAND || reason === CommandRejected_Reason.INVALID) {
+            handlers.onCommandRejected?.(reason);
+          }
           break;
         }
         case "attackRejected": {
