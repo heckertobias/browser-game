@@ -45,7 +45,7 @@ dokumentiert. Tests und Builds decken die Umsetzung ab.
 
 ## Lokal starten
 
-Voraussetzungen: .NET 10 SDK, Node 24.
+Voraussetzungen: .NET 11 SDK, Node 24.
 
 ```bash
 # Terminal 1 – Spielserver (http://localhost:5080)

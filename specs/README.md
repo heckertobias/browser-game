@@ -93,7 +93,7 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 8 | [002 – Tastenbelegung & erstes Menü](002-keybindings/spec.md) | umgesetzt | 003 |
 | 9 | [012 – HP & Mana](012-hp-mana/spec.md) | umgesetzt | 001 |
 | 10 | [016 – Blickrichtung](016-blickrichtung/spec.md) | umgesetzt | 001 |
-| 11 | [009 – Wechsel auf .NET 11](009-dotnet-11/spec.md) | bereit | .NET 11 und Npgsql 11 je 7 Tage alt (ab 2026-11-17) |
+| 11 | [009 – Wechsel auf .NET 11](009-dotnet-11/spec.md) | umgesetzt | .NET 11 und Npgsql 11 je 7 Tage alt (ab 2026-11-17) |
 | 12 | [013 – Rudimentäres Kampfsystem](013-kampfsystem/spec.md) | umgesetzt | 012, 016 |
 | 13 | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | umgesetzt | 011, 012, 003 |
 | 14 | [026 – Spec-Nummer eindeutig](026-spec-nummer-eindeutig/spec.md) | bereit | – |

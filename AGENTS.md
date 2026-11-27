@@ -13,6 +13,15 @@ Regeln:
 - Arbeite `tasks.md` der Reihe nach ab und hake erledigte Tasks ab.
 - Wenn die Spec nicht passt oder unklar ist: anhalten und nachfragen, nicht raten.
 - Typen nur aus `contracts/` generieren, nie duplizieren.
+- NuGet-Pakete nur mit `dotnet package add <Paket>` bzw. `dotnet package update` ohne feste Version (kein
+  `--version`, kein `<Paket>@<Version>`) hinzufügen oder aktualisieren, nie Versionen von Hand in eine `.csproj`
+  schreiben. Nur so wählt das Werkzeug keine Version, die jünger als 7 Tage ist (`minPublishAgeHours` in `server/nuget.config`,
+  [ADR 0002](docs/decisions/0002-repo-und-ci-cd.md)).
+  - Ausnahme nur für einen dringenden Sicherheitsfix: `dotnet package add <Paket> --version <Version>`. Der PR nennt
+    Paket, Version und Grund.
+  - Werkzeuge in `server/dotnet-tools.json` mit `dotnet tool update` ohne feste Version (kein `--version`, kein
+    `<Paket>@<Version>`); ob dabei das Mindestalter greift, ist nicht dokumentiert, deshalb das Alter der gewählten
+    Version selbst prüfen.
 - Fällt dir bei der Arbeit eine Idee oder ein Problem auf, das nicht in die aktuelle Aufgabe gehört: sofort als neue
   `spec.md` festhalten (Status `entwurf`, Unklares unter „Offene Fragen“, Eintrag in der Roadmap) – auf dem Branch, auf
   dem du gerade bist ([ADR 0016](docs/decisions/0016-specs-von-jedem-branch.md)). Nummer: die nächste freie auf `main`.
