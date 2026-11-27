@@ -6,6 +6,8 @@ import { Chat, type ChatFeed } from "@/features/game/chat/Chat";
 import { Game, type ConnectionStatus, type PlayerVitals } from "@/features/game/engine/game";
 import { Vitals } from "@/features/game/hud/Vitals";
 import type { Bindings } from "@/features/game/input/bindings";
+import { browserDecode, browserSource } from "@/features/game/sprites/browser";
+import { HUMANOID_IMAGES, HUMANOID_RIG, loadSpriteSet } from "@/features/game/sprites/spriteSet";
 import { KeyBindings } from "@/features/game/menu/KeyBindings";
 import { Menu } from "@/features/game/menu/Menu";
 import { menuKeyAction } from "@/features/game/menu/menuLogic";
@@ -96,6 +98,10 @@ export function App() {
     });
     gameRef.current = game;
     game.start();
+    // Bis die Sprites da sind und wenn das Laden scheitert, zeichnet das Spiel Quadrate (017 AK-14).
+    void loadSpriteSet(HUMANOID_RIG, HUMANOID_IMAGES, browserDecode, browserSource).then((sprites) => {
+      game.setSprites(sprites);
+    });
     return () => {
       game.stop();
       gameRef.current = null;

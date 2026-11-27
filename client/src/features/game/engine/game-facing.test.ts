@@ -54,13 +54,18 @@ function setup() {
     onChatRejected: () => {},
   });
   game.start();
-  return { ctx, socket: FakeWebSocket.latest() };
+  const socket = FakeWebSocket.latest();
+  socket.receive(toggleArrows);
+  return { ctx, socket };
 }
 
 const welcome = serverBytes({
   case: "welcome",
   value: { playerId: "a", name: "n", speed: 100, tickRateHz: 20, minFacingInput: 0.01 },
 });
+
+/** Pfeile sind seit 017 standardmäßig aus (AK-10); diese Tests prüfen den Pfeil selbst. */
+const toggleArrows = serverBytes({ case: "toggleFacingArrows", value: {} });
 
 const snapshot = (ownFacing: number) =>
   serverBytes({

@@ -13,6 +13,7 @@ import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "@/feat
 import type { Vec } from "@/features/game/core/vector";
 import { fitViewport, type Viewport } from "@/features/game/render/viewport";
 import { ScreenWakeLock } from "@/features/game/input/wakeLock";
+import type { SpriteSet } from "@/features/game/sprites/spriteSet";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "kicked";
 
@@ -81,6 +82,10 @@ export class Game {
   private targets: readonly TargetState[] = [];
   /** Zuletzt gezeichnete Kamera; Tippen auf ein Ziel rechnet mit dem, was der Spieler sieht. */
   private camera: Vec = { x: 0, y: 0 };
+  /** Pfeile der Blickrichtung (016) nur auf Wunsch; nur lokal, nicht gespeichert (017 AK-10–13). */
+  private facingArrows = false;
+  /** Fertige Figuren aus `App`; `null` → Quadrate (017 AK-14, Plan-Entscheidung 11, 12). */
+  private sprites: SpriteSet | null = null;
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly events: GameEvents) {
     const ctx = canvas.getContext("2d");
@@ -112,6 +117,7 @@ export class Game {
       onCommandRejected: (reason) => { this.events.onCommandRejected?.(reason); },
       onAttackRejected: (reason) => { this.events.onAttackRejected?.(reason); },
       onAttackAccepted: (accepted) => { this.events.onCooldown?.(accepted.cooldownSeconds * 1000); },
+      onToggleFacingArrows: () => { this.facingArrows = !this.facingArrows; },
     });
     this.lastFrame = performance.now();
     this.frameHandle = requestAnimationFrame(this.frame);
@@ -149,6 +155,11 @@ export class Game {
   /** Menü offen: Figur steht (002 AK-4); Snapshots und Rendern laufen weiter (AK-4b). */
   setMenuOpen(open: boolean): void {
     this.input.setSuspended(open);
+  }
+
+  /** Sprites aus `App` übernehmen; `null` (Laden gescheitert) zeichnet weiter Quadrate (017 AK-14). */
+  setSprites(sprites: SpriteSet | null): void {
+    this.sprites = sprites;
   }
 
   private applyKeyBindings(bindings: Bindings): void {
@@ -288,20 +299,30 @@ export class Game {
     this.updateViewport();
     if (!this.viewport) return;
 
-    const others = this.snapshots.sample(now - INTERPOLATION_DELAY_MS);
-    const players: DrawablePlayer[] = [...others];
+    const renderTime = now - INTERPOLATION_DELAY_MS;
+    const moving = this.snapshots.moving(renderTime);
+    const players: DrawablePlayer[] = this.snapshots
+      .sample(renderTime)
+      .map((player) => ({ ...player, moving: moving.has(player.id) }));
     let camera: Vec = { x: 0, y: 0 };
     if (this.predictor?.initialized && this.self) {
       camera = this.predictor.renderPosition(this.accumulator / this.stepMs);
-      players.push({ ...this.self, ...camera, facing: this.predictor.facing });
+      players.push({ ...this.self, ...camera, facing: this.predictor.facing, moving: this.predictor.moving });
     }
     this.camera = camera;
     this.effects.update(now);
-    render(this.ctx, this.viewport, camera, players, {
-      targets: this.effects.targets(),
-      projectiles: this.effects.positions(now),
-      selectedId: this.selection.current,
-    });
+    render(
+      this.ctx,
+      this.viewport,
+      camera,
+      players,
+      {
+        targets: this.effects.targets(),
+        projectiles: this.effects.positions(now),
+        selectedId: this.selection.current,
+      },
+      { sprites: this.sprites, facingArrows: this.facingArrows, now },
+    );
   }
 
   private observeSize(): void {

@@ -44,7 +44,7 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
 - [x] **T8** (AK-1, AK-3, AK-9, AK-10, AK-14, AK-20): `render.ts`: `RenderOptions`, Sprite statt Quadrat, Quadrat als
   Rückfall, Pfeil nur mit `facingArrows`; `fakeContext.ts` additiv (`drawImage`, `fillText`); Vitest
   `render-sprite.test.ts`.
-- [ ] **T9** (AK-10–14): `net.ts` (`onToggleFacingArrows`); `game.ts` (Schalter, `setSprites`, `moving`, Optionen an
+- [x] **T9** (AK-10–14): `net.ts` (`onToggleFacingArrows`); `game.ts` (Schalter, `setSprites`, `moving`, Optionen an
   `render`); `App.tsx` lädt die Sprites. Vitest `net`, `game-facing-arrows.test.ts`. Bestehende
   `game-facing.test.ts` nur nach Freigabe anpassen (Toggle vor dem Zeichnen, Prüfungen gleich).
 
