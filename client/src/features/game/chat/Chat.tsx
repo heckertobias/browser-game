@@ -1,9 +1,10 @@
 import { memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useReducer, useRef, useState, type KeyboardEvent, type Ref, type RefObject } from "react";
 import { flushSync } from "react-dom";
-import type { ChatMessage } from "@/generated/browsergame/v1/game_pb";
-import type { ChatHandlers } from "@/features/game/network/net";
+import { CommandRejected_Reason, type ChatMessage } from "@/generated/browsergame/v1/game_pb";
+import type { ChatHandlers, CommandRejectReason } from "@/features/game/network/net";
 import { language, t } from "@/features/localization/i18n";
 import {
+  CHAT_COMMAND_HINT_MS,
   CHAT_FLUSH_MS,
   CHAT_KEYBOARD_VAR,
   CHAT_MAX_LENGTH,
@@ -32,6 +33,11 @@ import {
 
 const TIME_FORMAT = timeFormatter(language);
 
+const COMMAND_HINT: Record<CommandRejectReason, string> = {
+  [CommandRejected_Reason.UNKNOWN_COMMAND]: t.commandUnknown,
+  [CommandRejected_Reason.INVALID]: t.commandInvalid,
+};
+
 // --chat-keyboard: Die Tastatur ersetzt Rand und Safe Area, sie addiert sich nicht.
 // max-sm: Auf schmalen Schirmen wäre sonst die Versionsanzeige unten rechts im Weg.
 const CHAT_ROOT =
@@ -42,6 +48,7 @@ const CHAT_PANEL =
 /** Was das Spiel dem Chat meldet: Server-Nachrichten und den Beginn einer Sitzung (Welcome leert die Liste). */
 export interface ChatFeed extends ChatHandlers {
   onWelcome(): void;
+  onCommandRejected(reason: CommandRejectReason): void;
 }
 
 export interface ChatProps {
@@ -113,6 +120,9 @@ export function ChatView({ state, listRef, inputRef, rootRef, onListScroll, onCo
         {state.lines.map((line) => <ChatRow key={line.id} line={line} />)}
       </ol>
       {state.tooFast && <p role="status" data-testid="chat-too-fast" className="px-2 text-warning">{t.chatTooFast}</p>}
+      {state.commandRejected !== null && (
+        <p role="status" data-testid="chat-command-hint" className="px-2 text-warning">{COMMAND_HINT[state.commandRejected]}</p>
+      )}
       <form
         className="flex gap-1 p-1"
         onSubmit={(e) => {
@@ -153,7 +163,7 @@ export const Chat = memo(function Chat({ ref, sendChat, inGame }: ChatProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
-  const tooFastTimer = useRef<number | undefined>(undefined);
+  const hintTimer = useRef<number | undefined>(undefined);
   const [batcher] = useState(
     () => new MessageBatcher<ChatMessage>((messages) => { dispatch({ type: "messages", messages }); }, CHAT_FLUSH_MS, CHAT_MAX_LINES),
   );
@@ -176,8 +186,13 @@ export const Chat = memo(function Chat({ ref, sendChat, inGame }: ChatProps) {
       },
       onChatRejected() {
         dispatch({ type: "rejected" });
-        window.clearTimeout(tooFastTimer.current);
-        tooFastTimer.current = window.setTimeout(() => { dispatch({ type: "tooFastOver" }); }, CHAT_TOO_FAST_HINT_MS);
+        window.clearTimeout(hintTimer.current);
+        hintTimer.current = window.setTimeout(() => { dispatch({ type: "tooFastOver" }); }, CHAT_TOO_FAST_HINT_MS);
+      },
+      onCommandRejected(reason) {
+        dispatch({ type: "commandRejected", reason });
+        window.clearTimeout(hintTimer.current);
+        hintTimer.current = window.setTimeout(() => { dispatch({ type: "commandHintOver" }); }, CHAT_COMMAND_HINT_MS);
       },
     }),
     [batcher],
@@ -185,7 +200,7 @@ export const Chat = memo(function Chat({ ref, sendChat, inGame }: ChatProps) {
 
   useEffect(() => () => {
     batcher.clear();
-    window.clearTimeout(tooFastTimer.current);
+    window.clearTimeout(hintTimer.current);
   }, [batcher]);
 
   const scrollToEndIfStuck = useCallback(() => {

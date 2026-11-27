@@ -95,11 +95,11 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 10 | [016 – Blickrichtung](016-blickrichtung/spec.md) | umgesetzt | 001 |
 | 11 | [009 – Wechsel auf .NET 11](009-dotnet-11/spec.md) | bereit | .NET 11 und Npgsql 11 je 7 Tage alt (ab 2026-11-17) |
 | 12 | [013 – Rudimentäres Kampfsystem](013-kampfsystem/spec.md) | umgesetzt | 012, 016 |
-| 13 | [026 – Spec-Nummer eindeutig](026-spec-nummer-eindeutig/spec.md) | bereit | – |
-| 14 | [025 – Spieltakt nach Features aufteilen](025-spieltakt/spec.md) | bereit | 011, 013 |
-| 15 | [022 – Startbereich als Spielwert](022-startbereich/spec.md) | bereit | 003, 012 |
-| 16 | [023 – Chat-Höchstlänge vom Server](023-chat-laenge/spec.md) | bereit | 011 |
-| 17 | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | bereit | 011, 012, 003 |
+| 13 | [015 – Slash-Commands (Test-Befehle)](015-slash-commands/spec.md) | umgesetzt | 011, 012, 003 |
+| 14 | [026 – Spec-Nummer eindeutig](026-spec-nummer-eindeutig/spec.md) | bereit | – |
+| 15 | [025 – Spieltakt nach Features aufteilen](025-spieltakt/spec.md) | bereit | 011, 013 |
+| 16 | [022 – Startbereich als Spielwert](022-startbereich/spec.md) | bereit | 003, 012 |
+| 17 | [023 – Chat-Höchstlänge vom Server](023-chat-laenge/spec.md) | bereit | 011 |
 | 18 | [014 – Gegner (erstes Ziel, das HP hat und zurückwirkt)](014-gegner/spec.md) | bereit | 012, 013, 015, 016 |
 | 19 | [017 – Spielfigur als Pixel-Art](017-spielfigur/spec.md) | entwurf | 001, 003, 015, 016 |
 | 20 | [018 – Boden statt Gitter](018-boden/spec.md) | bereit | 017 |

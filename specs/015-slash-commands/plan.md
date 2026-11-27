@@ -28,11 +28,12 @@ ein Command darf die `World` direkt ändern.
    ```
    /run <name>               z. B. /run fullHealth
    /run <name>(<args>)       z. B. /run fullHealth()   /run debug(A, B, C)
-   name := Buchstabe (Buchstabe | Ziffer)*
+   name := Buchstabe (Buchstabe | Ziffer)*      Buchstabe, Ziffer := nur ASCII
    args := leer | arg (',' arg)*      arg := getrimmter Text ohne ',' und ')', nicht leer
    ```
-   Alles andere nach `/` ist ein Fehler. Namen werden ohne Rücksicht auf Groß-/Kleinschreibung gefunden
-   (`/run fullhealth()` geht auch).
+   Alles andere nach `/` ist ein Fehler. Das Präfix reicht bis zum ersten Leerraum oder Textende; nach `/run` muss
+   Leerraum folgen (`/run()` und `/runfullHealth()` sind ein anderes Präfix). Präfix und Namen gelten ohne Rücksicht
+   auf Groß-/Kleinschreibung (`/Run fullhealth()` geht auch). Text ohne führendes `/` liefert `UnknownPrefix`.
 4. **Zwei Fehlerarten** (`CommandRejected.Reason`):
    - `UNKNOWN_COMMAND`: anderes Präfix als `/run` (z. B. `/xyz`) oder unbekannter Name (AK-4).
    - `INVALID`: `/run` ohne Namen, kaputte Klammern oder falsche Anzahl Parameter (Spec: „fehlerhafter Befehl“).
@@ -104,9 +105,9 @@ message CommandRejected {
 
 - **`net.ts` / `game.ts`:** `commandRejected` → `GameEvents.onCommandRejected(reason)`.
 - **`Chat.tsx` (011):** derselbe kurze Hinweis wie bei „zu schnell“: „Unbekannter Befehl“ bzw. „Befehl fehlerhaft“.
+  Er bleibt so lange wie „zu schnell“; es steht immer nur ein Hinweis da, ein neuer ersetzt den alten.
   Das Feld wird beim Absenden geleert wie bei einer Nachricht (der Client weiß nicht, ob ein Command gelingt,
-  Entscheidung 5). Bei `CommandRejected` setzt er den zuletzt gesendeten Command wieder ein, damit man ihn korrigieren
-  kann.
+  Entscheidung 5). Bei `CommandRejected` bleibt es, wie es ist; der Command wird nicht wieder eingesetzt.
 - Der Client kennt die Commands nicht und prüft nichts außer dem, was 011 schon prüft (leer, Länge).
 - **`i18n.ts`:** `commandUnknown`, `commandInvalid` (de/en).
 
@@ -123,7 +124,7 @@ message CommandRejected {
 | 7 | `resetPosition` → `ResetToStart` | Unit: Position (500, 500) → im `SpawnRadius`, HP unverändert, `SpawnSeq + 1` |
 | 8 | Snapshot an alle | Integration: B sieht die neue Position von A im nächsten Snapshot (< 1 s), mit neuem `spawn_seq` |
 | 9 | keine Rechteprüfung | Unit: Registry hat keinen Rechte-Parameter; Integration: frisch registrierter Account darf beide Commands |
-| 10 | keine Konfiguration | Code-Review (Registry fest im Code); Integration: Commands auch mit `Environment=Production` |
+| 10 | keine Konfiguration | Code-Review (Registry fest im Code); Unit: Registry und Dispatcher ohne Konfiguration und Umgebung |
 | 11 | `CommandContext` nur mit `Self` | Unit: zwei Figuren, `fullHealth` auf A → B unverändert; `resetPosition` auf A → B unverändert |
 
 ## Constitution-Check
@@ -140,5 +141,3 @@ message CommandRejected {
   ohne echten Kampfdruck ist das harmlos; vor einem öffentlichen Start braucht es die Rechte-Spec. Das steht so auch in
   der Spec.
 - **Reihenfolge der Specs:** 015 setzt 011 voraus, das selbst noch nicht umgesetzt ist (siehe Roadmap).
-- **Feld wieder füllen:** Kommt `CommandRejected` erst nach einer weiteren Eingabe an (sehr langsame Verbindung), wird
-  der zuletzt gesendete Command nur eingesetzt, wenn das Feld noch leer ist.

@@ -1,6 +1,7 @@
 // Reine Logik des Chatfensters (011), ohne React und ohne DOM testbar. AK-Angaben in dieser Datei beziehen sich auf 011.
 
 import { isEditableTarget } from "@/features/game/input/input";
+import type { CommandRejectReason } from "@/features/game/network/net";
 import type { ChatMessage } from "@/generated/browsergame/v1/game_pb";
 
 /** Höchstlänge in UTF-16-Einheiten wie `maxLength` im Browser; gleich `GameSettings.ChatMaxLength` (Server, AK-9). */
@@ -11,6 +12,8 @@ export const CHAT_MAX_LINES = 200;
 export const CHAT_FLUSH_MS = 100;
 /** So lange steht der Hinweis „zu schnell“ (AK-13). */
 export const CHAT_TOO_FAST_HINT_MS = 4000;
+/** Der Befehls-Hinweis steht so lange wie „zu schnell“ (015). */
+export const CHAT_COMMAND_HINT_MS = CHAT_TOO_FAST_HINT_MS;
 /** Schlüssel in `localStorage` für „eingeklappt“; der Stand gilt je Gerät (AK-4b). */
 export const CHAT_COLLAPSED_KEY = "bg.chat.collapsed";
 /** Abstand zum Ende, der noch als „ganz unten“ zählt; Rundungen beim Scrollen erreichen 0 nicht immer. */
@@ -212,6 +215,8 @@ export interface ChatState {
   readonly lastSent: string;
   /** Der Hinweis „zu schnell“ ist sichtbar. */
   readonly tooFast: boolean;
+  /** Grund, aus dem der Server den letzten Befehl abgelehnt hat; `null`: kein Hinweis (015). */
+  readonly commandRejected: CommandRejectReason | null;
 }
 
 export type ChatAction =
@@ -223,11 +228,13 @@ export type ChatAction =
   | { type: "sent"; text: string }
   | { type: "cancel" }
   | { type: "rejected" }
-  | { type: "tooFastOver" };
+  | { type: "tooFastOver" }
+  | { type: "commandRejected"; reason: CommandRejectReason }
+  | { type: "commandHintOver" };
 
 /** Leerer Chat; `collapsed` aus `loadCollapsed`. */
 export function initialChatState(collapsed: boolean): ChatState {
-  return { lines: [], nextId: 1, collapsed, unread: false, draft: "", lastSent: "", tooFast: false };
+  return { lines: [], nextId: 1, collapsed, unread: false, draft: "", lastSent: "", tooFast: false, commandRejected: null };
 }
 
 function numbered(state: ChatState, messages: readonly ChatMessage[]): ChatLine[] {
@@ -264,9 +271,13 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
     case "cancel":
       return { ...state, draft: "" };
     case "rejected":
-      return { ...state, tooFast: true, draft: state.draft === "" ? state.lastSent : state.draft, lastSent: "" };
+      return { ...state, tooFast: true, commandRejected: null, draft: state.draft === "" ? state.lastSent : state.draft, lastSent: "" };
     case "tooFastOver":
       return { ...state, tooFast: false };
+    case "commandRejected":
+      return { ...state, commandRejected: action.reason, tooFast: false };
+    case "commandHintOver":
+      return { ...state, commandRejected: null };
   }
 }
 

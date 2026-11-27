@@ -1,6 +1,6 @@
 # 015 – Slash-Commands (Test-Befehle)
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [011 – Chat](../011-chat/spec.md) (Chat-Eingabefeld; dass `/`-Text zunächst nur Text ist) ·
 [012 – HP & Mana](../012-hp-mana/spec.md) (für `fullHealth()`) ·
