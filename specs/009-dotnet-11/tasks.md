@@ -19,7 +19,7 @@ alt sind (frühestens 2026-11-17).
 - [x] **T4**: `README.md` (Voraussetzung .NET 11 SDK) und weitere Stellen, die .NET 10 als aktuelle Version nennen.
 
 ## Tests / Prüfung
-- [ ] **T5**: RC in der Testumgebung: Anmelden, Laufen, Chat, Tastenbelegung, HUD, Admin; beide Container gesund.
+- [x] **T5**: RC in der Testumgebung: Anmelden, Laufen, Chat, Tastenbelegung, HUD, Admin; beide Container gesund.
   `dotnet package update` schließt eine zu junge Version aus (AK-2).
 
   Danach alle AKs abhaken, Spec-Status auf `umgesetzt`, Roadmap aktualisieren.
