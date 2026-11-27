@@ -7,24 +7,41 @@ const features = ["accounts", "game", "localization", "pwa"];
 const allowedFeatureImports: Record<string, string[]> = { game: ["localization"], pwa: ["localization"] };
 const generatedOnlyViaAlias = { regex: String.raw`^\.{1,2}/.*\bgenerated/`, message: "generated/ nur über @/generated importieren." };
 
+function featurePatterns(feature: string) {
+  return [
+    generatedOnlyViaAlias,
+    { group: ["@/app", "@/app/**", "**/app", "**/app/**"], message: "Features importieren nie aus app/." },
+    { group: ["../**"], message: "Über Ordnergrenzen nur per @/-Alias importieren." },
+    ...features
+      .filter((other) => other !== feature && !(allowedFeatureImports[feature] ?? []).includes(other))
+      .map((other) => ({ group: [`@/features/${other}`, `@/features/${other}/**`], message: `Feature ${feature} darf ${other} nicht importieren.` })),
+  ];
+}
+
 const featureRestrictions = features.map((feature): OxlintOverride => ({
   files: [`src/features/${feature}/**`],
+  rules: { "no-restricted-imports": ["error", { patterns: featurePatterns(feature) }] },
+}));
+
+// sprites/ soll später als eigenes Paket herauslösbar sein (ADR 0018). Dieser Override ersetzt die Regel von game,
+// deshalb stehen dessen Muster noch einmal darin. Tests sind ausgenommen (assets.test.ts braucht PLAYER_SIZE).
+const spritesRestriction: OxlintOverride = {
+  files: ["src/features/game/sprites/**"],
+  excludeFiles: ["src/features/game/sprites/**/*.test.ts"],
   rules: {
     "no-restricted-imports": [
       "error",
       {
         patterns: [
-          generatedOnlyViaAlias,
-          { group: ["@/app", "@/app/**", "**/app", "**/app/**"], message: "Features importieren nie aus app/." },
-          { group: ["../**"], message: "Über Ordnergrenzen nur per @/-Alias importieren." },
-          ...features
-            .filter((other) => other !== feature && !(allowedFeatureImports[feature] ?? []).includes(other))
-            .map((other) => ({ group: [`@/features/${other}`, `@/features/${other}/**`], message: `Feature ${feature} darf ${other} nicht importieren.` })),
+          ...featurePatterns("game"),
+          { group: ["@/features", "@/features/**"], message: "sprites/ importiert nichts aus dem übrigen Spiel (ADR 0018)." },
+          { group: ["@/generated", "@/generated/**"], message: "sprites/ kennt keine Verträge (ADR 0018)." },
+          { group: ["react", "react/**", "react-dom", "react-dom/**"], message: "sprites/ nutzt kein React (ADR 0018)." },
         ],
       },
     ],
   },
-}));
+};
 
 // Typgestützte Regeln; in Node-Skripten außerhalb von tsconfig aus.
 const typeAwareRules = [
@@ -277,6 +294,7 @@ export default defineConfig({
       rules: { "no-restricted-imports": ["error", { patterns: [generatedOnlyViaAlias] }] },
     },
     ...featureRestrictions,
+    spritesRestriction,
     { files: ["scripts/**/*.mjs"], env: { node: true }, rules: withoutTypeAware },
   ],
 });

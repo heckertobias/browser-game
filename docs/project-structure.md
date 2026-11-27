@@ -39,7 +39,7 @@ client/
   vite.config.ts             Mehrseiten-Build (index + offline), Tests (vitest), Alias @/ (aus tsconfig)
   vite.passkeys.config.ts    Feste Bundles für die Razor-Seiten: passkeys.js und language.js
                              (Einträge: features/accounts/api/passkeys.ts, features/localization/language.ts)
-  oxlint.config.ts           Linter (ADR 0014), inkl. Importgrenzen zwischen Features (siehe unten)
+  oxlint.config.ts           Linter (ADR 0014), inkl. Importgrenzen zwischen Features und für `game/sprites/` (siehe unten)
   package.json               Skripte: dev/test/lint/build; build:landing mit src/styles/landing.css als
                              Tailwind-Eingabe; build:admin kopiert Bootstrap (scripts/admin-lib.mjs)
   scripts/                   icons.mjs (Web-App-Icons), admin-lib.mjs (Bootstrap fürs Admin),
@@ -79,6 +79,9 @@ Regeln:
 - **Importgrenzen** prüft oxlint (`no-restricted-imports`, `npm run lint`): Features importieren nie aus `app/`,
   `app/` importiert Features. Zwischen Features ist nur erlaubt, was die Tabelle unter
   [Abhängigkeitsrichtung](#abhängigkeitsrichtung) nennt. Neue Abhängigkeit = Tabelle und `oxlint.config.ts` anpassen.
+  `features/game/sprites/` importiert außerdem nichts aus dem übrigen Spiel: kein `@/features/…`, kein
+  `@/generated/…`, weder `react` noch `react-dom`; erlaubt sind `./…` im selben Ordner und `@/assets/…`. So bleibt es
+  als eigenes Paket herauslösbar ([ADR 0018](decisions/0018-sprite-format.md)). Tests in `sprites/` sind ausgenommen.
 - **Tailwind-Quellen:** `landing.css` scannt nur `**/*.cshtml` des Spielservers, kein C#. Das Admin nutzt Bootstrap ohne Tailwind (ADR 0007).
 - **Grafiken und Schriften** liegen nur unter `src/assets/`, jede Datei mit einer Zeile in `src/assets/LICENSES.md`
   (nur CC0 1.0 oder selbst erstellt, [ADR 0017](decisions/0017-grafiken-nur-cc0.md)); `licenses.test.ts` prüft das.

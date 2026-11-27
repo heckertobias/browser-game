@@ -21,7 +21,7 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
   Nachrichten).
 
 ## Client
-- [ ] **T4** (AK-4–8, AK-19): `FACING_TIE_EPSILON`; `sprites/rig.ts` (`parseRig`, `sheetSize`, `frameRect`) und
+- [x] **T4** (AK-4–8, AK-19): `FACING_TIE_EPSILON`; `sprites/rig.ts` (`parseRig`, `sheetSize`, `frameRect`) und
   `sprites/direction.ts` (`spriteDirection`); Vitest `rig.test.ts`, `direction.test.ts` inkl. 45°-Fällen als float32
   und aller Regelverletzungen in `parseRig`. Importgrenze für `sprites/` in `oxlint.config.ts` und in
   `docs/project-structure.md`; Gegenprobe: ein Import aus `core/` in `sprites/` lässt `npm run lint` scheitern
