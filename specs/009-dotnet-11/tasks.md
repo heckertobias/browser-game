@@ -6,7 +6,7 @@ Erst beginnen, wenn .NET 11 und eine finale `Npgsql.EntityFrameworkCore.PostgreS
 alt sind (frühestens 2026-11-17).
 
 ## Werkzeug
-- [ ] **T1** (AK-2, AK-3): `server/nuget.config` mit nuget.org und `minPublishAgeHours` 168 (per
+- [x] **T1** (AK-2, AK-3): `server/nuget.config` mit nuget.org und `minPublishAgeHours` 168 (per
   `dotnet nuget add source`, geerbte Quellen geleert); Regel für NuGet-Pakete und die Ausnahme in `AGENTS.md`.
 
 ## Server
