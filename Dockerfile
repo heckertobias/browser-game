@@ -53,7 +53,7 @@ COPY --from=client /src/server/BrowserGame.Admin/wwwroot/ server/BrowserGame.Adm
 RUN dotnet publish server/BrowserGame.Admin/BrowserGame.Admin.csproj --configuration Release --arch $TARGETARCH --no-restore --output /app
 
 # 4a) Laufzeit Admin: chiseled (keine Shell, kein Paketmanager), non-root-User "app"
-FROM mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled@sha256:fc0ee12f9ea79bde6cda88c7a34e5467fe383dbb62276be0ec13e5e9cc1654ac AS admin
+FROM mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled@sha256:045ba65412b8edcc2f70a779163bf4353d450f72535a0dddf6188d6d945bfaef AS admin
 WORKDIR /app
 COPY --from=publish-admin /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data
@@ -67,7 +67,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 ENTRYPOINT ["dotnet", "BrowserGame.Admin.dll"]
 
 # 4b) Laufzeit Spiel (Standardziel)
-FROM mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled@sha256:fc0ee12f9ea79bde6cda88c7a34e5467fe383dbb62276be0ec13e5e9cc1654ac AS game
+FROM mcr.microsoft.com/dotnet/aspnet:11.0-resolute-chiseled@sha256:045ba65412b8edcc2f70a779163bf4353d450f72535a0dddf6188d6d945bfaef AS game
 WORKDIR /app
 COPY --from=publish-game /app ./
 COPY --from=restore --chown=1654:1654 /data-template /data
