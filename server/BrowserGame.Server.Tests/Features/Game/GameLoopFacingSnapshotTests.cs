@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Blickrichtung in Welcome und Snapshot des GameLoops (016 AK-4, AK-8, AK-12); der Eingabe-Vertrag hat bewusst kein
+/// Feld dafür, weil allein der Server sie bestimmt.
+/// </summary>
 public sealed class GameLoopFacingSnapshotTests
 {
     private const float DefaultFacing = (float)GameSettings.DefaultFacing;

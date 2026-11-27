@@ -57,7 +57,7 @@ const pointerdown = (init: object = {}) => {
 };
 const pointerup = (pointerId = 1) => { canvas.dispatchEvent(fakeEvent("pointerup", canvas, { pointerId })); };
 
-describe("Zielauswahl per Zeiger (AK-1, plan.md Entscheidung 7)", () => {
+describe("Zielauswahl per Zeiger (013 AK-1, plan.md Entscheidung 7)", () => {
   it("wählt ein getroffenes Ziel aus, ohne zu laufen", () => {
     hit = true;
     const e = pointerdown();
@@ -77,7 +77,7 @@ describe("Zielauswahl per Zeiger (AK-1, plan.md Entscheidung 7)", () => {
     expect(canvas.setPointerCapture).toHaveBeenCalledTimes(1);
   });
 
-  it("hält ohne Ziel wie bisher", () => {
+  it("ohne Ziel unter dem Zeiger startet das Halten", () => {
     const e = pointerdown();
     expect(direction()).toEqual(TOWARDS_POINTER);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
@@ -119,7 +119,7 @@ describe("Zielauswahl per Zeiger (AK-1, plan.md Entscheidung 7)", () => {
   });
 });
 
-describe("Angriffstasten (plan.md Entscheidung 8)", () => {
+describe("Angriffstasten (013 plan.md Entscheidung 8)", () => {
   it("meldet die Angriffsart der Taste", () => {
     keydown("Digit1", BODY);
     expect(onAttack).toHaveBeenLastCalledWith(Attack_Kind.MELEE);

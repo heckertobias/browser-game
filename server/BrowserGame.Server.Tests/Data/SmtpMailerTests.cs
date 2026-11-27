@@ -5,6 +5,10 @@ using BrowserGame.Data;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Versand über <see cref="SmtpMailer"/> gegen einen Fake-SMTP-Server (004 AK-9–AK-11, 005 AK-18): Zustellung,
+/// verständliche Fehler, Einstellungen gelten ohne Neustart.
+/// </summary>
 public sealed class SmtpMailerTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static SmtpSettings For(FakeSmtpServer server, string? password = null) =>

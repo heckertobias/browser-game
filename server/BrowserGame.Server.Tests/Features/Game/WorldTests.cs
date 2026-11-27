@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Bewegung in der <see cref="World"/> (001 AK-2, AK-4, AK-5, AK-7): Der Server bestimmt die Strecke je Tick; zu große,
+/// ungültige, wiederholte und geflutete Eingaben bringen keinen Vorteil.
+/// </summary>
 public class WorldTests
 {
     private const double Speed = 200;

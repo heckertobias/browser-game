@@ -10,6 +10,10 @@ using Xunit.Sdk;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Gemeinsame Schritte und HTML-Auswertung der SMTP-Tests: Formular, angemeldeter Admin, Token des getesteten
+/// Passworts, Meldungen und gespeicherter Stand.
+/// </summary>
 internal static partial class SmtpTestHelpers
 {
     public static Dictionary<string, string> Form(FakeSmtpServer server, string? password, string recipient = "t@example.org") => new()

@@ -3,6 +3,10 @@ using BrowserGame.Contracts.V1;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Sitzungen über echte WebSockets und Account-Seiten (003 AK-12, AK-13, AK-15, AK-16, AK-20–AK-22): Rauswurf bei
+/// Anmeldung anderswo, Abmelden, Passwort-Reset und Löschen.
+/// </summary>
 public sealed class GameSessionTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

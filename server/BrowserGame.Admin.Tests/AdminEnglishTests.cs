@@ -12,6 +12,10 @@ using MimeKit;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Das Admin ist durchgehend Englisch (005 AK-14): Mails und alle sichtbaren Texte der Seiten stammen aus den neutralen
+/// Ressourcen, nichts ist fest im Code.
+/// </summary>
 public sealed partial class AdminEnglishTests
 {
     private static string PagesDirectory()

@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Die gemeldete Abklingzeit entspricht den ganzen Cooldown-Ticks, nicht dem konfigurierten Wert (013 AK-11, AK-22):
+/// Der Client soll genau so lange warten, wie der Server sperrt.
+/// </summary>
 public sealed class CombatCooldownTests
 {
     private const double Tolerance = 1e-9;

@@ -4,7 +4,11 @@ using BrowserGame.Data;
 
 namespace BrowserGame.Server.Tests;
 
-/// <summary>Zertifikatsfehler beim Mailserver sollen den richtigen Servernamen verraten (0.2.2: mail.game.example vs. Zertifikat des Mail-Anbieters).</summary>
+/// <summary>
+/// Passt das Zertifikat des Mailservers nicht zum eingetragenen Host, nennt die Fehlermeldung die Namen aus dem
+/// Zertifikat (004 AK-9). Typischer Fall: eigener Host-Alias wie <c>mail.game.example</c>, das Zertifikat gehört aber
+/// dem Mail-Anbieter; mit den Namen sieht der Admin sofort, welchen Host er eintragen muss.
+/// </summary>
 public class CertificateNameTests
 {
     [Fact]

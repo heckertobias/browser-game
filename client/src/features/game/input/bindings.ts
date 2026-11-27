@@ -7,6 +7,10 @@ export type Bindings = ReadonlyMap<Action, readonly string[]>;
 /** Platz in der Anzeige. Ein Platz hinter der letzten Taste hängt an. */
 export type Slot = 0 | 1;
 
+/**
+ * Ergebnis von `assign`: neue Belegung (samt der Aktion, der die Taste weggenommen wurde) oder Ablehnung einer
+ * reservierten Taste.
+ */
 export type AssignResult =
   | { kind: "ok"; bindings: Bindings; overwritten?: Action }
   | { kind: "reserved"; reservedFor: "menu" | "chat" };
@@ -14,6 +18,7 @@ export type AssignResult =
 /** Teil von `KeyboardLayoutMap` (`navigator.keyboard.getLayoutMap()`, nur Chromium; fehlt in lib.dom). */
 export type KeyLayout = Pick<ReadonlyMap<string, string>, "get">;
 
+/** Plätze je Aktion (002 AK-6); gleich `KeyBindingRules.MaxCodesPerAction` (Server). */
 export const MAX_CODES_PER_ACTION = 2;
 
 /** Esc öffnet das Menü, Enter (beide Tasten) den Chat. Gleich `KeyBindingRules.ReservedCodes` (Server). */
@@ -43,6 +48,7 @@ function withCodes(bindings: Bindings, action: Action, codes: readonly string[])
   return new Map(bindings).set(action, codes);
 }
 
+/** Wofür eine Taste aus `RESERVED_CODES` reserviert ist; muss zu `RESERVED_CODES` passen. */
 function reservedFor(code: string): "menu" | "chat" | null {
   if (code === "Escape") {
     return "menu";
@@ -69,7 +75,11 @@ function place(bindings: Bindings, action: Action, slot: Slot, code: string): Bi
   return withCodes(bindings, action, codes);
 }
 
-/** Liefert immer eine Belegung, die der Server akzeptiert. */
+/**
+ * Belegung aus dem `Welcome`. Leer heißt Standard (002 AK-10). Sonst gilt jede gültige gespeicherte Aktion; ungültige,
+ * reservierte und doppelte Codes fallen weg, fehlende Aktionen bekommen ihre Standardtasten, soweit diese frei sind.
+ * Liefert immer eine Belegung, die der Server akzeptiert.
+ */
 export function fromProto(proto: KeyBindings | undefined): Bindings {
   if (!proto || proto.bindings.length === 0) {
     return DEFAULT_BINDINGS;
@@ -109,6 +119,7 @@ export function fromProto(proto: KeyBindings | undefined): Bindings {
   return result;
 }
 
+/** Gleicht die Belegung `DEFAULT_BINDINGS` (gleiche Tasten in gleicher Reihenfolge)? */
 export function isDefault(bindings: Bindings): boolean {
   return ACTIONS.every((action) => {
     const codes = codesOf(bindings, action);
@@ -127,7 +138,11 @@ export function toProto(bindings: Bindings): KeyBindings {
   });
 }
 
-/** Eine Taste einer anderen Aktion wird dort entfernt; `overwritten` nennt diese Aktion (AK-7). */
+/**
+ * Legt `code` auf den Platz `slot` von `action` (002 AK-5). Eine Taste einer anderen Aktion wird dort entfernt;
+ * `overwritten` nennt diese Aktion (AK-7). Reservierte Tasten werden abgelehnt (AK-8). Ungültige Codes und eine Taste,
+ * die die Aktion schon hat, ändern nichts: Dann kommt dasselbe Objekt zurück.
+ */
 export function assign(bindings: Bindings, action: Action, slot: Slot, code: string): AssignResult {
   const reserved = reservedFor(code);
   if (reserved) {
@@ -148,6 +163,7 @@ export function assign(bindings: Bindings, action: Action, slot: Slot, code: str
   return { kind: "ok", bindings: place(freed, action, slot, code), overwritten: other };
 }
 
+/** Entfernt die Taste auf `slot`; eine zweite Taste rückt nach vorn. Ein leerer Platz ändert nichts (dasselbe Objekt). */
 export function clear(bindings: Bindings, action: Action, slot: Slot): Bindings {
   const codes = codesOf(bindings, action);
   if (slot >= codes.length) {

@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Ausgang einer Verbindung (011 AK-10): Pflichtnachrichten in Reihenfolge vor dem neuesten Snapshot, Abschluss mit
+/// Kicked, Trennen bei Überlauf; auch unter gleichzeitigem Lesen und Schreiben.
+/// </summary>
 public sealed class PlayerOutboxTests
 {
     private static readonly TimeSpan Limit = TimeSpan.FromSeconds(10);
@@ -218,6 +222,8 @@ public sealed class PlayerOutboxTests
         Assert.Same(k, items[1]);
     }
 
+    // Lesen und Schreiben laufen auf verschiedenen Threads (Sendeschleife, Tick). Die Wettläufe, die der gemeinsame Lock
+    // verhindert, treten nur selten auf; darum viele Durchläufe statt eines einzelnen.
     [Fact]
     public async Task Concurrent_reader_never_sees_snapshot_before_required_or_after_last()
     {
@@ -244,6 +250,7 @@ public sealed class PlayerOutboxTests
         }
     }
 
+    // Wie oben, aber mit TryRead in einer engen Schleife: So liest der Leser auch zwischen SendRequired und OfferSnapshot.
     [Fact]
     public async Task Spinning_reader_never_gets_snapshot_before_required()
     {
@@ -271,6 +278,8 @@ public sealed class PlayerOutboxTests
         }
     }
 
+    // Das Wecksignal hat nur einen Platz. Viele schnelle Schreibvorgänge zeigen, dass dabei kein Wecken verloren geht und
+    // der wartende Leser nie hängen bleibt.
     [Fact]
     public async Task Blocked_reader_wakes_for_every_write()
     {

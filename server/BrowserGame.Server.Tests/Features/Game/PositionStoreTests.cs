@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Schreiben der Positionen in die Datenbank (003 AK-16, AK-18): Upsert, gelöschte Accounts werden übersprungen statt
+/// einen Fehler auszulösen.
+/// </summary>
 public class PositionStoreTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

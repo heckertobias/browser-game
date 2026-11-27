@@ -4,7 +4,11 @@ using BrowserGame.Server.Features.Localization.Resources;
 
 namespace BrowserGame.Server.Tests;
 
-/// <summary>006 T4: Die deutschen Seitentexte bleiben wie in 003 T7; die Ressourcen enthalten kein HTML.</summary>
+/// <summary>
+/// Die deutschen Texte der Spielerseiten sind festgeschrieben, so wie sie in 003 abgenommen wurden: Eine versehentliche
+/// Änderung beim Pflegen der Ressourcen fällt hier auf (006 AK-10). Die Ressourcen enthalten kein HTML, weil Razor sie
+/// escaped ausgibt und Markup sonst als Text erschiene.
+/// </summary>
 public sealed class PageTextsTests
 {
     private static readonly Dictionary<string, string> German = new()
@@ -31,7 +35,7 @@ public sealed class PageTextsTests
     };
 
     [Fact] // AK-10
-    public void German_texts_are_unchanged_from_003()
+    public void German_texts_match_the_approved_wording()
     {
         var de = CultureInfo.GetCultureInfo("de");
 

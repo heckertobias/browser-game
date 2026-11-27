@@ -3,6 +3,10 @@ using static BrowserGame.Admin.Tests.SmtpTestHelpers;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// SMTP ohne Benutzername (005 AK-18): Dann gibt es keine Anmeldung am Mailserver, und ein Passwort wird weder
+/// gespeichert noch getestet.
+/// </summary>
 public sealed class SmtpNoLoginTests
 {
     private const string Save = "/Smtp?handler=Save";
@@ -113,7 +117,9 @@ public sealed class SmtpNoLoginTests
         Assert.Null((await StoredAsync(factory))!.Password);
     }
 
-    [Fact] // 005 AK-18, T9 Entscheidung 10
+    // 005 AK-18: Ein Formularfehler verwirft nichts. Das getestete Passwort bleibt im Formular, auch wenn gerade kein
+    // Benutzername eingetragen ist; trägt der Admin ihn wieder ein, muss er das Passwort nicht erneut testen.
+    [Fact]
     public async Task Form_errors_keep_the_tested_password_without_username()
     {
         await using var factory = new AdminFactory();

@@ -1,9 +1,11 @@
+/** Punkt oder Richtung in Weltkoordinaten; y wächst nach unten. */
 export interface Vec {
   x: number;
   y: number;
 }
 
-export const ZERO: Vec = { x: 0, y: 0 };
+/** Nullvektor (Stillstand). Eingefroren, weil mehrere Funktionen ihn geteilt zurückgeben. */
+export const ZERO: Vec = Object.freeze({ x: 0, y: 0 });
 
 /** Wie der Server: Länge ≤ 1, ungültige Werte bedeuten Stillstand. */
 export function clampDirection(x: number, y: number): Vec {

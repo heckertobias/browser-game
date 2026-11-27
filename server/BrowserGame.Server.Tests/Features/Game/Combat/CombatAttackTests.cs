@@ -3,6 +3,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Angriffsregeln von <see cref="Combat"/> ohne Netz (013 AK-2, AK-4–AK-12, AK-14, AK-19): Ziel, Art, Reichweite,
+/// Blickrichtung, Mana, Cooldown und Projektilflug.
+/// </summary>
 public sealed class CombatAttackTests
 {
     private const int TickRate = 20;

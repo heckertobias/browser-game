@@ -10,6 +10,14 @@ namespace BrowserGame.Server.Features.Game;
 /// <summary>WebSocket <c>/ws</c>: binäre Protobuf-Nachrichten in beide Richtungen.</summary>
 internal static partial class GameEndpoint
 {
+    /// <summary>So lange wartet der Server nach einem Kick auf das Close des Clients, bevor er die Verbindung selbst beendet.</summary>
+    private static readonly TimeSpan KickCloseTimeout = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// Prüft Anfrage, Anmeldung und Origin, meldet die Verbindung beim <see cref="GameLoop"/> an und läuft, bis eine Seite
+    /// schließt. Empfangen und Senden laufen getrennt: Die Empfangsschleife legt Nachrichten in die Channels der Verbindung,
+    /// die Sendeschleife leert deren <see cref="PlayerOutbox"/>.
+    /// </summary>
     public static async Task HandleAsync(
         HttpContext context, GameLoop game, UserManager<Account> users, GameDbContext db,
         IConfiguration configuration, IWebHostEnvironment environment, IHostApplicationLifetime lifetime,
@@ -87,6 +95,10 @@ internal static partial class GameEndpoint
         }
     }
 
+    /// <summary>
+    /// Liest Client-Nachrichten, bis der Client schließt oder eine ungültige Nachricht schickt, und liefert Status und Grund
+    /// für das eigene Close. Eingaben, Chat und Angriffe gehen ungeprüft an den Tick-Thread, der sie bewertet.
+    /// </summary>
     private static async Task<(WebSocketCloseStatus Status, string Reason)> ReceiveLoopAsync(
         WebSocket socket, PlayerConnection connection, KeyBindingStore keyBindings, ILogger logger, CancellationToken cancellationToken)
     {
@@ -178,8 +190,10 @@ internal static partial class GameEndpoint
     [LoggerMessage(Level = LogLevel.Error, Message = "Tastenbelegung von {AccountId} nicht gespeichert")]
     private static partial void LogKeyBindingsSaveFailed(ILogger logger, Exception exception, string accountId);
 
-    private static readonly TimeSpan KickCloseTimeout = TimeSpan.FromSeconds(5);
-
+    /// <summary>
+    /// Schickt die Outbox, bis sie geschlossen ist. Nach einem Kick schließt der Server die Verbindung selbst und gibt der
+    /// Empfangsschleife <see cref="KickCloseTimeout"/> Zeit für das Close des Clients.
+    /// </summary>
     private static async Task SendLoopAsync(
         WebSocket socket, PlayerConnection connection, CancellationTokenSource receiving, CancellationToken cancellationToken)
     {

@@ -7,6 +7,10 @@ using Microsoft.Net.Http.Headers;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Sprachwahl der Spielerseiten über HTTP (006 AK-1, AK-2, AK-4): Deutsch nur bei deutscher Browsersprache, sonst
+/// Englisch; das Cookie gewinnt.
+/// </summary>
 public sealed partial class LanguageSelectionTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static readonly string[] German =

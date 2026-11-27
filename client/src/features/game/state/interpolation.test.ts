@@ -3,7 +3,7 @@ import { SnapshotBuffer, type RemotePlayer } from "./interpolation";
 
 const player = (id: string, x: number, y = 0): RemotePlayer => ({ id, name: id, color: 0, x, y });
 
-describe("SnapshotBuffer (AK-3, AK-4)", () => {
+describe("SnapshotBuffer (001 AK-3, AK-4)", () => {
   it("ist ohne Snapshots leer", () => {
     expect(new SnapshotBuffer().sample(0)).toEqual([]);
   });

@@ -34,7 +34,7 @@ const arms = (ctx: FakeContext) => ctx.rects().filter((r) => r.width === DUMMY_A
 const bars = (ctx: FakeContext) => ctx.rects().filter((r) => r.height === HP_BAR_HEIGHT);
 const squares = (ctx: FakeContext) => ctx.rects().filter((r) => r.width === PLAYER_SIZE && r.height === PLAYER_SIZE);
 
-describe("hpBarWidth (AK-18)", () => {
+describe("hpBarWidth (013 AK-18)", () => {
   it.each([
     [100, 100, 20, 20],
     [50, 100, 20, 10],
@@ -118,7 +118,7 @@ describe("render: Ziele (013)", () => {
     expect(ctx.paths("stroke")).toHaveLength(0);
   });
 
-  it("ohne Szene wie bisher", () => {
+  it("ohne Szene zeichnet weder Ziele noch Projektile", () => {
     const ctx = new FakeContext();
     render(ctx.asContext(), viewport, camera, [own]);
     expect(posts(ctx)).toHaveLength(0);

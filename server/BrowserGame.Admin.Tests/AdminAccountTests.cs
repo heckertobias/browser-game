@@ -3,6 +3,10 @@ using BrowserGame.Admin.Auth;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Account-Seite der Admins (004 AK-4b, AK-4c, AK-4f): wann eine Anmeldeart als eingerichtet gilt und dass neue
+/// Wiederherstellungscodes die alten ersetzen.
+/// </summary>
 public sealed class AdminAccountTests
 {
     [Theory] // AK-4b/AK-4f: nur Passkey oder Passwort + 2FA gilt als eingerichtete Anmeldung

@@ -4,6 +4,10 @@ using BrowserGame.Data;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Struktur der Admin-Seiten (005 AK-6, AK-9): Tabellen scrollen in <c>table-responsive</c>, Formulare haben Label über
+/// und Hinweis unter dem Feld. Die Optik prüft die manuelle Abnahme.
+/// </summary>
 public sealed partial class AdminPagesTests
 {
     [GeneratedRegex("""<(?:input|select|textarea)\b[^>]*\bname="(?<name>[^"]*)"[^>]*>""", RegexOptions.Singleline)]

@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Die Ressourcen der Spielerseiten (006 AK-10): Englisch und Deutsch mit denselben Schlüsseln, kein leerer Text,
+/// Validierungsmeldungen sind Schlüssel.
+/// </summary>
 public sealed class TextsResourcesTests
 {
     private const string BaseName = "BrowserGame.Server.Features.Localization.Resources.Texts";

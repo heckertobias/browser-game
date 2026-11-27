@@ -14,6 +14,7 @@ internal sealed class ChatHistory(int capacity, TimeSpan maxAge)
     // Queue ist intern ein Ringpuffer; sie wächst nicht, weil Add vor dem Einfügen die älteste Nachricht entfernt.
     private readonly Queue<ChatHistoryEntry> _entries = new(capacity);
 
+    /// <summary>Hängt eine Nachricht an; ist der Verlauf voll, fällt die älteste heraus.</summary>
     public void Add(ChatHistoryEntry entry)
     {
         if (_entries.Count == capacity)

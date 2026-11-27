@@ -16,10 +16,10 @@ import {
 } from "@/generated/browsergame/v1/game_pb";
 import type { PendingInput } from "@/features/game/state/prediction";
 
-/** Gründe, bei denen der Server die Verbindung bewusst beendet (AK-12, AK-22). */
+/** Gründe, bei denen der Server die Verbindung bewusst beendet (003 AK-12, AK-22). */
 export type KickReason = Kicked_Reason.SIGNED_IN_ELSEWHERE | Kicked_Reason.SIGNED_OUT;
 
-/** Gründe, aus denen der Server eine Chatnachricht ablehnt (AK-13). */
+/** Gründe, aus denen der Server eine Chatnachricht ablehnt (011 AK-13). */
 export type ChatRejectReason = ChatRejected_Reason.TOO_FAST;
 
 /** Gründe, aus denen der Server einen Befehl ablehnt (015 AK-4). */
@@ -31,6 +31,7 @@ export type AttackRejectReason =
   | AttackRejected_Reason.NOT_FACING
   | AttackRejected_Reason.OUT_OF_RANGE;
 
+/** Rückrufe für die Server-Nachrichten des Spiels; die optionalen braucht nicht jeder Aufrufer. */
 export interface ConnectionHandlers {
   onWelcome(welcome: Welcome): void;
   onSnapshot(snapshot: Snapshot): void;
@@ -44,6 +45,7 @@ export interface ConnectionHandlers {
   onCombatEvents?(events: CombatEvents): void;
 }
 
+/** Rückrufe für die Chat-Nachrichten des Servers (011). */
 export interface ChatHandlers {
   onChatHistory(messages: readonly ChatMessage[]): void;
   onChatMessage(message: ChatMessage): void;
@@ -52,6 +54,7 @@ export interface ChatHandlers {
   onCommandRejected?(reason: CommandRejectReason): void;
 }
 
+/** Offene Verbindung zum Spielserver. Senden bei nicht offenem Socket verwirft die Nachricht. */
 export interface GameConnection {
   sendInput(input: PendingInput): void;
   /** Schickt den Text unverändert. `false`: Verbindung nicht offen, nichts gesendet. `true` ist keine Zustellbestätigung. */
@@ -63,16 +66,21 @@ export interface GameConnection {
   close(): void;
 }
 
+/** WebSocket-URL des Spielservers auf demselben Host, `wss` unter HTTPS. */
 export function gameSocketUrl(location: Location): string {
   return `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
 }
 
+/** Verarbeitet empfangene Bytes; getrennt von `connect`, damit es ohne WebSocket testbar ist. */
 export interface Receiver {
   message(data: Uint8Array): void;
   close(): void;
 }
 
-/** Leitet Server-Nachrichten weiter. Nach Kicked meldet das folgende Schließen kein onClose. */
+/**
+ * Leitet Server-Nachrichten weiter. Nach Kicked meldet das folgende Schließen kein onClose: Das Spiel zeigt dann den
+ * Grund des Rauswurfs statt „getrennt“. Gründe, die der Client nicht kennt, werden ignoriert.
+ */
 export function createReceiver(handlers: ConnectionHandlers & Partial<ChatHandlers>): Receiver {
   let kicked = false;
   return {
@@ -138,6 +146,7 @@ export function createReceiver(handlers: ConnectionHandlers & Partial<ChatHandle
   };
 }
 
+/** Öffnet den WebSocket (binär, Protobuf) und verbindet ihn mit `createReceiver`. */
 export function connect(url: string, handlers: ConnectionHandlers & ChatHandlers): GameConnection {
   const socket = new WebSocket(url);
   socket.binaryType = "arraybuffer";

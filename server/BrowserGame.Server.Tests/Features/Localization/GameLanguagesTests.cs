@@ -3,6 +3,7 @@ using BrowserGame.Server.Features.Localization;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>Unterstützte Sprachen und ihre Normalisierung (006, ADR 0008).</summary>
 public class GameLanguagesTests
 {
     [Fact]
@@ -34,6 +35,8 @@ public class GameLanguagesTests
     public void Unknown_or_missing_codes_fall_back_to_default(string? input) =>
         Assert.Equal("en", GameLanguages.Normalize(input));
 
-    [Fact] // Bestand: Accounts ohne Angabe gelten als deutsch
+    // Der Standard der Entity ist bewusst nicht GameLanguages.Default: Accounts von vor 006 haben sich auf Deutsch
+    // registriert. Neue Accounts setzen ihre Sprache immer selbst (siehe AccountLanguageTests).
+    [Fact]
     public void New_account_defaults_to_german() => Assert.Equal("de", new Account().Language);
 }

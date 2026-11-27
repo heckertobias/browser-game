@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Text einer Chatnachricht (011 AK-8, AK-9, AK-12): leer oder zu lang wird abgelehnt, Steuerzeichen werden zu
+/// Leerzeichen, Markup und Links bleiben reiner Text.
+/// </summary>
 public sealed class ChatRulesTests
 {
     private const char LineSeparator = (char)0x2028;

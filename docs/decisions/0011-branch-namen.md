@@ -1,6 +1,7 @@
 # ADR 0011 – Branch-Namen: Spec und Umsetzung getrennt
 
-**Status:** akzeptiert – ersetzt Punkt 1 von [ADR 0009](0009-spec-branches-rc-und-deploy-per-api.md)
+**Status:** akzeptiert – ersetzt Punkt 1 von [ADR 0009](0009-spec-branches-rc-und-deploy-per-api.md); für neue Specs
+geändert durch [ADR 0016](0016-specs-von-jedem-branch.md)
 
 ## Kontext
 
@@ -13,7 +14,7 @@ Umsetzung geht.
 
 | Präfix | Wofür | PR | Merge |
 |---|---|---|---|
-| `spec/NNN-name` | Spec schreiben oder ändern: `spec.md`, `plan.md`, `tasks.md`, Roadmap, Vision – nur `specs/`, kein Code | normaler PR | Squash |
+| `spec/NNN-name` | Spec schreiben oder ändern: `spec.md`, `plan.md`, `tasks.md`, Roadmap, Vision – nur `specs/`, kein Code. _(Geändert durch ADR 0016: Eine neue `spec.md` darf auf jedem Branch entstehen; `plan.md` und `tasks.md` entstehen erstmals hier.)_ | normaler PR | Squash |
 | `impl/NNN-name` | Spec umsetzen: Code, Tests, Tasks abhaken, Status `in arbeit` → `umgesetzt`; Release Candidates | Draft-PR, am Ende „Ready“ | Merge-Commit |
 | `chore/kurzer-name` | Tooling, CI, Skripte, ADRs, READMEs ohne Bezug zu einer Spec | normaler PR | Squash |
 

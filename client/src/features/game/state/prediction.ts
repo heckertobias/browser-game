@@ -1,5 +1,6 @@
 import { clampDirection, facingOf, type Vec } from "@/features/game/core/vector";
 
+/** Eine Eingabe je festem Schritt; der Server bestätigt sie über `lastProcessedSeq` im Snapshot. */
 export interface PendingInput {
   seq: number;
   dirX: number;
@@ -11,7 +12,7 @@ const MAX_PENDING = 100;
 
 /**
  * Client-Prediction für die eigene Figur: Eingaben werden sofort lokal angewandt und
- * beim Snapshot gegen die Server-Position abgeglichen (der Server ist Autorität, AK-5).
+ * beim Snapshot gegen die Server-Position abgeglichen (der Server ist Autorität, 001 AK-5).
  */
 export class Predictor {
   /** Position nach dem letzten Fixed-Step. */
@@ -22,6 +23,7 @@ export class Predictor {
   prevY = 0;
   /** Blickrichtung in Bogenmaß (016); gilt erst nach dem ersten `reconcile` (Server-Wert, AK-4). */
   facing = 0;
+  /** Erst nach dem ersten Snapshot mit eigener Figur gibt es eine Position; vorher wird nichts vorhergesagt. */
   initialized = false;
 
   private pending: PendingInput[] = [];
@@ -74,6 +76,7 @@ export class Predictor {
     return { x: this.prevX + (this.x - this.prevX) * alpha, y: this.prevY + (this.y - this.prevY) * alpha };
   }
 
+  /** Zahl der noch unbestätigten Eingaben. */
   get pendingCount(): number {
     return this.pending.length;
   }

@@ -4,6 +4,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Welche Positionen der GameLoop zum Speichern weitergibt (003 AK-16, AK-18, AK-19, AK-22, AK-23): alle im
+/// Speicher-Takt, entfernte sofort, gelöschte nie.
+/// </summary>
 public class GameLoopPositionsTests
 {
     private static GameLoop NewGame(string saveIntervalSeconds, string lingerSeconds = "60") => new(

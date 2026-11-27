@@ -14,13 +14,14 @@ export function activeActions(pressedKeys: ReadonlySet<string>, bindings: Bindin
   return actions;
 }
 
+/** Richtung aus den gedrückten Bewegungsaktionen (001 AK-2); diagonal auf Länge 1 gekürzt, Gegenrichtungen heben sich auf. */
 export function keyboardDirection(actions: ReadonlySet<Action>): Vec {
   const x = (actions.has(Action.MOVE_RIGHT) ? 1 : 0) - (actions.has(Action.MOVE_LEFT) ? 1 : 0);
   const y = (actions.has(Action.MOVE_DOWN) ? 1 : 0) - (actions.has(Action.MOVE_UP) ? 1 : 0);
   return clampDirection(x, y);
 }
 
-/** Halten-und-Folgen: volle Geschwindigkeit Richtung Zeiger, in der Totzone Stillstand. */
+/** Halten-und-Folgen (001 AK-2b): volle Geschwindigkeit Richtung Zeiger, in der Totzone Stillstand. */
 export function pointerDirection(pointer: Vec, player: Vec): Vec {
   const dx = pointer.x - player.x;
   const dy = pointer.y - player.y;
@@ -58,7 +59,7 @@ export type PointerSample = Pick<PointerEvent, "pointerId" | "isPrimary" | "butt
 /** Diese Events beenden das Halten wie pointerup (Capture kann ohne pointerup verloren gehen). */
 export const POINTER_RELEASE_EVENTS = ["pointerup", "pointercancel", "lostpointercapture"] as const;
 
-/** Tippen und Halten (AK-7): nur der primäre Zeiger mit Haupttaste; weitere Finger werden ignoriert. */
+/** Tippen und Halten (007 AK-7): nur der primäre Zeiger mit Haupttaste; weitere Finger werden ignoriert. */
 export class PointerHold {
   private pointerId: number | null = null;
   private client: { x: number; y: number } | null = null;
@@ -153,19 +154,19 @@ export class InputTracker {
     for (const type of POINTER_RELEASE_EVENTS) canvas.addEventListener(type, release, { signal });
     canvas.addEventListener("contextmenu", (e) => { e.preventDefault(); }, { signal });
 
-    // iOS ignoriert user-scalable=no beim Pinch (AK-8); GestureEvent fehlt in lib.dom.
+    // iOS ignoriert user-scalable=no beim Pinch (007 AK-8); GestureEvent fehlt in lib.dom.
     const preventGesture = (e: Event) => { e.preventDefault(); };
     document.addEventListener("gesturestart", preventGesture, { signal, passive: false });
     document.addEventListener("gesturechange", preventGesture, { signal, passive: false });
   }
 
-  /** Neue Belegung gilt ab dem nächsten `direction()` (AK-5). */
+  /** Neue Belegung gilt ab dem nächsten `direction()` (002 AK-5). */
   setBindings(bindings: Bindings): void {
     this.bindings = bindings;
   }
 
   /**
-   * Menü offen (AK-4): gedrückte Tasten und gehaltener Zeiger verfallen, neue werden ignoriert, die Figur steht.
+   * Menü offen (002 AK-4): gedrückte Tasten und gehaltener Zeiger verfallen, neue werden ignoriert, die Figur steht.
    * Eine über das Schließen hinaus gehaltene Taste zählt erst wieder mit ihrer nächsten Wiederholung.
    */
   setSuspended(suspended: boolean): void {
@@ -184,6 +185,7 @@ export class InputTracker {
     return combinedDirection(activeActions(this.pressedKeys, this.bindings), pointer, player);
   }
 
+  /** Entfernt alle Listener; danach ist der Tracker nicht mehr zu benutzen. */
   dispose(): void {
     this.abort.abort();
   }

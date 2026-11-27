@@ -13,6 +13,11 @@ internal sealed class ChatRateLimiter(int limit, TimeSpan window)
     /// <summary>Accounts im Speicher. Inaktive zählen mit, bis das nächste Aufräumen sie entfernt.</summary>
     public int TrackedAccounts => _accepted.Count;
 
+    /// <summary>
+    /// Nimmt eine Nachricht an, wenn der Account im Zeitfenster noch unter <paramref name="limit"/> liegt, und zählt sie dann.
+    /// Höchstens einmal je Fenster werden nebenbei Accounts ohne gültige Einträge entfernt, damit der Speicher nicht mit
+    /// jedem Account wächst, der je geschrieben hat.
+    /// </summary>
     public bool TryAccept(string accountId, DateTimeOffset now)
     {
         if (now >= _nextCleanup)
@@ -47,7 +52,7 @@ internal sealed class ChatRateLimiter(int limit, TimeSpan window)
 
     private void RemoveInactiveAccounts(DateTimeOffset now)
     {
-        // Dictionary erlaubt Remove während foreach.
+        // Seit .NET Core 3.0 erlaubt Dictionary Remove während foreach.
         foreach (var (accountId, accepted) in _accepted)
         {
             RemoveExpired(accepted, now);

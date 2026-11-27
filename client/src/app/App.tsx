@@ -43,6 +43,10 @@ const browserWatchDeps = (): ServerWatchDeps => ({
   win: window,
 });
 
+/**
+ * Spielseite: Canvas, HUD (Status, Koordinaten, HP/Mana, Angriffe, Chat, Hinweise) und Menü. Verbindet die Ereignisse
+ * des `Game` mit dem React-Zustand und zeigt bei Trennung oder Rauswurf das passende Overlay.
+ */
 export function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chatRef = useRef<ChatFeed>(null);
@@ -98,7 +102,7 @@ export function App() {
     };
   }, []);
 
-  // Figur steht, Spiel läuft weiter (AK-4, AK-4b).
+  // Figur steht, Spiel läuft weiter (002 AK-4, AK-4b).
   useEffect(() => { gameRef.current?.setMenuOpen(menuShown); }, [menuShown]);
 
   useEffect(() => {
@@ -112,6 +116,7 @@ export function App() {
     return () => { abort.abort(); };
   }, [menuAvailable]);
 
+  // Nach einer Trennung prüfen, ob inzwischen eine neue Version läuft; dann bietet das Overlay „Neu laden“ an (007 AK-17).
   useEffect(() => {
     if (status !== "disconnected") return;
     const watch = new ServerWatch(currentEntryScript(), () => { setUpdate(true); }, browserWatchDeps());

@@ -4,6 +4,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Neu angemeldete Figur nach Ablauf des Nachlaufs beginnt mit der Standard-Blickrichtung (016 AK-4, AK-11).
+/// </summary>
 public sealed class GameLoopFacingTests
 {
     private static GameLoop NewGame() => new(NullLogger<GameLoop>.Instance, new ConfigurationBuilder().Build());

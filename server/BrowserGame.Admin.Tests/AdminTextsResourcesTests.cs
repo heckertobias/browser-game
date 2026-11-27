@@ -7,6 +7,10 @@ using Microsoft.Extensions.Localization;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Die Ressource <c>AdminTexts.resx</c> (005 AK-14): kein leerer Text, Validierungsmeldungen sind Schlüssel, der
+/// Localizer findet jeden Eintrag.
+/// </summary>
 public sealed class AdminTextsResourcesTests
 {
     private static Dictionary<string, string> Neutral() =>

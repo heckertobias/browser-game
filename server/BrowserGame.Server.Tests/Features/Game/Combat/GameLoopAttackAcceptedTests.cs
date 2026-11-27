@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Bestätigung ausgeführter Angriffe im GameLoop (013 AK-11, AK-12, AK-22): nur an den Angreifer, vor den
+/// Kampfereignissen, nie für abgelehnte oder gesperrte Versuche.
+/// </summary>
 public sealed class GameLoopAttackAcceptedTests
 {
     private const float DummyMaxHp = (float)GameSettings.DummyMaxHp;
