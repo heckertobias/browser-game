@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// SMTP-Seite im Admin (004 AK-3, AK-7–AK-9, AK-12): speichern, Passwort nie wieder anzeigen, Testmail mit
+/// Formularwerten, verständliche Fehler bei typischen Verwechslungen.
+/// </summary>
 public sealed class SmtpPageTests
 {
     private static Dictionary<string, string> Form(FakeSmtpServer server, string? password) => new()

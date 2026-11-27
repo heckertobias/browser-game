@@ -13,7 +13,7 @@ const VITE = `<!doctype html><html><head>
 <script type="module" crossorigin src="/play/assets/index-BFl2WypM.js"></script>
 <link rel="stylesheet" href="/play/assets/index-x.css"></head><body></body></html>`;
 
-describe("entryScript", () => {
+describe("entryScript (007 AK-17)", () => {
   it("findet die Vite-Zeile", () => {
     expect(entryScript(VITE)).toBe("/play/assets/index-BFl2WypM.js");
   });
@@ -35,11 +35,13 @@ describe("entryScript", () => {
   });
 });
 
-describe("classifyServer", () => {
+describe("classifyServer (007 AK-17)", () => {
   const ok = { ok: true, redirected: false };
-  it.each([502, 503, 504, 404])("%i ist unreachable", () => {
+  // classifyServer sieht nur `ok`, nicht den Statuscode: 404 und 502–504 (Deploy) landen alle hier.
+  it("Antwort ohne Erfolg ist unreachable", () => {
     expect(classifyServer("/a.js", { ok: false, redirected: false }, "")).toBe("unreachable");
   });
+  // Weiterleitung heißt z. B. abgelaufene Anmeldung: Neuladen führt dann zur Anmeldung, nicht zu einer neuen Version.
   it("Weiterleitung ist same", () => {
     expect(classifyServer("/a.js", { ok: true, redirected: true }, VITE)).toBe("same");
   });
@@ -125,7 +127,7 @@ function setup(visibility: DocumentVisibilityState = "visible") {
   return { timers, net, doc, win, watch, updates: () => updates };
 }
 
-describe("ServerWatch (AK-17)", () => {
+describe("ServerWatch (007 AK-17)", () => {
   it("fragt sofort /play ohne Cache ab", async () => {
     const { net, watch } = setup();
     watch.start();

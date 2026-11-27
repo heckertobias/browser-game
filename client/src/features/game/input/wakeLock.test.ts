@@ -55,15 +55,15 @@ function setup(visibility: DocumentVisibilityState = "visible") {
   return { api, doc, lock, fire, hide, show };
 }
 
-describe("ScreenWakeLock (AK-14)", () => {
-  it("requests on start when visible", async () => {
+describe("ScreenWakeLock (007 AK-14)", () => {
+  it("fordert beim Start an, wenn die Seite sichtbar ist", async () => {
     const { api, lock } = setup();
     lock.start();
     await flush();
     expect(api.types).toEqual(["screen"]);
   });
 
-  it("does not request while hidden", async () => {
+  it("fordert nicht an, solange die Seite verborgen ist", async () => {
     const { api, lock, fire, show } = setup("hidden");
     lock.start();
     fire("visibilitychange");
@@ -74,7 +74,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.requests).toBe(1);
   });
 
-  it("requests again when visible again", async () => {
+  it("fordert erneut an, sobald die Seite wieder sichtbar ist (der Browser gibt die Sperre beim Verstecken frei)", async () => {
     const { api, lock, hide, show } = setup();
     lock.start();
     await flush();
@@ -86,7 +86,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.requests).toBe(2);
   });
 
-  it("does not request twice", async () => {
+  it("fordert nicht doppelt an", async () => {
     const { api, lock, fire, show } = setup();
     api.mode = "manual";
     lock.start();
@@ -101,7 +101,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.requests).toBe(1);
   });
 
-  it("releases on stop and stops listening", async () => {
+  it("gibt die Sperre bei stop frei und hört auf zu lauschen", async () => {
     const { api, lock, fire, hide, show } = setup();
     lock.start();
     await flush();
@@ -115,7 +115,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.requests).toBe(1);
   });
 
-  it("releases a lock that arrives after stop", async () => {
+  it("gibt eine Sperre frei, die erst nach stop eintrifft", async () => {
     const { api, lock } = setup();
     api.mode = "manual";
     lock.start();
@@ -125,7 +125,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.sentinel(0).releaseCalls).toBe(1);
   });
 
-  it("handles start twice and stop/start", async () => {
+  it("verträgt doppeltes start sowie stop und erneutes start", async () => {
     const { api, lock, hide, show } = setup();
     lock.start();
     lock.start();
@@ -142,7 +142,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.sentinel(2).releaseCalls).toBe(0);
   });
 
-  it("does nothing without API", async () => {
+  it("tut ohne Wake-Lock-API nichts", async () => {
     const doc = new FakeDocument();
     const lock = new ScreenWakeLock(undefined, doc);
     expect(() => {
@@ -154,7 +154,8 @@ describe("ScreenWakeLock (AK-14)", () => {
     await flush();
   });
 
-  it("stays silent on rejection and retries on every input until it gets the lock", async () => {
+  // Manche Browser gewähren die Sperre erst nach einer Nutzergeste; darum zählt jede Eingabe als neuer Versuch.
+  it("bleibt bei Ablehnung still und versucht es bei jeder Eingabe erneut, bis die Sperre gewährt ist", async () => {
     const { api, lock, fire, show } = setup();
     api.mode = "deny";
     lock.start();
@@ -180,7 +181,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.requests).toBe(5);
   });
 
-  it("requests on touchend, not on touch pointerup", async () => {
+  it("fordert bei Touch mit touchend an, nicht schon beim pointerup derselben Berührung", async () => {
     const { api, doc, lock, fire } = setup();
     api.mode = "deny";
     lock.start();
@@ -193,7 +194,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.requests).toBe(2);
   });
 
-  it("one request per tap while pending", () => {
+  it("höchstens eine Anfrage je Tippen, solange eine läuft", () => {
     const { api, doc, lock, fire } = setup();
     api.mode = "manual";
     lock.start();
@@ -203,7 +204,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.requests).toBe(1);
   });
 
-  it("requests again on input after the lock was released without visibilitychange", async () => {
+  it("fordert bei der nächsten Eingabe erneut an, wenn der Browser die Sperre ohne visibilitychange freigegeben hat", async () => {
     const { api, lock, fire } = setup();
     lock.start();
     await flush();
@@ -213,7 +214,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.requests).toBe(2);
   });
 
-  it("ignores repeated keydown", async () => {
+  it("ignoriert wiederholtes keydown einer gehaltenen Taste", async () => {
     const { api, doc, lock } = setup();
     api.mode = "deny";
     lock.start();
@@ -223,7 +224,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.requests).toBe(1);
   });
 
-  it("gets the lock on input after a rejection", async () => {
+  it("bekommt die Sperre bei einer Eingabe nach einer Ablehnung", async () => {
     const { api, lock, fire } = setup();
     api.mode = "deny";
     lock.start();
@@ -236,7 +237,7 @@ describe("ScreenWakeLock (AK-14)", () => {
     expect(api.sentinel(0).releaseCalls).toBe(1);
   });
 
-  it("stays silent when release fails", async () => {
+  it("bleibt still, wenn die Freigabe scheitert", async () => {
     const { api, lock } = setup();
     lock.start();
     await flush();

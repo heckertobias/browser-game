@@ -4,6 +4,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// HP und Mana über echte WebSockets (012 AK-2, AK-5, AK-6, AK-8, AK-10): andere sehen fremde Werte nicht, Tod führt zu
+/// Respawn mit vollen Werten.
+/// </summary>
 public sealed class GameVitalsSocketTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private const float MaxHp = (float)GameSettings.MaxHp;

@@ -4,6 +4,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Blickrichtung über echte WebSockets (016 AK-4, AK-8, AK-11, AK-12): Startwert und Schwelle im Welcome, Server leitet
+/// sie nur aus der Bewegung ab, andere sehen sie.
+/// </summary>
 public sealed class GameFacingSocketTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private const float DefaultFacing = (float)GameSettings.DefaultFacing;

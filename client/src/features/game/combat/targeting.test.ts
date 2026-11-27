@@ -5,7 +5,7 @@ import { attackRequest, pickTarget, TargetSelection } from "./targeting";
 
 const ORIGIN = { x: 0, y: 0 };
 
-describe("pickTarget (AK-1)", () => {
+describe("pickTarget (013 AK-1)", () => {
   it("wählt ein Ziel genau am Weltpunkt", () => {
     expect(pickTarget(ORIGIN, [{ id: "a", x: 0, y: 0 }], TARGET_HIT_RADIUS)).toBe("a");
   });
@@ -41,7 +41,7 @@ describe("pickTarget (AK-1)", () => {
   });
 });
 
-describe("TargetSelection (AK-1, AK-3)", () => {
+describe("TargetSelection (013 AK-1, AK-3)", () => {
   it("startet ohne Ziel", () => {
     expect(new TargetSelection().current).toBeNull();
   });
@@ -90,7 +90,7 @@ describe("TargetSelection (AK-1, AK-3)", () => {
   });
 });
 
-describe("attackRequest (AK-2)", () => {
+describe("attackRequest (013 AK-2)", () => {
   const kinds = [Attack_Kind.MELEE, Attack_Kind.RANGED];
 
   it.each(kinds)("erzeugt ohne Ziel keinen Angriff (Art %s)", (kind) => {

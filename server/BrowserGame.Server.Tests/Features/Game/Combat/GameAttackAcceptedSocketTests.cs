@@ -38,6 +38,7 @@ file static class AcceptedSockets
     }
 }
 
+/// <summary>Bestätigung eines Angriffs mit Abklingzeit über echte WebSockets (013 AK-22).</summary>
 public sealed class GameAttackAcceptedSocketTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

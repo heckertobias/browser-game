@@ -13,8 +13,14 @@ internal static class PwaCaching
         var path = context.Context.Request.Path;
         var headers = context.Context.Response.Headers;
         if (path.StartsWithSegments("/play/assets", StringComparison.OrdinalIgnoreCase))
+        {
             headers.CacheControl = "public, max-age=31536000, immutable"; // Dateinamen mit Inhalts-Hash
+        }
         else if (path.Value is { } value && NoCache.Contains(value))
+        {
+            // Einstiegsseiten und Manifest verweisen auf Assets und Icons; nur mit Revalidierung findet der Browser nach
+            // einem Deploy die neuen.
             headers.CacheControl = "no-cache";
+        }
     }
 }

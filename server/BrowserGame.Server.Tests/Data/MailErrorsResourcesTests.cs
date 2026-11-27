@@ -8,6 +8,10 @@ using MailKit.Security;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Fehlertexte des Mailversands (005 AK-14): jeder Member von <c>MailErrors</c> hat einen Text, andere Sprachen fallen
+/// auf Englisch zurück.
+/// </summary>
 public sealed class MailErrorsResourcesTests
 {
     private static Dictionary<string, string> Neutral() =>

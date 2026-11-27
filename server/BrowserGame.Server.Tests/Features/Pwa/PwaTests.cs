@@ -5,6 +5,10 @@ using System.Text.RegularExpressions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Web-App über HTTP (007 AK-10–AK-13): Manifest und Icons, Service Worker und Offline-Seite ohne Anmeldung,
+/// Cache-Header für Einstiegsseiten und gehashte Assets.
+/// </summary>
 public sealed partial class PwaTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private static ReadOnlySpan<byte> PngSignature => [137, 80, 78, 71, 13, 10, 26, 10];

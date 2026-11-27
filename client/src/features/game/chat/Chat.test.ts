@@ -56,7 +56,7 @@ describe("ChatRow (011 AK-2, AK-12)", () => {
   });
 });
 
-describe("ChatView", () => {
+describe("ChatView (011)", () => {
   it("zeigt die neuere Nachricht weiter unten (AK-2)", () => {
     const markup = view(run(open(), { type: "messages", messages: [msg("erste"), msg("zweite")] }));
     expect(markup.indexOf("zweite")).toBeGreaterThan(markup.indexOf("erste"));

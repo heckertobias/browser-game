@@ -54,8 +54,8 @@ internal sealed partial class ChatStore(
             // Herunterfahren: Das Ausstehende folgt unten.
         }
 
-        // Der GameLoop ist schon gestoppt (siehe GameSetup), hier kommt nichts mehr nach. Der zweite Versuch trifft einen
-        // Account, der beim ersten gerade gelöscht wurde, nicht mehr an.
+        // Der GameLoop ist schon gestoppt (siehe GameSetup), hier kommt nichts mehr nach. Ein zweiter Versuch, weil der erste
+        // an einem gerade gelöschten Account scheitern kann (PostgreSQL: FK-Prüfung nach EXISTS); im zweiten fehlt er.
         if (game.ChatToSave.TakeDroppedCount() is > 0 and var dropped)
         {
             LogDropped(dropped);
@@ -159,7 +159,10 @@ internal sealed partial class ChatStore(
         await transaction.CommitAsync(cancellationToken);
     }
 
-    /// <summary>Die jüngsten Nachrichten der letzten 24 Stunden, älteste zuerst (AK-15). Genau 24 Stunden alt zählt nicht mehr.</summary>
+    /// <summary>
+    /// Die jüngsten <see cref="GameSettings.ChatHistoryCount"/> Nachrichten, die jünger als <see cref="MaxAge"/> sind, älteste
+    /// zuerst (AK-15). Genau <see cref="MaxAge"/> alt zählt nicht mehr, wie in <see cref="ChatHistory"/>.
+    /// </summary>
     internal async Task<IReadOnlyList<ChatHistoryEntry>> LoadRecentAsync(DateTimeOffset now, CancellationToken cancellationToken)
     {
         var cutoff = now - MaxAge;
@@ -177,7 +180,10 @@ internal sealed partial class ChatStore(
         return [.. newestFirst.AsEnumerable().Reverse().Select(m => new ChatHistoryEntry(m.AccountId, m.UserName ?? "", m.Text, m.SentAt))];
     }
 
-    /// <summary>Löscht höchstens <paramref name="batchSize"/> Nachrichten, die älter als 24 Stunden sind (AK-16); genau 24 Stunden alt bleibt bis zum nächsten Mal.</summary>
+    /// <summary>
+    /// Löscht höchstens <paramref name="batchSize"/> Nachrichten, die älter als <see cref="MaxAge"/> sind (AK-16); genau
+    /// <see cref="MaxAge"/> alt bleibt bis zum nächsten Lauf. <see cref="LoadRecentAsync"/> liefert sie schon nicht mehr aus.
+    /// </summary>
     internal async Task<int> DeleteExpiredAsync(DateTimeOffset now, int batchSize, CancellationToken cancellationToken)
     {
         var cutoff = now - MaxAge;
@@ -207,7 +213,7 @@ internal sealed partial class ChatStore(
         }
         catch (Exception ex)
         {
-            // Ausgeliefert wird trotzdem nichts Altes (AK-16); der nächste Versuch kommt in einer Stunde.
+            // Ausgeliefert wird trotzdem nichts Altes (AK-16); der nächste Versuch folgt nach CleanupInterval.
             if (!stoppingToken.IsCancellationRequested)
             {
                 LogCleanupFailed(ex);

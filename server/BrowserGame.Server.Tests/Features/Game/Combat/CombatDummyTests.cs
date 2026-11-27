@@ -3,6 +3,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Trainings-Dummy in <see cref="Combat"/> (013 AK-13–AK-17): Position, HP, Respawn nach der Verzögerung, kein Schaden
+/// an Spielern, neu mit jeder Instanz.
+/// </summary>
 public sealed class CombatDummyTests
 {
     private const int TickRate = 20;

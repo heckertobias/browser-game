@@ -1,3 +1,5 @@
+// Hinweis bei gescheitertem Angriff (013 AK-20). AK-Angaben in dieser Datei beziehen sich auf 013.
+
 import { memo, useEffect, useImperativeHandle, useState, type Ref } from "react";
 import { AttackRejected_Reason } from "@/generated/browsergame/v1/game_pb";
 import type { AttackRejectReason } from "@/features/game/network/net";
@@ -9,6 +11,7 @@ export const ATTACK_HINT_MS = 2000;
 /** Kein Ziel gewählt: erkennt der Client selbst (AK-2). */
 export const NO_TARGET = "noTarget";
 
+/** Grund für einen Hinweis: vom Server gemeldet oder „kein Ziel“, das der Client selbst erkennt. */
 export type HintReason = AttackRejectReason | typeof NO_TARGET;
 
 const HINT_TEXT: Record<HintReason, string> = {
@@ -23,6 +26,7 @@ const AREA =
   "pointer-events-none absolute inset-x-0 top-1/6 flex justify-center pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))]";
 const BOX = "max-w-full border-2 border-warning bg-black/80 px-4 py-2 text-center text-2xl normal-case text-warning";
 
+/** Text zum Grund in der Sprache des Spiels. */
 export function hintText(reason: HintReason): string {
   return HINT_TEXT[reason];
 }
@@ -52,6 +56,7 @@ export class HintTimer {
   }
 }
 
+/** Darstellung ohne Zustand (testbar); der Bereich bleibt auch ohne Hinweis im DOM. */
 export function AttackHintView({ reason }: { reason: HintReason | null }) {
   return (
     <div className={AREA} data-testid="attack-hint-area">
@@ -64,6 +69,7 @@ export function AttackHintView({ reason }: { reason: HintReason | null }) {
   );
 }
 
+/** Zeigt einen Hinweis; das Spiel ruft es über eine Ref auf. */
 export interface HintFeed {
   show(reason: HintReason): void;
 }

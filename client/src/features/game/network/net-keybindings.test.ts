@@ -36,7 +36,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("createReceiver: Belegung (AK-9)", () => {
+describe("createReceiver: Belegung (002 AK-9)", () => {
   it("reicht die Belegung aus Welcome unverändert an onWelcome weiter", () => {
     const r = recorder();
     createReceiver(r.handlers).message(
@@ -55,7 +55,7 @@ describe("createReceiver: Belegung (AK-9)", () => {
   });
 });
 
-describe("connect: Belegung", () => {
+describe("connect: Belegung (002)", () => {
   it("saveKeyBindings schickt die Belegung über den offenen Socket", () => {
     const connection = connect("ws://test/ws", recorder().handlers);
     expect(connection.saveKeyBindings(custom)).toBe(true);

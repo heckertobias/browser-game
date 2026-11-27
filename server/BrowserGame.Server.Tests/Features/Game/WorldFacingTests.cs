@@ -2,6 +2,10 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Blickrichtung in der <see cref="World"/> (016 AK-1–AK-5, AK-9, AK-11): folgt der angewandten Laufrichtung als freier
+/// Winkel, bleibt im Stehen und bei zu kurzen Richtungen.
+/// </summary>
 public sealed class WorldFacingTests
 {
     private const int TickRate = 20;
@@ -199,7 +203,7 @@ public sealed class WorldFacingTests
         }
     }
 
-    [Fact] // Plan-Entscheidung 2, AK-11
+    [Fact] // AK-11; Übernahme ist keine neue Figur, nur neue Figuren starten mit DefaultFacing (016 plan.md Entscheidung 2)
     public void Taking_over_waiting_player_keeps_facing()
     {
         var (world, player) = NewWorldWithPlayer();
@@ -214,7 +218,7 @@ public sealed class WorldFacingTests
         Assert.Equal(Math.PI, player.Facing);
     }
 
-    [Fact] // Plan-Entscheidung 3
+    [Fact] // Respawn ändert die Blickrichtung nicht, die Spec verlangt nichts dafür (016 plan.md Entscheidung 3)
     public void Respawn_keeps_facing()
     {
         var (world, player) = NewWorldWithPlayer();

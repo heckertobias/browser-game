@@ -21,12 +21,13 @@ import {
 import type { Vec } from "@/features/game/core/vector";
 import type { Viewport } from "./viewport";
 
+/** Figur, wie `render` sie zeichnet: eigene aus der Vorhersage, andere aus dem `SnapshotBuffer`. */
 export interface DrawablePlayer {
   name: string;
   color: number;
   x: number;
   y: number;
-  /** Verbindung verloren, Figur wartet noch (AK-20). */
+  /** Verbindung verloren, Figur wartet noch (003 AK-20). */
   away?: boolean;
   /** Blickrichtung in Bogenmaß (016); ohne Wert kein Pfeil. */
   facing?: number;
@@ -58,7 +59,7 @@ export function hpBarWidth(hp: number, maxHp: number, width: number): number {
 
 const AWAY_ALPHA = 0.5;
 
-/** Grauwert gleicher Helligkeit (Rec. 601) für wartende Figuren (AK-20). */
+/** Grauwert gleicher Helligkeit (Rec. 601) für wartende Figuren (003 AK-20). */
 export function desaturate(rgb: number): number {
   const r = (rgb >> 16) & 0xff;
   const g = (rgb >> 8) & 0xff;
@@ -116,7 +117,7 @@ export function isVisible(player: Vec, origin: Vec, viewport: Viewport, margin: 
   );
 }
 
-/** CSS-Pixel relativ zum Canvas → Weltkoordinaten; berücksichtigt Gerätepixel, Balken (offset) und k. */
+/** CSS-Pixel relativ zum Canvas → Weltkoordinaten; berücksichtigt Gerätepixel, Balken (`offsetX/Y`) und den Faktor `scale`. */
 export function screenToWorld(
   x: number,
   y: number,
@@ -132,6 +133,11 @@ export function screenToWorld(
   };
 }
 
+/**
+ * Zeichnet einen Frame: Hintergrund mit Gitter, Ziele, Figuren mit Namen und Blickrichtung, Projektil-Effekte. Gezeichnet
+ * wird in Weltkoordinaten mit ganzzahligem Faktor (ADR 0010); was mitsamt `CULL_MARGIN` außerhalb des Sichtfelds liegt,
+ * entfällt.
+ */
 export function render(
   ctx: CanvasRenderingContext2D,
   viewport: Viewport,
@@ -245,6 +251,7 @@ function drawArrow(ctx: CanvasRenderingContext2D, x: number, y: number, facing: 
   ctx.fill();
 }
 
+/** Linien im Abstand `spacing`, an Weltkoordinaten ausgerichtet, damit das Muster beim Laufen mitwandert (001 AK-7). */
 function drawGrid(
   ctx: CanvasRenderingContext2D,
   origin: Vec,
@@ -263,6 +270,7 @@ function drawGrid(
   }
 }
 
+/** Farbe als 0xRRGGBB (wie im Snapshot) → CSS-Hex. */
 export function toCssColor(rgb: number): string {
   return `#${rgb.toString(16).padStart(6, "0")}`;
 }

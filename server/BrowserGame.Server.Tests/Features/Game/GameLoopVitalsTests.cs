@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// HP und Mana im GameLoop (012 AK-2, AK-5, AK-6, AK-8, AK-10): Maxima im Welcome, eigene Werte je Empfänger, Werte
+/// bleiben bei Übernahme und Wiederkehr im Nachlauf.
+/// </summary>
 public class GameLoopVitalsTests
 {
     private const uint LingerTicks = 20; // Game:LingerSeconds = 1 bei 20 Hz

@@ -37,6 +37,7 @@ public static class WebDefaults
     /// </summary>
     public static string JsonForHtmlScript(string json) => json.Replace("<", "\\u003c", StringComparison.Ordinal);
 
+    /// <summary>Name der Rate-Limit-Policy für Anmelde-Seiten; Seiten aktivieren sie mit <c>[EnableRateLimiting]</c>.</summary>
     public const string AuthRateLimitPolicy = "auth";
 
     /// <summary>
@@ -61,6 +62,10 @@ public static class WebDefaults
         });
     }
 
+    /// <summary>
+    /// Sicherheits-Header für jede Antwort: kein MIME-Sniffing, kein Referrer, CSP nur mit eigenen Quellen (Inline-Skripte
+    /// sind damit verboten), keine Einbettung in fremde Seiten.
+    /// </summary>
     public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder app) =>
         app.Use(async (context, next) =>
         {

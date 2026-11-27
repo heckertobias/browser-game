@@ -1,10 +1,17 @@
 namespace BrowserGame.Server.Features.Game;
 
+/// <summary>
+/// Alle Werte des Spielservers an einer Stelle (Constitution §8, ADR 0015): Spielwerte, Zeitabstände und technische
+/// Grenzen. Der <see cref="GameLoop"/> übergibt sie an <see cref="World"/> und <see cref="Combat"/>. Deren Spielwerte
+/// stehen dort als <c>Default…</c>-Konstanten, weil sie zugleich Standard der Konstruktorparameter sind (Tests setzen
+/// nur, was sie prüfen); hier werden sie nur benannt, damit jede Zahl genau einmal vorkommt.
+/// </summary>
 internal static class GameSettings
 {
-    /// <summary>Welteinheiten pro Sekunde.</summary>
+    /// <summary>Laufgeschwindigkeit in Welteinheiten pro Sekunde; geht im <c>Welcome</c> an den Client.</summary>
     public const double Speed = 200;
 
+    /// <summary>Server-Ticks pro Sekunde; alle Zeitangaben in Sekunden werden mit <see cref="ToTicks"/> umgerechnet.</summary>
     public const int TickRateHz = 20;
 
     /// <summary>Max-HP einer Figur (012 AK-1).</summary>
@@ -64,6 +71,7 @@ internal static class GameSettings
     /// </summary>
     public const double LingerSeconds = 20;
 
+    /// <summary>Konfigurationsschlüssel für <see cref="LingerSeconds"/>.</summary>
     public const string LingerSecondsKey = "Game:LingerSeconds";
 
     /// <summary>
@@ -72,12 +80,13 @@ internal static class GameSettings
     /// </summary>
     public const double PositionSaveIntervalSeconds = 5;
 
+    /// <summary>Konfigurationsschlüssel für <see cref="PositionSaveIntervalSeconds"/>.</summary>
     public const string PositionSaveIntervalSecondsKey = "Game:PositionSaveIntervalSeconds";
 
     /// <summary>Sekunden in ganze Ticks, aufgerundet; negative Werte zählen als 0.</summary>
     public static uint ToTicks(double seconds) => (uint)Math.Ceiling(Math.Max(0, seconds) * TickRateHz);
 
-    /// <summary>Größere Client-Nachrichten trennen die Verbindung.</summary>
+    /// <summary>Größere Client-Nachrichten trennen die Verbindung (Schutz vor Speicherverbrauch durch einzelne Clients).</summary>
     public const int MaxClientMessageBytes = 1024;
 
     /// <summary>Höchstlänge einer Chatnachricht in UTF-16-Einheiten (011 AK-9).</summary>
@@ -96,8 +105,8 @@ internal static class GameSettings
     public const int ChatRateLimitSeconds = 10;
 
     /// <summary>
-    /// Kapazität des Chat-Channels je Verbindung. Der Tick leert ihn; über dem Tempolimit (<see cref="ChatRateLimitCount"/>),
-    /// sodass nur eine Flut die ältesten Einträge verliert (011 AK-13).
+    /// Kapazität des Chat-Channels je Verbindung. Der Tick leert ihn; die Kapazität liegt über dem Tempolimit
+    /// (<see cref="ChatRateLimitCount"/>), sodass nur eine Flut die ältesten Einträge verliert (011 AK-13).
     /// </summary>
     public const int ChatInboxCapacity = 8;
 

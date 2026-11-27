@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Seite „Admins“ (004 AK-4e, AK-4f, AK-12): einladen per Link oder Mail, andere Admins entfernen, aber nie sich selbst
+/// oder den letzten.
+/// </summary>
 public sealed partial class AdminsPageTests
 {
     [GeneratedRegex("data-testid=\"invite-link\"|value=\"([^\"]+/Invite\\?token=[^\"]+)\"")]

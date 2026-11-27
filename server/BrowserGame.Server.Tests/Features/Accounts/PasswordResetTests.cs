@@ -12,6 +12,10 @@ using Microsoft.Extensions.Options;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Passwort vergessen und zurücksetzen (003 AK-14, AK-15): Antwort verrät keine Adresse, Link gilt befristet und
+/// einmal, andere Sitzungen enden, Rate-Limit.
+/// </summary>
 public sealed partial class PasswordResetTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private const string NewPassword = "ein-ganz-neues-passwort";

@@ -5,6 +5,10 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Verbindungen und Figuren im GameLoop ohne Netz (003 AK-12, AK-15, AK-16, AK-20–AK-23): Übernahme durch ein anderes
+/// Gerät, Nachlauf getrennter Figuren, Rauswurf beim Abmelden.
+/// </summary>
 public class GameLoopTests
 {
     private const uint LingerTicks = 20; // Game:LingerSeconds = 1 bei 20 Hz

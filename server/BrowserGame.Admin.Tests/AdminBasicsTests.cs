@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Grundlagen des Admin-Dienstes: Health-Probe, Sicherheits-Header und eigene Migration beider Schemata (004 AK-5).
+/// </summary>
 public sealed class AdminBasicsTests(AdminFactory factory) : IClassFixture<AdminFactory>
 {
     [Fact]

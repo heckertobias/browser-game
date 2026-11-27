@@ -1,15 +1,24 @@
+// Reine Logik des Chatfensters (011), ohne React und ohne DOM testbar. AK-Angaben in dieser Datei beziehen sich auf 011.
+
 import { isEditableTarget } from "@/features/game/input/input";
 import type { CommandRejectReason } from "@/features/game/network/net";
 import type { ChatMessage } from "@/generated/browsergame/v1/game_pb";
 
+/** Höchstlänge in UTF-16-Einheiten wie `maxLength` im Browser; gleich `GameSettings.ChatMaxLength` (Server, AK-9). */
 export const CHAT_MAX_LENGTH = 200;
+/** So viele Zeilen hält die Liste; ältere fallen weg, damit lange Sitzungen das DOM nicht wachsen lassen. */
 export const CHAT_MAX_LINES = 200;
+/** Neue Nachrichten werden so lange gesammelt und dann gemeinsam gezeichnet (`MessageBatcher`). */
 export const CHAT_FLUSH_MS = 100;
+/** So lange steht der Hinweis „zu schnell“ (AK-13). */
 export const CHAT_TOO_FAST_HINT_MS = 4000;
 /** Der Befehls-Hinweis steht so lange wie „zu schnell“ (015). */
 export const CHAT_COMMAND_HINT_MS = CHAT_TOO_FAST_HINT_MS;
+/** Schlüssel in `localStorage` für „eingeklappt“; der Stand gilt je Gerät (AK-4b). */
 export const CHAT_COLLAPSED_KEY = "bg.chat.collapsed";
+/** Abstand zum Ende, der noch als „ganz unten“ zählt; Rundungen beim Scrollen erreichen 0 nicht immer. */
 const AT_BOTTOM_TOLERANCE_PX = 8;
+/** CSS-Variable mit der von der Bildschirmtastatur verdeckten Höhe (AK-7). */
 export const CHAT_KEYBOARD_VAR = "--chat-keyboard";
 
 /** Ohne `timeZone`: Ortszeit. `hourCycle`: sonst zeigt `en` „02:05 PM“ statt Stunden:Minuten (AK-2). */
@@ -17,18 +26,22 @@ export function timeFormatter(language: string, timeZone?: string): Intl.DateTim
   return new Intl.DateTimeFormat(language, { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone });
 }
 
+/** Uhrzeit einer Nachricht (AK-2). */
 export function formatTime(sentAtUnixMs: bigint, formatter: Intl.DateTimeFormat): string {
   return formatter.format(Number(sentAtUnixMs));
 }
 
+/** Steht die Liste ganz unten? Nur dann scrollt sie bei neuen Nachrichten mit; wer hochgescrollt hat, liest in Ruhe (AK-3). */
 export function isAtBottom(scrollTop: number, scrollHeight: number, clientHeight: number): boolean {
   return scrollHeight - scrollTop - clientHeight <= AT_BOTTOM_TOLERANCE_PX;
 }
 
+/** Standard ohne gespeicherte Wahl (AK-4c): eingeklappt nur am Handy hochkant, wo der Chat sonst das Spielbild verdeckt. */
 export function defaultCollapsed(isPortrait: boolean, isCoarsePointer: boolean): boolean {
   return isPortrait && isCoarsePointer;
 }
 
+/** Teil von `localStorage`, den der Chat braucht (in Tests gefälscht). */
 export type ChatStorage = Pick<Storage, "getItem" | "setItem">;
 
 /** `null`, wenn es keinen Speicher gibt oder der Zugriff verboten ist. */
@@ -49,6 +62,7 @@ export function deviceHasCoarsePointer(): boolean {
   }
 }
 
+/** `defaultCollapsed` für dieses Gerät; ohne `matchMedia` aufgeklappt. */
 export function deviceDefaultCollapsed(): boolean {
   try {
     return defaultCollapsed(window.matchMedia("(orientation: portrait)").matches, deviceHasCoarsePointer());
@@ -57,6 +71,7 @@ export function deviceDefaultCollapsed(): boolean {
   }
 }
 
+/** Gespeicherte Wahl „eingeklappt“ (AK-4b); fehlt sie oder ist der Speicher gesperrt, gilt `fallback` (AK-4c). */
 export function loadCollapsed(storage: ChatStorage | null, fallback: () => boolean): boolean {
   let stored: string | null = null;
   try {
@@ -67,6 +82,7 @@ export function loadCollapsed(storage: ChatStorage | null, fallback: () => boole
   return stored === "true" ? true : stored === "false" ? false : fallback();
 }
 
+/** Merkt sich „eingeklappt“ für den nächsten Besuch; ohne Speicher gilt die Wahl nur bis zum Neuladen. */
 export function saveCollapsed(storage: ChatStorage | null, collapsed: boolean): void {
   try {
     storage?.setItem(CHAT_COLLAPSED_KEY, String(collapsed));
@@ -81,6 +97,7 @@ export function chatTextToSend(draft: string): string | null {
   return text === "" || text.length > CHAT_MAX_LENGTH ? null : text;
 }
 
+/** Ergebnis von `submitChat`: Aktion für den Reducer (oder keine) und ob der Fokus das Feld verlassen soll. */
 export interface SubmitResult {
   readonly action: ChatAction | null;
   readonly leaveField: boolean;
@@ -144,6 +161,7 @@ export function keyboardInset(innerHeight: number, viewport: Pick<VisualViewport
   return Math.max(0, Math.round(innerHeight - viewport.height - viewport.offsetTop));
 }
 
+/** Teil von `window`, den `liftWhileFocused` braucht (in Tests gefälscht). */
 export interface KeyboardWindow {
   readonly innerHeight: number;
   readonly visualViewport: (EventTarget & Pick<VisualViewport, "height" | "offsetTop">) | null;
@@ -178,19 +196,26 @@ export function liftWhileFocused(field: EventTarget, focused: boolean, win: Keyb
   };
 }
 
+/** Zeile der Liste; `id` ist fortlaufend und dient React als stabiler Schlüssel. */
 export interface ChatLine {
   readonly id: number;
   readonly message: ChatMessage;
 }
 
+/** Zustand des Chatfensters; ändert sich nur über `chatReducer`. */
 export interface ChatState {
   readonly lines: readonly ChatLine[];
   readonly nextId: number;
   readonly collapsed: boolean;
+  /** Neue Nachrichten kamen, während der Chat eingeklappt war (AK-4). */
   readonly unread: boolean;
+  /** Text im Eingabefeld. */
   readonly draft: string;
+  /** Zuletzt gesendeter Text; lehnt der Server ihn ab (zu schnell), kommt er zurück ins Feld (AK-13). */
   readonly lastSent: string;
+  /** Der Hinweis „zu schnell“ ist sichtbar. */
   readonly tooFast: boolean;
+  /** Grund, aus dem der Server den letzten Befehl abgelehnt hat; `null`: kein Hinweis (015). */
   readonly commandRejected: CommandRejectReason | null;
 }
 
@@ -207,6 +232,7 @@ export type ChatAction =
   | { type: "commandRejected"; reason: CommandRejectReason }
   | { type: "commandHintOver" };
 
+/** Leerer Chat; `collapsed` aus `loadCollapsed`. */
 export function initialChatState(collapsed: boolean): ChatState {
   return { lines: [], nextId: 1, collapsed, unread: false, draft: "", lastSent: "", tooFast: false, commandRejected: null };
 }
@@ -215,6 +241,10 @@ function numbered(state: ChatState, messages: readonly ChatMessage[]): ChatLine[
   return messages.map((message, index) => ({ id: state.nextId + index, message }));
 }
 
+/**
+ * Zustandsübergänge des Chats. Bemerkenswert: `welcome` leert die Liste, weil der Verlauf danach vollständig neu kommt
+ * (AK-15); `rejected` stellt den abgelehnten Text wieder ins Feld, sofern dort noch nichts Neues steht (AK-13).
+ */
 export function chatReducer(state: ChatState, action: ChatAction): ChatState {
   switch (action.type) {
     case "welcome":
@@ -251,7 +281,10 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
   }
 }
 
-/** Sammelt und liefert gebündelt in Reihenfolge, damit 50 Nachrichten/s nicht 50 Renders/s bedeuten. */
+/**
+ * Sammelt und liefert gebündelt in Reihenfolge, damit 50 Nachrichten/s nicht 50 Renders/s bedeuten. Mehr als `maxItems`
+ * wartende Einträge verdrängen die ältesten; mehr zeigt die Liste ohnehin nicht.
+ */
 export class MessageBatcher<T> {
   private pending: T[] = [];
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -273,6 +306,7 @@ export class MessageBatcher<T> {
     }, this.delayMs);
   }
 
+  /** Verwirft Wartendes ohne Auslieferung, z. B. bei einem neuen Welcome. */
   clear(): void {
     clearTimeout(this.timer);
     this.timer = undefined;

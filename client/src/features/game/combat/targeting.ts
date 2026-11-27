@@ -1,3 +1,5 @@
+// Zielauswahl und Angriffswunsch (013), reine Logik. AK-Angaben in dieser Datei beziehen sich auf 013.
+
 import { create } from "@bufbuild/protobuf";
 import type { Vec } from "@/features/game/core/vector";
 import { AttackSchema, type Attack, type Attack_Kind, type TargetState } from "@/generated/browsergame/v1/game_pb";
@@ -19,7 +21,10 @@ export function pickTarget(world: Vec, targets: readonly PickableTarget[], radiu
   return best;
 }
 
-/** Höchstens ein aktives Ziel (AK-1, AK-3). Nur Anzeige; der Server prüft beim Angriff (plan.md Entscheidung 1). */
+/**
+ * Höchstens ein aktives Ziel (AK-1, AK-3). Nur der Client kennt es und schickt es mit jedem Angriff mit; der Server prüft
+ * es dann und braucht so keinen eigenen Auswahl-Zustand (plan.md Entscheidung 1).
+ */
 export class TargetSelection {
   private id: string | null = null;
 
@@ -32,7 +37,7 @@ export class TargetSelection {
     this.id = id;
   }
 
-  /** Hebt die Auswahl auf, wenn ihr Ziel nicht mehr unter `ids` ist (tot, plan.md Entscheidung 2). */
+  /** Hebt die Auswahl auf, wenn ihr Ziel nicht unter `ids` ist; tote Ziele fehlen im Snapshot (plan.md Entscheidung 2). */
   sync(ids: readonly string[]): void {
     if (this.id !== null && !ids.includes(this.id)) this.id = null;
   }

@@ -5,6 +5,10 @@ using ProtoAction = BrowserGame.Contracts.V1.Action;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Prüfung einer Tastenbelegung vor dem Speichern (002 AK-5–AK-11): bekannte Aktionen, höchstens zwei Codes je Aktion,
+/// keine doppelten oder reservierten Codes. Der Server prüft selbst, weil er dem Client nicht glaubt (Constitution §2).
+/// </summary>
 public sealed class KeyBindingRulesTests
 {
     private static readonly string[] ExpectedReservedCodes = ["Escape", "Enter", "NumpadEnter"];

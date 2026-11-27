@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Datenbank des Spiels: Modell passt zu den Migrationen, Daten überleben einen Neustart (Grundlage für 003 AK-19),
+/// SQLite-Backup (ADR 0004).
+/// </summary>
 public sealed class DatabaseTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     [Fact] // Laufzeit-Modell und Migrationen müssen übereinstimmen – inklusive Passkey-Tabelle (Identity-Schema v3)

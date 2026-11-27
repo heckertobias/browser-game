@@ -6,6 +6,10 @@ using BrowserGame.Server.Tests;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Seitenleiste des Admins (005 AK-1–AK-3, AK-5): alle Bereiche mit markiertem aktuellen, Account und Abmelden auf
+/// jeder Seite, Menü-Button für schmale Bildschirme.
+/// </summary>
 public sealed partial class AdminSidebarTests
 {
     private static readonly string[] Sections = ["/", "/Smtp", "/Admins", "/Audit"];

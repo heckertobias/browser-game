@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Spiel und Account über echte WebSockets (003 AK-8, AK-17, AK-18): nur bestätigte Accounts mit passendem Origin, Name
+/// und Farbe aus dem Account, Start an gespeicherter Position.
+/// </summary>
 public sealed class GameAccountTests(GameServerFactory factory) : IClassFixture<GameServerFactory>
 {
     private async Task<(string Email, string Cookie)> SignedInAccountAsync()

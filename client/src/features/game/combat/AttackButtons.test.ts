@@ -33,7 +33,7 @@ function findByTestId(node: ReactNode, id: string): ReactElement<Probe> | undefi
 const view = (over: Partial<AttackButtonsViewProps> = {}) =>
   renderToStaticMarkup(createElement(AttackButtonsView, { hasTarget: true, onAttack: noop, ...over }));
 
-describe("AttackButtonsView (plan.md Entscheidung 9)", () => {
+describe("AttackButtonsView (013 plan.md Entscheidung 9)", () => {
   it("zwei bedienbare Buttons mit Daumengröße", () => {
     const markup = view();
     for (const id of ["attack-melee", "attack-ranged"]) {

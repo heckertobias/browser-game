@@ -10,12 +10,15 @@ export interface Viewport {
   /** Sichtbare Welt in Weltpixeln (darf gebrochen sein). */
   viewWidth: number;
   viewHeight: number;
-  /** Gerätepixel bis zum Spielbild; > 0 nur über 21:9 (AK-4). */
+  /** Gerätepixel bis zum Spielbild; > 0 nur über 21:9 (007 AK-4). */
   offsetX: number;
   offsetY: number;
 }
 
-/** Faktor für die kurze Seite: relativ am nächsten an 360 (Grenze: geometrisches Mittel), nie über 400. */
+/**
+ * Faktor für die kurze Seite: relativ am nächsten an `TARGET_SHORT_SIDE` (Grenze zwischen k und k+1 ist das geometrische
+ * Mittel), die kurze Seite aber nie über `MAX_SHORT_SIDE` Weltpixel (ADR 0010).
+ */
 export function chooseScale(shortSide: number): number {
   const ratio = shortSide / TARGET_SHORT_SIDE;
   let scale = Math.max(1, Math.floor(ratio));
@@ -24,6 +27,10 @@ export function chooseScale(shortSide: number): number {
   return scale;
 }
 
+/**
+ * Sichtfeld für ein Canvas in Gerätepixeln (ADR 0010, 007 AK-1–AK-4): Das Canvas füllt das Fenster, der Faktor folgt aus
+ * der kurzen Seite. Ist die lange Seite länger als 21:9, wird das Spielbild mittig begrenzt und der Rest bleibt schwarz.
+ */
 export function fitViewport(deviceWidth: number, deviceHeight: number): Viewport {
   const width = Math.max(1, Math.round(deviceWidth));
   const height = Math.max(1, Math.round(deviceHeight));
@@ -43,7 +50,10 @@ export function fitViewport(deviceWidth: number, deviceHeight: number): Viewport
   };
 }
 
-/** Bequemlichkeit für Tests und den Fallback ohne device-pixel-content-box. */
+/**
+ * Sichtfeld aus CSS-Größe und `devicePixelRatio`, so wie es der Fallback ohne device-pixel-content-box in `Game` misst.
+ * Tests beschreiben Geräte damit in den Maßen, die Datenblätter nennen.
+ */
 export function computeViewport(cssWidth: number, cssHeight: number, devicePixelRatio: number): Viewport {
   return fitViewport(cssWidth * devicePixelRatio, cssHeight * devicePixelRatio);
 }

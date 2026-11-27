@@ -1,4 +1,4 @@
-// Vorlage, Platzhalter füllt ServiceWorkerScript.Render; 008 ergänzt push.
+// Vorlage: Die Platzhalter __VERSION__ und __PRECACHE__ füllt ServiceWorkerScript.Render.
 const VERSION = "__VERSION__";
 const PRECACHE = __PRECACHE__; // ["/play/offline.html", "/play/assets/offline-….js", …]
 const OFFLINE_PAGE = "/play/offline.html";

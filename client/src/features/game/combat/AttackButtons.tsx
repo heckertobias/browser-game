@@ -17,38 +17,48 @@ export interface AttackButtonsViewProps {
   cooldown?: number;
 }
 
+interface AttackButtonProps {
+  kind: Attack_Kind;
+  label: string;
+  /** Präfix der Test-IDs: `<testId>` am Button, `<testId>-cooldown` am Sweep. */
+  testId: string;
+  hasTarget: boolean;
+  onAttack: (kind: Attack_Kind) => void;
+  cooldown: number;
+}
+
+/**
+ * Ein Angriffs-Button. Bewusst eine Funktion statt einer Komponente: So enthält der Baum von `AttackButtonsView` direkt
+ * die `<button>`-Elemente, und Tests können ihn ohne Rendern durchsuchen.
+ */
+function attackButton({ kind, label, testId, hasTarget, onAttack, cooldown }: AttackButtonProps) {
+  return (
+    // mousedown ohne Fokus: Leertaste oder Enter lösten sonst über den Button erneut aus.
+    <button
+      type="button"
+      data-testid={testId}
+      className={BUTTON}
+      disabled={!hasTarget}
+      onMouseDown={(e) => { e.preventDefault(); }}
+      onClick={() => { onAttack(kind); }}
+    >
+      {label}
+      {cooldown > 0 && (
+        <span aria-hidden="true" data-testid={`${testId}-cooldown`} className={SWEEP} style={{ background: sweepBackground(cooldown) }} />
+      )}
+    </button>
+  );
+}
+
+/** Darstellung ohne Zustand (testbar): beide Buttons, gesperrt ohne Ziel, mit Sweep während der Abklingzeit. */
 export function AttackButtonsView({ hasTarget, onAttack, cooldown = 0 }: AttackButtonsViewProps) {
+  const shared = { hasTarget, onAttack, cooldown };
   return (
     <div className={ROOT} data-testid="attack-buttons">
       {/* Gesperrte Buttons lassen den Zeiger durch (daisyUI: pointer-events none); die Leiste fängt ihn, sonst liefe die Figur los. */}
       <div className="pointer-events-auto flex gap-2" data-testid="attack-bar">
-        {/* mousedown ohne Fokus: Leertaste oder Enter lösten sonst über den Button erneut aus. */}
-        <button
-          type="button"
-          data-testid="attack-melee"
-          className={BUTTON}
-          disabled={!hasTarget}
-          onMouseDown={(e) => { e.preventDefault(); }}
-          onClick={() => { onAttack(Attack_Kind.MELEE); }}
-        >
-          {t.attackMelee}
-          {cooldown > 0 && (
-            <span aria-hidden="true" data-testid="attack-melee-cooldown" className={SWEEP} style={{ background: sweepBackground(cooldown) }} />
-          )}
-        </button>
-        <button
-          type="button"
-          data-testid="attack-ranged"
-          className={BUTTON}
-          disabled={!hasTarget}
-          onMouseDown={(e) => { e.preventDefault(); }}
-          onClick={() => { onAttack(Attack_Kind.RANGED); }}
-        >
-          {t.attackRanged}
-          {cooldown > 0 && (
-            <span aria-hidden="true" data-testid="attack-ranged-cooldown" className={SWEEP} style={{ background: sweepBackground(cooldown) }} />
-          )}
-        </button>
+        {attackButton({ kind: Attack_Kind.MELEE, label: t.attackMelee, testId: "attack-melee", ...shared })}
+        {attackButton({ kind: Attack_Kind.RANGED, label: t.attackRanged, testId: "attack-ranged", ...shared })}
       </div>
     </div>
   );
@@ -66,8 +76,9 @@ export interface AttackButtonsProps {
 }
 
 /**
- * Nah- und Fernkampf im HUD; ohne Ziel gesperrt (plan.md Entscheidung 9). Nach einem bestätigten Angriff läuft auf beiden
- * ein Sweep ab, die Buttons bleiben dabei klickbar (AK-22). Hinweise zeigt `AttackHint` (AK-20).
+ * Nah- und Fernkampf im HUD für Touch und Maus; ohne Ziel gesperrt (013 AK-2, plan.md Entscheidung 9). Nach einem vom
+ * Server bestätigten Angriff läuft auf beiden ein Sweep ab; die Buttons bleiben dabei klickbar, weil allein der Server
+ * den Cooldown durchsetzt (AK-22). Hinweise zeigt `AttackHint` (AK-20).
  */
 export const AttackButtons = memo(function AttackButtons({ hasTarget, onAttack, ref }: AttackButtonsProps) {
   const [cooldown, setCooldown] = useState(0);

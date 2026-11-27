@@ -4,6 +4,10 @@ using static BrowserGame.Admin.Tests.SmtpTestHelpers;
 
 namespace BrowserGame.Admin.Tests;
 
+/// <summary>
+/// Getestetes Passwort (005 AK-15): Nach einer erfolgreichen Testmail trägt die Seite das Passwort geschützt und 30
+/// Minuten gültig bis zum Speichern mit, damit es nicht erneut eingetippt werden muss.
+/// </summary>
 public sealed class SmtpTestedPasswordTests
 {
     private const string Save = "/Smtp?handler=Save";

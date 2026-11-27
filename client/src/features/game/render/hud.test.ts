@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { formatCoordinates } from "./hud";
 
-describe("formatCoordinates (AK-19b)", () => {
+describe("formatCoordinates (003 AK-19b)", () => {
   it("rundet auf ganze Zahlen", () => {
     expect(formatCoordinates(12.4, -3.6)).toBe("X 12 · Y -4");
   });

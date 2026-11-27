@@ -4,6 +4,10 @@ using ProtoAction = BrowserGame.Contracts.V1.Action;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Umwandlung der Tastenbelegung in die gespeicherten Bytes und zurück (002 AK-9–AK-11); kaputte Bytes ergeben den
+/// Standard statt eines Fehlers.
+/// </summary>
 public sealed class KeyBindingStoredTests
 {
     private static KeyBinding Bind(ProtoAction action, params string[] codes)

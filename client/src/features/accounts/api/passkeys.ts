@@ -41,6 +41,7 @@ export function isBinary(value: unknown): value is Binary {
     || Object.prototype.toString.call(value) === "[object ArrayBuffer]";
 }
 
+/** Base64url ohne Padding, wie WebAuthn-JSON Bytes kodiert. */
 export function toBase64Url(value: Binary): string {
   const bytes = ArrayBuffer.isView(value)
     ? new Uint8Array(value.buffer, value.byteOffset, value.byteLength)

@@ -6,7 +6,7 @@ import { clampDirection } from "@/features/game/core/vector";
 
 const keys = (...codes: string[]) => activeActions(new Set(codes), DEFAULT_BINDINGS);
 
-describe("Tastatur (AK-2)", () => {
+describe("Tastatur (001 AK-2)", () => {
   it.each([
     ["KeyW", 0, -1],
     ["KeyS", 0, 1],
@@ -37,7 +37,7 @@ describe("Tastatur (AK-2)", () => {
   });
 });
 
-describe("Halten-und-Folgen (AK-2b)", () => {
+describe("Halten-und-Folgen (001 AK-2b)", () => {
   it("läuft mit voller Geschwindigkeit Richtung Zeiger", () => {
     const dir = pointerDirection({ x: 30, y: 40 }, { x: 0, y: 0 });
     expect(dir.x).toBeCloseTo(0.6);

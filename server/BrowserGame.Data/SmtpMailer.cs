@@ -7,10 +7,14 @@ using MimeKit;
 
 namespace BrowserGame.Data;
 
+/// <summary>Ausgang eines Versands; außer bei <see cref="Sent"/> trägt <see cref="MailResult.Error"/> eine Meldung.</summary>
 public enum MailStatus
 {
     Sent,
+
+    /// <summary>Im Admin-Interface sind noch keine SMTP-Einstellungen gespeichert (004 AK-11).</summary>
     NotConfigured,
+
     Failed,
 }
 

@@ -4,7 +4,11 @@ using Microsoft.Extensions.Options;
 
 namespace BrowserGame.Admin.Tests;
 
-/// <summary>Regression 0.2.1: „invalid origin“, weil die Standardprüfung den (wegen no-referrer leeren) Origin-Header vergleicht.</summary>
+/// <summary>
+/// Das Admin prüft die Passkey-Herkunft gegen <c>App:PublicUrl</c>, nicht gegen den Origin-Header: Wegen
+/// <c>Referrer-Policy: no-referrer</c> schicken Browser dort <c>null</c>, und die Standardprüfung meldete „invalid origin“.
+/// Regressionstest: Der Fehler ist in einer Testumgebung aufgetreten.
+/// </summary>
 public sealed class PasskeyOriginWiringTests
 {
     private static ValueTask<bool> Validate(Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program> factory, string origin, bool crossOrigin = false)

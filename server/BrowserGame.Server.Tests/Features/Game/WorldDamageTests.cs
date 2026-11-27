@@ -2,6 +2,9 @@ using BrowserGame.Server.Features.Game;
 
 namespace BrowserGame.Server.Tests;
 
+/// <summary>
+/// Schaden, Tod und Respawn in der <see cref="World"/> (012 AK-1, AK-7–AK-10), auch über <c>SetVitals</c>.
+/// </summary>
 public sealed class WorldDamageTests
 {
     private const double MaxHp = 80;

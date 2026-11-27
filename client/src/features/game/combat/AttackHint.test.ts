@@ -28,14 +28,14 @@ function classes(tag: string): string[] {
 
 const view = (reason: HintReason | null) => renderToStaticMarkup(createElement(AttackHintView, { reason }));
 
-describe("hintText (AK-8, AK-19)", () => {
+describe("hintText (013 AK-8, AK-19)", () => {
   it("liefert den Text zum Grund", () => {
     expect(hintText(NOT_ENOUGH_MANA)).toBe(t.notEnoughMana);
     expect(hintText(NOT_FACING)).toBe(t.notFacing);
   });
 });
 
-describe("HintTimer (AK-8, AK-19)", () => {
+describe("HintTimer (013 AK-8, AK-19)", () => {
   const onChange = vi.fn<(r: HintReason | null) => void>();
   let hint: HintTimer;
 
@@ -84,7 +84,7 @@ describe("HintTimer (AK-8, AK-19)", () => {
   });
 });
 
-describe("hintText (AK-20)", () => {
+describe("hintText (013 AK-20)", () => {
   it("liefert den Text zu jedem Grund", () => {
     expect(hintText(NO_TARGET)).toBe(t.noTarget);
     expect(hintText(OUT_OF_RANGE)).toBe(t.outOfRange);
@@ -97,7 +97,7 @@ describe("hintText (AK-20)", () => {
   });
 });
 
-describe("HintTimer (AK-20)", () => {
+describe("HintTimer (013 AK-20)", () => {
   const onChange = vi.fn<(r: HintReason | null) => void>();
 
   beforeEach(() => {
@@ -122,7 +122,7 @@ describe("HintTimer (AK-20)", () => {
   });
 });
 
-describe("AttackHintView (AK-20)", () => {
+describe("AttackHintView (013 AK-20)", () => {
   it("ohne Grund kein Hinweis, die Fläche bleibt", () => {
     const markup = view(null);
     expect(markup).toContain('data-testid="attack-hint-area"');

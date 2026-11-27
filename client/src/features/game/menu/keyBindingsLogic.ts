@@ -1,3 +1,5 @@
+// Reine Logik der Tastenbelegung im Menü (002), ohne React und ohne DOM testbar. AK-Angaben beziehen sich auf 002.
+
 import type { Action } from "@/generated/browsergame/v1/game_pb";
 import {
   DEFAULT_BINDINGS,
@@ -11,6 +13,7 @@ import {
 } from "@/features/game/input/bindings";
 import { menuKeyAction } from "./menuLogic";
 
+/** Plätze je Aktion in Anzeigereihenfolge. */
 export const SLOTS: readonly Slot[] = [0, 1];
 
 /** Hinweis nach einer Taste: abgelehnt (AK-8) oder einer anderen Aktion weggenommen (AK-7). */
@@ -18,12 +21,14 @@ export type Notice =
   | Extract<AssignResult, { kind: "reserved" }>
   | { kind: "overwritten"; code: string; from: Action; to: Action };
 
+/** Entweder wartet die Seite (mit dem Hinweis zur letzten Taste) oder sie nimmt gerade eine Taste für einen Platz auf. */
 export type KeyBindingsState =
   | { mode: "idle"; notice: Notice | null }
   | { mode: "recording"; action: Action; slot: Slot };
 
 export const IDLE: KeyBindingsState = { mode: "idle", notice: null };
 
+/** Bedienung der Seite: Platz anklicken, Taste drücken, abbrechen, Platz leeren, Standard wiederherstellen. */
 export type KeyBindingsEvent =
   | { type: "record"; action: Action; slot: Slot }
   | { type: "key"; code: string }
@@ -37,6 +42,11 @@ export interface KeyBindingsStep {
   save: Bindings | null;
 }
 
+/**
+ * Zustandsautomat der Seite. Ein Klick auf den Platz, der gerade aufnimmt, bricht die Aufnahme ab. Eine Taste wird nur
+ * beim Aufnehmen belegt (AK-5); jede Änderung gilt sofort und wird gespeichert (`save`), ein Schritt ohne Änderung
+ * speichert nichts.
+ */
 export function keyBindingsStep(state: KeyBindingsState, bindings: Bindings, event: KeyBindingsEvent): KeyBindingsStep {
   switch (event.type) {
     case "record":
@@ -66,8 +76,10 @@ export function keyBindingsStep(state: KeyBindingsState, bindings: Bindings, eve
   }
 }
 
+/** Ergebnis von `captureKey`: Taste belegen, Aufnahme abbrechen oder Event schlucken. */
 export type CapturedKey = { type: "key"; code: string } | { type: "cancel" } | { type: "ignore" };
 
+/** Teil eines `KeyboardEvent`, den `captureKey` braucht (in Tests gefälscht). */
 export type CaptureEvent = Pick<KeyboardEvent, "key" | "code" | "repeat" | "target" | "preventDefault" | "stopImmediatePropagation">;
 
 /**
