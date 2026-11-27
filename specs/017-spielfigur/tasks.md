@@ -34,7 +34,7 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
   gleich bleibt); Vitest.
 
 ## Assets
-- [ ] **T7** (AK-1, AK-16–18, AK-20): `pngjs` und `@types/pngjs` (devDependencies, Versionen mindestens 7 Tage alt);
+- [x] **T7** (AK-1, AK-16–18, AK-20): `pngjs` und `@types/pngjs` (devDependencies, Versionen mindestens 7 Tage alt);
   `client/scripts/import-sprites.mjs` mit `npm run sprites:import`; `assets/sprites/humanoid/rig.json`; daraus
   `body-default.png` und `clothing-ninja.png` aus zwei Farbvarianten einer Pack-Figur (Blätter stellt der User
   bereit); Zeilen in `LICENSES.md`; `sprites/assets.test.ts`; `HUMANOID_RIG`, `HUMANOID_IMAGES`. Figurwahl und

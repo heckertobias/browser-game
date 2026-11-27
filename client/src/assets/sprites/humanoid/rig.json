@@ -1,0 +1,14 @@
+{
+  "cell": { "width": 48, "height": 48 },
+  "origin": { "x": 24, "y": 24 },
+  "directions": ["down", "up", "left", "right"],
+  "animations": {
+    "idle": { "firstRow": 0, "frames": 1 },
+    "walk": { "firstRow": 0, "frames": 4, "frameMs": 100 }
+  },
+  "slots": ["body", "clothing"],
+  "parts": {
+    "body/default": { "slot": "body", "image": "body-default.png" },
+    "clothing/ninja": { "slot": "clothing", "image": "clothing-ninja.png", "tint": true }
+  }
+}

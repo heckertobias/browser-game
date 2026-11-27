@@ -1,3 +1,4 @@
+import humanoidRig from "@/assets/sprites/humanoid/rig.json";
 import { compose, greyscale, tint, type Pixels } from "./compose";
 import { parseRig, sheetSize, type Rig } from "./rig";
 
@@ -91,3 +92,18 @@ export async function loadSpriteSet(
     return null;
   }
 }
+
+/** Spielbezogen: beim Herauslösen von sprites/ im Spiel lassen (ADR 0018). */
+export const HUMANOID_RIG: unknown = humanoidRig;
+
+// Wurzelpfad statt @/: import.meta.glob löst den tsconfig-Alias nicht sicher auf.
+const humanoidImageUrls = import.meta.glob<string>("/src/assets/sprites/humanoid/*.png", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
+
+/** Dateiname (wie `image` in rig.json) → URL. */
+export const HUMANOID_IMAGES: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries(humanoidImageUrls).map(([path, url]) => [path.slice(path.lastIndexOf("/") + 1), url]),
+);
