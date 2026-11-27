@@ -10,7 +10,7 @@ alt sind (frühestens 2026-11-17).
   `dotnet nuget add source`, geerbte Quellen geleert); Regel für NuGet-Pakete und die Ausnahme in `AGENTS.md`.
 
 ## Server
-- [ ] **T2** (AK-1, AK-4): SDK in `global.json`, `net11.0` in `Directory.Build.props`, Images im `Dockerfile` (per
+- [x] **T2** (AK-1, AK-4): SDK in `global.json`, `net11.0` in `Directory.Build.props`, Images im `Dockerfile` (per
   Digest); neue Analyzer-Warnungen beheben; Build und Tests grün.
 - [ ] **T3** (AK-1, AK-2): Pakete per `dotnet package update` (ohne `--version`), `dotnet-ef` im Tool-Manifest;
   Pkcs-Pinning prüfen; Migrationen ohne offene Modelländerungen; Build und Tests grün.
