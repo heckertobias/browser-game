@@ -41,7 +41,7 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
   Ausgabe des Skripts nach Plan-Entscheidung 2 festhalten.
 
 ## Client (Zeichnen)
-- [ ] **T8** (AK-1, AK-3, AK-9, AK-10, AK-14, AK-20): `render.ts`: `RenderOptions`, Sprite statt Quadrat, Quadrat als
+- [x] **T8** (AK-1, AK-3, AK-9, AK-10, AK-14, AK-20): `render.ts`: `RenderOptions`, Sprite statt Quadrat, Quadrat als
   Rückfall, Pfeil nur mit `facingArrows`; `fakeContext.ts` additiv (`drawImage`, `fillText`); Vitest
   `render-sprite.test.ts`.
 - [ ] **T9** (AK-10–14): `net.ts` (`onToggleFacingArrows`); `game.ts` (Schalter, `setSprites`, `moving`, Optionen an

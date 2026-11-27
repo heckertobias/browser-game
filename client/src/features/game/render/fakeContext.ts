@@ -27,9 +27,32 @@ export interface ArcOp {
   alpha: number;
 }
 
-export type DrawOp = RectOp | PathOp | ArcOp;
+export interface ImageOp {
+  kind: "image";
+  source: CanvasImageSource;
+  sx: number;
+  sy: number;
+  sw: number;
+  sh: number;
+  dx: number;
+  dy: number;
+  dw: number;
+  dh: number;
+  alpha: number;
+}
 
-/** Ersatz für den Canvas-2D-Kontext in Tests: merkt sich Rechtecke und gefüllte/umrandete Pfade. */
+export interface TextOp {
+  kind: "text";
+  text: string;
+  x: number;
+  y: number;
+  font: string;
+  alpha: number;
+}
+
+export type DrawOp = RectOp | PathOp | ArcOp | ImageOp | TextOp;
+
+/** Ersatz für den Canvas-2D-Kontext in Tests: merkt sich Rechtecke, Pfade, Kreise, Bilder und Texte. */
 export class FakeContext {
   fillStyle = "";
   strokeStyle = "";
@@ -59,13 +82,28 @@ export class FakeContext {
     return this.ops.filter((op): op is ArcOp => op.kind === "arc");
   }
 
+  images(): ImageOp[] {
+    return this.ops.filter((op): op is ImageOp => op.kind === "image");
+  }
+
+  texts(): TextOp[] {
+    return this.ops.filter((op): op is TextOp => op.kind === "text");
+  }
+
   setTransform(): void {}
   save(): void {}
   restore(): void {}
   rect(): void {}
   clip(): void {}
-  fillText(): void {}
   closePath(): void {}
+
+  drawImage(source: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void {
+    this.ops.push({ kind: "image", source, sx, sy, sw, sh, dx, dy, dw, dh, alpha: this.globalAlpha });
+  }
+
+  fillText(text: string, x: number, y: number): void {
+    this.ops.push({ kind: "text", text, x, y, font: this.font, alpha: this.globalAlpha });
+  }
 
   beginPath(): void {
     this.path = [];
