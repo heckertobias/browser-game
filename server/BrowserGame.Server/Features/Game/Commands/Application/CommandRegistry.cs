@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using BrowserGame.Contracts.V1;
 
 namespace BrowserGame.Server.Features.Game;
 
@@ -18,6 +19,9 @@ internal sealed class CommandRegistry
             context.World.SetVitals(context.Self.Id, context.World.MaxHp, context.World.MaxMana)));
         // Zurück an den Startpunkt, HP und Mana bleiben (AK-7).
         Register("resetPosition", new Command(0, static (context, _) => context.World.ResetToStart(context.Self)));
+        // Pfeile der Blickrichtung nur im eigenen Bild umschalten; die Welt bleibt, der Server merkt sich nichts (017 AK-11–13).
+        Register("toggleFacingArrows", new Command(0, static (context, _) =>
+            context.Reply(new ServerMessage { ToggleFacingArrows = new ToggleFacingArrows() })));
     }
 
     /// <summary>Fügt einen Command hinzu (z. B. 014: <c>spawnEnemy</c>). Ein schon vergebener Name wirft.</summary>

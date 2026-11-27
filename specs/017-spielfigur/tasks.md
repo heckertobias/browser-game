@@ -15,7 +15,7 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
   grün.
 
 ## Server
-- [ ] **T3** (AK-11–13): `CommandContext.Reply` (init, Standard no-op); Command `toggleFacingArrows` im
+- [x] **T3** (AK-11–13): `CommandContext.Reply` (init, Standard no-op); Command `toggleFacingArrows` im
   `CommandRegistry`; `GameLoop` setzt `Reply` auf die Outbox des Absenders. Unit-Tests (Reply genau einmal, `World`
   unverändert) und Integrationstests (WS: nur der Absender bekommt die Nachricht, kein Chat-Echo, zweimal → zwei
   Nachrichten).
