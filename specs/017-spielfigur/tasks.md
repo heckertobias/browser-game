@@ -11,7 +11,7 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
   `docs/project-structure.md` nachziehen.
 
 ## Verträge
-- [ ] **T2** (AK-11, AK-12): `game.proto`: `ToggleFacingArrows` (`ServerMessage` Feld 9); `buf lint` und `buf breaking`
+- [x] **T2** (AK-11, AK-12): `game.proto`: `ToggleFacingArrows` (`ServerMessage` Feld 9); `buf lint` und `buf breaking`
   grün.
 
 ## Server

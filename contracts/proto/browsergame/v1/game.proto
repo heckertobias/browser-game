@@ -86,7 +86,8 @@ message ServerMessage {
     AttackRejected attack_rejected = 7;
     // Nur an den Absender: Befehl nicht ausgeführt (015).
     CommandRejected command_rejected = 8;
-    // 9: ToggleFacingArrows (017)
+    // Nur an den Absender von /run toggleFacingArrows(): Pfeile der Blickrichtung umschalten (017).
+    ToggleFacingArrows toggle_facing_arrows = 9;
     // An alle, höchstens eine pro Tick und vor dem Snapshot desselben Ticks: Projektile gestartet und eingeschlagen (013).
     CombatEvents combat_events = 10;
     // Nur an den Angreifer: Angriff ausgeführt, die Abklingzeit läuft (013 AK-11, AK-22).
@@ -191,7 +192,7 @@ message AttackAccepted {
   float cooldown_seconds = 1;
 }
 
-// Befehl aus dem Chat-Eingabefeld nicht ausgeführt (015). Ein ausgeführter Befehl bekommt keine Antwort.
+// Befehl aus dem Chat-Eingabefeld nicht ausgeführt (015). Ein ausgeführter Befehl bekommt keine Antwort, außer er schickt selbst eine (z. B. ToggleFacingArrows).
 message CommandRejected {
   enum Reason {
     REASON_UNSPECIFIED = 0;
@@ -202,6 +203,9 @@ message CommandRejected {
   }
   Reason reason = 1;
 }
+
+// Leer. Der Client schaltet nur seine eigene Anzeige um; der Server merkt sich nichts (017 AK-12, AK-13).
+message ToggleFacingArrows {}
 
 // Zielbares Objekt mit HP (013: Trainings-Dummy; 014: Gegner).
 message TargetState {
