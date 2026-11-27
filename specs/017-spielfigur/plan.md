@@ -19,8 +19,8 @@ Client  ── client/src/assets/                 LICENSES.md · licenses.test.t
         ── client/scripts/import-sprites.mjs  Pack-Figur → Teile im eigenen Format (einmalig je Figur)
         ── client/oxlint.config.ts            Importgrenze: sprites/ importiert nichts aus dem übrigen Spiel
 Server  ── Commands (015): neuer Command toggleFacingArrows() → Nachricht nur an den Absender
-Doku    ── ADR 0016: Grafiken nur CC0 oder selbst erstellt; Register client/src/assets/LICENSES.md
-        ── ADR 0017: Sprite-Format (Figur aus Teilen, Beschreibung statt Pack-Aufbau)
+Doku    ── ADR 0017: Grafiken nur CC0 oder selbst erstellt; Register client/src/assets/LICENSES.md
+        ── ADR 0018: Sprite-Format (Figur aus Teilen, Beschreibung statt Pack-Aufbau)
 ```
 
 Pfade ohne `client/` liegen unter `client/src/features/game/`. `sprites/` ist ein neuer Unterordner dort.
@@ -32,7 +32,7 @@ Der Server merkt sich den Pfeil-Schalter nicht; er bestätigt nur den Command.
 (Blickrichtung, Pfeil). 013 hat `render.ts` um Ziele und Projektile erweitert (`CombatScene`), 014 bringt Gegner; das
 bleibt unberührt.
 
-## Sprite-Format (wird ADR 0017)
+## Sprite-Format (wird ADR 0018)
 
 Das Pack liefert fertige Figuren als ein Bild je Figur. Das reicht nicht, sobald Kleidung, Frisuren und Waffen
 tauschbar sein sollen. Der Code kennt deshalb nie den Aufbau des Packs, sondern nur dieses Format.
@@ -107,7 +107,7 @@ Linter erzwingt das (siehe `client/oxlint.config.ts` unten). Nur `sprites/browse
 `HUMANOID_RIG`, `HUMANOID_IMAGES` und `assets.test.ts`.
 
 Boden (018) und Deko (019) folgen demselben Grundsatz mit einem **Atlas**: ein Bild plus Beschreibung mit benannten
-Einträgen. ADR 0017 nennt beide Formen; der Atlas wird in 018 gebaut.
+Einträgen. ADR 0018 nennt beide Formen; der Atlas wird in 018 gebaut.
 
 ## Konstanten
 
@@ -171,8 +171,8 @@ Alle Werte sind reine Darstellung (Constitution §8, „nicht gemeint“) und st
     Teil ist damit automatisch geprüft.
 16. **Register und ADRs** (AK-16): `client/src/assets/` ist der eine Ort für fremde und eigene Grafiken und Schriften
     (auch für 018–020). `LICENSES.md` dort listet jede Datei mit Herkunft, Stand, Lizenz und Änderungen. Ein Vitest
-    prüft, dass jede Datei im Ordner dort mit `CC0 1.0` oder `eigen` steht. ADR 0016 hält die Lizenzregel fest, ADR
-    0017 das Format.
+    prüft, dass jede Datei im Ordner dort mit `CC0 1.0` oder `eigen` steht. ADR 0017 hält die Lizenzregel fest, ADR
+    0018 das Format.
 
 ## Verträge
 
@@ -333,11 +333,11 @@ Alles in `Features/Game/Commands/Application/` aus 015.
   `void loadSpriteSet(HUMANOID_RIG, HUMANOID_IMAGES, browserDecode, browserSource).then((s) => { game.setSprites(s); });`
 
 ### Doku
-- `docs/decisions/0016-grafiken-nur-cc0.md` (Entscheidung 16): Regel „nur CC0 1.0 oder selbst erstellt“ für Grafiken
+- `docs/decisions/0017-grafiken-nur-cc0.md` (Entscheidung 16): Regel „nur CC0 1.0 oder selbst erstellt“ für Grafiken
   und Schriften; Register `client/src/assets/LICENSES.md`; Prüfung per Vitest; abgeleitete Werke erlaubt; keine
   Credits im Spiel nötig. Alternativen: CC-BY (Namensnennung im Spiel, 017 Out of Scope), SIL OFL für Schriften
   (offen in 020).
-- `docs/decisions/0017-sprite-format.md`: Inhalt des Abschnitts „Sprite-Format“ oben, dazu der Atlas für 018/019 als
+- `docs/decisions/0018-sprite-format.md`: Inhalt des Abschnitts „Sprite-Format“ oben, dazu der Atlas für 018/019 als
   zweite Form. Kontext: tauschbare Kleidung, Frisuren, Waffen. Alternativen: Pack-Blätter unverändert mit Konstanten
   im Code (bisheriger Plan; ein Teiletausch wäre ein Umbau), Einfärben über exakte Farbwerte (bricht bei jeder neuen
   Figur), Ankerpunkte statt voller Blätter (weniger Zeichenarbeit, mehr Logik; später möglich), eine
@@ -345,7 +345,7 @@ Alles in `Features/Game/Commands/Application/` aus 015.
   Ausweichlösung festgehalten, siehe oben), Hochladen fertiger Blätter durch den Client (verworfen, §2). Ausblick: `sprites/` als eigenes Paket für
   Webseiten (siehe oben).
 - `docs/project-structure.md`: `client/src/assets/` und `features/game/sprites/` in den Client-Baum,
-  `client/scripts/import-sprites.mjs`; ADR-Zähler „0001–0017“.
+  `client/scripts/import-sprites.mjs`; ADR-Zähler „0001–0018“.
 
 ## Abdeckung der Akzeptanzkriterien
 
@@ -366,7 +366,7 @@ Alles in `Features/Game/Commands/Application/` aus 015.
 | 13 | nur lokaler Zustand | Vitest: neue `Game`-Instanz zeigt keine Pfeile, auch nach Toggle in einer früheren; Server hat keinen Zustand (Code-Review); **manuell:** Neuladen |
 | 14 | Quadrate ohne Sprites | Vitest: `loadSpriteSet` mit scheiterndem `decode`, ungültiger Beschreibung, fehlendem Bild oder falscher Blattgröße → `null`, wirft nicht; `render` ohne `sprites` zeichnet 16×16-Rechtecke; **manuell:** Grafik im Browser blockieren |
 | 15 | ein `drawImage` je Figur, Blätter gecacht | Vitest: `sheet` setzt je `(Aussehen, away)` nur einmal zusammen (`toSource` gezählt); **manuell:** 50 laufende Figuren auf dem Testhandy (siehe Risiken) |
-| 16 | Register + Test + ADRs | Vitest `licenses.test.ts`; Review von ADR 0016 und 0017 |
+| 16 | Register + Test + ADRs | Vitest `licenses.test.ts`; Review von ADR 0017 und 0018 |
 | 17 | Teile aus einer Pack-Figur abgeleitet, Farben außer der Kleidung unverändert | `assets.test.ts` (Körper 16×16 in der Zellmitte); Herkunft und Änderungen in `LICENSES.md` (Review); Ausgabe des Import-Skripts |
 | 18 | zwei Teile, `compose`, `tint` nur auf der Kleidung | Vitest `compose.test.ts`: oberes Teil ersetzt nur seine deckenden Pixel; `spriteSet.test.ts`: Körperpixel bei jeder Farbe gleich; `assets.test.ts`: `humanoid` hat `body/default` (ohne `tint`) und `clothing/ninja` (`tint`) |
 | 19 | Teile und Slots sind Daten in `rig.json` | Vitest `spriteSet.test.ts` mit eigenem Test-Rig: zweites Kleidungsteil und dritter Slot nur in der Beschreibung → `sheet` nutzt sie in Slot-Reihenfolge; `rig.test.ts`: `parseRig` nimmt gültige Beschreibungen an und meldet jede Regelverletzung; `assets.test.ts` prüft jedes Teil im Ordner |
@@ -385,7 +385,7 @@ Alles in `Features/Game/Commands/Application/` aus 015.
   Neu sind außerdem Grafiken aus Ninja Adventure (CC0, Update vom 2026-03-29).
 - [x] **Spielwerte:** keine neuen. Animationstempo, Größen und Farben sind Darstellung (§8 „nicht gemeint“).
 - [ ] **KISS – bewusste Abweichung:** Format, Slots und größere Zelle gehen über das hinaus, was zwei feste Teile
-  brauchen. Begründung: Der Wechsel des Formats wäre später ein Neu-Export aller Grafiken; ADR 0017 hält das fest.
+  brauchen. Begründung: Der Wechsel des Formats wäre später ein Neu-Export aller Grafiken; ADR 0018 hält das fest.
   Gebaut wird nur, was 017 nutzt (zwei Slots, zwei Animationen); alles Weitere steht unter „bewusst noch nicht
   gebaut“.
 

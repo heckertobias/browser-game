@@ -8,7 +8,7 @@ mit. Erst beginnen, wenn 015 umgesetzt ist.
 ## Doku / Assets
 - [ ] **T1** (AK-2, AK-5): Kandidaten am Original prüfen (Lizenz, Urheber, Stand, Glyphen, native Größe; Plan-Abschnitt
   „Kandidaten“); mindestens fünf nach `client/src/assets/fonts/<id>/` mit `OFL.txt` bei OFL; Zeilen in `LICENSES.md`;
-  ADR 0016 um die OFL-Ausnahme ergänzen und `licenses.test.ts` anpassen (fehlen ADR und Register aus 017 noch, hier
+  ADR 0017 um die OFL-Ausnahme ergänzen und `licenses.test.ts` anpassen (fehlen ADR und Register aus 017 noch, hier
   anlegen); Testhilfe `cmap`-Leser und Vitest `fonts.test.ts`.
 
 ## Verträge

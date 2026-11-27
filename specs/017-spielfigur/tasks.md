@@ -6,7 +6,7 @@ Reihenfolge: Doku → Verträge → Server → Client → Assets → Tests/Prüf
 Erst beginnen, wenn 015 und 016 umgesetzt sind.
 
 ## Doku
-- [ ] **T1** (AK-16): ADR 0016 (nur CC0 oder selbst erstellt) und ADR 0017 (Sprite-Format, Plan-Abschnitt
+- [ ] **T1** (AK-16): ADR 0017 (nur CC0 oder selbst erstellt) und ADR 0018 (Sprite-Format, Plan-Abschnitt
   „Sprite-Format“); `client/src/assets/` mit `LICENSES.md` (noch ohne Zeilen) und `licenses.test.ts`;
   `docs/project-structure.md` nachziehen.
 
