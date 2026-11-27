@@ -27,6 +27,7 @@ export class Predictor {
   initialized = false;
 
   private pending: PendingInput[] = [];
+  private didMove = false;
   private nextSeq = 1;
 
   constructor(
@@ -42,6 +43,7 @@ export class Predictor {
     this.prevX = this.x;
     this.prevY = this.y;
     this.apply(input);
+    this.didMove = this.x !== this.prevX || this.y !== this.prevY;
     this.pending.push(input);
     if (this.pending.length > MAX_PENDING) {
       this.pending.splice(0, this.pending.length - MAX_PENDING);
@@ -74,6 +76,11 @@ export class Predictor {
   /** Darstellungsposition zwischen zwei Fixed-Steps (alpha ∈ [0, 1]). */
   renderPosition(alpha: number): Vec {
     return { x: this.prevX + (this.x - this.prevX) * alpha, y: this.prevY + (this.y - this.prevY) * alpha };
+  }
+
+  /** Die eigene Figur läuft, wenn der letzte Fixed-Step ihre Position verändert hat (017 AK-7, AK-8). */
+  get moving(): boolean {
+    return this.didMove;
   }
 
   /** Zahl der noch unbestätigten Eingaben. */

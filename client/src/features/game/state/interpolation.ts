@@ -46,20 +46,15 @@ export class SnapshotBuffer {
    * interpoliert (016 AK-7).
    */
   sample(renderTime: number): RemotePlayer[] {
-    const later = this.snapshots.findIndex((s) => s.time >= renderTime);
     const newest = this.snapshots.at(-1);
     if (!newest) {
       return [];
     }
-    if (later === -1) {
+    const pair = this.around(renderTime);
+    if (!pair) {
       return [...newest.players.values()];
     }
-
-    const to = this.snapshots[later];
-    const from = this.snapshots[later - 1];
-    if (!to) {
-      return [];
-    }
+    const { from, to } = pair;
     if (!from) {
       return [...to.players.values()];
     }
@@ -82,5 +77,35 @@ export class SnapshotBuffer {
         ...facing,
       };
     });
+  }
+
+  /**
+   * IDs der Figuren, die sich zum Zeitpunkt `renderTime` sichtbar bewegen (017 AK-7, AK-8): in beiden Snapshots um
+   * `renderTime` vorhanden, gleicher `spawnSeq`, andere Position. Außerhalb der Snapshots: leer.
+   */
+  moving(renderTime: number): ReadonlySet<string> {
+    const ids = new Set<string>();
+    const pair = this.around(renderTime);
+    const from = pair?.from;
+    if (!pair || !from) {
+      return ids;
+    }
+    for (const target of pair.to.players.values()) {
+      const start = from.players.get(target.id);
+      if (start && start.spawnSeq === target.spawnSeq && (start.x !== target.x || start.y !== target.y)) {
+        ids.add(target.id);
+      }
+    }
+    return ids;
+  }
+
+  /** Die beiden Snapshots, zwischen denen `renderTime` liegt; `from` fehlt vor dem ältesten, alles fehlt nach dem neuesten. */
+  private around(renderTime: number): { from: TimedSnapshot | undefined; to: TimedSnapshot } | undefined {
+    const later = this.snapshots.findIndex((s) => s.time >= renderTime);
+    const to = this.snapshots[later];
+    if (later === -1 || !to) {
+      return undefined;
+    }
+    return { from: this.snapshots[later - 1], to };
   }
 }

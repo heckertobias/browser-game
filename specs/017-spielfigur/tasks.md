@@ -30,7 +30,7 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
   `sprites/spriteSet.ts` (`Appearance`, `playerAppearance`, `appearanceKey`, `SpriteSet` mit Cache, `loadSpriteSet` mit `null` bei
   Fehler), `sprites/browser.ts`; Vitest mit synthetischen Pixeln, eigenem Test-Rig (zweites Kleidungsteil, dritter
   Slot, Pixel in den Zell-Ecken) und gefälschtem `toSource`.
-- [ ] **T6** (AK-7, AK-8): `Predictor.moving`; `SnapshotBuffer.moving` (gemeinsame Suche mit `sample`, dessen Ergebnis
+- [x] **T6** (AK-7, AK-8): `Predictor.moving`; `SnapshotBuffer.moving` (gemeinsame Suche mit `sample`, dessen Ergebnis
   gleich bleibt); Vitest.
 
 ## Assets
