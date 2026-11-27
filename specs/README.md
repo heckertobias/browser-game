@@ -101,7 +101,7 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 16 | [022 – Startbereich als Spielwert](022-startbereich/spec.md) | bereit | 003, 012 |
 | 17 | [023 – Chat-Höchstlänge vom Server](023-chat-laenge/spec.md) | bereit | 011 |
 | 18 | [014 – Gegner (erstes Ziel, das HP hat und zurückwirkt)](014-gegner/spec.md) | bereit | 012, 013, 015, 016 |
-| 19 | [017 – Spielfigur als Pixel-Art](017-spielfigur/spec.md) | bereit | 001, 003, 015, 016 |
+| 19 | [017 – Spielfigur als Pixel-Art](017-spielfigur/spec.md) | in arbeit | 001, 003, 015, 016 |
 | 20 | [018 – Boden statt Gitter](018-boden/spec.md) | bereit | 017 |
 | 21 | [019 – Deko-Objekte](019-deko/spec.md) | bereit | 018 |
 | 22 | [021 – Kollision](021-kollision/spec.md) | bereit | 013, 014, 018, 019 |

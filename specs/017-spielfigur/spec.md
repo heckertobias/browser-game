@@ -1,6 +1,6 @@
 # 017 – Spielfigur als Pixel-Art
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** in arbeit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) (Figuren, Bewegung, Spielerfarbe) ·
 [003 – Accounts & gespeicherte Position](../003-accounts/spec.md) (wartende Figuren, AK-20) ·
