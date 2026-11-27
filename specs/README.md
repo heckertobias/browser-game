@@ -110,4 +110,5 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | später | [008 – Push-Benachrichtigungen](008-push/spec.md) | entwurf | 007, Haus |
 | offen | [024 – Spielregeln ohne Nachrichtentypen](024-regeln-ohne-nachrichtentypen/spec.md) | entwurf | 002, 013 |
 | offen | [027 – Importgrenzen auch bei `./../`-Pfaden](027-importgrenze-dot-pfade/spec.md) | entwurf | – |
+| offen | [028 – Keine Node-Typen im Browser-Code](028-node-typen-im-client/spec.md) | entwurf | 017 |
 | nach Release | [010 – Wechsel auf .NET 12](010-dotnet-12/spec.md) | bereit | 009, .NET 12 GA + 7 Tage |
