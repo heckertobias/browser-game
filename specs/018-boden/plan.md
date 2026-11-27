@@ -25,7 +25,7 @@ Damit sehen alle denselben Boden (AK-3), die Datei ist ohne Codeänderung bearbe
 kann auf genau dieselbe Karte bauen, ohne dass Server und Client zwei Kopien pflegen. In 018 beeinflusst die Karte
 weder Bewegung noch Spielstand; sie wird nur gezeichnet.
 
-**Voraussetzung:** 017 (ADR 0016 und 0017, `client/src/assets/` mit `LICENSES.md` und Test, `sprites/browser.ts`,
+**Voraussetzung:** 017 (ADR 0017 und 0018, `client/src/assets/` mit `LICENSES.md` und Test, `sprites/browser.ts`,
 `RenderOptions`, `import-sprites.mjs`, `pngjs`).
 
 ## Kartenformat
@@ -253,7 +253,7 @@ also `origin_tx = −origin.x`. So rechnen Client und Server ohne Vorzeichenwech
   Arbeitet es anders (Übergang auf der Graskachel), wird `edgeShape` auf Graskacheln angewandt; Namen und Tests passen
   sich mit an.
 - **Fremdes Kartenformat:** Ein verbreitetes Format wie das des Editors *Tiled* hätte einen Editor gratis, speichert
-  aber Bodenstücke des Packs statt Arten. Das widerspricht ADR 0017 (Namen statt Pack-Aufbau). Der Editor kommt mit
+  aber Bodenstücke des Packs statt Arten. Das widerspricht ADR 0018 (Namen statt Pack-Aufbau). Der Editor kommt mit
   einer eigenen Spec.
 - **Gespeicherte Positionen außerhalb der Karte** bleiben in 018 möglich (man läuft über den Rand). 021 versetzt
   solche Figuren an den Startpunkt.

@@ -19,7 +19,7 @@ Objekte sind Teil der Karte aus 018: Der Server lädt sie mit der Datei und schi
 reine Darstellung, man läuft hindurch (AK-7). Ob eine Objektart blockiert, legt 021 fest.
 
 **Voraussetzung:** 018 (Kartenformat, `MapFile`, `AreaMap`, `Welcome.area`, `world/hash.ts`, `sprites/atlas.ts`,
-Modus `atlas` im Import-Skript, `generate-map.py`) und 017 (`RenderOptions`, `loadImage`, Register, ADR 0017).
+Modus `atlas` im Import-Skript, `generate-map.py`) und 017 (`RenderOptions`, `loadImage`, Register, ADR 0018).
 
 ## Kartenformat (Erweiterung)
 

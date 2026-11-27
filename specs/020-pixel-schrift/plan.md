@@ -12,7 +12,7 @@ Client  ── client/src/assets/fonts/<schrift>/   5–6 Kandidaten (TTF wie ge
         ── app/App.tsx                          alle Kandidaten beim Start laden (für das Canvas)
 Server  ── Commands (015): /run nameFont() → NextNameFont nur an den Absender
 Vertrag ── game.proto: ServerMessage 12 = NextNameFont (nach der Wahl wieder entfernt)
-Doku    ── Lizenz-ADR aus 017 (ADR 0016): Ausnahme OFL für Schriften
+Doku    ── Lizenz-ADR aus 017 (ADR 0017): Ausnahme OFL für Schriften
 ```
 
 Nur die **Namen über den Figuren** (Canvas) nutzen die Pixel-Schrift. HUD, Chat, Menüs, öffentliche Seiten und Admin
@@ -22,7 +22,7 @@ Die Spec läuft in zwei Phasen: Erst sind alle Kandidaten eingebaut und im Spiel
 User im Spiel eine, und die übrigen samt Umschalten werden entfernt (AK-4).
 
 **Voraussetzung:** 001, 015 (`CommandRegistry`, `CommandContext`, Abfangen im `GameLoop`, Hinweis über dem Chat-Feld).
-Aus 017 kommen ADR 0016, `client/src/assets/` mit `LICENSES.md` und `licenses.test.ts` sowie `CommandContext.Reply`;
+Aus 017 kommen ADR 0017, `client/src/assets/` mit `LICENSES.md` und `licenses.test.ts` sowie `CommandContext.Reply`;
 ist 017 noch nicht umgesetzt, legt T1 bzw. T3 hier das Nötige an (wie in 017 T1 und T3 beschrieben).
 
 ## Kandidaten
@@ -81,7 +81,7 @@ Nach der Wahl (AK-4) schrumpft `NAME_FONTS` auf einen Eintrag und heißt `NAME_F
 8. **Lizenz** (AK-5): `LICENSES.md` nennt je Datei Herkunft, Stand und Lizenz (`CC0 1.0` oder `OFL-1.1`).
    `licenses.test.ts` (017) lässt `OFL-1.1` nur für Dateien unter `assets/fonts/` zu und verlangt dann `OFL.txt` im
    selben Ordner. Die Lizenzdatei wird mit dem Client gebaut und ausgeliefert (Vite kopiert sie neben die Schrift). ADR
-   0016 bekommt den Absatz „Schriften dürfen auch unter der SIL Open Font License 1.1 stehen: Lizenztext mitliefern,
+   0017 bekommt den Absatz „Schriften dürfen auch unter der SIL Open Font License 1.1 stehen: Lizenztext mitliefern,
    nicht einzeln verkaufen, geänderte Fassungen nicht unter dem reservierten Namen.“
 
 ## Verträge
@@ -151,7 +151,7 @@ Nach der Wahl (Entscheidung 5): `reserved 12; reserved "next_name_font";` in `Se
 - [x] **Server ist Autorität:** nicht betroffen (reine Darstellung); der Command bestätigt nur.
 - [x] **Typen nur aus `contracts/`:** `NextNameFont` aus dem Proto.
 - [x] **Offline-Fortschritt:** nicht betroffen.
-- [x] **Keine unnötigen neuen Abhängigkeiten:** kein Paket; Schriftdateien unter CC0 oder OFL (Ausnahme per ADR 0016),
+- [x] **Keine unnötigen neuen Abhängigkeiten:** kein Paket; Schriftdateien unter CC0 oder OFL (Ausnahme per ADR 0017),
   Releases deutlich älter als 7 Tage.
 - [x] **Spielwerte:** keine.
 - [x] **KISS:** Umschalten ohne Parameter und ohne Speichern; nach der Wahl bleibt eine Schrift und eine Zeile im
