@@ -6,7 +6,7 @@ Reihenfolge: Verträge → Server (Karte) → Client → Assets → Tests/Prüfu
 Erst beginnen, wenn 017 umgesetzt ist.
 
 ## Verträge
-- [ ] **T1** (AK-3, AK-6): `game.proto`: `GroundKind`, `AreaMap`, `Welcome.area` (Feld 10); `buf lint` und
+- [x] **T1** (AK-3, AK-6): `game.proto`: `GroundKind`, `AreaMap`, `Welcome.area` (Feld 10); `buf lint` und
   `buf breaking` grün; generierte Typen in Client und Server.
 
 ## Server
