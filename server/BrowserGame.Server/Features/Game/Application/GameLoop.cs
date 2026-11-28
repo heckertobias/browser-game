@@ -387,7 +387,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             return;
         }
 
-        // Slash-Command (015): nie verteilt, nie im Verlauf oder Speicher (AK-1, AK-5). Erfolg bleibt ohne Antwort.
+        // Slash-Command (015): nie verteilt, nie im Verlauf oder Speicher (AK-1, AK-5). Erfolg bleibt ohne Antwort, außer der Command antwortet selbst (017).
         if (text.StartsWith('/'))
         {
             RunCommand(sender, text);
@@ -415,8 +415,9 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     }
 
     /// <summary>
-    /// Führt einen Slash-Command für den Absender aus (015). Nur der Absender bekommt eine Antwort, und nur bei Ablehnung
-    /// (AK-4); andere Figuren erreicht der Command nicht (AK-11).
+    /// Führt einen Slash-Command für den Absender aus (015). Nur der Absender bekommt eine Antwort: bei Ablehnung (AK-4) oder
+    /// wenn der Command selbst über <see cref="CommandContext.Reply"/> antwortet (017). Andere Figuren erreicht der Command
+    /// nicht (AK-11).
     /// </summary>
     private void RunCommand(PlayerConnection sender, string text)
     {
@@ -425,7 +426,11 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
             return;
         }
 
-        if (_commands.Execute(text, new CommandContext(_world, self, _tick)) is { } reason)
+        var context = new CommandContext(_world, self, _tick)
+        {
+            Reply = message => sender.Outbox.SendRequired(message.ToByteArray()),
+        };
+        if (_commands.Execute(text, context) is { } reason)
         {
             sender.Outbox.SendRequired(new ServerMessage { CommandRejected = new CommandRejected { Reason = reason } }.ToByteArray());
         }

@@ -1,6 +1,6 @@
 # 017 – Spielfigur als Pixel-Art
 
-**Status:** bereit  <!-- entwurf | bereit | in arbeit | umgesetzt -->
+**Status:** umgesetzt  <!-- entwurf | bereit | in arbeit | umgesetzt -->
 
 Setzt voraus: [001 – Walking Skeleton](../001-walking-skeleton/spec.md) (Figuren, Bewegung, Spielerfarbe) ·
 [003 – Accounts & gespeicherte Position](../003-accounts/spec.md) (wartende Figuren, AK-20) ·
@@ -86,7 +86,8 @@ Dies ist die erste von vier Grafik-Specs: danach [018 – Boden](../018-boden/sp
 - **AK-14:** Gegeben die Grafik der Figur lässt sich nicht laden, dann sind alle Figuren trotzdem sichtbar
   (in der bisherigen Darstellung als farbiges Quadrat) und das Spiel bleibt spielbar.
 - **AK-15:** Gegeben etwa 50 laufende Figuren sind gleichzeitig sichtbar (Vision), dann läuft das Bild auf
-  dem Testhandy flüssig, ohne sichtbares Ruckeln.
+  dem Testhandy flüssig, ohne sichtbares Ruckeln. _(Nicht geprüft: Ohne Bots gibt es keine 50 Figuren. Der Weg
+  dahin ist [030](../030-viele-testfiguren/spec.md).)_
 
 ### Herkunft & Lizenz
 

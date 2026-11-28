@@ -24,7 +24,7 @@ Diese Seite beschreibt, **wo** etwas im Repo liegt und **warum**. Kurzversion im
 |---|---|
 | `specs/` | Features-Anforderungen: `spec.md` (WAS/WARUM), `plan.md`, `tasks.md` |
 | `contracts/` | Einzige Typquelle: OpenAPI (HTTP), Protobuf (WebSocket); Typen werden generiert, nie gedoppelt |
-| `docs/decisions/` | ADRs (0001–0016) |
+| `docs/decisions/` | ADRs (0001–0018) |
 | `client/` | TypeScript/React/Canvas-Spielclient (siehe unten) |
 | `server/` | .NET: Spielserver, Admin, gemeinsame Datenschicht, Tests (siehe unten) |
 | `deploy/`, `scripts/`, `.github/` | Betrieb (Compose), Release-Tooling, CI |
@@ -39,9 +39,11 @@ client/
   vite.config.ts             Mehrseiten-Build (index + offline), Tests (vitest), Alias @/ (aus tsconfig)
   vite.passkeys.config.ts    Feste Bundles für die Razor-Seiten: passkeys.js und language.js
                              (Einträge: features/accounts/api/passkeys.ts, features/localization/language.ts)
-  oxlint.config.ts           Linter (ADR 0014), inkl. Importgrenzen zwischen Features (siehe unten)
+  oxlint.config.ts           Linter (ADR 0014), inkl. Importgrenzen zwischen Features und für `game/sprites/` (siehe unten)
   package.json               Skripte: dev/test/lint/build; build:landing mit src/styles/landing.css als
                              Tailwind-Eingabe; build:admin kopiert Bootstrap (scripts/admin-lib.mjs)
+  scripts/                   icons.mjs (Web-App-Icons), admin-lib.mjs (Bootstrap fürs Admin),
+                             import-sprites.mjs (Pack-Figur → Teile im Sprite-Format, ADR 0018)
   src/
     app/                     main.tsx, App.tsx — Bootstrapping und Komposition
     features/
@@ -56,11 +58,14 @@ client/
         menu/                Menu.tsx (Spielmenü), KeyBindings.tsx (Tastenbelegung), menuLogic.ts und keyBindingsLogic.ts (reine Logik)
         hud/                 Vitals.tsx (HP-/Mana-Balken im HUD, reine Funktionen vitalsText/fillPercent)
         combat/              targeting.ts (Zielauswahl und Angriffswunsch, reine Logik, 013), AttackButtons.tsx (Angriffs-Buttons im HUD, 013), cooldownSweep.ts (Cooldown-Sweep auf den Buttons, reine Logik, 013), AttackHint.tsx (Hinweis bei gescheitertem Angriff, oben mittig, 013), projectileEffects.ts (Projektil-Effekt und zurückgehaltene Treffer, reine Logik, 013)
+        sprites/             Figuren aus Teilen (ADR 0018): rig.ts, direction.ts, compose.ts (reine Logik), spriteSet.ts (Aussehen → Blatt, Laden), browser.ts (nur Browser); importiert nichts aus dem übrigen Spiel
       accounts/api/          passkeys.ts — WebAuthn-Flow der Spielerseiten
       localization/          i18n.ts (Texte, Sprache) · language.ts (bestätigt bei Formularverlust)
       pwa/
         services/            pwa.ts (Service-Worker), update.ts (Server-Watch), reload.ts, version.ts
         pages/               offline.ts — Einstieg der Offline-Seite
+    assets/                  Grafiken und Schriften (ADR 0017): LICENSES.md (Register), licenses.test.ts,
+                             sprites/<rig>/ (rig.json und Teile, ADR 0018)
     styles/                  global.css (Spiel+Offline), landing.css (Tailwind-Eingaben)
     generated/               Protobuf-Ausgabe von `buf generate` (nicht editieren)
     vite-env.d.ts            Ambient-Typen (bleibt auf src-Ebene)
@@ -74,7 +79,12 @@ Regeln:
 - **Importgrenzen** prüft oxlint (`no-restricted-imports`, `npm run lint`): Features importieren nie aus `app/`,
   `app/` importiert Features. Zwischen Features ist nur erlaubt, was die Tabelle unter
   [Abhängigkeitsrichtung](#abhängigkeitsrichtung) nennt. Neue Abhängigkeit = Tabelle und `oxlint.config.ts` anpassen.
+  `features/game/sprites/` importiert außerdem nichts aus dem übrigen Spiel: kein `@/features/…`, kein
+  `@/generated/…`, weder `react` noch `react-dom`; erlaubt sind `./…` im selben Ordner und `@/assets/…`. So bleibt es
+  als eigenes Paket herauslösbar ([ADR 0018](decisions/0018-sprite-format.md)). Tests in `sprites/` sind ausgenommen.
 - **Tailwind-Quellen:** `landing.css` scannt nur `**/*.cshtml` des Spielservers, kein C#. Das Admin nutzt Bootstrap ohne Tailwind (ADR 0007).
+- **Grafiken und Schriften** liegen nur unter `src/assets/`, jede Datei mit einer Zeile in `src/assets/LICENSES.md`
+  (nur CC0 1.0 oder selbst erstellt, [ADR 0017](decisions/0017-grafiken-nur-cc0.md)); `licenses.test.ts` prüft das.
 - **Spielnahe Features** (Chat, Kampf, Gegner, Slash-Commands …) kommen als Unterordner `features/game/<sub>/`, nicht als
   eigenes Top-Level-Feature. Bestehender Code wird nicht künstlich in Subs aufgeteilt.
 
@@ -111,7 +121,7 @@ server/
         KeyBindings/Infrastructure/ KeyBindingStore (Belegung am Account speichern, 002)
         Combat/Domain/       Combat (Kampfregeln, Trainings-Dummy, 013), Target, Projectile, ProjectileLaunch, ProjectileImpact, AttackResult
         Commands/Domain/     CommandParser (Slash-Commands „/run name(…)“, 015), ParseResult
-        Commands/Application/ CommandRegistry (fullHealth, resetPosition), CommandDispatcher, CommandContext, Command (015)
+        Commands/Application/ CommandRegistry (fullHealth, resetPosition, toggleFacingArrows), CommandDispatcher, CommandContext, Command (015)
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)
         Application/         GameLanguages, LanguageCookie, LanguageOnlyCultureProvider

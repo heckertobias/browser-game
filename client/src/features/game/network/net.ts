@@ -43,6 +43,8 @@ export interface ConnectionHandlers {
   onAttackAccepted?(accepted: AttackAccepted): void;
   /** An alle: Projektile gestartet und eingeschlagen, vor dem Snapshot desselben Ticks (013 AK-21). */
   onCombatEvents?(events: CombatEvents): void;
+  /** Nur an den Absender von `/run toggleFacingArrows()`: Pfeile der Blickrichtung umschalten (017 AK-11–13). */
+  onToggleFacingArrows?(): void;
 }
 
 /** Rückrufe für die Chat-Nachrichten des Servers (011). */
@@ -135,6 +137,9 @@ export function createReceiver(handlers: ConnectionHandlers & Partial<ChatHandle
           break;
         case "combatEvents":
           handlers.onCombatEvents?.(message.payload.value);
+          break;
+        case "toggleFacingArrows":
+          handlers.onToggleFacingArrows?.();
           break;
         case undefined:
           break;

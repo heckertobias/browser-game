@@ -19,6 +19,9 @@ import {
   TARGET_OUTLINE_WIDTH,
 } from "@/features/game/core/constants";
 import type { Vec } from "@/features/game/core/vector";
+import { spriteDirection } from "@/features/game/sprites/direction";
+import { frameRect } from "@/features/game/sprites/rig";
+import { playerAppearance, type SpriteSet } from "@/features/game/sprites/spriteSet";
 import type { Viewport } from "./viewport";
 
 /** Figur, wie `render` sie zeichnet: eigene aus der Vorhersage, andere aus dem `SnapshotBuffer`. */
@@ -31,6 +34,8 @@ export interface DrawablePlayer {
   away?: boolean;
   /** Blickrichtung in Bogenmaß (016); ohne Wert kein Pfeil. */
   facing?: number;
+  /** Figur läuft gerade (017 AK-7); ohne Wert steht sie. */
+  moving?: boolean;
 }
 
 /** Zielbares Objekt (013); `TargetState` aus dem Snapshot passt direkt. */
@@ -49,6 +54,14 @@ export interface CombatScene {
   selectedId: string | null;
 }
 
+/** Darstellung der Figuren (017). Ohne `sprites` Quadrate (AK-14); ohne `facingArrows` Pfeile wie in 016 (Plan-Entscheidung 10). */
+export interface RenderOptions {
+  sprites?: SpriteSet | null;
+  facingArrows?: boolean;
+  /** Uhrzeit in ms für das Bild der Laufanimation (Plan-Entscheidung 8). */
+  now?: number;
+}
+
 const EMPTY_SCENE: CombatScene = { targets: [], projectiles: [], selectedId: null };
 
 /** Gefüllte Breite des HP-Balkens (013 AK-18): anteilig, auf 0 … `width` begrenzt; ohne Maximum leer. */
@@ -58,6 +71,10 @@ export function hpBarWidth(hp: number, maxHp: number, width: number): number {
 }
 
 const AWAY_ALPHA = 0.5;
+/** Ohne Blickrichtung zeigt die Figur nach unten, wie die Standard-Blickrichtung aus 016 (AK-4). */
+const DEFAULT_FACING = Math.PI / 2;
+const IDLE_ANIMATION = "idle";
+const WALK_ANIMATION = "walk";
 
 /** Grauwert gleicher Helligkeit (Rec. 601) für wartende Figuren (003 AK-20). */
 export function desaturate(rgb: number): number {
@@ -136,7 +153,7 @@ export function screenToWorld(
 /**
  * Zeichnet einen Frame: Hintergrund mit Gitter, Ziele, Figuren mit Namen und Blickrichtung, Projektil-Effekte. Gezeichnet
  * wird in Weltkoordinaten mit ganzzahligem Faktor (ADR 0010); was mitsamt `CULL_MARGIN` außerhalb des Sichtfelds liegt,
- * entfällt.
+ * entfällt. Figuren als Sprite, solange `options.sprites` gesetzt ist, sonst als Quadrat (017).
  */
 export function render(
   ctx: CanvasRenderingContext2D,
@@ -144,7 +161,11 @@ export function render(
   camera: Vec,
   players: readonly DrawablePlayer[],
   scene: CombatScene = EMPTY_SCENE,
+  options: RenderOptions = {},
 ): void {
+  const sprites = options.sprites ?? null;
+  const facingArrows = options.facingArrows ?? true;
+  const now = options.now ?? 0;
   const { scale, canvasWidth, canvasHeight, viewWidth, viewHeight, offsetX, offsetY } = viewport;
   const origin = cameraOrigin(camera, viewport);
 
@@ -179,9 +200,13 @@ export function render(
     const left = Math.round(player.x - PLAYER_SIZE / 2);
     const top = Math.round(player.y - PLAYER_SIZE / 2);
     ctx.globalAlpha = player.away ? AWAY_ALPHA : 1;
-    ctx.fillStyle = toCssColor(player.away ? desaturate(player.color) : player.color);
-    ctx.fillRect(left, top, PLAYER_SIZE, PLAYER_SIZE);
-    if (player.facing !== undefined) drawArrow(ctx, left + PLAYER_SIZE / 2, top + PLAYER_SIZE / 2, player.facing);
+    if (sprites) {
+      drawSprite(ctx, sprites, player, now);
+    } else {
+      ctx.fillStyle = toCssColor(player.away ? desaturate(player.color) : player.color);
+      ctx.fillRect(left, top, PLAYER_SIZE, PLAYER_SIZE);
+    }
+    if (facingArrows && player.facing !== undefined) drawArrow(ctx, left + PLAYER_SIZE / 2, top + PLAYER_SIZE / 2, player.facing);
     ctx.fillStyle = "#ffffff";
     ctx.fillText(player.name, Math.round(player.x), top - 2);
   }
@@ -233,6 +258,28 @@ function drawProjectile(ctx: CanvasRenderingContext2D, projectile: Vec): void {
   ctx.beginPath();
   ctx.arc(projectile.x, projectile.y, PROJECTILE_RADIUS, 0, 2 * Math.PI);
   ctx.fill();
+}
+
+/**
+ * Ganze Zelle 1:1 an ganzzahliger Stelle (AK-3, AK-20); `origin` liegt auf der Weltposition, der Körper damit dort, wo
+ * sonst das Quadrat liegt (AK-1). Wartende Figuren: graues Blatt, immer `idle` (AK-9).
+ */
+function drawSprite(ctx: CanvasRenderingContext2D, sprites: SpriteSet, player: DrawablePlayer, now: number): void {
+  const away = player.away === true;
+  const { rig } = sprites;
+  const animation = player.moving === true && !away ? WALK_ANIMATION : IDLE_ANIMATION;
+  const { sx, sy } = frameRect(rig, animation, spriteDirection(player.facing ?? DEFAULT_FACING), now);
+  ctx.drawImage(
+    sprites.sheet(playerAppearance(player.color), away),
+    sx,
+    sy,
+    rig.cell.width,
+    rig.cell.height,
+    Math.round(player.x - rig.origin.x),
+    Math.round(player.y - rig.origin.y),
+    rig.cell.width,
+    rig.cell.height,
+  );
 }
 
 /** Dunkler Rand zuerst, die Füllung deckt seine innere Hälfte (016 AK-6). */
