@@ -43,7 +43,8 @@ client/
   package.json               Skripte: dev/test/lint/build; build:landing mit src/styles/landing.css als
                              Tailwind-Eingabe; build:admin kopiert Bootstrap (scripts/admin-lib.mjs)
   scripts/                   icons.mjs (Web-App-Icons), admin-lib.mjs (Bootstrap fürs Admin),
-                             import-sprites.mjs (Pack-Figur → Teile im Sprite-Format, ADR 0018)
+                             import-sprites.mjs (Pack → Sprite-Format, ADR 0018: Modus character = Figur → Teile,
+                             Modus atlas = Pack-Ausschnitte → Atlas), atlas-ground.json (Liste für den Boden-Atlas, 018)
   src/
     app/                     main.tsx, App.tsx — Bootstrapping und Komposition
     features/
@@ -66,7 +67,8 @@ client/
         services/            pwa.ts (Service-Worker), update.ts (Server-Watch), reload.ts, version.ts
         pages/               offline.ts — Einstieg der Offline-Seite
     assets/                  Grafiken und Schriften (ADR 0017): LICENSES.md (Register), licenses.test.ts,
-                             sprites/<rig>/ (rig.json und Teile, ADR 0018)
+                             sprites/<rig>/ (rig.json und Teile, ADR 0018), tiles/ (ground.png + ground.json,
+                             Atlas des Bodens, 018)
     styles/                  global.css (Spiel+Offline), landing.css (Tailwind-Eingaben)
     generated/               Protobuf-Ausgabe von `buf generate` (nicht editieren)
     vite-env.d.ts            Ambient-Typen (bleibt auf src-Ebene)

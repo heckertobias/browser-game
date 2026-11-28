@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { computeViewport } from "@/features/game/render/viewport";
+import { group, parseAtlas } from "@/features/game/sprites/atlas";
 import { GroundKind } from "@/generated/browsergame/v1/game_pb";
 import type { AreaMap } from "./areaMap";
 import {
@@ -316,5 +317,38 @@ describe("echte Karte (018 AK-1)", () => {
     expect(paths).toBeGreaterThan(0);
     expect(waters).toBeGreaterThan(0);
     expect(missing).toEqual([]);
+  });
+});
+
+describe("Atlas des Bodens (018 AK-1)", () => {
+  const data: unknown = JSON.parse(
+    readFileSync(
+      new URL("../../../assets/tiles/ground.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const atlas = parseAtlas(data);
+
+  it("enthält jeden Namen aus GROUND_ENTRIES", () => {
+    expect(GROUND_ENTRIES.filter((name) => !atlas.entries.has(name))).toEqual(
+      [],
+    );
+  });
+
+  it("hat Gras-Varianten", () => {
+    expect(group(atlas, "grass").length).toBeGreaterThan(0);
+  });
+
+  it("liefert mit den Varianten des Atlas nur Namen aus dem Atlas", () => {
+    const variants = group(atlas, "grass");
+    const map = testMap(RING);
+    const missing = new Set<string>();
+    for (let ty = -20; ty < 30; ty++) {
+      for (let tx = -20; tx < 30; tx++) {
+        const name = groundTile(map, tx, ty, variants);
+        if (!atlas.entries.has(name)) missing.add(name);
+      }
+    }
+    expect([...missing]).toEqual([]);
   });
 });

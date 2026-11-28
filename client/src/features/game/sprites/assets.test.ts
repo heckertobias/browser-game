@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { PNG } from "pngjs";
 import { describe, expect, it } from "vitest";
 import { PLAYER_SIZE } from "@/features/game/core/constants";
+import { parseAtlas, type Atlas } from "./atlas";
 import type { Pixels } from "./compose";
 import { parseRig, sheetSize, type Rig } from "./rig";
 import { HUMANOID_IMAGES, HUMANOID_RIG, loadSpriteSet, playerAppearance } from "./spriteSet";
@@ -152,5 +153,85 @@ describe("humanoid assets (017)", () => {
         }
       }
     }
+  });
+});
+
+const TILES_DIR = new URL("../../../assets/tiles/", import.meta.url);
+// Kantenlänge eines Bodenstücks = tileSize der Karte (018 plan.md „Konstanten“).
+const GROUND_TILE = 16;
+
+function readTilePixels(file: string): Pixels {
+  const png = PNG.sync.read(readFileSync(new URL(file, TILES_DIR)));
+  return { width: png.width, height: png.height, data: new Uint8ClampedArray(png.data) };
+}
+
+const atlasData = readdirSync(TILES_DIR)
+  .filter((file) => file.endsWith(".json"))
+  .sort()
+  .map((file) => {
+    const data: unknown = JSON.parse(readFileSync(new URL(file, TILES_DIR), "utf8"));
+    return { file, data };
+  });
+const atlases = atlasData.map(({ file, data }) => {
+  const atlas: Atlas = parseAtlas(data);
+  return { file, atlas, pixels: readTilePixels(atlas.image) };
+});
+const tileImages = readdirSync(TILES_DIR)
+  .filter((file) => file.endsWith(".png"))
+  .sort();
+
+describe("Atlanten unter assets/tiles (018)", () => {
+  it("ground.json ist da", () => {
+    expect(atlasData.map(({ file }) => file)).toContain("ground.json");
+  });
+
+  it("jeder Atlas ist gültig", () => {
+    for (const { file, data } of atlasData) expect(() => parseAtlas(data), file).not.toThrow();
+  });
+
+  it("jedes Rechteck liegt im Bild", () => {
+    const outside: string[] = [];
+    for (const { file, atlas, pixels } of atlases) {
+      for (const [name, e] of atlas.entries) {
+        if (e.x + e.width > pixels.width || e.y + e.height > pixels.height) outside.push(`${file}: ${name}`);
+      }
+    }
+    expect(outside).toEqual([]);
+  });
+
+  it("Alpha ist nur 0 oder 255", () => {
+    const wrong: string[] = [];
+    for (const { file, pixels } of atlases) {
+      for (let y = 0; y < pixels.height; y++) {
+        for (let x = 0; x < pixels.width; x++) {
+          const alpha = pixelAt(pixels, x, y)[3];
+          if (alpha !== 0 && alpha !== 255) wrong.push(`${file} bei ${String(x)},${String(y)}`);
+        }
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it("kein Bild im Ordner ohne Atlas", () => {
+    expect(tileImages).toEqual([...new Set(atlases.map(({ atlas }) => atlas.image))].sort());
+  });
+});
+
+describe("Boden-Atlas (018 AK-1, AK-2, AK-5)", () => {
+  it("jedes Bodenstück ist eine ganze, voll deckende Kachel", () => {
+    const ground = atlases.find(({ file }) => file === "ground.json");
+    if (ground === undefined) throw new Error("ground.json fehlt");
+    const problems: string[] = [];
+    for (const [name, e] of ground.atlas.entries) {
+      if (e.width !== GROUND_TILE || e.height !== GROUND_TILE) problems.push(`${name}: Größe`);
+      for (let y = 0; y < e.height; y++) {
+        for (let x = 0; x < e.width; x++) {
+          if (pixelAt(ground.pixels, e.x + x, e.y + y)[3] !== 255) {
+            problems.push(`${name} bei ${String(x)},${String(y)}`);
+          }
+        }
+      }
+    }
+    expect(problems).toEqual([]);
   });
 });

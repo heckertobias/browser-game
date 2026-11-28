@@ -27,7 +27,7 @@ Erst beginnen, wenn 017 umgesetzt ist.
 - [x] **T6** (AK-1): `sprites/atlas.ts` (`parseAtlas`, `group`); Vitest `atlas.test.ts`.
 
 ## Assets
-- [ ] **T7** (AK-1): Modus `atlas` in `import-sprites.mjs` mit `atlas-ground.json`; daraus
+- [x] **T7** (AK-1): Modus `atlas` in `import-sprites.mjs` mit `atlas-ground.json`; daraus
   `client/src/assets/tiles/ground.png` und `ground.json` (Gras, Varianten, je 13 Weg- und Wasserformen, Berg;
   Pack-Tilesets stellt der User bereit); Zeile in `LICENSES.md`; `assets.test.ts` prüft den Atlas; Vitest „jeder Name
   aus `GROUND_ENTRIES` steht im Atlas“.

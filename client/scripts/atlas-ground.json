@@ -1,0 +1,43 @@
+{
+  "image": "ground.png",
+  "width": 128,
+  "sources": {
+    "floor": "Backgrounds/Tilesets/TilesetFloor.png",
+    "water": "Backgrounds/Tilesets/TilesetWater.png",
+    "relief": "Backgrounds/Tilesets/TilesetRelief.png"
+  },
+  "entries": {
+    "grass": { "source": "floor", "x": 0, "y": 192, "width": 16, "height": 16 },
+    "grass.1": { "source": "floor", "x": 16, "y": 192, "width": 16, "height": 16 },
+    "grass.2": { "source": "floor", "x": 32, "y": 192, "width": 16, "height": 16 },
+    "grass.3": { "source": "floor", "x": 48, "y": 192, "width": 16, "height": 16 },
+    "grass.4": { "source": "floor", "x": 64, "y": 192, "width": 16, "height": 16 },
+    "mountain": { "source": "relief", "x": 80, "y": 16, "width": 16, "height": 16 },
+    "path.center": { "source": "floor", "x": 16, "y": 128, "width": 16, "height": 16 },
+    "path.n": { "source": "floor", "x": 16, "y": 112, "width": 16, "height": 16 },
+    "path.e": { "source": "floor", "x": 32, "y": 128, "width": 16, "height": 16 },
+    "path.s": { "source": "floor", "x": 16, "y": 144, "width": 16, "height": 16 },
+    "path.w": { "source": "floor", "x": 0, "y": 128, "width": 16, "height": 16 },
+    "path.ne": { "source": "floor", "x": 32, "y": 112, "width": 16, "height": 16 },
+    "path.nw": { "source": "floor", "x": 0, "y": 112, "width": 16, "height": 16 },
+    "path.se": { "source": "floor", "x": 32, "y": 144, "width": 16, "height": 16 },
+    "path.sw": { "source": "floor", "x": 0, "y": 144, "width": 16, "height": 16 },
+    "path.inner-ne": { "source": "floor", "x": 80, "y": 144, "width": 16, "height": 16 },
+    "path.inner-nw": { "source": "floor", "x": 96, "y": 144, "width": 16, "height": 16 },
+    "path.inner-se": { "source": "floor", "x": 80, "y": 128, "width": 16, "height": 16 },
+    "path.inner-sw": { "source": "floor", "x": 96, "y": 128, "width": 16, "height": 16 },
+    "water.center": { "source": "water", "x": 16, "y": 112, "width": 16, "height": 16 },
+    "water.n": { "source": "water", "x": 16, "y": 96, "width": 16, "height": 16 },
+    "water.e": { "source": "water", "x": 32, "y": 112, "width": 16, "height": 16 },
+    "water.s": { "source": "water", "x": 16, "y": 128, "width": 16, "height": 16 },
+    "water.w": { "source": "water", "x": 0, "y": 112, "width": 16, "height": 16 },
+    "water.ne": { "source": "water", "x": 32, "y": 96, "width": 16, "height": 16 },
+    "water.nw": { "source": "water", "x": 0, "y": 96, "width": 16, "height": 16 },
+    "water.se": { "source": "water", "x": 32, "y": 128, "width": 16, "height": 16 },
+    "water.sw": { "source": "water", "x": 0, "y": 128, "width": 16, "height": 16 },
+    "water.inner-ne": { "source": "water", "x": 80, "y": 128, "width": 16, "height": 16 },
+    "water.inner-nw": { "source": "water", "x": 96, "y": 128, "width": 16, "height": 16 },
+    "water.inner-se": { "source": "water", "x": 80, "y": 112, "width": 16, "height": 16 },
+    "water.inner-sw": { "source": "water", "x": 96, "y": 112, "width": 16, "height": 16 }
+  }
+}
