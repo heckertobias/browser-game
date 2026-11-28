@@ -1,3 +1,5 @@
+import { fail, integer, record, text } from "./parse";
+
 export type SpriteDirection = "down" | "up" | "left" | "right";
 
 /** Die vier Richtungen, die ein Rig kennen darf (ADR 0018). */
@@ -24,30 +26,8 @@ export interface Rig {
   readonly parts: Readonly<Record<string, RigPart>>;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 function isSpriteDirection(value: unknown): value is SpriteDirection {
   return SPRITE_DIRECTIONS.some((d) => d === value);
-}
-
-function fail(path: string, expected: string): never {
-  throw new Error(`${path}: ${expected}`);
-}
-
-function record(value: unknown, path: string): Record<string, unknown> {
-  return isRecord(value) ? value : fail(path, "Objekt erwartet");
-}
-
-function integer(value: unknown, path: string, min: number): number {
-  return typeof value === "number" && Number.isInteger(value) && value >= min
-    ? value
-    : fail(path, `ganze Zahl >= ${String(min)} erwartet`);
-}
-
-function text(value: unknown, path: string): string {
-  return typeof value === "string" && value !== "" ? value : fail(path, "nicht leerer Text erwartet");
 }
 
 function parseAnimation(value: unknown, path: string): RigAnimation {

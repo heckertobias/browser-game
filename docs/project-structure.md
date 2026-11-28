@@ -59,7 +59,7 @@ client/
         menu/                Menu.tsx (Spielmenü), KeyBindings.tsx (Tastenbelegung), menuLogic.ts und keyBindingsLogic.ts (reine Logik)
         hud/                 Vitals.tsx (HP-/Mana-Balken im HUD, reine Funktionen vitalsText/fillPercent)
         combat/              targeting.ts (Zielauswahl und Angriffswunsch, reine Logik, 013), AttackButtons.tsx (Angriffs-Buttons im HUD, 013), cooldownSweep.ts (Cooldown-Sweep auf den Buttons, reine Logik, 013), AttackHint.tsx (Hinweis bei gescheitertem Angriff, oben mittig, 013), projectileEffects.ts (Projektil-Effekt und zurückgehaltene Treffer, reine Logik, 013)
-        sprites/             Figuren aus Teilen (ADR 0018): rig.ts, direction.ts, compose.ts (reine Logik), spriteSet.ts (Aussehen → Blatt, Laden), browser.ts (nur Browser); importiert nichts aus dem übrigen Spiel
+        sprites/             Sprite-Format (ADR 0018): rig.ts (Figuren aus Teilen), atlas.ts (Atlas: benannte Rechtecke in einem Bild, 018), parse.ts (Prüfhelfer), direction.ts, compose.ts (reine Logik), spriteSet.ts (Aussehen → Blatt, Laden), browser.ts (nur Browser); importiert nichts aus dem übrigen Spiel
       accounts/api/          passkeys.ts — WebAuthn-Flow der Spielerseiten
       localization/          i18n.ts (Texte, Sprache) · language.ts (bestätigt bei Formularverlust)
       pwa/

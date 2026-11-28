@@ -24,7 +24,7 @@ Erst beginnen, wenn 017 umgesetzt ist.
 - [x] **T5** (AK-1, AK-3, AK-5): `world/areaMap.ts` (`areaMapFromProto`, `kindAt`), `world/hash.ts`,
   `world/groundTiles.ts` (`edgeShape`, `groundTile`, `visibleTiles`, `GROUND_ENTRIES`), Konstanten; Vitest
   `areaMap.test.ts`, `groundTiles.test.ts`.
-- [ ] **T6** (AK-1): `sprites/atlas.ts` (`parseAtlas`, `group`); Vitest `atlas.test.ts`.
+- [x] **T6** (AK-1): `sprites/atlas.ts` (`parseAtlas`, `group`); Vitest `atlas.test.ts`.
 
 ## Assets
 - [ ] **T7** (AK-1): Modus `atlas` in `import-sprites.mjs` mit `atlas-ground.json`; daraus
