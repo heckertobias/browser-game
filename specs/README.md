@@ -101,7 +101,7 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | 16 | [022 – Startbereich als Spielwert](022-startbereich/spec.md) | bereit | 003, 012 |
 | 17 | [023 – Chat-Höchstlänge vom Server](023-chat-laenge/spec.md) | bereit | 011 |
 | 18 | [014 – Gegner (erstes Ziel, das HP hat und zurückwirkt)](014-gegner/spec.md) | bereit | 012, 013, 015, 016 |
-| 19 | [017 – Spielfigur als Pixel-Art](017-spielfigur/spec.md) | in arbeit | 001, 003, 015, 016 |
+| 19 | [017 – Spielfigur als Pixel-Art](017-spielfigur/spec.md) | umgesetzt | 001, 003, 015, 016 |
 | 20 | [018 – Boden statt Gitter](018-boden/spec.md) | bereit | 017 |
 | 21 | [019 – Deko-Objekte](019-deko/spec.md) | bereit | 018 |
 | 22 | [021 – Kollision](021-kollision/spec.md) | bereit | 013, 014, 018, 019 |
@@ -111,4 +111,6 @@ nur `bereit`, und erst wenn alles unter „setzt voraus“ `umgesetzt` ist. Beim
 | offen | [024 – Spielregeln ohne Nachrichtentypen](024-regeln-ohne-nachrichtentypen/spec.md) | entwurf | 002, 013 |
 | offen | [027 – Importgrenzen auch bei `./../`-Pfaden](027-importgrenze-dot-pfade/spec.md) | entwurf | – |
 | offen | [028 – Keine Node-Typen im Browser-Code](028-node-typen-im-client/spec.md) | entwurf | 017 |
+| offen | [029 – Größere Figur auf dem Handy](029-figurgroesse/spec.md) | entwurf | 017 |
+| offen | [030 – Viele Testfiguren](030-viele-testfiguren/spec.md) | entwurf | 015, 017 |
 | nach Release | [010 – Wechsel auf .NET 12](010-dotnet-12/spec.md) | bereit | 009, .NET 12 GA + 7 Tage |

@@ -49,7 +49,7 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
   `game-facing.test.ts` nur nach Freigabe anpassen (Toggle vor dem Zeichnen, Prüfungen gleich).
 
 ## Tests / Prüfung
-- [ ] **T10**: Manuelle Prüfung in der Testumgebung (PC mit DPR 1 und 2, Handy hochkant/quer, zwei Geräte mit
+- [x] **T10**: Manuelle Prüfung in der Testumgebung (PC mit DPR 1 und 2, Handy hochkant/quer, zwei Geräte mit
   verschiedenen Farben):
   - Figur statt Quadrat, scharf, Kleidung in Spielerfarbe; vier Richtungen, schräg = Seite; Laufen und Stehen;
     andere Figur läuft sichtbar; wartende Figur grau
@@ -57,5 +57,8 @@ Erst beginnen, wenn 015 und 016 umgesetzt sind.
   - Grafik im Browser blockieren → Quadrate, Spiel läuft
   - etwa 50 laufende Figuren auf dem Testhandy flüssig (Weg je nach Antwort auf die offene Frage zu AK-15);
     `walk.frameMs` in `rig.json` bei Bedarf nachstellen
+
+  Ergebnis (RC `v0.14.0-rc.1`): alles bestanden außer AK-15, das ohne 50 Figuren nicht prüfbar war (→ 030). Die
+  Figur wirkt auf dem Handy klein (→ 029).
 
   Danach alle AKs abhaken, Spec-Status auf `umgesetzt`, Roadmap aktualisieren.
