@@ -6,7 +6,7 @@ namespace BrowserGame.Server.Features.Game;
 /// Feste Karte eines Gebiets (018): Bodenart je Kachel. Jenseits der Karte setzt sich die äußerste Kachel endlos fort
 /// (AK-5). Koordinaten wie im Vertrag: Weltkachel (tx, ty) = Kartenkachel (tx − OriginTx, ty − OriginTy).
 /// </summary>
-internal sealed class AreaMap
+public sealed class AreaMap
 {
     public AreaMap(int tileSize, int width, int height, int originTx, int originTy, GroundKind[] ground)
     {

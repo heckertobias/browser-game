@@ -123,6 +123,7 @@ server/
         Commands/Domain/     CommandParser (Slash-Commands „/run name(…)“, 015), ParseResult
         Commands/Application/ CommandRegistry (fullHealth, resetPosition, toggleFacingArrows), CommandDispatcher, CommandContext, Command (015)
         Map/Domain/          AreaMap (Karte, Rand fortgesetzt, 018), MapFile + MapFormatException (Kartendatei lesen und prüfen)
+        Map/Infrastructure/  MapLoader (Karte beim Start laden: Maps/meadow.json oder Game:MapPath; ungültig → Start scheitert)
         Map/Maps/            meadow.json (Karte des ersten Gebiets, erzeugt von scripts/generate-map.py; in der Ausgabe unter Maps/)
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)

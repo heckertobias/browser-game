@@ -15,7 +15,7 @@ Erst beginnen, wenn 017 umgesetzt ist.
 - [x] **T3** (AK-4): `scripts/generate-map.py` nach Plan-Entscheidung 11; daraus
   `server/BrowserGame.Server/Features/Game/Map/Maps/meadow.json`; `.csproj` kopiert sie in Ausgabe und Publish;
   xUnit `MeadowMapTests` (Größe, `origin`, Bergrand, Weg, See, Startkachel, Regeln aus Entscheidung 5).
-- [ ] **T4** (AK-3, AK-6): `Map/Infrastructure/MapLoader.cs` (Datei oder `Game:MapPath`, ungültig → Start scheitert),
+- [x] **T4** (AK-3, AK-6): `Map/Infrastructure/MapLoader.cs` (Datei oder `Game:MapPath`, ungültig → Start scheitert),
   Registrierung in `GameSetup`; `GameLoop` setzt `Welcome.area`. Integrationstests: zwei Clients bekommen dasselbe
   `area`; eigene Datei über `Game:MapPath`; ungültige Datei → Host startet nicht. Image-Build prüfen: Datei liegt im
   Container.

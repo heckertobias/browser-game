@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using BrowserGame.Contracts.V1;
 using Google.Protobuf;
+using ProtoAreaMap = BrowserGame.Contracts.V1.AreaMap;
 using ProtoChatHistory = BrowserGame.Contracts.V1.ChatHistory;
 
 namespace BrowserGame.Server.Features.Game;
@@ -40,8 +41,9 @@ internal sealed class PlayerConnection(
 /// <summary>
 /// Fester Server-Takt: Ein- und Austritte übernehmen, Eingaben anwenden, Chat verteilen, Commands ausführen (015), simulieren, Angriffe ausführen und bestätigen, Projektil-Ereignisse melden (013), Snapshots verschicken.
 /// Dazu Nachlauf getrennter Figuren, Übernahme und Rauswurf (003 AK-12, AK-20–22); Positionen an den PositionStore (AK-18, AK-19).
+/// Die Karte des Gebiets geht in jedem <c>Welcome</c> mit (018).
 /// </summary>
-public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null) : BackgroundService
+public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration configuration, TimeProvider? time = null, AreaMap? map = null) : BackgroundService
 {
     private enum ChangeKind { Join, Leave, ForceLeave, ForceLeaveWithoutSave, ChatHistoryLoaded, RemoveChat, SetVitals }
 
@@ -78,6 +80,8 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
         GameSettings.DummyRespawnSeconds);
     // Slash-Commands (015): fest im Code, ohne Rechte und Schalter; laufen auf dem Tick-Thread wie der Chat.
     private readonly CommandDispatcher _commands = new(new CommandRegistry());
+    // Einmal beim Start gebaut; alle Welcome teilen die Nachricht, sie wird nur gelesen (018). Ohne Karte fehlt area.
+    private readonly ProtoAreaMap? _area = map is null ? null : AreaMessage(map);
     private readonly uint _lingerTicks = GameSettings.ToTicks(configuration.GetValue(GameSettings.LingerSecondsKey, GameSettings.LingerSeconds));
 
     // Mindestens 1 Tick, sonst Division durch 0 im Speicher-Takt.
@@ -247,6 +251,7 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
                         MaxMana = (float)_world.MaxMana,
                         MinFacingInput = (float)_world.MinFacingInput,
                         ProjectileSpeed = (float)_combat.ProjectileSpeed,
+                        Area = _area,
                         KeyBindings = change.Connection!.KeyBindings,
                     };
                     change.Connection!.Outbox.SendRequired(new ServerMessage { Welcome = welcome }.ToByteArray());
@@ -335,6 +340,26 @@ public sealed partial class GameLoop(ILogger<GameLoop> logger, IConfiguration co
     {
         connection.WasKicked = true;
         connection.Outbox.Close(new ServerMessage { Kicked = new Kicked { Reason = reason } }.ToByteArray());
+    }
+
+    /// <summary>Karte als Nachricht für das Welcome (018): Ursprung wie im Vertrag, eine Bodenart je Byte.</summary>
+    internal static ProtoAreaMap AreaMessage(AreaMap map)
+    {
+        var ground = new byte[map.Ground.Length];
+        for (var i = 0; i < ground.Length; i++)
+        {
+            ground[i] = (byte)map.Ground[i];
+        }
+
+        return new ProtoAreaMap
+        {
+            TileSize = (uint)map.TileSize,
+            Width = (uint)map.Width,
+            Height = (uint)map.Height,
+            OriginTx = map.OriginTx,
+            OriginTy = map.OriginTy,
+            Ground = ByteString.CopyFrom(ground),
+        };
     }
 
     /// <summary>Direkt nach Welcome, in derselben Warteschlange (011 AK-15). Ohne Verlauf geht nichts raus; der Client leert seine Liste bei Welcome.</summary>
