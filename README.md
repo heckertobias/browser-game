@@ -27,7 +27,7 @@ Details: [`specs/README.md`](specs/README.md)
 | `contracts/` | Maschinenlesbare Verträge: OpenAPI (HTTP), Protobuf (WebSocket) |
 | `docs/decisions/` | Architekturentscheidungen (ADRs) |
 | `docs/project-structure.md` | Detaillierte Projektstruktur (wo ist was, warum) |
-| `scripts/` | Hilfsskripte: `github-setup.sh` (Repo-Härtung), `release.sh`, `release-notes.sh` |
+| `scripts/` | Hilfsskripte: `github-setup.sh` (Repo-Härtung), `release.sh`, `release-notes.sh`, `generate-map.py` (Karte des ersten Gebiets einmal erzeugen, 018) |
 | `.github/` | CI-Workflows, Dependabot |
 | `deploy/` | Compose für den Betrieb (Version über `GAME_VERSION`) |
 | `server/` | C# / ASP.NET Core: `Features/<Name>/` (innen nur die nötigen Ordner aus `Domain/`, `Application/`, `Infrastructure/`, `Presentation/`); gemeinsame Daten- und Infrastruktur-Ebene (`BrowserGame.Data`), Admin als eigener Dienst |

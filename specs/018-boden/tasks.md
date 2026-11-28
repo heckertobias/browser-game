@@ -12,7 +12,7 @@ Erst beginnen, wenn 017 umgesetzt ist.
 ## Server
 - [x] **T2** (AK-5, AK-6): `Map/Domain/AreaMap.cs` (`KindAt` mit Klemmen, `TileOf`) und `Map/Domain/MapFile.cs`
   (`Parse`, `MapFormatException`); xUnit `AreaMapTests`, `MapFileTests` (jeder Fehlerfall mit Fundstelle).
-- [ ] **T3** (AK-4): `scripts/generate-map.py` nach Plan-Entscheidung 11; daraus
+- [x] **T3** (AK-4): `scripts/generate-map.py` nach Plan-Entscheidung 11; daraus
   `server/BrowserGame.Server/Features/Game/Map/Maps/meadow.json`; `.csproj` kopiert sie in Ausgabe und Publish;
   xUnit `MeadowMapTests` (Größe, `origin`, Bergrand, Weg, See, Startkachel, Regeln aus Entscheidung 5).
 - [ ] **T4** (AK-3, AK-6): `Map/Infrastructure/MapLoader.cs` (Datei oder `Game:MapPath`, ungültig → Start scheitert),
