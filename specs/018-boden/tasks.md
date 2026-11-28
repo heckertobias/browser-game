@@ -10,7 +10,7 @@ Erst beginnen, wenn 017 umgesetzt ist.
   `buf breaking` grün; generierte Typen in Client und Server.
 
 ## Server
-- [ ] **T2** (AK-5, AK-6): `Map/Domain/AreaMap.cs` (`KindAt` mit Klemmen, `TileOf`) und `Map/Domain/MapFile.cs`
+- [x] **T2** (AK-5, AK-6): `Map/Domain/AreaMap.cs` (`KindAt` mit Klemmen, `TileOf`) und `Map/Domain/MapFile.cs`
   (`Parse`, `MapFormatException`); xUnit `AreaMapTests`, `MapFileTests` (jeder Fehlerfall mit Fundstelle).
 - [ ] **T3** (AK-4): `scripts/generate-map.py` nach Plan-Entscheidung 11; daraus
   `server/BrowserGame.Server/Features/Game/Map/Maps/meadow.json`; `.csproj` kopiert sie in Ausgabe und Publish;

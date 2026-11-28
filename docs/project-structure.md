@@ -122,6 +122,7 @@ server/
         Combat/Domain/       Combat (Kampfregeln, Trainings-Dummy, 013), Target, Projectile, ProjectileLaunch, ProjectileImpact, AttackResult
         Commands/Domain/     CommandParser (Slash-Commands „/run name(…)“, 015), ParseResult
         Commands/Application/ CommandRegistry (fullHealth, resetPosition, toggleFacingArrows), CommandDispatcher, CommandContext, Command (015)
+        Map/Domain/          AreaMap (Karte, Rand fortgesetzt, 018), MapFile + MapFormatException (Kartendatei lesen und prüfen)
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)
         Application/         GameLanguages, LanguageCookie, LanguageOnlyCultureProvider
