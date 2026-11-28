@@ -51,6 +51,7 @@ client/
         core/                constants.ts, vector.ts — Basis, von allen Unterordnern genutzt
         engine/              game.ts (Orchestrierung)
         state/               prediction.ts, interpolation.ts (Client-Vorschau des Serverstands)
+        world/               areaMap.ts (Karte aus dem Welcome, Rand fortgesetzt), hash.ts (fester Ganzzahl-Hash), groundTiles.ts (Bodenstück je Kachel, sichtbare Kacheln), testMap.ts (Testkarten); reine Logik (018)
         input/               input.ts, bindings.ts, wakeLock.ts
         render/              render.ts, viewport.ts, hud.ts
         network/             net.ts (WebSocket + Protobuf)

@@ -21,7 +21,7 @@ Erst beginnen, wenn 017 umgesetzt ist.
   Container.
 
 ## Client
-- [ ] **T5** (AK-1, AK-3, AK-5): `world/areaMap.ts` (`areaMapFromProto`, `kindAt`), `world/hash.ts`,
+- [x] **T5** (AK-1, AK-3, AK-5): `world/areaMap.ts` (`areaMapFromProto`, `kindAt`), `world/hash.ts`,
   `world/groundTiles.ts` (`edgeShape`, `groundTile`, `visibleTiles`, `GROUND_ENTRIES`), Konstanten; Vitest
   `areaMap.test.ts`, `groundTiles.test.ts`.
 - [ ] **T6** (AK-1): `sprites/atlas.ts` (`parseAtlas`, `group`); Vitest `atlas.test.ts`.
