@@ -23,6 +23,11 @@
     <EmbeddedResource Include="Features/Pwa/Application/service-worker.js" LogicalName="BrowserGame.Server.Features.Pwa.service-worker.js" />
   </ItemGroup>
 
+  <!-- Karte des ersten Gebiets (018): liegt in Ausgabe und Publish unter Maps/ neben der Anwendung. -->
+  <ItemGroup>
+    <Content Update="Features/Game/Map/Maps/meadow.json" Link="Maps/meadow.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="BrowserGame.Server.Tests" />
   </ItemGroup>

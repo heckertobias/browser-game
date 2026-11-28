@@ -3,10 +3,13 @@ import { Kicked_Reason, type Attack_Kind } from "@/generated/browsergame/v1/game
 import { AttackButtons, type CooldownFeed } from "@/features/game/combat/AttackButtons";
 import { AttackHint, NO_TARGET, type HintFeed } from "@/features/game/combat/AttackHint";
 import { Chat, type ChatFeed } from "@/features/game/chat/Chat";
-import { Game, type ConnectionStatus, type PlayerVitals } from "@/features/game/engine/game";
+import groundAtlasData from "@/assets/tiles/ground.json";
+import groundImageUrl from "@/assets/tiles/ground.png";
+import { Game, type ConnectionStatus, type GroundAtlas, type PlayerVitals } from "@/features/game/engine/game";
 import { Vitals } from "@/features/game/hud/Vitals";
 import type { Bindings } from "@/features/game/input/bindings";
-import { browserDecode, browserSource } from "@/features/game/sprites/browser";
+import { parseAtlas } from "@/features/game/sprites/atlas";
+import { browserDecode, browserSource, loadImage } from "@/features/game/sprites/browser";
 import { HUMANOID_IMAGES, HUMANOID_RIG, loadSpriteSet } from "@/features/game/sprites/spriteSet";
 import { KeyBindings } from "@/features/game/menu/KeyBindings";
 import { Menu } from "@/features/game/menu/Menu";
@@ -44,6 +47,16 @@ const browserWatchDeps = (): ServerWatchDeps => ({
   doc: document,
   win: window,
 });
+
+/** Boden-Atlas und Bild (018); `null` bei jedem Fehler, dann bleibt das Gitter (Entscheidung 9). */
+async function loadGroundAtlas(): Promise<GroundAtlas | null> {
+  try {
+    const atlas = parseAtlas(groundAtlasData);
+    return { atlas, image: await loadImage(groundImageUrl) };
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Spielseite: Canvas, HUD (Status, Koordinaten, HP/Mana, Angriffe, Chat, Hinweise) und Menü. Verbindet die Ereignisse
@@ -101,6 +114,10 @@ export function App() {
     // Bis die Sprites da sind und wenn das Laden scheitert, zeichnet das Spiel Quadrate (017 AK-14).
     void loadSpriteSet(HUMANOID_RIG, HUMANOID_IMAGES, browserDecode, browserSource).then((sprites) => {
       game.setSprites(sprites);
+    });
+    // Bis Karte und Atlas da sind und wenn das Laden scheitert, zeichnet das Spiel das Gitter (018 Entscheidung 9).
+    void loadGroundAtlas().then((ground) => {
+      game.setGroundAtlas(ground);
     });
     return () => {
       game.stop();

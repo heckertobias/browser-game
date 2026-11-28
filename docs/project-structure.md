@@ -43,7 +43,8 @@ client/
   package.json               Skripte: dev/test/lint/build; build:landing mit src/styles/landing.css als
                              Tailwind-Eingabe; build:admin kopiert Bootstrap (scripts/admin-lib.mjs)
   scripts/                   icons.mjs (Web-App-Icons), admin-lib.mjs (Bootstrap fürs Admin),
-                             import-sprites.mjs (Pack-Figur → Teile im Sprite-Format, ADR 0018)
+                             import-sprites.mjs (Pack → Sprite-Format, ADR 0018: Modus character = Figur → Teile,
+                             Modus atlas = Pack-Ausschnitte → Atlas), atlas-ground.json (Liste für den Boden-Atlas, 018)
   src/
     app/                     main.tsx, App.tsx — Bootstrapping und Komposition
     features/
@@ -51,6 +52,7 @@ client/
         core/                constants.ts, vector.ts — Basis, von allen Unterordnern genutzt
         engine/              game.ts (Orchestrierung)
         state/               prediction.ts, interpolation.ts (Client-Vorschau des Serverstands)
+        world/               areaMap.ts (Karte aus dem Welcome, Rand fortgesetzt), hash.ts (fester Ganzzahl-Hash), groundTiles.ts (Bodenstück je Kachel, sichtbare Kacheln), testMap.ts (Testkarten); reine Logik (018)
         input/               input.ts, bindings.ts, wakeLock.ts
         render/              render.ts, viewport.ts, hud.ts
         network/             net.ts (WebSocket + Protobuf)
@@ -58,14 +60,15 @@ client/
         menu/                Menu.tsx (Spielmenü), KeyBindings.tsx (Tastenbelegung), menuLogic.ts und keyBindingsLogic.ts (reine Logik)
         hud/                 Vitals.tsx (HP-/Mana-Balken im HUD, reine Funktionen vitalsText/fillPercent)
         combat/              targeting.ts (Zielauswahl und Angriffswunsch, reine Logik, 013), AttackButtons.tsx (Angriffs-Buttons im HUD, 013), cooldownSweep.ts (Cooldown-Sweep auf den Buttons, reine Logik, 013), AttackHint.tsx (Hinweis bei gescheitertem Angriff, oben mittig, 013), projectileEffects.ts (Projektil-Effekt und zurückgehaltene Treffer, reine Logik, 013)
-        sprites/             Figuren aus Teilen (ADR 0018): rig.ts, direction.ts, compose.ts (reine Logik), spriteSet.ts (Aussehen → Blatt, Laden), browser.ts (nur Browser); importiert nichts aus dem übrigen Spiel
+        sprites/             Sprite-Format (ADR 0018): rig.ts (Figuren aus Teilen), atlas.ts (Atlas: benannte Rechtecke in einem Bild, 018), parse.ts (Prüfhelfer), direction.ts, compose.ts (reine Logik), spriteSet.ts (Aussehen → Blatt, Laden), browser.ts (nur Browser); importiert nichts aus dem übrigen Spiel
       accounts/api/          passkeys.ts — WebAuthn-Flow der Spielerseiten
       localization/          i18n.ts (Texte, Sprache) · language.ts (bestätigt bei Formularverlust)
       pwa/
         services/            pwa.ts (Service-Worker), update.ts (Server-Watch), reload.ts, version.ts
         pages/               offline.ts — Einstieg der Offline-Seite
     assets/                  Grafiken und Schriften (ADR 0017): LICENSES.md (Register), licenses.test.ts,
-                             sprites/<rig>/ (rig.json und Teile, ADR 0018)
+                             sprites/<rig>/ (rig.json und Teile, ADR 0018), tiles/ (ground.png + ground.json,
+                             Atlas des Bodens, 018)
     styles/                  global.css (Spiel+Offline), landing.css (Tailwind-Eingaben)
     generated/               Protobuf-Ausgabe von `buf generate` (nicht editieren)
     vite-env.d.ts            Ambient-Typen (bleibt auf src-Ebene)
@@ -122,6 +125,9 @@ server/
         Combat/Domain/       Combat (Kampfregeln, Trainings-Dummy, 013), Target, Projectile, ProjectileLaunch, ProjectileImpact, AttackResult
         Commands/Domain/     CommandParser (Slash-Commands „/run name(…)“, 015), ParseResult
         Commands/Application/ CommandRegistry (fullHealth, resetPosition, toggleFacingArrows), CommandDispatcher, CommandContext, Command (015)
+        Map/Domain/          AreaMap (Karte, Rand fortgesetzt, 018), MapFile + MapFormatException (Kartendatei lesen und prüfen)
+        Map/Infrastructure/  MapLoader (Karte beim Start laden: Maps/meadow.json oder Game:MapPath; ungültig → Start scheitert)
+        Map/Maps/            meadow.json (Karte des ersten Gebiets, erzeugt von scripts/generate-map.py; in der Ausgabe unter Maps/)
       Localization/
         LocalizationSetup.cs DI und Middleware (AddGameLocalization/UseGameLocalization)
         Application/         GameLanguages, LanguageCookie, LanguageOnlyCultureProvider

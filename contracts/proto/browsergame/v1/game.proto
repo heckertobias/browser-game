@@ -121,6 +121,30 @@ message Welcome {
   float min_facing_input = 8;
   // Welteinheiten pro Sekunde; der Client fliegt damit den Effekt eines Fernkampf-Projektils (013).
   float projectile_speed = 9;
+  // Gebiet, in dem die Figur ist (018). Fehlt es, zeichnet der Client das Gitter.
+  AreaMap area = 10;
+}
+
+// Bodenart einer Kachel (018).
+enum GroundKind {
+  GROUND_KIND_UNSPECIFIED = 0;
+  GROUND_KIND_GRASS = 1;
+  GROUND_KIND_PATH = 2;
+  GROUND_KIND_WATER = 3;
+  GROUND_KIND_MOUNTAIN = 4;
+}
+
+// Feste Karte eines Gebiets (018). Jenseits der Karte setzt sich die äußerste Kachel endlos fort.
+message AreaMap {
+  // Kantenlänge einer Kachel in Weltpixeln.
+  uint32 tile_size = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+  // Weltkachel der Kartenkachel (0, 0); Weltkachel (tx, ty) = Kartenkachel (tx − origin_tx, ty − origin_ty).
+  int32 origin_tx = 4;
+  int32 origin_ty = 5;
+  // Eine GroundKind je Kachel, Zeile für Zeile von oben links; Länge width × height.
+  bytes ground = 6;
 }
 
 message Snapshot {

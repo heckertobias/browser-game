@@ -83,6 +83,15 @@ internal static class GameSettings
     /// <summary>Konfigurationsschlüssel für <see cref="PositionSaveIntervalSeconds"/>.</summary>
     public const string PositionSaveIntervalSecondsKey = "Game:PositionSaveIntervalSeconds";
 
+    /// <summary>
+    /// Kartendatei des ersten Gebiets (018), relativ zur Anwendung (<see cref="AppContext.BaseDirectory"/>).
+    /// Überschreibbar mit <c>Game:MapPath</c>, relativ zur Anwendung oder absolut (z. B. in Tests).
+    /// </summary>
+    public const string DefaultMapPath = "Maps/meadow.json";
+
+    /// <summary>Konfigurationsschlüssel für <see cref="DefaultMapPath"/>.</summary>
+    public const string MapPathKey = "Game:MapPath";
+
     /// <summary>Sekunden in ganze Ticks, aufgerundet; negative Werte zählen als 0.</summary>
     public static uint ToTicks(double seconds) => (uint)Math.Ceiling(Math.Max(0, seconds) * TickRateHz);
 

@@ -4,6 +4,9 @@ internal static class GameSetup
 {
     public static void AddGame(this IServiceCollection services)
     {
+        services.AddSingleton<MapLoader>();
+        // Geladen, wenn der Host den GameLoop anlegt: vor dem ersten Tick und vor dem ersten Client. Eine ungültige Karte bricht den Start ab (018).
+        services.AddSingleton(sp => sp.GetRequiredService<MapLoader>().Map);
         services.AddSingleton<GameLoop>();
         services.AddSingleton<PositionStore>();
         services.AddSingleton<ChatStore>();

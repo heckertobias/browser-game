@@ -208,7 +208,7 @@ public sealed class GameServerTests(GameServerFactory factory) : IClassFixture<G
     {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
         timeout.CancelAfter(TimeSpan.FromSeconds(2));
-        var buffer = new byte[64 * 1024];
+        var buffer = new byte[256 * 1024];
         while (true)
         {
             var result = await socket.ReceiveAsync(buffer, timeout.Token);

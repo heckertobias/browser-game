@@ -27,7 +27,7 @@ Details: [`specs/README.md`](specs/README.md)
 | `contracts/` | Maschinenlesbare Verträge: OpenAPI (HTTP), Protobuf (WebSocket) |
 | `docs/decisions/` | Architekturentscheidungen (ADRs) |
 | `docs/project-structure.md` | Detaillierte Projektstruktur (wo ist was, warum) |
-| `scripts/` | Hilfsskripte: `github-setup.sh` (Repo-Härtung), `release.sh`, `release-notes.sh` |
+| `scripts/` | Hilfsskripte: `github-setup.sh` (Repo-Härtung), `release.sh`, `release-notes.sh`, `generate-map.py` (Karte des ersten Gebiets einmal erzeugen, 018) |
 | `.github/` | CI-Workflows, Dependabot |
 | `deploy/` | Compose für den Betrieb (Version über `GAME_VERSION`) |
 | `server/` | C# / ASP.NET Core: `Features/<Name>/` (innen nur die nötigen Ordner aus `Domain/`, `Application/`, `Infrastructure/`, `Presentation/`); gemeinsame Daten- und Infrastruktur-Ebene (`BrowserGame.Data`), Admin als eigener Dienst |
@@ -109,6 +109,7 @@ Datenbank; man richtet sie im Admin unter „SMTP“ ein.
 | `Registration__LinkLifetimeMinutes` | Spiel | `30` | So viele Minuten gilt der Link aus der Registrierungsmail. |
 | `Game__LingerSeconds` | Spiel | `20` | So lange bleibt eine getrennte Figur in der Welt, bevor sie verschwindet. |
 | `Game__PositionSaveIntervalSeconds` | Spiel | `5` | Abstand, in dem alle Positionen gespeichert werden; mehr Bewegung geht bei einem Absturz nicht verloren. |
+| `Game__MapPath` | Spiel | `Maps/meadow.json` | Kartendatei des ersten Gebiets, relativ zur Anwendung (`/app` im Image) oder absolut. Fehlt sie oder ist sie ungültig, startet das Spiel nicht; Fundstelle und Grund stehen im Log. |
 | `RateLimiting__AuthRequestsPerMinute` | Spiel, Admin | `10` | Formular-Absendungen pro Minute und Client-IP auf den Anmelde-Seiten; darüber antwortet der Dienst mit 429. |
 | `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | Spiel, Admin | `false` | Hinter einem Reverse-Proxy `true`: Dann zählen Client-IP (Rate-Limit) und HTTPS aus `X-Forwarded-For` und `X-Forwarded-Proto`. Die Header werden jedem Absender geglaubt – den Port des Containers deshalb nicht veröffentlichen. |
 | `ASPNETCORE_HTTP_PORTS` | Spiel, Admin | `8080` | Port im Container; der Healthcheck nutzt den ersten. |
