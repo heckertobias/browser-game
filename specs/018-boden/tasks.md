@@ -33,7 +33,7 @@ Erst beginnen, wenn 017 umgesetzt ist.
   aus `GROUND_ENTRIES` steht im Atlas“.
 
 ## Client (Zeichnen)
-- [ ] **T8** (AK-1, AK-2, AK-5, AK-7): `render.ts` zeichnet Kacheln statt Gitter (Gitter als Rückfall) und die
+- [x] **T8** (AK-1, AK-2, AK-5, AK-7): `render.ts` zeichnet Kacheln statt Gitter (Gitter als Rückfall) und die
   Startmarkierung; `Game` übernimmt die Karte aus dem `Welcome`, `setGroundAtlas`, Laden im `App`; Vitest
   `render-ground.test.ts` (Abdeckung ohne Lücke für die Sichtfelder aus ADR 0010, Sichtfeld über den Kartenrand,
   Startmarkierung) und `game`-Test (Karte aus dem `Welcome` landet in den Render-Optionen).

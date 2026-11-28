@@ -9,11 +9,14 @@ import { formatCoordinates } from "@/features/game/render/hud";
 import { SnapshotBuffer } from "@/features/game/state/interpolation";
 import { connect, gameSocketUrl, type AttackRejectReason, type ChatHandlers, type GameConnection, type KickReason } from "@/features/game/network/net";
 import { Predictor } from "@/features/game/state/prediction";
-import { cameraOrigin, render, screenToWorld, type DrawablePlayer } from "@/features/game/render/render";
+import { cameraOrigin, render, screenToWorld, type DrawablePlayer, type GroundLayer } from "@/features/game/render/render";
 import type { Vec } from "@/features/game/core/vector";
 import { fitViewport, type Viewport } from "@/features/game/render/viewport";
 import { ScreenWakeLock } from "@/features/game/input/wakeLock";
 import type { SpriteSet } from "@/features/game/sprites/spriteSet";
+import { group, type Atlas } from "@/features/game/sprites/atlas";
+import { areaMapFromProto, type AreaMap } from "@/features/game/world/areaMap";
+import { GROUND_ENTRIES } from "@/features/game/world/groundTiles";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "kicked";
 
@@ -23,6 +26,12 @@ export interface PlayerVitals {
   maxHp: number;
   mana: number;
   maxMana: number;
+}
+
+/** Atlas des Bodens mit geladenem Bild, aus `App` (018). */
+export interface GroundAtlas {
+  atlas: Atlas;
+  image: CanvasImageSource;
 }
 
 export interface GameEvents extends ChatHandlers {
@@ -86,6 +95,12 @@ export class Game {
   private facingArrows = false;
   /** Fertige Figuren aus `App`; `null` → Quadrate (017 AK-14, Plan-Entscheidung 11, 12). */
   private sprites: SpriteSet | null = null;
+  /** Karte aus dem Welcome; `null` ohne oder mit ungültiger Karte (018). */
+  private map: AreaMap | null = null;
+  /** Atlas aus `App` samt Gras-Varianten; `null`, solange er fehlt oder unvollständig ist. */
+  private groundAtlas: (GroundAtlas & { variants: readonly string[] }) | null = null;
+  /** Boden für `render`; nur mit Karte und Atlas, sonst Gitter (018 Entscheidung 9). */
+  private ground: GroundLayer | null = null;
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly events: GameEvents) {
     const ctx = canvas.getContext("2d");
@@ -162,6 +177,19 @@ export class Game {
     this.sprites = sprites;
   }
 
+  /** Atlas des Bodens aus `App`; `null` oder ein Atlas ohne alle Namen aus `GROUND_ENTRIES` zeichnet weiter das Gitter (018). */
+  setGroundAtlas(ground: GroundAtlas | null): void {
+    this.groundAtlas =
+      ground !== null && GROUND_ENTRIES.every((name) => ground.atlas.entries.has(name))
+        ? { ...ground, variants: group(ground.atlas, "grass") }
+        : null;
+    this.updateGround();
+  }
+
+  private updateGround(): void {
+    this.ground = this.map !== null && this.groundAtlas !== null ? { map: this.map, ...this.groundAtlas } : null;
+  }
+
   private applyKeyBindings(bindings: Bindings): void {
     this.input.setBindings(bindings);
     this.events.onKeyBindings?.(bindings);
@@ -170,6 +198,8 @@ export class Game {
   private handleWelcome(welcome: Welcome): void {
     this.effects.clear();
     this.welcome = welcome;
+    this.map = areaMapFromProto(welcome.area);
+    this.updateGround();
     this.stepMs = 1000 / welcome.tickRateHz;
     this.predictor = new Predictor(welcome.speed / welcome.tickRateHz, welcome.minFacingInput);
     this.applyKeyBindings(fromProto(welcome.keyBindings));
@@ -321,7 +351,7 @@ export class Game {
         projectiles: this.effects.positions(now),
         selectedId: this.selection.current,
       },
-      { sprites: this.sprites, facingArrows: this.facingArrows, now },
+      { sprites: this.sprites, facingArrows: this.facingArrows, now, ground: this.ground, startMarker: t.startMarker },
     );
   }
 

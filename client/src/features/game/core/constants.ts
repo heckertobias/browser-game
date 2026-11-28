@@ -43,3 +43,7 @@ export const TARGET_OUTLINE_WIDTH = 1;
 export const PROJECTILE_RADIUS = 2;
 /** Projektil-Effekt (013 AK-21): höchstens so lange in ms; so lange hält der Client einen Fernkampftreffer höchstens zurück. Technische Grenze, kein Spielwert. */
 export const PROJECTILE_EFFECT_MAX_MS = 1000;
+/** Startmarkierung (018 AK-7): grell und nicht im Stil der Welt, damit sie klar als vorläufige Testhilfe erkennbar ist. */
+export const START_MARKER_COLOR = "#ff00ff";
+/** Kantenlänge des Kreuzes der Startmarkierung in Weltpixeln. */
+export const START_MARKER_SIZE = 12;

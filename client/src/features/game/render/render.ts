@@ -15,10 +15,15 @@ import {
   HP_BAR_WIDTH,
   PLAYER_SIZE,
   PROJECTILE_RADIUS,
+  START_MARKER_COLOR,
+  START_MARKER_SIZE,
   TARGET_OUTLINE_GAP,
   TARGET_OUTLINE_WIDTH,
 } from "@/features/game/core/constants";
 import type { Vec } from "@/features/game/core/vector";
+import type { Atlas } from "@/features/game/sprites/atlas";
+import type { AreaMap } from "@/features/game/world/areaMap";
+import { groundTile, visibleTiles } from "@/features/game/world/groundTiles";
 import { spriteDirection } from "@/features/game/sprites/direction";
 import { frameRect } from "@/features/game/sprites/rig";
 import { playerAppearance, type SpriteSet } from "@/features/game/sprites/spriteSet";
@@ -54,12 +59,24 @@ export interface CombatScene {
   selectedId: string | null;
 }
 
-/** Darstellung der Figuren (017). Ohne `sprites` Quadrate (AK-14); ohne `facingArrows` Pfeile wie in 016 (Plan-Entscheidung 10). */
+/** Boden (018): Karte aus dem Welcome, Atlas mit Bild; `variants` = Gras-Varianten aus dem Atlas, einmal bestimmt. */
+export interface GroundLayer {
+  map: AreaMap;
+  atlas: Atlas;
+  image: CanvasImageSource;
+  variants: readonly string[];
+}
+
+/** Darstellung der Figuren (017), Boden und Startmarkierung (018). Ohne `sprites` Quadrate (AK-14); ohne `facingArrows` Pfeile wie in 016 (Plan-Entscheidung 10). */
 export interface RenderOptions {
   sprites?: SpriteSet | null;
   facingArrows?: boolean;
   /** Uhrzeit in ms für das Bild der Laufanimation (Plan-Entscheidung 8). */
   now?: number;
+  /** Boden aus Kacheln; ohne Wert das Gitter (018 Entscheidung 9). */
+  ground?: GroundLayer | null;
+  /** Beschriftung der Startmarkierung (018 AK-7); ohne Wert keine Markierung. */
+  startMarker?: string;
 }
 
 const EMPTY_SCENE: CombatScene = { targets: [], projectiles: [], selectedId: null };
@@ -97,6 +114,9 @@ const TARGET_OUTLINE_COLOR = "#ffd400";
 const PROJECTILE_COLOR = "#fff6c2";
 /** Sichtbarer Rand des Pfeils in Weltpixeln (016 AK-6). */
 const ARROW_OUTLINE_WIDTH = 1;
+/** Dicke der Kreuzbalken und Abstand der Beschriftung unter dem Kreuz in Weltpixeln (018 AK-7). */
+const START_MARKER_THICKNESS = 2;
+const START_MARKER_TEXT_GAP = 2;
 
 /**
  * Ecken des Blickrichtungs-Pfeils um den Mittelpunkt (x, y): Spitze, dann die beiden Ecken der Basis (016 AK-6).
@@ -151,7 +171,8 @@ export function screenToWorld(
 }
 
 /**
- * Zeichnet einen Frame: Hintergrund mit Gitter, Ziele, Figuren mit Namen und Blickrichtung, Projektil-Effekte. Gezeichnet
+ * Zeichnet einen Frame: Hintergrund, Boden aus Kacheln oder (ohne `options.ground`) das Gitter, die Startmarkierung
+ * (nur mit `options.startMarker`), Ziele, Figuren mit Namen und Blickrichtung, Projektil-Effekte. Gezeichnet
  * wird in Weltkoordinaten mit ganzzahligem Faktor (ADR 0010); was mitsamt `CULL_MARGIN` außerhalb des Sichtfelds liegt,
  * entfällt. Figuren als Sprite, solange `options.sprites` gesetzt ist, sonst als Quadrat (017).
  */
@@ -166,6 +187,7 @@ export function render(
   const sprites = options.sprites ?? null;
   const facingArrows = options.facingArrows ?? true;
   const now = options.now ?? 0;
+  const ground = options.ground ?? null;
   const { scale, canvasWidth, canvasHeight, viewWidth, viewHeight, offsetX, offsetY } = viewport;
   const origin = cameraOrigin(camera, viewport);
 
@@ -184,8 +206,13 @@ export function render(
   ctx.fillStyle = BACKGROUND;
   ctx.fillRect(origin.x, origin.y, viewWidth, viewHeight);
 
-  drawGrid(ctx, origin, viewWidth, viewHeight, GRID_MINOR, 1 / scale, GRID_MINOR_COLOR);
-  drawGrid(ctx, origin, viewWidth, viewHeight, GRID_MAJOR, 1, GRID_MAJOR_COLOR);
+  if (ground) {
+    drawGround(ctx, ground, origin, viewWidth, viewHeight);
+  } else {
+    drawGrid(ctx, origin, viewWidth, viewHeight, GRID_MINOR, 1 / scale, GRID_MINOR_COLOR);
+    drawGrid(ctx, origin, viewWidth, viewHeight, GRID_MAJOR, 1, GRID_MAJOR_COLOR);
+  }
+  if (options.startMarker !== undefined) drawStartMarker(ctx, options.startMarker);
 
   for (const target of scene.targets) {
     if (!isVisible(target, origin, viewport, CULL_MARGIN)) continue;
@@ -216,6 +243,36 @@ export function render(
     drawProjectile(ctx, projectile);
   }
   if (letterbox) ctx.restore();
+}
+
+/**
+ * Je sichtbarer Kachel ein Bodenstück 1:1 an ganzzahliger Stelle (018 Entscheidungen 7, 8): Kachelkanten liegen auf
+ * Vielfachen von `tileSize`, mit ganzzahligem Faktor und gerundetem Ursprung also auf Gerätepixel-Grenzen (AK-2).
+ */
+function drawGround(ctx: CanvasRenderingContext2D, ground: GroundLayer, origin: Vec, width: number, height: number): void {
+  const { map, atlas, image, variants } = ground;
+  const size = map.tileSize;
+  const { tx0, ty0, tx1, ty1 } = visibleTiles(origin, width, height, size);
+  for (let ty = ty0; ty <= ty1; ty++) {
+    for (let tx = tx0; tx <= tx1; tx++) {
+      const entry = atlas.entries.get(groundTile(map, tx, ty, variants));
+      if (entry === undefined) continue;
+      ctx.drawImage(image, entry.x, entry.y, entry.width, entry.height, tx * size, ty * size, size, size);
+    }
+  }
+}
+
+/** Kreuz an Welt (0, 0) und die Beschriftung darunter, beide in `START_MARKER_COLOR` (018 AK-7, Entscheidung 10). */
+function drawStartMarker(ctx: CanvasRenderingContext2D, label: string): void {
+  const half = START_MARKER_SIZE / 2;
+  const halfThickness = START_MARKER_THICKNESS / 2;
+  ctx.fillStyle = START_MARKER_COLOR;
+  ctx.fillRect(-half, -halfThickness, START_MARKER_SIZE, START_MARKER_THICKNESS);
+  ctx.fillRect(-halfThickness, -half, START_MARKER_THICKNESS, START_MARKER_SIZE);
+  ctx.font = "8px monospace";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText(label, 0, half + START_MARKER_TEXT_GAP);
 }
 
 /** Pfosten mit Querbalken, darüber der HP-Balken; das aktive Ziel bekommt eine Umrandung (013 AK-1, AK-18). */
